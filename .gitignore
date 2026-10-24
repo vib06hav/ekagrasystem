@@ -2,7 +2,7 @@
 .env.*
 __pycache__/
 .pytest_cache/
-exports/*.json
+exports/
 research-data/
 artifacts/
 graphify-out/
