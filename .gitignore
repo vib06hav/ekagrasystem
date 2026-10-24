@@ -6,6 +6,9 @@ exports/
 research-data/
 artifacts/
 graphify-out/
+.graphify_*.json
+.graphify_*.txt
+_graphify_ast_runner.py
 *.mkv
 *.mp4
 *.webm
