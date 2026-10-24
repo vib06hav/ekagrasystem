@@ -1,0 +1,95 @@
+id: fibonacci_judge_contract
+instructions:
+  - evaluate only the submitted assessment response;
+  - use the exact assessment task and hidden scoring context supplied;
+  - use Knowledge Pack definitions as semantic authority;
+  - distinguish factual correctness from structural organization;
+  - avoid inferring knowledge not demonstrated;
+  - avoid rewarding terminology alone;
+  - identify relevant misconceptions only when supported by the response;
+  - represent ambiguity when evidence is incomplete;
+  - provide concise evidence-linked justification.
+  - pedagogy identity;
+  - Tutor prompt;
+  - Tutor transcript;
+  - previous failed assessments;
+  - attempt number as a reason to score differently;
+  - next pedagogy;
+  - reward information.
+forbidden_inputs:
+  - pedagogy identity;
+  - Tutor prompt;
+  - Tutor transcript;
+  - previous failed assessments;
+  - attempt number as a reason to score differently;
+  - next pedagogy;
+  - reward information.
+generic_contract: |
+  The Judge must:
+
+  - evaluate only the submitted assessment response;
+  - use the exact assessment task and hidden scoring context supplied;
+  - use Knowledge Pack definitions as semantic authority;
+  - distinguish factual correctness from structural organization;
+  - avoid inferring knowledge not demonstrated;
+  - avoid rewarding terminology alone;
+  - identify relevant misconceptions only when supported by the response;
+  - represent ambiguity when evidence is incomplete;
+  - provide concise evidence-linked justification.
+
+  The Judge must not receive or use:
+
+  - pedagogy identity;
+  - Tutor prompt;
+  - Tutor transcript;
+  - previous failed assessments;
+  - attempt number as a reason to score differently;
+  - next pedagogy;
+  - reward information.
+
+  ---
+output_concepts: |
+  The exact machine schema is deferred, but the Judge should provide the equivalent of:
+
+  - `gradable`
+  - correctness status
+  - knowledge-component evidence
+  - relation evidence
+  - misconceptions detected
+  - observed SOLO state
+  - confidence/ambiguity
+  - short evidence excerpts or evidence summaries
+
+  The LLM should not be the sole source of `transition_achieved`.
+
+  ---
+solo_interpretation:
+  P: |
+    Response lacks a usable relevant structure or is materially off-topic/misconceived.
+  U: |
+    One central relevant structure is demonstrated.
+  M: |
+    Multiple relevant components are demonstrated but remain largely separate.
+  R: |
+    Relevant components are integrated into a coherent causal/relational explanation.
+  EA: |
+    The learner abstracts the mechanism and applies it to an unfamiliar/equivalent situation, derives invariants, or reasons beyond the canonical representation.
+
+    The Judge must not classify by response length or vocabulary density alone.
+
+    ---
+correctness_policy: |
+  Correctness and structural organization are separate dimensions.
+
+  A response can be structurally integrated yet materially incorrect.
+
+  Such a response may be recorded as showing integrated structure, but a material contradiction of required target knowledge blocks transition success.
+
+  Examples of blocking errors include, when relevant:
+
+  - wrong Fibonacci recurrence;
+  - claim that memoization changes the recurrence;
+  - claim that a cache hit still requires recursively solving the subproblem first;
+  - claim that independent fresh caches across recursive calls provide cross-branch reuse.
+
+  ---

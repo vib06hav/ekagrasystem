@@ -1,0 +1,353 @@
+judge_rubrics:
+  - id: JR-C1
+    transition_id: C1
+    target_state_id: U
+    evidence_ids:
+      - C1-E1
+      - C1-E2
+      - C1-E3
+    blocking_misconception_ids:
+      - M1
+    success_rule:
+      requires:
+        - C1-E1
+        - C1-E2
+      required_by_assessment_form:
+        C1-A2:
+          - C1-E3
+        C1-A3:
+          - C1-E3
+        C1-A4:
+          - C1-E3
+    target_state_definition: |
+      Unistructural
+    core_target: |
+      One coherent recurrence-to-recursion relationship.
+    correctness_expectations: |
+      The response must not materially contradict:
+
+      - `fib(n) = fib(n-1) + fib(n-2)` for non-base inputs;
+      - appropriate terminating base cases in the POC definition.
+    evidence_criteria:
+      - id: C1-E1
+        name: Two-predecessor dependence
+        definition: |
+          Learner demonstrates that a non-base Fibonacci value depends on both preceding Fibonacci values.
+      - id: C1-E2
+        name: Recursive representation
+        definition: |
+          Learner connects that dependence to recursive calls or an equivalent recursive description.
+      - id: C1-E3
+        name: Termination/base cases
+        definition: |
+          Learner correctly handles or explains `fib(0)`/`fib(1)` as terminating known values when the task requires it.
+    state_guidance:
+      P: |
+        Examples:
+
+        - gives unrelated loop explanation;
+        - says `fib(n)=fib(n-1)` with no correction;
+        - cannot identify a relevant recurrence structure.
+      U: |
+        Demonstrates the central two-predecessor recursive relationship.
+
+        The answer may be concise.
+      M or above: |
+        If the learner additionally discusses repeated subproblems, caching, etc., the Judge may observe above-target structure, but the formal C1 result only concerns whether U is reached.
+    blocking_misconception_guidance: |
+      - M1 when it materially defines Fibonacci with one predecessor.
+    success_rule_text: |
+      C1 succeeds when:
+
+      - response is gradable;
+      - required core relation C1-E1 + C1-E2 is demonstrated;
+      - task-specific base-case requirement is correct;
+      - no blocking misconception materially contradicts the core relation.
+
+      ---
+  - id: JR-C2
+    transition_id: C2
+    target_state_id: M
+    evidence_ids:
+      - C2-E1
+      - C2-E2
+      - C2-E3
+      - C2-E4
+      - C2-E5
+    blocking_misconception_ids:
+      - M3
+      - M5
+      - M6
+      - M8
+    success_rule:
+      minimum_evidence: 3
+      requires_any_groups:
+        -   - C2-E1
+            - C2-E2
+        -   - C2-E3
+            - C2-E4
+      required_by_assessment_form:
+        C2-A4:
+          - C2-E5
+    target_state_definition: |
+      Multistructural
+    core_target: |
+      Multiple relevant components concerning recursive repetition and memoization are demonstrated.
+
+      Full causal integration is not required.
+    correctness_expectations: |
+      Apply the global correctness policy and item-specific scoring context.
+    evidence_criteria:
+      - id: C2-E1
+        name: Recursive/repeated subproblem
+        definition: |
+          Learner recognizes that the same smaller `fib(k)` may be requested multiple times.
+      - id: C2-E2
+        name: Repeated computation
+        definition: |
+          Learner recognizes that without retained results, the repeated subproblem may be recomputed.
+      - id: C2-E3
+        name: Stored result
+        definition: |
+          Learner recognizes that a solved result can be stored in association with its input.
+      - id: C2-E4
+        name: Lookup/reuse
+        definition: |
+          Learner recognizes that a later request can check/access and reuse a stored result.
+      - id: C2-E5
+        name: Shared cache availability
+        definition: |
+          Learner recognizes, when the item probes it, that recursive calls need access to relevant shared cache state for cross-branch reuse.
+    state_guidance:
+      U: |
+        One relevant idea only.
+
+        Example:
+
+        > “A dictionary stores previous values.”
+      M: |
+        Several relevant components are correctly present, even if listed rather than integrated.
+
+        Example:
+
+        > “The same Fibonacci call can happen again. Without memory it can be calculated again. A cache can store an answer by input, and a later call can reuse it.”
+      R or above: |
+        If the response causally integrates the components, the Judge may observe R, but C2 still formally advances only to M.
+    blocking_misconception_guidance: |
+      Material versions of:
+
+      - M3;
+      - M5;
+      - M6;
+      - M8 when the task explicitly probes shared state.
+    success_rule_text: |
+      C2 succeeds when:
+
+      - response is gradable;
+      - at least three transition-relevant evidence domains are demonstrated;
+      - those domains include at least one repetition/recomputation concept (E1 or E2);
+      - and at least one storage/reuse concept (E3 or E4);
+      - any task-explicit required component is correct;
+      - no blocking misconception invalidates the demonstrated model.
+
+      This rule allows a multi-component M response without demanding full C3 integration.
+
+      ---
+  - id: JR-C3
+    transition_id: C3
+    target_state_id: R
+    evidence_ids:
+      - C3-E1
+      - C3-E2
+      - C3-E3
+      - C3-E4
+      - C3-E5
+      - C3-E6
+    blocking_misconception_ids:
+      - M3
+      - M4
+      - M5
+      - M6
+      - M7
+      - M8
+      - M9
+    success_rule:
+      requires:
+        - C3-E1
+        - C3-E2
+        - C3-E3
+        - C3-E4
+      required_by_assessment_form:
+        C3-A1:
+          - C3-E5
+        C3-A2:
+          - C3-E5
+        C3-A3:
+          - C3-E5
+    target_state_definition: |
+      Relational
+    core_target: |
+      The learner integrates repeated subproblems, recomputation, storage, lookup/reuse, and preserved recurrence into one causal memoization mechanism.
+    correctness_expectations: |
+      Apply the global correctness policy and item-specific scoring context.
+    evidence_criteria:
+      - id: C3-E1
+        name: Repetition causes redundant computation
+        definition: |
+          The learner causally connects a repeated request for the same subproblem to repeated recursive computation when prior results are not retained.
+
+          Not enough:
+
+          > “Recursion is slow.”
+      - id: C3-E2
+        name: Correct storage semantics
+        definition: |
+          The learner explains that a solved Fibonacci result is retained in association with its input.
+
+          Not enough:
+
+          > “It has a dictionary.”
+      - id: C3-E3
+        name: Lookup/reuse before redundant expansion
+        definition: |
+          The learner explains that a later request can find and return/reuse the stored result rather than recursively solving that same subproblem again.
+      - id: C3-E4
+        name: Integrated causal chain
+        definition: |
+          The learner connects E1–E3 rather than listing them independently.
+
+          Strong evidence resembles:
+
+          ```text
+          same subproblem requested again
+          → naive version would recompute
+          → prior result is stored
+          → later call checks/uses stored result
+          → recursive expansion for that subproblem is avoided
+          ```
+      - id: C3-E5
+        name: Recurrence preserved
+        definition: |
+          The learner correctly states or clearly implies that memoization does not change the Fibonacci recurrence.
+      - id: C3-E6
+        name: Shared cache mechanism where relevant
+        definition: |
+          If the assessment probes cache scope, the learner understands that the reusable result must be accessible to later recursive requests.
+    state_guidance:
+      M: |
+        Multiple relevant pieces are present but largely listed.
+      R: |
+        The causal mechanism is integrated and correct.
+      EA: |
+        The learner additionally abstracts the mechanism to unfamiliar code/invariants beyond the immediate item.
+    blocking_misconception_guidance: |
+      - M3 if it denies same-input reusability;
+      - M4;
+      - M5 when it destroys correct storage semantics;
+      - M6 when dictionary presence is treated as sufficient;
+      - M7;
+      - M8 when cache sharing is relevant;
+      - M9 if learner claims memoization removes recursion rather than reusing solved recursive subproblems.
+    success_rule_text: |
+      C3 succeeds when:
+
+      - response is gradable;
+      - correctness is materially sound;
+      - E1, E2, E3, and E4 are demonstrated;
+      - E5 is demonstrated when explicitly requested or no contradictory claim is present;
+      - no blocking misconception invalidates the mechanism.
+
+      Observed R or EA satisfies the structural threshold, but formal state advances only to R.
+
+      ---
+  - id: JR-C4
+    transition_id: C4
+    target_state_id: EA
+    evidence_ids:
+      - C4-E1
+      - C4-E2
+      - C4-E3
+      - C4-E4
+      - C4-E5
+      - C4-E6
+    blocking_misconception_ids:
+      - M6
+      - M7
+      - M8
+      - M10
+    success_rule:
+      requires_any_groups:
+        -   - C4-E1
+            - C4-E2
+        -   - C4-E3
+            - C4-E4
+            - C4-E5
+            - C4-E6
+    target_state_definition: |
+      Extended Abstract
+    core_target: |
+      The learner reasons from memoization invariants in an unfamiliar recursive-Fibonacci situation.
+
+      The learner must do more than restate the canonical memoized function.
+    correctness_expectations: |
+      Apply the global correctness policy and item-specific scoring context.
+    evidence_criteria:
+      - id: C4-E1
+        name: Identifies essential invariants
+        definition: |
+          The learner can identify mechanism-level requirements such as:
+
+          - consistent subproblem identity;
+          - accessible/shared relevant cache state;
+          - lookup/conditional reuse before redundant expansion;
+          - correct storage of newly solved results;
+          - preserved recurrence.
+      - id: C4-E2
+        name: Distinguishes invariant from incidental syntax
+        definition: |
+          The learner recognizes that details such as:
+
+          - variable names;
+          - exact `if` phrasing;
+          - whether base cases are also cached;
+          - temporary local variable names;
+
+          are not themselves the definition of memoization.
+      - id: C4-E3
+        name: Applies mechanism to unfamiliar implementation
+        definition: |
+          The learner correctly evaluates code or a design that differs from the canonical memorized pattern.
+      - id: C4-E4
+        name: Reasons about cache state
+        definition: |
+          Where the item requires it, the learner predicts what existing entries can be reused and how additional entries arise.
+      - id: C4-E5
+        name: Diagnoses broken memoization from principle
+        definition: |
+          The learner can explain *why* a superficially cached implementation fails, e.g. because cache state is recreated or lookup occurs only after redundant work.
+      - id: C4-E6
+        name: Derives requirements
+        definition: |
+          The learner can state or construct requirements for a valid memoized recursive Fibonacci design without merely reproducing a memorized program.
+    state_guidance:
+      R: |
+        Correct integrated explanation of canonical memoized recursion, but little evidence of abstraction to the unfamiliar form.
+      EA: |
+        Mechanism-level reasoning transfers to the unfamiliar code/state and distinguishes essential from incidental features.
+    blocking_misconception_guidance: |
+      - M6;
+      - M7;
+      - M8;
+      - M10;
+      - any material recurrence error.
+    success_rule_text: |
+      C4 succeeds when:
+
+      - response is gradable;
+      - correctness is materially sound;
+      - the response demonstrates at least one explicit abstraction/invariance criterion (E1 or E2);
+      - and at least one transfer/derivation criterion appropriate to the item (E3, E4, E5, or E6);
+      - the response does not simply repeat canonical code without engaging the unfamiliar situation;
+      - no blocking misconception invalidates the mechanism.
+
+      ---

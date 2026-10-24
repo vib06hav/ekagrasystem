@@ -1,0 +1,14 @@
+.env
+.env.*
+__pycache__/
+.pytest_cache/
+exports/*.json
+research-data/
+artifacts/
+graphify-out/
+*.mkv
+*.mp4
+*.webm
+*.ndjson
+ffmpeg_stderr.log
+tools/runtime/

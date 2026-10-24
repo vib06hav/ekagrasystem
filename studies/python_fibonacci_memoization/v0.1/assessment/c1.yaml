@@ -1,0 +1,197 @@
+assessment_families:
+  - id: AF-C1
+    transition_id: C1
+    construct: |
+      Can the learner demonstrate one usable central structure connecting:
+
+      - Fibonacci base cases;
+      - the two-predecessor recurrence;
+      - recursive computation?
+    forms:
+      - id: C1-A1
+        material_tag: c1_code_completion_alpha
+        title: Complete the recursive relationship
+        target_evidence_ids:
+          - C1-E1
+          - C1-E2
+        relevant_misconception_ids: &id001
+          - M1
+        task_type: complete_the_recursive_relationship
+        generation_goal: |
+          Generate a fresh assessment task that tests: Complete the recursive relationship. The prose must be newly generated for this AssessmentInstance.
+        scenario_seed: |
+          A student has started this function:
+
+          ```python
+          def fib(n):
+              if n <= 1:
+                  return n
+
+              # one line is missing here
+          ```
+        equivalence_constraints:
+          - require only basic Python reading/writing;
+          - avoid memoization;
+          - avoid repeated-subproblem analysis;
+          - require a short explanation or simple completion;
+          - assess the same recurrence-to-recursion relationship.
+        required_response_features:
+          - uses `fib(n-1)` and `fib(n-2)`;
+          - combines by addition;
+          - explanation reflects the two-predecessor recurrence;
+          - base case is recognized as termination if discussed.
+          - ''
+        misconception_probes: *id001
+        prohibited_leakage:
+          - Do not reveal scoring criteria or expected answers.
+          - Do not reproduce the scenario seed verbatim.
+        target_kc_ids:
+          - K1
+          - K2
+          - K3
+        target_relation_ids:
+          - R1
+      - id: C1-A2
+        material_tag: c1_explanation_beta
+        title: Explain a concrete value recursively
+        target_evidence_ids:
+          - C1-E1
+          - C1-E2
+          - C1-E3
+        relevant_misconception_ids: *id001
+        task_type: explain_a_concrete_value_recursively
+        generation_goal: |
+          Generate a fresh assessment task that tests: Explain a concrete value recursively. The prose must be newly generated for this AssessmentInstance.
+        scenario_seed: |
+          Create a new scenario suitable for the task type: Explain a concrete value recursively.
+        equivalence_constraints:
+          - require only basic Python reading/writing;
+          - avoid memoization;
+          - avoid repeated-subproblem analysis;
+          - require a short explanation or simple completion;
+          - assess the same recurrence-to-recursion relationship.
+        required_response_features:
+          - '`fib(5)` depends on `fib(4)` + `fib(3)`;'
+          - recursive continuation follows same relation;
+          - '`fib(0)`/`fib(1)` terminate with known values.'
+          - ''
+        misconception_probes: *id001
+        prohibited_leakage:
+          - Do not reveal scoring criteria or expected answers.
+          - Do not reproduce the scenario seed verbatim.
+        target_kc_ids:
+          - K1
+          - K2
+          - K3
+        target_relation_ids:
+          - R1
+      - id: C1-A3
+        material_tag: c1_rule_choice_gamma
+        title: Choose the structurally correct recursive rule
+        target_evidence_ids:
+          - C1-E1
+          - C1-E2
+          - C1-E3
+        relevant_misconception_ids: *id001
+        task_type: choose_the_structurally_correct_recursive_rule
+        generation_goal: |
+          Generate a fresh assessment task that tests: Choose the structurally correct recursive rule. The prose must be newly generated for this AssessmentInstance.
+        scenario_seed: |
+          Consider these two candidate recursive return rules for `n > 1`.
+
+          **Rule A**
+
+          ```python
+          return fib(n - 1)
+          ```
+
+          **Rule B**
+
+          ```python
+          return fib(n - 1) + fib(n - 2)
+          ```
+        equivalence_constraints:
+          - require only basic Python reading/writing;
+          - avoid memoization;
+          - avoid repeated-subproblem analysis;
+          - require a short explanation or simple completion;
+          - assess the same recurrence-to-recursion relationship.
+        required_response_features:
+          - chooses B;
+          - identifies two-predecessor Fibonacci relation;
+          - base cases prevent infinite recursion/provide known terminal values.
+          - ''
+        misconception_probes: *id001
+        prohibited_leakage:
+          - Do not reveal scoring criteria or expected answers.
+          - Do not reproduce the scenario seed verbatim.
+        target_kc_ids:
+          - K1
+          - K2
+          - K3
+        target_relation_ids:
+          - R1
+      - id: C1-A4
+        material_tag: c1_dependency_delta
+        title: Trace one dependency step
+        target_evidence_ids:
+          - C1-E1
+          - C1-E2
+          - C1-E3
+        relevant_misconception_ids: *id001
+        task_type: trace_one_dependency_step
+        generation_goal: |
+          Generate a fresh assessment task that tests: Trace one dependency step. The prose must be newly generated for this AssessmentInstance.
+        scenario_seed: |
+          Suppose a recursive Fibonacci function is asked to compute `fib(6)`.
+        equivalence_constraints:
+          - require only basic Python reading/writing;
+          - avoid memoization;
+          - avoid repeated-subproblem analysis;
+          - require a short explanation or simple completion;
+          - assess the same recurrence-to-recursion relationship.
+        required_response_features:
+          - '`fib(5)` and `fib(4)`;'
+          - same two-predecessor relation recursively;
+          - eventually reaches 0/1.
+          - ''
+        misconception_probes: *id001
+        prohibited_leakage:
+          - Do not reveal scoring criteria or expected answers.
+          - Do not reproduce the scenario seed verbatim.
+        target_kc_ids:
+          - K1
+          - K2
+          - K3
+        target_relation_ids:
+          - R1
+    required_evidence_overview: |
+      A successful C1 response should show the core idea that for non-base inputs, `fib(n)` depends on `fib(n-1)` and `fib(n-2)`, with base cases terminating the recursion.
+    equivalence_envelope: |
+      All forms should:
+
+      - require only basic Python reading/writing;
+      - avoid memoization;
+      - avoid repeated-subproblem analysis;
+      - require a short explanation or simple completion;
+      - assess the same recurrence-to-recursion relationship.
+
+      ---
+    global_rules:
+      pedagogy_independence: |
+        The selector must not choose a form because the learner received Worked Example, Guided Questioning, or Contrasting Cases.
+      freshness: |
+        Within one session, an assessment form should not be reused.
+      equivalence: |
+        Forms within a transition family should be comparable in conceptual demand.
+      non_leakage: |
+        Reserved assessment material should not be used verbatim during intervention.
+      independent_response: |
+        During assessment:
+
+        - no tutoring;
+        - no hints;
+        - no intervention continuation;
+        - no corrective feedback before submission.
+
+        ---

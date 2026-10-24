@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Study introduction</title>
+  <style>
+    :root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#18202e;background:#f3f5f8}
+    *{box-sizing:border-box}body{margin:0}.page{max-width:58rem;margin:0 auto;padding:4rem 1.25rem}.card{background:#fff;border:1px solid #dfe4eb;border-radius:18px;padding:2.25rem;box-shadow:0 14px 45px rgba(28,39,60,.08)}
+    .eyebrow{color:#52617a;font-size:.78rem;font-weight:750;letter-spacing:.12em;text-transform:uppercase}h1{font-size:clamp(2rem,5vw,3.25rem);line-height:1.05;margin:.5rem 0 1rem}h2{margin:2rem 0 .5rem;font-size:1.05rem}p,li{line-height:1.65;color:#48546a}.notice{border-left:4px solid #6b7ea4;background:#f5f7fb;padding:.8rem 1rem;margin:1.5rem 0}.entry{margin-top:2rem;padding-top:1.5rem;border-top:1px solid #e5e9ef}label{display:block;font-weight:700;margin-bottom:.5rem}input{width:100%;max-width:24rem;padding:.8rem .9rem;border:1px solid #aab4c4;border-radius:9px;font:inherit;text-transform:none}button{display:block;margin-top:1rem;padding:.8rem 1.2rem;border:0;border-radius:9px;background:#254f9b;color:#fff;font:inherit;font-weight:750;cursor:pointer}.error{color:#a22525;background:#fff1f1;padding:.75rem 1rem;border-radius:8px}
+  </style>
+</head>
+<body><main class="page"><article class="card">
+  <div class="eyebrow">Participant study</div>
+  <h1>{{ settings.participant_study_title }}</h1>
+  <p>{{ settings.participant_intro_text }}</p>
+  <h2>Before you begin</h2>
+  <ul><li>Work through the study independently.</li><li>Wait while the study assistant prepares each response.</li><li>Your responses and interactions are recorded for the study.</li></ul>
+  <div class="notice"><strong>Privacy and consent information</strong><br>{{ settings.participant_privacy_text }}</div>
+  <h2>Questions or support</h2>
+  <p>{{ settings.participant_support_text }}</p>
+  <section class="entry">
+    <h2>Enter the study</h2>
+    {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <form method="post" action="/join">
+      <label for="participant-code">University ID</label>
+      <input id="participant-code" name="institutional_id" required maxlength="200" autocomplete="off" placeholder="u20240132">
+      <label style="margin-top:1rem;font-weight:500"><input style="width:auto;margin-right:.4rem" type="checkbox" name="acknowledged" value="yes" required> I have read the information above and am ready to begin.</label>
+      <button type="submit">Continue</button>
+    </form>
+  </section>
+</article></main></body></html>
