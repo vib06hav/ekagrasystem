@@ -4,29 +4,122 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Study introduction</title>
+  <script src="/static/theme.js"></script>
   <style>
-    :root{font-family:Inter,ui-sans-serif,system-ui,sans-serif;color:#18202e;background:#f3f5f8}
-    *{box-sizing:border-box}body{margin:0}.page{max-width:58rem;margin:0 auto;padding:4rem 1.25rem}.card{background:#fff;border:1px solid #dfe4eb;border-radius:18px;padding:2.25rem;box-shadow:0 14px 45px rgba(28,39,60,.08)}
-    .eyebrow{color:#52617a;font-size:.78rem;font-weight:750;letter-spacing:.12em;text-transform:uppercase}h1{font-size:clamp(2rem,5vw,3.25rem);line-height:1.05;margin:.5rem 0 1rem}h2{margin:2rem 0 .5rem;font-size:1.05rem}p,li{line-height:1.65;color:#48546a}.notice{border-left:4px solid #6b7ea4;background:#f5f7fb;padding:.8rem 1rem;margin:1.5rem 0}.entry{margin-top:2rem;padding-top:1.5rem;border-top:1px solid #e5e9ef}label{display:block;font-weight:700;margin-bottom:.5rem}input{width:100%;max-width:24rem;padding:.8rem .9rem;border:1px solid #aab4c4;border-radius:9px;font:inherit;text-transform:none}button{display:block;margin-top:1rem;padding:.8rem 1.2rem;border:0;border-radius:9px;background:#254f9b;color:#fff;font:inherit;font-weight:750;cursor:pointer}.error{color:#a22525;background:#fff1f1;padding:.75rem 1rem;border-radius:8px}
+    .join-page{--ink:#0d0d0d;--muted:#5d5d5d;--line:#e5e5e5;--soft:#f7f7f8;--accent:#0d0d0d;--danger:#b42318;--danger-bg:#fef3f2;--danger-line:#fecdca;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:#fff;-webkit-font-smoothing:antialiased}
+    .join-page *{box-sizing:border-box}
+    body.join-page{margin:0;min-height:100vh}
+    .join-page .page{max-width:46rem;margin:0 auto;padding:3rem 1.25rem 4rem}
+    .join-page .brand{display:flex;align-items:center;gap:.6rem;font-weight:650;font-size:1.05rem;letter-spacing:-.01em;margin-bottom:3rem}
+    .join-page .brand-mark{display:grid;place-items:center;width:2rem;height:2rem;border-radius:50%;background:var(--ink);color:#fff;font-size:.95rem;font-weight:700}
+    .join-page .eyebrow{color:var(--muted);font-size:.8rem;font-weight:600;margin-bottom:.5rem}
+    .join-page h1{font-size:clamp(1.75rem,4.5vw,2.4rem);line-height:1.15;letter-spacing:-.02em;font-weight:650;margin:0 0 .85rem}
+    .join-page h2{font-size:.95rem;font-weight:650;margin:0 0 .6rem}
+    .join-page p{line-height:1.6;color:var(--muted);margin:0}
+    .join-page .intro{font-size:1.05rem}
+    .join-page button.theme-toggle{display:grid;place-items:center;width:2.25rem;height:2.25rem;margin:0 0 0 auto;padding:0;border-radius:50%;background:transparent;color:var(--muted);border:1px solid var(--line)}
+    .join-page button.theme-toggle:hover{background:var(--soft);color:var(--ink)}
+    .join-page .theme-toggle svg{width:1.1rem;height:1.1rem;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    .join-page .theme-toggle .i-sun{display:none}.join-page .theme-toggle[data-mode=dark] .i-sun{display:block}.join-page .theme-toggle[data-mode=dark] .i-moon{display:none}
+    :root[data-theme=light]{color-scheme:light}
+    .join-page .panel{background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:1.25rem 1.4rem;margin-top:1.75rem}
+    .join-page .panel ul{margin:0;padding-left:1.15rem}
+    .join-page .panel li{line-height:1.6;color:var(--muted);margin:.25rem 0}
+    .join-page .panel li::marker{color:#a0a0a0}
+    .join-page .entry{margin-top:2rem;padding:1.5rem;border:1px solid var(--line);border-radius:16px;box-shadow:0 1px 2px rgba(0,0,0,.04),0 6px 20px rgba(0,0,0,.04)}
+    .join-page .error{color:var(--danger);background:var(--danger-bg);border:1px solid var(--danger-line);padding:.75rem 1rem;border-radius:12px;margin:0 0 1rem;font-size:.95rem}
+    .join-page label.field{display:block;font-weight:600;font-size:.92rem;margin-bottom:.45rem}
+    .join-page input[type=text],.join-page input:not([type]){width:100%;padding:.85rem 1rem;border:1px solid #d0d0d0;border-radius:12px;font:inherit;font-size:1rem;color:var(--ink);background:#fff;text-transform:none;transition:border-color .15s,box-shadow .15s}
+    .join-page input[type=text]::placeholder,.join-page input:not([type])::placeholder{color:#a0a0a0}
+    .join-page input[type=text]:hover,.join-page input:not([type]):hover{border-color:#a0a0a0}
+    .join-page input:focus-visible{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(13,13,13,.12)}
+    .join-page .consent{display:flex;align-items:flex-start;gap:.65rem;margin-top:1.1rem;font-weight:400;font-size:.92rem;line-height:1.5;color:var(--muted);cursor:pointer}
+    .join-page .consent input{flex:none;width:1.05rem;height:1.05rem;margin:.2rem 0 0;accent-color:var(--ink);cursor:pointer}
+    .join-page button{-webkit-appearance:none;appearance:none;position:relative;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.25;background-image:none;width:100%;margin-top:1.4rem;padding:.85rem 1.2rem;border:0;border-radius:999px;background:var(--accent);color:#fff;font:inherit;font-weight:600;cursor:pointer;transition:background .15s,box-shadow .15s}
+    .join-page button::before,.join-page button::after{content:none;display:none}
+    .join-page button:hover{background:#2f2f2f}
+    .join-page button:focus-visible{outline:none;box-shadow:0 0 0 3px #fff,0 0 0 5px var(--ink)}
+    .join-page button:disabled{background:#d7d7d7;color:#8a8a8a;cursor:not-allowed}
+    .join-page .steps{display:grid;gap:.9rem;margin-top:1rem}
+    .join-page .steps h3{font-size:.92rem;font-weight:650;margin:0 0 .15rem;color:var(--ink)}
+    .join-page .steps p,.join-page .panel .note{font-size:.92rem}
+    .join-page .panel .note{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--line)}
+    .join-page .info{display:block;margin-top:1.75rem;padding:1.25rem 1.4rem;border:1px dashed #b8b8b8;border-radius:16px}
+    .join-page .info-grid{display:grid;gap:1rem}
+    .join-page .draft-flag{background:#fffaeb;border:1px solid #fedf89;color:#7a4b00;border-radius:12px;padding:.65rem .9rem;margin-bottom:1rem;font-size:.88rem;line-height:1.5}
+    .join-page .id-note{font-size:.92rem;margin:0 0 1rem}
+    .join-page .info h2{font-size:.82rem;color:var(--ink)}
+    .join-page .info p{font-size:.88rem;line-height:1.55}
+    @media (min-width:46rem){.join-page .info-grid{grid-template-columns:1fr 1fr;gap:2rem}.join-page .steps{grid-template-columns:repeat(3,1fr)}.join-page .page{padding-top:4rem}}
+    @media (max-width:30rem){.join-page .entry{padding:1.1rem}.join-page .brand{margin-bottom:2rem}}
+    @media (prefers-color-scheme:dark){
+      :root:not([data-theme=light]) .join-page{--ink:#ececec;--muted:#a6a6a6;--line:#2e2e2e;--soft:#1b1b1b;--accent:#ececec;--danger:#fda29b;--danger-bg:#2a1512;--danger-line:#5c2a24;color-scheme:dark;background:#121212}
+      :root:not([data-theme=light]) .join-page .brand-mark{color:#121212}
+      :root:not([data-theme=light]) .join-page .panel li::marker{color:#6b6b6b}
+      :root:not([data-theme=light]) .join-page input[type=text],:root:not([data-theme=light]) .join-page input:not([type]){background:#181818;border-color:#3a3a3a}
+      :root:not([data-theme=light]) .join-page input[type=text]::placeholder,:root:not([data-theme=light]) .join-page input:not([type])::placeholder{color:#7a7a7a}
+      :root:not([data-theme=light]) .join-page input[type=text]:hover,:root:not([data-theme=light]) .join-page input:not([type]):hover{border-color:#6b6b6b}
+      :root:not([data-theme=light]) .join-page input:focus-visible{border-color:var(--ink);box-shadow:0 0 0 3px rgba(236,236,236,.18)}
+      :root:not([data-theme=light]) .join-page .entry{background:#161616;border-color:#2e2e2e;box-shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.35)}
+      :root:not([data-theme=light]) .join-page .info{border-color:#444}
+      :root:not([data-theme=light]) .join-page .draft-flag{background:#2a2110;border-color:#5a4713;color:#f5d58a}
+      :root:not([data-theme=light]) .join-page button{color:#121212}
+      :root:not([data-theme=light]) .join-page button:hover{background:#cfcfcf}
+      :root:not([data-theme=light]) .join-page button:focus-visible{box-shadow:0 0 0 3px #121212,0 0 0 5px var(--ink)}
+      :root:not([data-theme=light]) .join-page button:disabled{background:#2c2c2c;color:#7a7a7a}
+      :root:not([data-theme=light]) .join-page button.theme-toggle,:root:not([data-theme=light]) .join-page button.theme-toggle:hover{background:transparent;color:var(--muted)}
+      :root:not([data-theme=light]) .join-page button.theme-toggle:hover{background:#262626;color:var(--ink)}
+    }
+      :root[data-theme=dark] .join-page{--ink:#ececec;--muted:#a6a6a6;--line:#2e2e2e;--soft:#1b1b1b;--accent:#ececec;--danger:#fda29b;--danger-bg:#2a1512;--danger-line:#5c2a24;color-scheme:dark;background:#121212}
+      :root[data-theme=dark] .join-page .brand-mark{color:#121212}
+      :root[data-theme=dark] .join-page .panel li::marker{color:#6b6b6b}
+      :root[data-theme=dark] .join-page input[type=text],:root[data-theme=dark] .join-page input:not([type]){background:#181818;border-color:#3a3a3a}
+      :root[data-theme=dark] .join-page input[type=text]::placeholder,:root[data-theme=dark] .join-page input:not([type])::placeholder{color:#7a7a7a}
+      :root[data-theme=dark] .join-page input[type=text]:hover,:root[data-theme=dark] .join-page input:not([type]):hover{border-color:#6b6b6b}
+      :root[data-theme=dark] .join-page input:focus-visible{border-color:var(--ink);box-shadow:0 0 0 3px rgba(236,236,236,.18)}
+      :root[data-theme=dark] .join-page .entry{background:#161616;border-color:#2e2e2e;box-shadow:0 1px 2px rgba(0,0,0,.4),0 6px 20px rgba(0,0,0,.35)}
+      :root[data-theme=dark] .join-page .info{border-color:#444}
+      :root[data-theme=dark] .join-page .draft-flag{background:#2a2110;border-color:#5a4713;color:#f5d58a}
+      :root[data-theme=dark] .join-page button{color:#121212}
+      :root[data-theme=dark] .join-page button:hover{background:#cfcfcf}
+      :root[data-theme=dark] .join-page button:focus-visible{box-shadow:0 0 0 3px #121212,0 0 0 5px var(--ink)}
+      :root[data-theme=dark] .join-page button:disabled{background:#2c2c2c;color:#7a7a7a}
+      :root[data-theme=dark] .join-page button.theme-toggle,:root[data-theme=dark] .join-page button.theme-toggle:hover{background:transparent;color:var(--muted)}
+      :root[data-theme=dark] .join-page button.theme-toggle:hover{background:#262626;color:var(--ink)}
+
   </style>
 </head>
-<body><main class="page"><article class="card">
-  <div class="eyebrow">Participant study</div>
-  <h1>{{ settings.participant_study_title }}</h1>
-  <p>{{ settings.participant_intro_text }}</p>
-  <h2>Before you begin</h2>
-  <ul><li>Work through the study independently.</li><li>Wait while the study assistant prepares each response.</li><li>Your responses and interactions are recorded for the study.</li></ul>
-  <div class="notice"><strong>Privacy and consent information</strong><br>{{ settings.participant_privacy_text }}</div>
-  <h2>Questions or support</h2>
-  <p>{{ settings.participant_support_text }}</p>
+<body class="join-page"><main class="page">
+  <div class="brand"><span class="brand-mark" aria-hidden="true">E</span><span>Ekagra AI</span><button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg></button></div>
+  <div class="eyebrow">{{ settings.participant_study_title }}</div>
+  <h1>Welcome to Ekagra AI</h1>
+  <p class="intro">A guided learning study exploring how people develop their understanding of a topic.</p>
+  <section class="panel">
+    <h2>What to expect</h2>
+    <p>{{ settings.participant_intro_text }}</p>
+    <div class="steps">
+      <div><h3>Learn through guided examples</h3><p>Each section starts with a teaching conversation with the study assistant. Wait while it prepares each response.</p></div>
+      <div><h3>Think through the material</h3><p>Work through the study independently, in your own words.</p></div>
+      <div><h3>Complete the assessments</h3><p>An independent assessment follows each teaching conversation.</p></div>
+    </div>
+    <p class="note">Your responses and interactions are recorded for the study.</p>
+  </section>
+  <section class="info" aria-labelledby="consent-heading">
+    <div class="draft-flag" role="note"><strong>Draft &mdash; pending research-team approval.</strong> The consent and privacy information below is placeholder text in this development version and is not final.</div>
+    <div class="info-grid">
+      <div><h2 id="consent-heading">Privacy and consent information</h2><p>{{ settings.participant_privacy_text }}</p></div>
+      <div><h2>Questions or support</h2><p>{{ settings.participant_support_text }}</p></div>
+    </div>
+  </section>
   <section class="entry">
     <h2>Enter the study</h2>
     {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <p class="id-note">We'll use your university roll number to track your progress across the learning sections and associate your learning interactions with your assessment responses.</p>
     <form method="post" action="/join">
-      <label for="participant-code">University ID</label>
-      <input id="participant-code" name="institutional_id" required maxlength="200" autocomplete="off" placeholder="u20240132">
-      <label style="margin-top:1rem;font-weight:500"><input style="width:auto;margin-right:.4rem" type="checkbox" name="acknowledged" value="yes" required> I have read the information above and am ready to begin.</label>
+      <label class="field" for="participant-code">University ID</label>
+      <input id="participant-code" name="institutional_id" required maxlength="200" autocomplete="off" placeholder="Enter your university roll number">
+      <label class="consent"><input type="checkbox" name="acknowledged" value="yes" required> <span>I have read the information above and am ready to begin.</span></label>
       <button type="submit">Continue</button>
     </form>
   </section>
-</article></main></body></html>
+</main></body></html>
