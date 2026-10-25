@@ -1,0 +1,529 @@
+cells:
+  - id: C2-P1
+    transition_id: C2
+    pedagogy_id: P1
+    instructional_intent: |
+      Model several distinct components that become relevant once the learner already understands basic recursive Fibonacci.
+    missing_structure: Multiple relevant memoization components.
+    target_kc_ids:
+      - K4
+      - K5
+      - K6
+      - K7
+      - K8
+      - K9
+    target_relation_ids:
+      - R2
+      - R3
+      - R4
+      - R5
+    relevant_misconception_ids:
+      - M2
+      - M3
+      - M5
+      - M6
+      - M8
+    prohibitions:
+      - Do not require full causal C3 integration.
+    completion_condition: |
+      All target components have been modeled as identifiable pieces and the learner can recognize at least several of them.
+
+      ---
+    max_tutor_turns: 8
+    treatment_constraints: |
+      C2 boundary:
+      The Tutor may name and demonstrate the pieces, but should not make the full C3 causal chain the central instructional object.
+
+      The learner is being equipped with multiple relevant components.
+    move_ids:
+      - C2-P1-MOVE-1
+      - C2-P1-MOVE-2
+      - C2-P1-MOVE-3
+    moves:
+      - id: C2-P1-MOVE-1
+        transition_id: C2
+        pedagogy_id: P1
+        title: Part A — show dependency/repetition
+        purpose: |
+          Model several distinct components that become relevant once the learner already understands basic recursive Fibonacci.
+        kc_ids:
+          - K4
+          - K5
+          - K6
+          - K7
+          - K8
+          - K9
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+        misconception_ids:
+          - M2
+          - M3
+          - M5
+          - M6
+          - M8
+        material_blueprint: |
+          Use a small naive recursive call tree, for example:
+
+          ```text
+          fib(5)
+          ├── fib(4)
+          │   ├── fib(3)
+          │   └── fib(2)
+          └── fib(3)
+          ```
+
+          Explicitly identify:
+
+          - a recursive dependency;
+          - a repeated subproblem such as `fib(3)`;
+          - the fact that naive recursion computes it again when no result was retained.
+        allowed_behavior:
+          - present solved example
+          - explain reasoning
+        prohibited_behavior:
+          - "C2 boundary:\nThe Tutor may name and demonstrate the pieces, but should not make the full C3 causal chain the
+            central instructional object.\n\nThe learner is being equipped with multiple relevant components."
+        completion_evidence: |
+          All target components have been modeled as identifiable pieces and the learner can recognize at least several of them.
+
+          ---
+        next_move_ids:
+          - C2-P1-MOVE-2
+      - id: C2-P1-MOVE-2
+        transition_id: C2
+        pedagogy_id: P1
+        title: Part B — show storage as a separate mechanism
+        purpose: |
+          Model several distinct components that become relevant once the learner already understands basic recursive Fibonacci.
+        kc_ids:
+          - K4
+          - K5
+          - K6
+          - K7
+          - K8
+          - K9
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+        misconception_ids:
+          - M2
+          - M3
+          - M5
+          - M6
+          - M8
+        material_blueprint: |
+          Introduce a small cache table conceptually:
+
+          ```text
+          input   stored result
+            2          1
+            3          2
+          ```
+
+          Explain:
+
+          - a solved value can be stored with its input;
+          - the function can later check whether an input already has a stored result;
+          - a stored result can be reused.
+        allowed_behavior:
+          - present solved example
+          - explain reasoning
+        prohibited_behavior:
+          - "C2 boundary:\nThe Tutor may name and demonstrate the pieces, but should not make the full C3 causal chain the
+            central instructional object.\n\nThe learner is being equipped with multiple relevant components."
+        completion_evidence: |
+          All target components have been modeled as identifiable pieces and the learner can recognize at least several of them.
+
+          ---
+        next_move_ids:
+          - C2-P1-MOVE-3
+      - id: C2-P1-MOVE-3
+        transition_id: C2
+        pedagogy_id: P1
+        title: Part C — show shared state
+        purpose: |
+          Model several distinct components that become relevant once the learner already understands basic recursive Fibonacci.
+        kc_ids:
+          - K4
+          - K5
+          - K6
+          - K7
+          - K8
+          - K9
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+        misconception_ids:
+          - M2
+          - M3
+          - M5
+          - M6
+          - M8
+        material_blueprint: |
+          Explain that recursive calls must be using the same relevant cache if one branch is to benefit from work done in another branch.
+        allowed_behavior:
+          - present solved example
+          - explain reasoning
+        prohibited_behavior:
+          - "C2 boundary:\nThe Tutor may name and demonstrate the pieces, but should not make the full C3 causal chain the
+            central instructional object.\n\nThe learner is being equipped with multiple relevant components."
+        completion_evidence: |
+          All target components have been modeled as identifiable pieces and the learner can recognize at least several of them.
+
+          ---
+        next_move_ids: []
+  - id: C2-P2
+    transition_id: C2
+    pedagogy_id: P2
+    instructional_intent: |
+      Elicit several relevant observations/components without requiring the learner to produce the full integrated memoization mechanism.
+    missing_structure: Multiple relevant memoization components.
+    target_kc_ids:
+      - K4
+      - K5
+      - K6
+      - K7
+      - K8
+      - K9
+    target_relation_ids:
+      - R2
+      - R3
+      - R4
+      - R5
+    relevant_misconception_ids:
+      - M2
+      - M3
+      - M5
+      - M6
+      - M8
+    prohibitions:
+      - Do not require full causal C3 integration.
+    completion_condition: |
+      The learner has demonstrated or engaged with several relevant components, or the budget is exhausted.
+
+      ---
+    max_tutor_turns: 8
+    treatment_constraints: |
+      C2 boundary:
+      Do not require a polished explanation of the entire causal chain.
+
+      It is acceptable at C2 for the learner to express the pieces separately.
+    move_ids:
+      - C2-P2-MOVE-1
+    moves:
+      - id: C2-P2-MOVE-1
+        transition_id: C2
+        pedagogy_id: P2
+        title: Required progression
+        purpose: |
+          Elicit several relevant observations/components without requiring the learner to produce the full integrated memoization mechanism.
+        kc_ids:
+          - K4
+          - K5
+          - K6
+          - K7
+          - K8
+          - K9
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+        misconception_ids:
+          - M2
+          - M3
+          - M5
+          - M6
+          - M8
+        material_blueprint: |
+          1. **Dependency**
+             - “What smaller calls are needed while computing `fib(5)`?”
+
+          2. **Repetition**
+             - Show/construct a small call tree.
+             - “Which smaller input appears in more than one branch?”
+
+          3. **Repeated computation**
+             - “If the program remembers nothing, what happens when that same input appears again?”
+
+          4. **Storage**
+             - “What information from the first completed calculation could be kept?”
+
+          5. **Input/result association**
+             - “How would the program know that the stored value belongs to `fib(3)` rather than `fib(4)`?”
+
+          6. **Lookup/reuse**
+             - “Before calculating the same input again, what could the function check?”
+
+          7. **Shared cache**
+             - “If every recursive call created a completely separate empty store, could one branch reuse a result found by another?”
+        allowed_behavior:
+          - ask bounded questions
+          - request prediction
+        prohibited_behavior:
+          - "C2 boundary:\nDo not require a polished explanation of the entire causal chain.\n\nIt is acceptable at C2 for
+            the learner to express the pieces separately."
+        completion_evidence: |
+          The learner has demonstrated or engaged with several relevant components, or the budget is exhausted.
+
+          ---
+        next_move_ids: []
+  - id: C2-P3
+    transition_id: C2
+    pedagogy_id: P3
+    instructional_intent: |
+      Use controlled comparisons to help the learner identify multiple relevant components of repeated work and result reuse.
+    missing_structure: Multiple relevant memoization components.
+    target_kc_ids:
+      - K4
+      - K5
+      - K6
+      - K7
+      - K8
+      - K9
+    target_relation_ids:
+      - R2
+      - R3
+      - R4
+      - R5
+    relevant_misconception_ids:
+      - M2
+      - M3
+      - M5
+      - M6
+      - M8
+    prohibitions:
+      - Do not require full causal C3 integration.
+    completion_condition: |
+      The learner accumulates multiple relevant distinctions:
+
+      - repeated subproblem;
+      - recomputation;
+      - stored result;
+      - lookup/reuse;
+      - shared state.
+    max_tutor_turns: 8
+    treatment_constraints: |
+      Boundary:
+      Do not require a generalized, integrated efficiency explanation yet.
+
+      ---
+    move_ids:
+      - C2-P3-MOVE-1
+      - C2-P3-MOVE-2
+      - C2-P3-MOVE-3
+      - C2-P3-MOVE-4
+    moves:
+      - id: C2-P3-MOVE-1
+        transition_id: C2
+        pedagogy_id: P3
+        title: Contrast 1 — repeated vs non-repeated positions
+        purpose: |
+          Use controlled comparisons to help the learner identify multiple relevant components of repeated work and result reuse.
+        kc_ids:
+          - K4
+          - K5
+          - K6
+          - K7
+          - K8
+          - K9
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+        misconception_ids:
+          - M2
+          - M3
+          - M5
+          - M6
+          - M8
+        material_blueprint: |
+          Present a small recursive dependency diagram containing repeated `fib(k)` nodes.
+
+          Ask:
+
+          - which labels repeat;
+          - which are unique in the shown portion;
+          - what the repeated label means.
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - "Boundary:\nDo not require a generalized, integrated efficiency explanation yet.\n\n---"
+        completion_evidence: |
+          The learner accumulates multiple relevant distinctions:
+
+          - repeated subproblem;
+          - recomputation;
+          - stored result;
+          - lookup/reuse;
+          - shared state.
+        next_move_ids:
+          - C2-P3-MOVE-2
+      - id: C2-P3-MOVE-2
+        transition_id: C2
+        pedagogy_id: P3
+        title: Contrast 2 — no stored result vs stored result available
+        purpose: |
+          Use controlled comparisons to help the learner identify multiple relevant components of repeated work and result reuse.
+        kc_ids:
+          - K4
+          - K5
+          - K6
+          - K7
+          - K8
+          - K9
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+        misconception_ids:
+          - M2
+          - M3
+          - M5
+          - M6
+          - M8
+        material_blueprint: |
+          Present two execution snapshots for the same requested subproblem.
+
+          Case A:
+
+          ```text
+          Request: fib(3)
+          Stored entries: none
+          ```
+
+          Case B:
+
+          ```text
+          Request: fib(3)
+          Stored entries: {3: 2}
+          ```
+
+          Ask:
+
+          - what information differs;
+          - what action becomes possible in B that is not possible in A.
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - "Boundary:\nDo not require a generalized, integrated efficiency explanation yet.\n\n---"
+        completion_evidence: |
+          The learner accumulates multiple relevant distinctions:
+
+          - repeated subproblem;
+          - recomputation;
+          - stored result;
+          - lookup/reuse;
+          - shared state.
+        next_move_ids:
+          - C2-P3-MOVE-3
+      - id: C2-P3-MOVE-3
+        transition_id: C2
+        pedagogy_id: P3
+        title: Contrast 3 — shared vs separate cache
+        purpose: |
+          Use controlled comparisons to help the learner identify multiple relevant components of repeated work and result reuse.
+        kc_ids:
+          - K4
+          - K5
+          - K6
+          - K7
+          - K8
+          - K9
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+        misconception_ids:
+          - M2
+          - M3
+          - M5
+          - M6
+          - M8
+        material_blueprint: |
+          Case A:
+
+          ```text
+          all recursive calls receive the same memo mapping
+          ```
+
+          Case B:
+
+          ```text
+          each recursive call starts with a new empty memo mapping
+          ```
+
+          Ask what opportunity for reuse differs.
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - "Boundary:\nDo not require a generalized, integrated efficiency explanation yet.\n\n---"
+        completion_evidence: |
+          The learner accumulates multiple relevant distinctions:
+
+          - repeated subproblem;
+          - recomputation;
+          - stored result;
+          - lookup/reuse;
+          - shared state.
+        next_move_ids:
+          - C2-P3-MOVE-4
+      - id: C2-P3-MOVE-4
+        transition_id: C2
+        pedagogy_id: P3
+        title: Intended C2 result
+        purpose: |
+          Use controlled comparisons to help the learner identify multiple relevant components of repeated work and result reuse.
+        kc_ids:
+          - K4
+          - K5
+          - K6
+          - K7
+          - K8
+          - K9
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+        misconception_ids:
+          - M2
+          - M3
+          - M5
+          - M6
+          - M8
+        material_blueprint: |
+          The learner accumulates multiple relevant distinctions:
+
+          - repeated subproblem;
+          - recomputation;
+          - stored result;
+          - lookup/reuse;
+          - shared state.
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - "Boundary:\nDo not require a generalized, integrated efficiency explanation yet.\n\n---"
+        completion_evidence: |
+          The learner accumulates multiple relevant distinctions:
+
+          - repeated subproblem;
+          - recomputation;
+          - stored result;
+          - lookup/reuse;
+          - shared state.
+        next_move_ids: []

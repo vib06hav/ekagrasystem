@@ -1,0 +1,452 @@
+cells:
+  - id: C1-P1
+    transition_id: C1
+    pedagogy_id: P1
+    instructional_intent: |
+      Model how the mathematical Fibonacci definition maps directly to a recursive Python function.
+    missing_structure: A coherent recurrence-to-recursion relationship.
+    target_kc_ids:
+      - K1
+      - K2
+      - K3
+    target_relation_ids:
+      - R1
+    relevant_misconception_ids:
+      - M1
+    prohibitions:
+      - Do not teach memoization or tabulation.
+    completion_condition: |
+      The solved relationship has been modeled clearly and the learner has had an opportunity to restate or answer a short rationale question about why the function has two recursive calls and base cases.
+
+      ---
+    max_tutor_turns: 8
+    treatment_constraints: |
+      Must not introduce as instructional target:
+      - repeated-subproblem inefficiency;
+      - caching;
+      - memoization;
+      - tabulation.
+    move_ids:
+      - C1-P1-MOVE-1
+      - C1-P1-MOVE-2
+      - C1-P1-MOVE-3
+    moves:
+      - id: C1-P1-MOVE-1
+        transition_id: C1
+        pedagogy_id: P1
+        title: Recommended instructional instance
+        purpose: |
+          Model how the mathematical Fibonacci definition maps directly to a recursive Python function.
+        kc_ids:
+          - K1
+          - K2
+          - K3
+        relation_ids:
+          - R1
+        misconception_ids:
+          - M1
+        material_blueprint: |
+          Use a small value such as `fib(4)` or `fib(5)` that is not reserved for the selected assessment.
+        allowed_behavior:
+          - present solved example
+          - explain reasoning
+        prohibited_behavior:
+          - "Must not introduce as instructional target:\n- repeated-subproblem inefficiency;\n- caching;\n- memoization;\n\
+            - tabulation."
+        completion_evidence: |
+          The solved relationship has been modeled clearly and the learner has had an opportunity to restate or answer a short rationale question about why the function has two recursive calls and base cases.
+
+          ---
+        next_move_ids:
+          - C1-P1-MOVE-2
+      - id: C1-P1-MOVE-2
+        transition_id: C1
+        pedagogy_id: P1
+        title: Modeled content
+        purpose: |
+          Model how the mathematical Fibonacci definition maps directly to a recursive Python function.
+        kc_ids:
+          - K1
+          - K2
+          - K3
+        relation_ids:
+          - R1
+        misconception_ids:
+          - M1
+        material_blueprint: |
+          The Tutor should explicitly model:
+
+          1. `fib(0)=0` and `fib(1)=1` as terminating cases.
+          2. For `n >= 2`, `fib(n)=fib(n-1)+fib(n-2)`.
+          3. Therefore a recursive function for `fib(n)` requests the two smaller Fibonacci values.
+          4. The returned result is their sum.
+
+          Illustrative solved program:
+
+          ```python
+          def fib(n):
+              if n <= 1:
+                  return n
+              return fib(n - 1) + fib(n - 2)
+          ```
+
+          Illustrative walkthrough:
+
+          ```text
+          fib(4)
+          = fib(3) + fib(2)
+
+          fib(3)
+          = fib(2) + fib(1)
+
+          Eventually recursive calls reach fib(1) or fib(0),
+          where the function can return a known value rather than recurse again.
+          ```
+        allowed_behavior:
+          - present solved example
+          - explain reasoning
+        prohibited_behavior:
+          - "Must not introduce as instructional target:\n- repeated-subproblem inefficiency;\n- caching;\n- memoization;\n\
+            - tabulation."
+        completion_evidence: |
+          The solved relationship has been modeled clearly and the learner has had an opportunity to restate or answer a short rationale question about why the function has two recursive calls and base cases.
+
+          ---
+        next_move_ids:
+          - C1-P1-MOVE-3
+      - id: C1-P1-MOVE-3
+        transition_id: C1
+        pedagogy_id: P1
+        title: Must make visible
+        purpose: |
+          Model how the mathematical Fibonacci definition maps directly to a recursive Python function.
+        kc_ids:
+          - K1
+          - K2
+          - K3
+        relation_ids:
+          - R1
+        misconception_ids:
+          - M1
+        material_blueprint: |
+          - two-predecessor dependence;
+          - mapping between recurrence and recursive calls;
+          - role of base cases in termination.
+        allowed_behavior:
+          - present solved example
+          - explain reasoning
+        prohibited_behavior:
+          - "Must not introduce as instructional target:\n- repeated-subproblem inefficiency;\n- caching;\n- memoization;\n\
+            - tabulation."
+        completion_evidence: |
+          The solved relationship has been modeled clearly and the learner has had an opportunity to restate or answer a short rationale question about why the function has two recursive calls and base cases.
+
+          ---
+        next_move_ids: []
+  - id: C1-P2
+    transition_id: C1
+    pedagogy_id: P2
+    instructional_intent: |
+      Guide the learner to construct the recurrence-to-recursion relationship.
+    missing_structure: A coherent recurrence-to-recursion relationship.
+    target_kc_ids:
+      - K1
+      - K2
+      - K3
+    target_relation_ids:
+      - R1
+    relevant_misconception_ids:
+      - M1
+    prohibitions:
+      - Do not teach memoization or give a complete solution first.
+    completion_condition: |
+      The learner has constructed the central recurrence/recursive relationship or the intervention budget is exhausted.
+
+      ---
+    max_tutor_turns: 8
+    treatment_constraints: |
+      Prohibition:
+      Do not shift into memoization or repeated-work discussion.
+    move_ids:
+      - C1-P2-MOVE-1
+      - C1-P2-MOVE-2
+      - C1-P2-MOVE-3
+    moves:
+      - id: C1-P2-MOVE-1
+        transition_id: C1
+        pedagogy_id: P2
+        title: Required questioning progression
+        purpose: |
+          Guide the learner to construct the recurrence-to-recursion relationship.
+        kc_ids:
+          - K1
+          - K2
+          - K3
+        relation_ids:
+          - R1
+        misconception_ids:
+          - M1
+        material_blueprint: |
+          The Tutor should guide approximately through these functions:
+
+          1. **Sequence dependency**
+             - Ask how a later Fibonacci value is obtained from earlier ones.
+             - Use a concrete example if needed, such as `0, 1, 1, 2, 3, 5`.
+
+          2. **Two predecessors**
+             - Elicit that `fib(n)` depends on both `fib(n-1)` and `fib(n-2)`.
+
+          3. **Recursive representation**
+             - Ask what a function computing `fib(n)` could request from itself.
+
+          4. **Termination**
+             - Ask what should happen at `n=0` and `n=1`, and why recursion cannot continue indefinitely.
+
+          5. **Synthesis**
+             - Ask the learner to state the basic recursive rule in words or simple pseudocode.
+        allowed_behavior:
+          - ask bounded questions
+          - request prediction
+        prohibited_behavior:
+          - "Prohibition:\nDo not shift into memoization or repeated-work discussion."
+        completion_evidence: |
+          The learner has constructed the central recurrence/recursive relationship or the intervention budget is exhausted.
+
+          ---
+        next_move_ids:
+          - C1-P2-MOVE-2
+      - id: C1-P2-MOVE-2
+        transition_id: C1
+        pedagogy_id: P2
+        title: Illustrative moves
+        purpose: |
+          Guide the learner to construct the recurrence-to-recursion relationship.
+        kc_ids:
+          - K1
+          - K2
+          - K3
+        relation_ids:
+          - R1
+        misconception_ids:
+          - M1
+        material_blueprint: |
+          - “To get 5 from the Fibonacci sequence, which earlier values were combined?”
+          - “If a function is asked for `fib(n)`, which two smaller Fibonacci inputs does it need?”
+          - “What should happen when the input reaches 0 or 1?”
+        allowed_behavior:
+          - ask bounded questions
+          - request prediction
+        prohibited_behavior:
+          - "Prohibition:\nDo not shift into memoization or repeated-work discussion."
+        completion_evidence: |
+          The learner has constructed the central recurrence/recursive relationship or the intervention budget is exhausted.
+
+          ---
+        next_move_ids:
+          - C1-P2-MOVE-3
+      - id: C1-P2-MOVE-3
+        transition_id: C1
+        pedagogy_id: P2
+        title: Recovery rule
+        purpose: |
+          Guide the learner to construct the recurrence-to-recursion relationship.
+        kc_ids:
+          - K1
+          - K2
+          - K3
+        relation_ids:
+          - R1
+        misconception_ids:
+          - M1
+        material_blueprint: |
+          If the learner proposes only `fib(n-1)`, ask for a concrete sequence check rather than immediately giving the formula.
+        allowed_behavior:
+          - ask bounded questions
+          - request prediction
+        prohibited_behavior:
+          - "Prohibition:\nDo not shift into memoization or repeated-work discussion."
+        completion_evidence: |
+          The learner has constructed the central recurrence/recursive relationship or the intervention budget is exhausted.
+
+          ---
+        next_move_ids: []
+  - id: C1-P3
+    transition_id: C1
+    pedagogy_id: P3
+    instructional_intent: |
+      Have the learner infer the essential two-predecessor recursive structure by comparing two closely matched candidate definitions.
+    missing_structure: A coherent recurrence-to-recursion relationship.
+    target_kc_ids:
+      - K1
+      - K2
+      - K3
+    target_relation_ids:
+      - R1
+    relevant_misconception_ids:
+      - M1
+    prohibitions:
+      - Do not teach caching.
+    completion_condition: |
+      The two-predecessor recurrence is the central structure required for recursive Fibonacci.
+    max_tutor_turns: 8
+    treatment_constraints: |
+      Prohibition:
+      Do not introduce caching or efficiency as the comparison dimension.
+
+      ---
+    move_ids:
+      - C1-P3-MOVE-1
+      - C1-P3-MOVE-2
+      - C1-P3-MOVE-3
+      - C1-P3-MOVE-4
+      - C1-P3-MOVE-5
+    moves:
+      - id: C1-P3-MOVE-1
+        transition_id: C1
+        pedagogy_id: P3
+        title: Controlled cases
+        purpose: |
+          Have the learner infer the essential two-predecessor recursive structure by comparing two closely matched candidate definitions.
+        kc_ids:
+          - K1
+          - K2
+          - K3
+        relation_ids:
+          - R1
+        misconception_ids:
+          - M1
+        material_blueprint: |
+          Case A:
+
+          ```python
+          def fib_a(n):
+              if n <= 1:
+                  return n
+              return fib_a(n - 1)
+          ```
+
+          Case B:
+
+          ```python
+          def fib_b(n):
+              if n <= 1:
+                  return n
+              return fib_b(n - 1) + fib_b(n - 2)
+          ```
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - "Prohibition:\nDo not introduce caching or efficiency as the comparison dimension.\n\n---"
+        completion_evidence: |
+          The two-predecessor recurrence is the central structure required for recursive Fibonacci.
+        next_move_ids:
+          - C1-P3-MOVE-2
+      - id: C1-P3-MOVE-2
+        transition_id: C1
+        pedagogy_id: P3
+        title: Invariants across cases
+        purpose: |
+          Have the learner infer the essential two-predecessor recursive structure by comparing two closely matched candidate definitions.
+        kc_ids:
+          - K1
+          - K2
+          - K3
+        relation_ids:
+          - R1
+        misconception_ids:
+          - M1
+        material_blueprint: |
+          - same function purpose;
+          - same parameter;
+          - same base-case structure;
+          - both are recursive.
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - "Prohibition:\nDo not introduce caching or efficiency as the comparison dimension.\n\n---"
+        completion_evidence: |
+          The two-predecessor recurrence is the central structure required for recursive Fibonacci.
+        next_move_ids:
+          - C1-P3-MOVE-3
+      - id: C1-P3-MOVE-3
+        transition_id: C1
+        pedagogy_id: P3
+        title: Diagnostic difference
+        purpose: |
+          Have the learner infer the essential two-predecessor recursive structure by comparing two closely matched candidate definitions.
+        kc_ids:
+          - K1
+          - K2
+          - K3
+        relation_ids:
+          - R1
+        misconception_ids:
+          - M1
+        material_blueprint: |
+          - Case A uses only one preceding Fibonacci input.
+          - Case B uses both required preceding inputs.
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - "Prohibition:\nDo not introduce caching or efficiency as the comparison dimension.\n\n---"
+        completion_evidence: |
+          The two-predecessor recurrence is the central structure required for recursive Fibonacci.
+        next_move_ids:
+          - C1-P3-MOVE-4
+      - id: C1-P3-MOVE-4
+        transition_id: C1
+        pedagogy_id: P3
+        title: Comparison sequence
+        purpose: |
+          Have the learner infer the essential two-predecessor recursive structure by comparing two closely matched candidate definitions.
+        kc_ids:
+          - K1
+          - K2
+          - K3
+        relation_ids:
+          - R1
+        misconception_ids:
+          - M1
+        material_blueprint: |
+          The Tutor should ask the learner to:
+
+          1. identify what the functions have in common;
+          2. identify the key difference in the recursive return line;
+          3. test the two definitions against a small Fibonacci value;
+          4. infer which structure matches the Fibonacci sequence and why.
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - "Prohibition:\nDo not introduce caching or efficiency as the comparison dimension.\n\n---"
+        completion_evidence: |
+          The two-predecessor recurrence is the central structure required for recursive Fibonacci.
+        next_move_ids:
+          - C1-P3-MOVE-5
+      - id: C1-P3-MOVE-5
+        transition_id: C1
+        pedagogy_id: P3
+        title: Intended inference
+        purpose: |
+          Have the learner infer the essential two-predecessor recursive structure by comparing two closely matched candidate definitions.
+        kc_ids:
+          - K1
+          - K2
+          - K3
+        relation_ids:
+          - R1
+        misconception_ids:
+          - M1
+        material_blueprint: |
+          The two-predecessor recurrence is the central structure required for recursive Fibonacci.
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - "Prohibition:\nDo not introduce caching or efficiency as the comparison dimension.\n\n---"
+        completion_evidence: |
+          The two-predecessor recurrence is the central structure required for recursive Fibonacci.
+        next_move_ids: []

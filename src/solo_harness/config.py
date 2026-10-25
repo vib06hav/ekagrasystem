@@ -11,6 +11,7 @@ class Settings(BaseSettings):
 
     database_url: str
     study_dir: Path
+    activate_study_on_bootstrap: bool = False
     llm_provider: str = "aicredits_openai_compatible"
     aicredits_base_url: str | None = None
     aicredits_api_key: SecretStr | None = None

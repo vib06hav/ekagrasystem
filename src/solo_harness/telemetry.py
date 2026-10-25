@@ -230,7 +230,15 @@ def record_ui_events(db, session, events: object) -> int:
         assessment_id = None
         if section is not None:
             transition = transitions[section - 1]
-            attempt = db.scalar(select(Attempt).where(Attempt.session_id == session.id, Attempt.transition_id == transition).order_by(Attempt.sequence_in_transition.desc()))
+            statement = select(Attempt).where(
+                Attempt.session_id == session.id,
+                Attempt.transition_id == transition,
+            )
+            if activity is not None:
+                statement = statement.where(Attempt.sequence_in_transition == activity)
+            else:
+                statement = statement.order_by(Attempt.sequence_in_transition.desc())
+            attempt = db.scalar(statement)
             if attempt:
                 attempt_id = attempt.id
                 assessment = db.scalar(select(AssessmentInstance).where(AssessmentInstance.attempt_id == attempt.id))

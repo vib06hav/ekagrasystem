@@ -1,0 +1,235 @@
+assessment_families:
+  - id: AF-C3
+    transition_id: C3
+    construct: |
+      Can the learner independently integrate:
+
+      ```text
+      repeated subproblem
+      → repeated computation
+      → storage
+      → lookup/reuse
+      → avoided recursive recomputation
+      ```
+
+      while recognizing that the Fibonacci recurrence itself is unchanged?
+    forms:
+      - id: C3-A1
+        material_tag: c3_code_alpha
+        title: Explain the memoized execution mechanism
+        target_evidence_ids:
+          - C3-E1
+          - C3-E2
+          - C3-E3
+          - C3-E4
+          - C3-E5
+          - C3-E6
+        relevant_misconception_ids: &id001
+          - M3
+          - M4
+          - M5
+          - M6
+          - M7
+          - M8
+          - M9
+        task_type: explain_the_memoized_execution_mechanism
+        generation_goal: |
+          Generate a fresh assessment task that tests: Explain the memoized execution mechanism. The prose must be newly generated for this AssessmentInstance.
+        scenario_seed: |
+          ```python
+          def fib(n, memo=None):
+              if memo is None:
+                  memo = {}
+
+              if n in memo:
+                  return memo[n]
+
+              if n <= 1:
+                  return n
+
+              memo[n] = fib(n - 1, memo) + fib(n - 2, memo)
+              return memo[n]
+          ```
+        equivalence_constraints: []
+        required_response_features:
+          - repeated subproblem;
+          - first computation;
+          - stored mapping;
+          - later lookup;
+          - reuse;
+          - avoided recursive expansion;
+          - recurrence unchanged.
+        misconception_probes: *id001
+        prohibited_leakage:
+          - Do not reveal scoring criteria or expected answers.
+          - Do not reproduce the scenario seed verbatim.
+        target_kc_ids:
+          - K10
+          - K11
+        target_relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+      - id: C3-A2
+        material_tag: c3_explanations_beta
+        title: Evaluate two explanations
+        target_evidence_ids:
+          - C3-E1
+          - C3-E2
+          - C3-E3
+          - C3-E4
+          - C3-E5
+        relevant_misconception_ids: *id001
+        task_type: evaluate_two_explanations
+        generation_goal: |
+          Generate a fresh assessment task that tests: Evaluate two explanations. The prose must be newly generated for this AssessmentInstance.
+        scenario_seed: |
+          Student A says:
+
+          > “Memoization makes recursive Fibonacci faster because it changes the Fibonacci formula so fewer previous numbers are needed.”
+
+          Student B says:
+
+          > “The Fibonacci formula stays the same. After a smaller Fibonacci problem has been solved, its result can be stored. If the same subproblem is requested again, that result can be reused rather than recursively calculated again.”
+        equivalence_constraints: []
+        required_response_features:
+          - B;
+          - causal integration;
+          - explicitly rejects recurrence-changing misconception.
+        misconception_probes: *id001
+        prohibited_leakage:
+          - Do not reveal scoring criteria or expected answers.
+          - Do not reproduce the scenario seed verbatim.
+        target_kc_ids:
+          - K10
+          - K11
+        target_relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+      - id: C3-A3
+        material_tag: c3_second_request_gamma
+        title: Compare second-request behavior
+        target_evidence_ids:
+          - C3-E1
+          - C3-E2
+          - C3-E3
+          - C3-E4
+          - C3-E5
+          - C3-E6
+        relevant_misconception_ids: *id001
+        task_type: compare_second_request_behavior
+        generation_goal: |
+          Generate a fresh assessment task that tests: Compare second-request behavior. The prose must be newly generated for this AssessmentInstance.
+        scenario_seed: |
+          During one evaluation, `fib(4)` has already been calculated and returned 3.
+
+          Later in the same overall recursive computation, another branch requests `fib(4)`.
+        equivalence_constraints: []
+        required_response_features:
+          - naive version recursively recomputes;
+          - memoized version checks and reuses stored 3;
+          - avoids recursive expansion;
+          - recurrence unchanged.
+        misconception_probes: *id001
+        prohibited_leakage:
+          - Do not reveal scoring criteria or expected answers.
+          - Do not reproduce the scenario seed verbatim.
+        target_kc_ids:
+          - K10
+          - K11
+        target_relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+      - id: C3-A4
+        material_tag: c3_mechanism_delta
+        title: Complete the mechanism conceptually
+        target_evidence_ids:
+          - C3-E1
+          - C3-E2
+          - C3-E3
+          - C3-E4
+          - C3-E6
+        relevant_misconception_ids: *id001
+        task_type: complete_the_mechanism_conceptually
+        generation_goal: |
+          Generate a fresh assessment task that tests: Complete the mechanism conceptually. The prose must be newly generated for this AssessmentInstance.
+        scenario_seed: |
+          ```python
+          def fib(n, cache):
+              if n <= 1:
+                  return n
+
+              # cache-related operation(s) omitted here
+
+              result = fib(n - 1, cache) + fib(n - 2, cache)
+
+              # cache-related operation(s) omitted here
+
+              return result
+          ```
+        equivalence_constraints: []
+        required_response_features:
+          - lookup before recursive expansion;
+          - return cached result on hit;
+          - store computed result after solving;
+          - shared cache;
+          - causal link to avoiding recomputation.
+        misconception_probes: *id001
+        prohibited_leakage:
+          - Do not reveal scoring criteria or expected answers.
+          - Do not reproduce the scenario seed verbatim.
+        target_kc_ids:
+          - K10
+          - K11
+        target_relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+    required_evidence_overview: |
+      Evidence is defined by the transition rubric and selected item.
+    equivalence_envelope: |
+      All forms must require causal integration rather than keyword listing.
+
+      They should not require tabulation, another algorithmic domain, or formal complexity notation.
+
+      ---
+    global_rules:
+      pedagogy_independence: |
+        The selector must not choose a form because the learner received Worked Example, Guided Questioning, or Contrasting Cases.
+      freshness: |
+        Within one session, an assessment form should not be reused.
+      equivalence: |
+        Forms within a transition family should be comparable in conceptual demand.
+      non_leakage: |
+        Reserved assessment material should not be used verbatim during intervention.
+      independent_response: |
+        During assessment:
+
+        - no tutoring;
+        - no hints;
+        - no intervention continuation;
+        - no corrective feedback before submission.
+
+        ---

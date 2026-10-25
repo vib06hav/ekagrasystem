@@ -1,0 +1,148 @@
+pedagogies:
+  - id: P1
+    name: Worked-Example Instruction
+    core_mechanism: |
+      **Model the organization.**
+
+      The learner studies an explicitly organized solved case in which the target reasoning is visible.
+    permissions:
+      - present solved example
+      - explain reasoning
+    prohibitions:
+      - do not replace with discovery questions as primary mechanism
+    tutor_role: |
+      The Tutor may:
+
+      - present a complete solved example;
+      - make reasoning steps explicit;
+      - explain why each step is valid;
+      - make the target relationship visible;
+      - ask short rationale/engagement questions after or around modeled reasoning;
+      - choose a new instructional instance if prior history shows that an earlier instance has already been exposed.
+    prohibited_behavior: |
+      - turn the main mechanism into a long sequence of discovery questions;
+      - withhold the key organization in order to make the learner infer it independently;
+      - use a contrast between two cases as the primary mechanism.
+    treatment_fidelity_test: |
+      If the learner could receive the whole intervention without seeing an organized model of the target reasoning, the cell is probably not functioning as Worked-Example Instruction.
+
+      ---
+  - id: P2
+    name: Guided Questioning
+    core_mechanism: |
+      **Guide the learner to construct the organization.**
+
+      The Tutor uses bounded, sequenced questions to elicit the target relationship from the learner.
+    permissions:
+      - ask bounded questions
+      - request prediction
+    prohibitions:
+      - do not present complete target reasoning first
+    tutor_role: |
+      The Tutor may:
+
+      - ask targeted questions;
+      - ask for prediction;
+      - ask for justification;
+      - narrow a question;
+      - refer to the learner's immediately preceding answer;
+      - expose inconsistency through another question;
+      - provide minimal factual clarification when required to keep the questioning process viable.
+    prohibited_behavior: |
+      - present the complete target reasoning before the learner has constructed it;
+      - replace questioning with a worked solution because the learner struggles;
+      - use a pairwise comparison task as the primary teaching mechanism;
+      - silently switch to Worked Example.
+    treatment_fidelity_test: |
+      The learner should be doing the relation-building cognitive work.
+
+      The Tutor controls the path, but does not simply hand over the completed structure.
+
+      ---
+  - id: P3
+    name: Contrasting-Case Instruction
+    core_mechanism: |
+      **Infer the organization through comparison.**
+
+      The Tutor presents controlled cases designed so that comparison reveals the target structural feature.
+    permissions:
+      - present aligned cases
+      - ask for diagnostic difference
+    prohibitions:
+      - do not collapse into worked example
+    tutor_role: |
+      The Tutor may:
+
+      - present two or more aligned cases;
+      - ask what is shared;
+      - ask what differs;
+      - ask which difference matters;
+      - ask what rule/mechanism can be inferred;
+      - stabilize irrelevant features while varying the diagnostic feature.
+    prohibited_behavior: |
+      - merely label one case correct and explain the target without requiring comparison;
+      - vary many unrelated difficulty dimensions at once;
+      - collapse into Worked Example;
+      - collapse into a generic Socratic sequence with no meaningful contrast.
+    treatment_fidelity_test: |
+      The learner's understanding should be driven by noticing/inferencing from a controlled contrast.
+
+      ---
+shared_envelope:
+  same_target: |
+    All three pedagogies operating on a given transition target the same Knowledge Slice.
+  same_frontier: |
+    All interventions remain inside recursive Fibonacci + memoization.
+  no_assessment_leakage: |
+    The Tutor must not use a reserved assessment form verbatim or reveal its hidden scoring context.
+  no_pedagogy_switching: |
+    One pedagogy family remains fixed for the entire attempt.
+  independent_outcome: |
+    The intervention itself never declares that the learner has passed.
+
+    Completion means only that the teaching attempt has ended.
+
+    A fresh assessment follows.
+  runtime_history: |
+    A later intervention on the same transition receives structured history describing previous exposures/evidence.
+
+    History may alter emphasis and surface choice.
+
+    History may not authorize a change of pedagogy family.
+
+    ---
+tutor_prompt_recipes:
+  - id: RECIPE-P1
+    pedagogy_id: P1
+    role_instruction: Teach by visibly modelling an organized solution. Generate a fresh example from the current move 
+      blueprint.
+    move_generation_instruction: Explain the reasoning steps and why they are valid; do not merely state an answer.
+    learner_check_instruction: End with one concise learner check tied to the modelled reasoning.
+    completion_instruction: Complete when the move's completion evidence is present or the configured turn budget is 
+      exhausted.
+    prohibited_behavior:
+      - Do not turn the primary mechanism into discovery questioning.
+      - Do not use contrasting cases as the primary mechanism.
+  - id: RECIPE-P2
+    pedagogy_id: P2
+    role_instruction: Guide the learner to construct the target relationship through one bounded question at a time.
+    move_generation_instruction: Generate the next concise question from the current move blueprint and the learner's 
+      latest answer.
+    learner_check_instruction: Ask for prediction, justification, or synthesis without revealing the complete answer 
+      first.
+    completion_instruction: Complete when the learner has constructed the move's target relationship or the turn budget 
+      is exhausted.
+    prohibited_behavior:
+      - Do not provide the complete solution before the learner constructs it.
+      - Do not silently switch to a worked example.
+  - id: RECIPE-P3
+    pedagogy_id: P3
+    role_instruction: Teach through controlled comparison of aligned cases generated from the current move blueprint.
+    move_generation_instruction: Keep irrelevant features stable, vary the diagnostic feature, and ask the learner to 
+      compare.
+    learner_check_instruction: Ask what difference matters and what rule or mechanism follows from it.
+    completion_instruction: Complete when the learner states the intended inference from the contrast or the turn budget
+      is exhausted.
+    prohibited_behavior:
+      - Do not label one case and simply explain the answer.
+      - Do not collapse into a generic question sequence without a meaningful contrast.

@@ -1,8 +1,13 @@
 {% macro section_nav(view) %}
-<nav class="section-nav" aria-label="Study sections">
+{% set acts = (view.timeline or [])|selectattr('kind','in',['activity','assessment'])|list %}
+{% set in_assessment = view.is_current and view.phase in ['ASSESSMENT_GENERATING','ASSESSMENT_ACTIVE','JUDGING'] %}
+<nav class="section-nav" id="section-nav" aria-label="Study sections">
 {% for section in view.sections %}
-  {% if section.enabled and not view.pending %}<a class="section-link {{ section.state }} {% if section.number == view.section_number %}selected{% endif %}" href="/session/sections/{{ section.number }}" {% if section.number == view.section_number %}aria-current="step"{% endif %}>Section {{ section.number }}</a>
-  {% else %}<span class="section-link {{ section.state }} {% if view.pending %}disabled{% endif %}" aria-disabled="true">Section {{ section.number }}</span>{% endif %}
+  <div class="nav-group">
+  {% if section.enabled and not view.pending %}<a class="section-link {{ section.state }} {% if section.number == view.section_number %}selected{% endif %}" href="/session/sections/{{ section.number }}" {% if section.number == view.section_number %}aria-current="step"{% endif %}><span class="nav-label">Section</span> <span class="nav-num">{{ section.number }}</span></a>
+  {% else %}<span class="section-link {{ section.state }} {% if view.pending %}disabled{% endif %}" aria-disabled="true"><span class="nav-label">Section</span> <span class="nav-num">{{ section.number }}</span></span>{% endif %}
+  {% if section.number == view.section_number and (acts or in_assessment) %}<ul class="nav-sub" aria-label="Section {{ section.number }} activities">{% for act in acts %}<li class="{% if view.is_current and loop.last and not in_assessment and view.phase == 'INTERVENTION_ACTIVE' %}current{% endif %}">{{ act.label }}</li>{% endfor %}{% if in_assessment %}<li class="current">Independent assessment</li>{% endif %}</ul>{% endif %}
+  </div>
 {% endfor %}
 </nav>
 {% endmacro %}
@@ -14,7 +19,7 @@
   {% if item.kind == 'message' %}
     <article class="message {{ item.role|lower }}"{% if item.role == 'TUTOR' %} data-tutor-message-sequence="{{ item.sequence_no }}"{% endif %}><div class="message-meta"><span>{% if item.role == 'TUTOR' %}Study assistant{% else %}You{% endif %}</span><time>{{ item.timestamp.strftime('%H:%M:%S') }}</time></div>{{ item.content }}</article>
   {% else %}
-    <div class="timeline-marker {{ item.kind }}"{% if item.kind == 'assessment' %} data-assessment-completed-marker{% endif %}{% if item.kind == 'activity' %} data-teaching-activity-number="{{ item.activity_number }}"{% endif %}><span>{{ item.label }}</span>{% if item.timestamp %}<time>{{ item.timestamp.strftime('%H:%M:%S') }}</time>{% endif %}</div>
+    <div class="timeline-marker {{ item.kind }}"{% if item.kind == 'assessment' %} data-assessment-completed-marker{% endif %}{% if item.kind == 'activity' %} data-teaching-activity-number="{{ item.activity_number }}"{% endif %}><span>{{ item.label }}</span>{% if item.timestamp %}<time title="Time of day, not a duration">{% if item.kind == 'activity' %}Assigned at {% endif %}{{ item.timestamp.strftime('%H:%M:%S') }}</time>{% endif %}</div>
   {% endif %}
 {% endfor %}
 </div>
@@ -23,7 +28,7 @@
 <div id="session-main" data-started-at="{{ view.started_at.isoformat() if view.started_at else '' }}" data-ended-at="{{ view.ended_at.isoformat() if view.ended_at else '' }}">
 {% if view.phase == 'TERMINAL' and view.is_current %}
   {{ section_nav(view) }}
-  <section class="panel completion" data-study-complete><div class="phase-badge">Study completed</div><h1>Thank you</h1><p>Your study responses have been saved.</p>
+  <section class="panel completion" data-study-complete><div class="phase-badge">{% if view.status == 'UNRESOLVED' %}Study ended{% else %}Study completed{% endif %}</div><h1>Thank you</h1><p>{% if view.status == 'UNRESOLVED' %}Study ended — some transitions unresolved; your responses were saved.{% else %}Your study responses have been saved.{% endif %}</p>
     <div class="completion-grid"><div><strong>Total time</strong><span data-duration="{{ view.elapsed_seconds }}">{{ '%02d:%02d:%02d'|format(view.elapsed_seconds // 3600, (view.elapsed_seconds % 3600) // 60, view.elapsed_seconds % 60) }}</span></div><div><strong>Started</strong>{{ view.started_at.strftime('%Y-%m-%d %H:%M:%S') if view.started_at else '—' }}</div><div><strong>Finished</strong>{{ view.ended_at.strftime('%Y-%m-%d %H:%M:%S') if view.ended_at else '—' }}</div></div>
     <p>Debrief information and researcher support details will appear here.</p>
   </section>
@@ -41,10 +46,10 @@
     {% elif view.retryable %}
       {% if view.phase == 'INTERVENTION_ACTIVE' %}{{ timeline(view) }}{% endif %}<div class="action-card" data-generation-error><h2>That step could not be completed</h2><p>Your work is saved. Try the same step again when you are ready.</p><form hx-post="/session/actions/retry" hx-target="#session-main" hx-swap="outerHTML" method="post"><input type="hidden" name="idempotency_key" value="{{ new_key }}"><button class="retry-button">Retry</button></form></div>
     {% elif view.phase == 'SECTION_COMPLETE' %}
-      {{ timeline(view) }}<div class="composer" data-section-complete><form hx-post="{% if view.is_final_section %}/session/actions/finish{% else %}/session/actions/next{% endif %}" hx-target="#session-main" hx-swap="outerHTML" method="post"><button>{% if view.is_final_section %}Finish study{% else %}Next section{% endif %}</button></form></div>
+      {{ timeline(view) }}<div class="composer" data-section-complete>{% if view.section_scientific_outcome == 'UNRESOLVED' %}<p>Section ended — transition unresolved</p><p>You may continue to the next section for study administration; this does not mean the SOLO transition was achieved.</p>{% endif %}<form hx-post="{% if view.is_final_section %}/session/actions/finish{% else %}/session/actions/next{% endif %}" hx-target="#session-main" hx-swap="outerHTML" method="post"><button>{% if view.is_final_section %}Finish study{% else %}Next section{% endif %}</button></form></div>
     {% elif view.phase == 'INTERVENTION_ACTIVE' %}
       {{ timeline(view) }}
-      {% if view.attempt_status == 'ASSIGNED' %}<div class="composer" data-teaching-activity-number="{{ view.activity_number }}"><form hx-post="/session/actions/begin" hx-target="#session-main" hx-swap="outerHTML" method="post"><input type="hidden" name="idempotency_key" value="{{ new_key }}"><button>{% if not view.started_at %}Begin study{% else %}Begin teaching activity {{ view.activity_number }}{% endif %}</button></form></div>{% else %}{% include "partials/tutor_composer.html" %}{% endif %}
+      {% if view.attempt_status == 'ASSIGNED' %}<div class="composer begin-state" data-teaching-activity-number="{{ view.activity_number }}"><p class="begin-note">Select the button below to start the teaching conversation with the study assistant.</p><form hx-post="/session/actions/begin" hx-target="#session-main" hx-swap="outerHTML" method="post"><input type="hidden" name="idempotency_key" value="{{ new_key }}"><button>{% if not view.started_at %}Begin study{% else %}Begin teaching activity {{ view.activity_number }}{% endif %}</button></form></div>{% else %}{% include "partials/tutor_composer.html" %}{% endif %}
     {% elif view.phase == 'ASSESSMENT_ACTIVE' %}
       <section class="assessment" data-telemetry-surface="assessment"><div class="phase-badge">Independent assessment</div><h2>Respond in your own words</h2><div class="assessment-prompt">{{ view.assessment_prompt }}</div><form hx-post="/session/actions/assessment-response" hx-target="#session-main" hx-swap="outerHTML" method="post"><input type="hidden" name="idempotency_key" value="{{ new_key }}"><label for="assessment-response">Your response</label><textarea id="assessment-response" name="response_text" required maxlength="12000"></textarea><button>Submit assessment</button></form></section>
     {% else %}<div class="empty">Refresh this page to continue.</div>{% endif %}

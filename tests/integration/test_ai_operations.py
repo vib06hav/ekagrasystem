@@ -59,7 +59,9 @@ async def test_tutor_failure_is_manual_and_retry_does_not_duplicate_learner(harn
     factory,runtime,version_id=harness; client=ScriptedClient([]); execution=AIExecutionRuntime(runtime,client,TestSettings())
     with factory() as db:
         session=runtime.create_session(db,version_id); study=runtime._compiled(db,session); attempt=db.get(solo_harness.db.models.Attempt,session.current_attempt_id); move=study.cells[f"C1:{attempt.pedagogy_id}"]["move_ids"][0]
-        client.outputs += [tutor(move), "not-json", tutor(move)]
+        next_move=study.intervention_moves[move]["next_move_ids"][0]
+        retry_next=study.intervention_moves[next_move]["next_move_ids"][0] if study.intervention_moves[next_move]["next_move_ids"] else None
+        client.outputs += [tutor(move,next_move=next_move), "not-json", tutor(next_move,next_move=retry_next)]
         await execution.execute(db,execution.reserve_tutor(db,session.id))
         await execution.execute(db,execution.reserve_tutor(db,session.id,"my one answer"))
         assert db.scalars(select(Message).where(Message.attempt_id==attempt.id,Message.role=="LEARNER")).all().__len__()==1
@@ -74,7 +76,8 @@ async def test_assessment_is_generated_and_frozen_once(harness):
     factory,runtime,version_id=harness; client=ScriptedClient([]); execution=AIExecutionRuntime(runtime,client,TestSettings())
     with factory() as db:
         session=runtime.create_session(db,version_id); study=runtime._compiled(db,session); attempt=db.get(solo_harness.db.models.Attempt,session.current_attempt_id); move=study.cells[f"C1:{attempt.pedagogy_id}"]["move_ids"][0]
-        client.outputs += [tutor(move), tutor(move,"COMPLETE"), json.dumps({"schema_version":"1.0","learner_prompt":"Explain the relationship between two smaller recursive calls and the terminating cases in this fresh scenario.","hidden_scoring_context":"Require two-predecessor dependence and correct terminating base cases."})]
+        next_move=study.intervention_moves[move]["next_move_ids"][0]
+        client.outputs += [tutor(move,next_move=next_move), tutor(next_move,"COMPLETE"), json.dumps({"schema_version":"1.0","learner_prompt":"Explain the relationship between two smaller recursive calls and the terminating cases in this fresh scenario.","hidden_scoring_context":"Require two-predecessor dependence and correct terminating base cases."})]
         await execution.execute(db,execution.reserve_tutor(db,session.id)); await execution.execute(db,execution.reserve_tutor(db,session.id,"They combine two prior values."))
         assessment=db.scalar(select(AssessmentInstance).where(AssessmentInstance.attempt_id==attempt.id)); frozen=assessment.prompt_snapshot
         assert assessment.status=="ACTIVE" and assessment.generation_llm_call_id and assessment.blueprint_snapshot and frozen
@@ -88,7 +91,8 @@ async def test_judge_gets_exactly_one_automatic_retry(harness):
     factory,runtime,version_id=harness; client=ScriptedClient([]); execution=AIExecutionRuntime(runtime,client,TestSettings())
     with factory() as db:
         session=runtime.create_session(db,version_id); study=runtime._compiled(db,session); attempt=db.get(solo_harness.db.models.Attempt,session.current_attempt_id); move=study.cells[f"C1:{attempt.pedagogy_id}"]["move_ids"][0]
-        client.outputs += [tutor(move),tutor(move,"COMPLETE"),json.dumps({"schema_version":"1.0","learner_prompt":"Explain how a recursive Fibonacci case combines two smaller calls and reaches terminating cases.","hidden_scoring_context":"Require the two predecessors and base cases."}),"bad","still bad"]
+        next_move=study.intervention_moves[move]["next_move_ids"][0]
+        client.outputs += [tutor(move,next_move=next_move),tutor(next_move,"COMPLETE"),json.dumps({"schema_version":"1.0","learner_prompt":"Explain how a recursive Fibonacci case combines two smaller calls and reaches terminating cases.","hidden_scoring_context":"Require the two predecessors and base cases."}),"bad","still bad"]
         await execution.execute(db,execution.reserve_tutor(db,session.id)); await execution.execute(db,execution.reserve_tutor(db,session.id,"Two calls are combined."))
         await execution.execute(db,execution.reserve_judge(db,session.id,"It uses both prior calls and stops at zero or one."))
         calls=db.scalars(select(LLMCall).where(LLMCall.purpose=="JUDGE").order_by(LLMCall.retry_number)).all()

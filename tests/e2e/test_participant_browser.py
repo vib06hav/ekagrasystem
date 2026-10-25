@@ -62,6 +62,38 @@ class MalformedTutorOnceClient(PassingStudyClient):
         return await super().send(prepared)
 
 
+class FailingJudgeClient(PassingStudyClient):
+    """Valid deterministic outputs, but every independent assessment fails."""
+
+    async def send(self, prepared):
+        request = prepared.request
+        if request.logical_role != "JUDGE":
+            return await super().send(prepared)
+        system = request.messages[0].content
+        scoped = json.loads(re.search(r"\[SCOPED_EVALUATION_COMPONENTS\]\n(.*?)\n\n\[OUTPUT_RULES\]", system, re.S).group(1))
+        rubric = scoped["rubric"]
+        output = {
+            "schema_version": "1.0",
+            "not_gradable_reason": "INSUFFICIENT_TO_EVALUATE",
+            "correctness": "NOT_GRADABLE",
+            "observed_solo_state_id": None,
+            "criterion_evidence": [
+                {"criterion_id": item, "status": "NOT_EVALUABLE", "citations": [], "concise_summary": "The deterministic failure fixture withholds evidence."}
+                for item in rubric["evidence_ids"]
+            ],
+            "misconception_evidence": [
+                {"misconception_id": item, "status": "NOT_DETECTED", "citations": [], "concise_summary": "No misconception is asserted."}
+                for item in rubric["blocking_misconception_ids"]
+            ],
+            "confidence": 1.0,
+            "ambiguity_summary": "Deterministic unresolved-transition fixture.",
+            "overall_evidence_summary": "The response is intentionally insufficient for this fixture.",
+        }
+        text = json.dumps(output)
+        payload = {"choices": [{"message": {"content": text}, "finish_reason": "stop"}], "usage": {"prompt_tokens": 10, "completion_tokens": 10, "total_tokens": 20}}
+        return RawLLMResponse("e2e-fail", 200, json.dumps(payload), payload, text, "stop", False, payload["usage"], 1)
+
+
 def _start_server(client, research_data_dir=None):
     import uvicorn
     settings = get_settings()
@@ -219,5 +251,60 @@ def test_fallback_reload_and_telemetry_failure_do_not_block_study(tmp_path):
             assert len(list((browser_dir / "rrweb").glob("*.ndjson"))) >= 2
             assert len(list((browser_dir / "keyboard").glob("*.ndjson"))) >= 1
             browser.close()
+    finally:
+        server.should_exit = True; thread.join(timeout=10)
+
+
+def test_three_failed_activities_are_attributed_and_allow_unresolved_continuation(tmp_path):
+    playwright = pytest.importorskip("playwright.sync_api")
+    server, thread, port = _start_server(FailingJudgeClient(), tmp_path)
+    participant = _create_session()
+    try:
+        with playwright.sync_playwright() as api:
+            browser = api.chromium.launch(headless=True); page = browser.new_page()
+            page.goto(f"http://127.0.0.1:{port}/join")
+            page.get_by_label("University ID").fill(participant["institutional_id"])
+            page.locator('input[name="acknowledged"]').check(); page.get_by_role("button", name="Continue").click()
+            for activity in range(1, 4):
+                page.get_by_role("button", name=re.compile(r"^Begin")).click()
+                field = page.locator("#learner-text"); field.wait_for(timeout=15000)
+                field.press_sequentially("A deliberately limited answer", delay=12)
+                field.press("Backspace"); field.press("Shift+KeyR")
+                page.get_by_role("button", name="Send").click()
+                assessment = page.locator("#assessment-response"); assessment.wait_for(timeout=15000)
+                assessment.press_sequentially("Insufficient response", delay=12)
+                assessment.press("Backspace"); assessment.press("Shift+KeyE")
+                page.get_by_role("button", name="Submit assessment").click()
+                if activity < 3:
+                    page.get_by_role("button", name=f"Begin teaching activity {activity + 1}").wait_for(timeout=15000)
+                else:
+                    page.get_by_text("Section completed", exact=True).wait_for(timeout=15000)
+            page.wait_for_timeout(6000)
+            page.get_by_role("button", name="Next section").click()
+            page.get_by_role("heading", name="Section 2").wait_for(timeout=15000)
+            browser.close()
+
+        from sqlalchemy import select
+        from sqlalchemy.orm import sessionmaker
+        from solo_harness.db.models import Attempt, ParticipantUIEvent, ProtocolEvent, Session
+        factory = sessionmaker(__import__("sqlalchemy").create_engine(URL), expire_on_commit=False)
+        with factory() as db:
+            session = db.scalar(select(Session).where(Session.institutional_id == participant["institutional_id"]))
+            attempts = db.scalars(select(Attempt).where(Attempt.session_id == session.id, Attempt.transition_id == "C1").order_by(Attempt.sequence_in_transition)).all()
+            assert len(attempts) == 3 and len({item.pedagogy_id for item in attempts}) == 3
+            assert attempts[-1].outcome_details == {"administrative_outcome": "PEDAGOGIES_EXHAUSTED_CONTINUE", "scientific_outcome": "UNRESOLVED"}
+            assert session.current_transition_id == "C2" and session.formal_state_id == "P"
+            event_types = [item.event_type for item in db.scalars(select(ProtocolEvent).where(ProtocolEvent.session_id == session.id).order_by(ProtocolEvent.sequence_no))]
+            assert event_types.count("SECTION_CONTINUATION_ALLOWED") == 1
+            ui = db.scalars(select(ParticipantUIEvent).where(ParticipantUIEvent.session_id == session.id)).all()
+            attributed = {(item.teaching_activity_number, item.attempt_id) for item in ui if item.teaching_activity_number in {1, 2, 3}}
+            assert all((item.sequence_in_transition, item.id) in attributed for item in attempts)
+
+        keyboard_files = list((tmp_path / str(session.id) / "browser" / "keyboard").glob("*.ndjson"))
+        assert keyboard_files
+        keyboard_text = "\n".join(path.read_text(encoding="utf-8") for path in keyboard_files)
+        rows = [json.loads(line) for line in keyboard_text.splitlines()]
+        assert {row["teaching_activity_number"] for row in rows} >= {1, 2, 3}
+        assert "A deliberately limited answer" not in keyboard_text and "Insufficient response" not in keyboard_text
     finally:
         server.should_exit = True; thread.join(timeout=10)

@@ -11,7 +11,7 @@ class StudyCatalog:
         if key not in self._cache:
             version = db.get(StudyVersion, study_version_id)
             if version is None: raise KeyError("unknown StudyVersion")
-            if snapshot_identity(version.content_hash, version.compiled_snapshot) != version.snapshot_hash: raise ValueError("compiled snapshot hash mismatch")
+            if snapshot_identity(version.content_hash, version.compiled_snapshot, version.compiler_contract_version, version.snapshot_schema_version) != version.snapshot_hash: raise ValueError("compiled snapshot hash mismatch")
             self._cache[key] = CompiledStudy.from_snapshot(version.compiled_snapshot)
         return self._cache[key]
     def active(self, db: Session, study_id: str) -> CompiledStudy:

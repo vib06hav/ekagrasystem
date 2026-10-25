@@ -1,0 +1,219 @@
+assessment_families:
+  - id: AF-C2
+    transition_id: C2
+    construct: |
+      Can the learner demonstrate several relevant components concerning:
+
+      - recursive dependency;
+      - repeated subproblems;
+      - repeated computation;
+      - storing a solved result;
+      - lookup/reuse;
+      - shared cache state?
+
+      Full causal integration is not required for C2 success.
+    forms:
+      - id: C2-A1
+        material_tag: c2_tree_alpha
+        title: Identify repeated subproblems and stored information
+        target_evidence_ids:
+          - C2-E1
+          - C2-E2
+          - C2-E3
+        relevant_misconception_ids: &id001
+          - M3
+          - M5
+          - M6
+          - M8
+        task_type: identify_repeated_subproblems_and_stored_information
+        generation_goal: |
+          Generate a fresh assessment task that tests: Identify repeated subproblems and stored information. The prose must be newly generated for this AssessmentInstance.
+        scenario_seed: |
+          Consider this partial call structure:
+
+          ```text
+          fib(6)
+          ├── fib(5)
+          │   ├── fib(4)
+          │   └── fib(3)
+          └── fib(4)
+          ```
+        equivalence_constraints: []
+        required_response_features:
+          - identifies `fib(4)` as repeated;
+          - repeated request can cause recomputation;
+          - can store mapping such as `4 → 3`.
+        misconception_probes: *id001
+        prohibited_leakage:
+          - Do not reveal scoring criteria or expected answers.
+          - Do not reproduce the scenario seed verbatim.
+        target_kc_ids:
+          - K4
+          - K5
+          - K6
+          - K7
+          - K8
+          - K9
+        target_relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+      - id: C2-A2
+        material_tag: c2_trace_beta
+        title: Read an execution log
+        target_evidence_ids:
+          - C2-E1
+          - C2-E3
+          - C2-E4
+          - C2-E5
+        relevant_misconception_ids: *id001
+        task_type: read_an_execution_log
+        generation_goal: |
+          Generate a fresh assessment task that tests: Read an execution log. The prose must be newly generated for this AssessmentInstance.
+        scenario_seed: |
+          A naive recursive Fibonacci program produces part of this execution log:
+
+          ```text
+          start fib(4)
+          start fib(3)
+          start fib(2)
+          ...
+          finish fib(3) = 2
+          ...
+          start fib(3)
+          ...
+          ```
+        equivalence_constraints: []
+        required_response_features:
+          - same `fib(3)` requested again;
+          - first result is 2;
+          - mapping from input 3 to result 2;
+          - later lookup/check;
+          - shared/accessibly retained storage.
+        misconception_probes: *id001
+        prohibited_leakage:
+          - Do not reveal scoring criteria or expected answers.
+          - Do not reproduce the scenario seed verbatim.
+        target_kc_ids:
+          - K4
+          - K5
+          - K6
+          - K7
+          - K8
+          - K9
+        target_relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+      - id: C2-A3
+        material_tag: c2_components_gamma
+        title: Separate useful cache components
+        target_evidence_ids:
+          - C2-E1
+          - C2-E2
+          - C2-E3
+          - C2-E4
+          - C2-E5
+        relevant_misconception_ids: *id001
+        task_type: separate_useful_cache_components
+        generation_goal: |
+          Generate a fresh assessment task that tests: Separate useful cache components. The prose must be newly generated for this AssessmentInstance.
+        scenario_seed: |
+          Suppose a learner says:
+
+          > “To memoize Fibonacci, I only need to create an empty dictionary.”
+        equivalence_constraints: []
+        required_response_features:
+          - store computed result by input;
+          - check whether input is already present;
+          - return/reuse stored result;
+          - share the relevant cache across recursive calls;
+          - repeated subproblem exists.
+        misconception_probes: *id001
+        prohibited_leakage:
+          - Do not reveal scoring criteria or expected answers.
+          - Do not reproduce the scenario seed verbatim.
+        target_kc_ids:
+          - K4
+          - K5
+          - K6
+          - K7
+          - K8
+          - K9
+        target_relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+      - id: C2-A4
+        material_tag: c2_scope_delta
+        title: Shared versus separate cache state
+        target_evidence_ids:
+          - C2-E1
+          - C2-E3
+          - C2-E4
+          - C2-E5
+        relevant_misconception_ids: *id001
+        task_type: shared_versus_separate_cache_state
+        generation_goal: |
+          Generate a fresh assessment task that tests: Shared versus separate cache state. The prose must be newly generated for this AssessmentInstance.
+        scenario_seed: |
+          Consider two designs.
+
+          **Design A**
+
+          Every recursive call receives the same `memo` mapping.
+
+          **Design B**
+
+          Every recursive call starts by creating a new empty `memo` mapping for itself.
+        equivalence_constraints: []
+        required_response_features:
+          - repeated subproblems can occur in either;
+          - A allows previous results to remain available across branches;
+          - B loses that sharing;
+          - A can support reuse.
+        misconception_probes: *id001
+        prohibited_leakage:
+          - Do not reveal scoring criteria or expected answers.
+          - Do not reproduce the scenario seed verbatim.
+        target_kc_ids:
+          - K4
+          - K5
+          - K6
+          - K7
+          - K8
+          - K9
+        target_relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+    required_evidence_overview: |
+      Evidence is defined by the transition rubric and selected item.
+    equivalence_envelope: |
+      Each form should elicit multiple distinct relevant observations.
+
+      The form should not require a polished C3 causal explanation.
+
+      ---
+    global_rules:
+      pedagogy_independence: |
+        The selector must not choose a form because the learner received Worked Example, Guided Questioning, or Contrasting Cases.
+      freshness: |
+        Within one session, an assessment form should not be reused.
+      equivalence: |
+        Forms within a transition family should be comparable in conceptual demand.
+      non_leakage: |
+        Reserved assessment material should not be used verbatim during intervention.
+      independent_response: |
+        During assessment:
+
+        - no tutoring;
+        - no hints;
+        - no intervention continuation;
+        - no corrective feedback before submission.
+
+        ---

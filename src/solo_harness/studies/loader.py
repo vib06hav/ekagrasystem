@@ -1,4 +1,5 @@
 from pathlib import Path
+import hashlib
 
 from ruamel.yaml import YAML
 
@@ -44,3 +45,16 @@ def load(study_dir: Path) -> AuthoredStudy:
     except KeyError as exc:
         raise StudyLoadError(f"study manifest missing file entry {exc}") from exc
     return AuthoredStudy.model_validate({"manifest": manifest_raw, "knowledge": knowledge, "pedagogies": pedagogies, "tutor_prompt_recipes": tutor_prompt_recipes, "cells": cells, "assessment_families": families, "judge_contract": judge_contract, "judge_rubrics": judge_rubrics, "protocol": protocol, "shared_intervention_envelope": shared_intervention_envelope})
+
+
+def source_bundle(study_dir: Path) -> dict:
+    """Return exact local authored YAML bytes as UTF-8 text plus a relative hash index."""
+    manifest = _yaml(study_dir / "study.yaml")
+    files = {"study.yaml"}
+    for value in StudyManifest.model_validate(manifest).files.values():
+        files.update(str(item) for item in (value if isinstance(value, list) else [value]))
+    bundle = {}
+    for relative in sorted(files):
+        payload = (study_dir / relative).read_bytes()
+        bundle[relative] = {"sha256": hashlib.sha256(payload).hexdigest(), "utf8_text": payload.decode("utf-8")}
+    return {"schema_version": "1.0", "files": bundle}

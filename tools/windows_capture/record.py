@@ -13,6 +13,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 import re
+import signal
 
 SCHEMA_VERSION = "1.0"
 TOOL_VERSION = "1.0"
@@ -330,6 +331,13 @@ def parser() -> argparse.ArgumentParser:
 
 
 def main() -> int:
+    # Automated Windows validation launches the recorder in its own process
+    # group and sends CTRL_BREAK_EVENT. Treat it exactly like the documented
+    # interactive Ctrl+C so the existing `finally` finalizes both streams.
+    if hasattr(signal, "SIGBREAK"):
+        def graceful_break(_signum, _frame):
+            raise KeyboardInterrupt
+        signal.signal(signal.SIGBREAK, graceful_break)
     args = parser().parse_args()
     try:
         resolve_runtime(args)

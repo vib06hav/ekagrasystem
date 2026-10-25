@@ -1,0 +1,14 @@
+{
+  "valid_compute_term": {
+    "learner_prompt": "Complete this code:\n```python\ndef compute_term(n):\n    pass\n```",
+    "hidden_scoring_context": "Check a response such as `return compute_term(n-1) + compute_term(n-2)`."
+  },
+  "invalid_compute_term_fib": {
+    "learner_prompt": "Complete this code:\n```python\ndef compute_term(n):\n    pass\n```",
+    "hidden_scoring_context": "Check a response such as `return fib(n-1) + fib(n-2)`."
+  },
+  "invalid_leakage": {
+    "learner_prompt": "The expected answer is return compute_term(n-1).",
+    "hidden_scoring_context": "Private scoring context remains hidden."
+  }
+}

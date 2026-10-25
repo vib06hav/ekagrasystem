@@ -1,0 +1,860 @@
+cells:
+  - id: C3-P1
+    transition_id: C3
+    pedagogy_id: P1
+    instructional_intent: |
+      Use a complete solved execution example to model the causal relationship:
+
+      ```text
+      repeated subproblems
+      → repeated computation
+      → storage
+      → lookup/reuse
+      → avoided recursive recomputation
+      ```
+
+      while preserving the recurrence.
+    missing_structure: Integrated causal relation among repetition, storage, and reuse.
+    target_kc_ids:
+      - K10
+      - K11
+    target_relation_ids:
+      - R2
+      - R3
+      - R4
+      - R5
+      - R6
+      - R7
+      - R8
+      - R9
+    relevant_misconception_ids:
+      - M3
+      - M4
+      - M5
+      - M6
+      - M7
+      - M8
+      - M9
+    prohibitions:
+      - Do not teach tabulation or say recurrence changes.
+    completion_condition: |
+      The integrated mechanism has been modeled and the learner has engaged with or restated it.
+
+      ---
+    max_tutor_turns: 8
+    treatment_constraints: |
+      Prohibitions:
+      - no tabulation;
+      - no claim that recurrence changes;
+      - no assessment item verbatim.
+    move_ids:
+      - C3-P1-MOVE-1
+      - C3-P1-MOVE-2
+      - C3-P1-MOVE-3
+    moves:
+      - id: C3-P1-MOVE-1
+        transition_id: C3
+        pedagogy_id: P1
+        title: Naive recursive model
+        purpose: |
+          Use a complete solved execution example to model the causal relationship:
+
+          ```text
+          repeated subproblems
+          → repeated computation
+          → storage
+          → lookup/reuse
+          → avoided recursive recomputation
+          ```
+
+          while preserving the recurrence.
+        kc_ids:
+          - K10
+          - K11
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+        misconception_ids:
+          - M3
+          - M4
+          - M5
+          - M6
+          - M7
+          - M8
+          - M9
+        material_blueprint: |
+          ```python
+          def fib(n):
+              if n <= 1:
+                  return n
+              return fib(n - 1) + fib(n - 2)
+          ```
+
+          Illustrative reasoning:
+
+          ```text
+          When fib(5) is computed, fib(3) can be reached while solving fib(4)
+          and then requested again from another branch.
+
+          The second fib(3) request is the same mathematical subproblem.
+
+          Because the naive implementation retained no result for fib(3),
+          that second request triggers the recursive work for fib(3) again.
+          ```
+        allowed_behavior:
+          - present solved example
+          - explain reasoning
+        prohibited_behavior:
+          - "Prohibitions:\n- no tabulation;\n- no claim that recurrence changes;\n- no assessment item verbatim."
+        completion_evidence: |
+          The integrated mechanism has been modeled and the learner has engaged with or restated it.
+
+          ---
+        next_move_ids:
+          - C3-P1-MOVE-2
+      - id: C3-P1-MOVE-2
+        transition_id: C3
+        pedagogy_id: P1
+        title: Memoized recursive model
+        purpose: |
+          Use a complete solved execution example to model the causal relationship:
+
+          ```text
+          repeated subproblems
+          → repeated computation
+          → storage
+          → lookup/reuse
+          → avoided recursive recomputation
+          ```
+
+          while preserving the recurrence.
+        kc_ids:
+          - K10
+          - K11
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+        misconception_ids:
+          - M3
+          - M4
+          - M5
+          - M6
+          - M7
+          - M8
+          - M9
+        material_blueprint: |
+          ```python
+          def fib(n, memo=None):
+              if memo is None:
+                  memo = {}
+
+              if n in memo:
+                  return memo[n]
+
+              if n <= 1:
+                  return n
+
+              memo[n] = fib(n - 1, memo) + fib(n - 2, memo)
+              return memo[n]
+          ```
+
+          Model:
+
+          1. first request for a non-cached subproblem recursively solves it;
+          2. its result is stored under the input;
+          3. a later request checks the shared cache;
+          4. if the result exists, it is returned;
+          5. the recursive expansion for that subproblem is avoided;
+          6. the Fibonacci recurrence remains unchanged.
+        allowed_behavior:
+          - present solved example
+          - explain reasoning
+        prohibited_behavior:
+          - "Prohibitions:\n- no tabulation;\n- no claim that recurrence changes;\n- no assessment item verbatim."
+        completion_evidence: |
+          The integrated mechanism has been modeled and the learner has engaged with or restated it.
+
+          ---
+        next_move_ids:
+          - C3-P1-MOVE-3
+      - id: C3-P1-MOVE-3
+        transition_id: C3
+        pedagogy_id: P1
+        title: Required synthesis
+        purpose: |
+          Use a complete solved execution example to model the causal relationship:
+
+          ```text
+          repeated subproblems
+          → repeated computation
+          → storage
+          → lookup/reuse
+          → avoided recursive recomputation
+          ```
+
+          while preserving the recurrence.
+        kc_ids:
+          - K10
+          - K11
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+        misconception_ids:
+          - M3
+          - M4
+          - M5
+          - M6
+          - M7
+          - M8
+          - M9
+        material_blueprint: |
+          The Tutor must explicitly model the whole causal chain.
+        allowed_behavior:
+          - present solved example
+          - explain reasoning
+        prohibited_behavior:
+          - "Prohibitions:\n- no tabulation;\n- no claim that recurrence changes;\n- no assessment item verbatim."
+        completion_evidence: |
+          The integrated mechanism has been modeled and the learner has engaged with or restated it.
+
+          ---
+        next_move_ids: []
+  - id: C3-P2
+    transition_id: C3
+    pedagogy_id: P2
+    instructional_intent: |
+      Guide the learner to construct the integrated causal mechanism themselves.
+    missing_structure: Integrated causal relation among repetition, storage, and reuse.
+    target_kc_ids:
+      - K10
+      - K11
+    target_relation_ids:
+      - R2
+      - R3
+      - R4
+      - R5
+      - R6
+      - R7
+      - R8
+      - R9
+    relevant_misconception_ids:
+      - M3
+      - M4
+      - M5
+      - M6
+      - M7
+      - M8
+      - M9
+    prohibitions:
+      - Do not turn the main mechanism into a worked solution.
+    completion_condition: |
+      Learner constructs the causal chain or budget is exhausted.
+    max_tutor_turns: 8
+    treatment_constraints: |
+      Prohibition:
+      Do not convert to direct worked explanation.
+
+      ---
+    move_ids:
+      - C3-P2-MOVE-1
+      - C3-P2-MOVE-2
+      - C3-P2-MOVE-3
+      - C3-P2-MOVE-4
+      - C3-P2-MOVE-5
+      - C3-P2-MOVE-6
+      - C3-P2-MOVE-7
+    moves:
+      - id: C3-P2-MOVE-1
+        transition_id: C3
+        pedagogy_id: P2
+        title: Stage 1 — establish repetition
+        purpose: |
+          Guide the learner to construct the integrated causal mechanism themselves.
+        kc_ids:
+          - K10
+          - K11
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+        misconception_ids:
+          - M3
+          - M4
+          - M5
+          - M6
+          - M7
+          - M8
+          - M9
+        material_blueprint: |
+          Use a small recursive dependency structure and ask which `fib(k)` is reached more than once.
+        allowed_behavior:
+          - ask bounded questions
+          - request prediction
+        prohibited_behavior:
+          - "Prohibition:\nDo not convert to direct worked explanation.\n\n---"
+        completion_evidence: |
+          Learner constructs the causal chain or budget is exhausted.
+        next_move_ids:
+          - C3-P2-MOVE-2
+      - id: C3-P2-MOVE-2
+        transition_id: C3
+        pedagogy_id: P2
+        title: Stage 2 — establish recomputation
+        purpose: |
+          Guide the learner to construct the integrated causal mechanism themselves.
+        kc_ids:
+          - K10
+          - K11
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+        misconception_ids:
+          - M3
+          - M4
+          - M5
+          - M6
+          - M7
+          - M8
+          - M9
+        material_blueprint: |
+          Ask what naive recursion does on the later request if no prior result is retained.
+        allowed_behavior:
+          - ask bounded questions
+          - request prediction
+        prohibited_behavior:
+          - "Prohibition:\nDo not convert to direct worked explanation.\n\n---"
+        completion_evidence: |
+          Learner constructs the causal chain or budget is exhausted.
+        next_move_ids:
+          - C3-P2-MOVE-3
+      - id: C3-P2-MOVE-3
+        transition_id: C3
+        pedagogy_id: P2
+        title: Stage 3 — establish storage
+        purpose: |
+          Guide the learner to construct the integrated causal mechanism themselves.
+        kc_ids:
+          - K10
+          - K11
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+        misconception_ids:
+          - M3
+          - M4
+          - M5
+          - M6
+          - M7
+          - M8
+          - M9
+        material_blueprint: |
+          Ask what result from the first computation could be retained and how it is associated with the input.
+        allowed_behavior:
+          - ask bounded questions
+          - request prediction
+        prohibited_behavior:
+          - "Prohibition:\nDo not convert to direct worked explanation.\n\n---"
+        completion_evidence: |
+          Learner constructs the causal chain or budget is exhausted.
+        next_move_ids:
+          - C3-P2-MOVE-4
+      - id: C3-P2-MOVE-4
+        transition_id: C3
+        pedagogy_id: P2
+        title: Stage 4 — establish reuse
+        purpose: |
+          Guide the learner to construct the integrated causal mechanism themselves.
+        kc_ids:
+          - K10
+          - K11
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+        misconception_ids:
+          - M3
+          - M4
+          - M5
+          - M6
+          - M7
+          - M8
+          - M9
+        material_blueprint: |
+          Ask what the function should check on the later request and what it can return if the result exists.
+        allowed_behavior:
+          - ask bounded questions
+          - request prediction
+        prohibited_behavior:
+          - "Prohibition:\nDo not convert to direct worked explanation.\n\n---"
+        completion_evidence: |
+          Learner constructs the causal chain or budget is exhausted.
+        next_move_ids:
+          - C3-P2-MOVE-5
+      - id: C3-P2-MOVE-5
+        transition_id: C3
+        pedagogy_id: P2
+        title: Stage 5 — integrate
+        purpose: |
+          Guide the learner to construct the integrated causal mechanism themselves.
+        kc_ids:
+          - K10
+          - K11
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+        misconception_ids:
+          - M3
+          - M4
+          - M5
+          - M6
+          - M7
+          - M8
+          - M9
+        material_blueprint: |
+          Ask the learner to connect:
+
+          ```text
+          repeated request
+          → otherwise recomputed
+          → stored result
+          → later lookup
+          → reuse
+          → avoided recursive work
+          ```
+        allowed_behavior:
+          - ask bounded questions
+          - request prediction
+        prohibited_behavior:
+          - "Prohibition:\nDo not convert to direct worked explanation.\n\n---"
+        completion_evidence: |
+          Learner constructs the causal chain or budget is exhausted.
+        next_move_ids:
+          - C3-P2-MOVE-6
+      - id: C3-P2-MOVE-6
+        transition_id: C3
+        pedagogy_id: P2
+        title: Stage 6 — preserve recurrence
+        purpose: |
+          Guide the learner to construct the integrated causal mechanism themselves.
+        kc_ids:
+          - K10
+          - K11
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+        misconception_ids:
+          - M3
+          - M4
+          - M5
+          - M6
+          - M7
+          - M8
+          - M9
+        material_blueprint: |
+          Ask whether memoization changes:
+
+          `fib(n) = fib(n-1) + fib(n-2)`
+
+          or instead changes how already solved recursive subproblems are handled.
+        allowed_behavior:
+          - ask bounded questions
+          - request prediction
+        prohibited_behavior:
+          - "Prohibition:\nDo not convert to direct worked explanation.\n\n---"
+        completion_evidence: |
+          Learner constructs the causal chain or budget is exhausted.
+        next_move_ids:
+          - C3-P2-MOVE-7
+      - id: C3-P2-MOVE-7
+        transition_id: C3
+        pedagogy_id: P2
+        title: Recovery rule
+        purpose: |
+          Guide the learner to construct the integrated causal mechanism themselves.
+        kc_ids:
+          - K10
+          - K11
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+        misconception_ids:
+          - M3
+          - M4
+          - M5
+          - M6
+          - M7
+          - M8
+          - M9
+        material_blueprint: |
+          If the learner produces M4 (“memoization changes the recurrence”), continue questioning from the recurrence itself rather than dumping the final answer.
+        allowed_behavior:
+          - ask bounded questions
+          - request prediction
+        prohibited_behavior:
+          - "Prohibition:\nDo not convert to direct worked explanation.\n\n---"
+        completion_evidence: |
+          Learner constructs the causal chain or budget is exhausted.
+        next_move_ids: []
+  - id: C3-P3
+    transition_id: C3
+    pedagogy_id: P3
+    instructional_intent: |
+      Have the learner infer the integrated memoization mechanism by comparing two recursive implementations with the same recurrence but different result-retention behavior.
+    missing_structure: Integrated causal relation among repetition, storage, and reuse.
+    target_kc_ids:
+      - K10
+      - K11
+    target_relation_ids:
+      - R2
+      - R3
+      - R4
+      - R5
+      - R6
+      - R7
+      - R8
+      - R9
+    relevant_misconception_ids:
+      - M3
+      - M4
+      - M5
+      - M6
+      - M7
+      - M8
+      - M9
+    prohibitions:
+      - Do not replace comparison with a worked example.
+    completion_condition: |
+      The learner constructs the integrated causal mechanism through comparison.
+
+      ---
+    max_tutor_turns: 8
+    treatment_constraints: |
+      Follow the shared intervention envelope and assigned pedagogy without switching treatments.
+    move_ids:
+      - C3-P3-MOVE-1
+      - C3-P3-MOVE-2
+      - C3-P3-MOVE-3
+      - C3-P3-MOVE-4
+      - C3-P3-MOVE-5
+      - C3-P3-MOVE-6
+    moves:
+      - id: C3-P3-MOVE-1
+        transition_id: C3
+        pedagogy_id: P3
+        title: Case A
+        purpose: |
+          Have the learner infer the integrated memoization mechanism by comparing two recursive implementations with the same recurrence but different result-retention behavior.
+        kc_ids:
+          - K10
+          - K11
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+        misconception_ids:
+          - M3
+          - M4
+          - M5
+          - M6
+          - M7
+          - M8
+          - M9
+        material_blueprint: |
+          ```python
+          def fib_a(n):
+              if n <= 1:
+                  return n
+              return fib_a(n - 1) + fib_a(n - 2)
+          ```
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - Follow the shared intervention envelope and assigned pedagogy without switching treatments.
+        completion_evidence: |
+          The learner constructs the integrated causal mechanism through comparison.
+
+          ---
+        next_move_ids:
+          - C3-P3-MOVE-2
+      - id: C3-P3-MOVE-2
+        transition_id: C3
+        pedagogy_id: P3
+        title: Case B
+        purpose: |
+          Have the learner infer the integrated memoization mechanism by comparing two recursive implementations with the same recurrence but different result-retention behavior.
+        kc_ids:
+          - K10
+          - K11
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+        misconception_ids:
+          - M3
+          - M4
+          - M5
+          - M6
+          - M7
+          - M8
+          - M9
+        material_blueprint: |
+          ```python
+          def fib_b(n, memo=None):
+              if memo is None:
+                  memo = {}
+
+              if n in memo:
+                  return memo[n]
+
+              if n <= 1:
+                  return n
+
+              memo[n] = fib_b(n - 1, memo) + fib_b(n - 2, memo)
+              return memo[n]
+          ```
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - Follow the shared intervention envelope and assigned pedagogy without switching treatments.
+        completion_evidence: |
+          The learner constructs the integrated causal mechanism through comparison.
+
+          ---
+        next_move_ids:
+          - C3-P3-MOVE-3
+      - id: C3-P3-MOVE-3
+        transition_id: C3
+        pedagogy_id: P3
+        title: Invariants
+        purpose: |
+          Have the learner infer the integrated memoization mechanism by comparing two recursive implementations with the same recurrence but different result-retention behavior.
+        kc_ids:
+          - K10
+          - K11
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+        misconception_ids:
+          - M3
+          - M4
+          - M5
+          - M6
+          - M7
+          - M8
+          - M9
+        material_blueprint: |
+          - same Fibonacci task;
+          - same base cases;
+          - same recurrence;
+          - same recursive decomposition.
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - Follow the shared intervention envelope and assigned pedagogy without switching treatments.
+        completion_evidence: |
+          The learner constructs the integrated causal mechanism through comparison.
+
+          ---
+        next_move_ids:
+          - C3-P3-MOVE-4
+      - id: C3-P3-MOVE-4
+        transition_id: C3
+        pedagogy_id: P3
+        title: Diagnostic difference
+        purpose: |
+          Have the learner infer the integrated memoization mechanism by comparing two recursive implementations with the same recurrence but different result-retention behavior.
+        kc_ids:
+          - K10
+          - K11
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+        misconception_ids:
+          - M3
+          - M4
+          - M5
+          - M6
+          - M7
+          - M8
+          - M9
+        material_blueprint: |
+          B stores and reuses solved subproblem results.
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - Follow the shared intervention envelope and assigned pedagogy without switching treatments.
+        completion_evidence: |
+          The learner constructs the integrated causal mechanism through comparison.
+
+          ---
+        next_move_ids:
+          - C3-P3-MOVE-5
+      - id: C3-P3-MOVE-5
+        transition_id: C3
+        pedagogy_id: P3
+        title: Required comparison sequence
+        purpose: |
+          Have the learner infer the integrated memoization mechanism by comparing two recursive implementations with the same recurrence but different result-retention behavior.
+        kc_ids:
+          - K10
+          - K11
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+        misconception_ids:
+          - M3
+          - M4
+          - M5
+          - M6
+          - M7
+          - M8
+          - M9
+        material_blueprint: |
+          Ask:
+
+          1. what mathematical rule is shared;
+          2. what happens in both on the first uncached request;
+          3. what happens when the same subproblem is requested later;
+          4. which specific difference causes the changed behavior;
+          5. why this avoids repeated work without changing Fibonacci.
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - Follow the shared intervention envelope and assigned pedagogy without switching treatments.
+        completion_evidence: |
+          The learner constructs the integrated causal mechanism through comparison.
+
+          ---
+        next_move_ids:
+          - C3-P3-MOVE-6
+      - id: C3-P3-MOVE-6
+        transition_id: C3
+        pedagogy_id: P3
+        title: Intended inference
+        purpose: |
+          Have the learner infer the integrated memoization mechanism by comparing two recursive implementations with the same recurrence but different result-retention behavior.
+        kc_ids:
+          - K10
+          - K11
+        relation_ids:
+          - R2
+          - R3
+          - R4
+          - R5
+          - R6
+          - R7
+          - R8
+          - R9
+        misconception_ids:
+          - M3
+          - M4
+          - M5
+          - M6
+          - M7
+          - M8
+          - M9
+        material_blueprint: |
+          The learner constructs the integrated causal mechanism through comparison.
+
+          ---
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - Follow the shared intervention envelope and assigned pedagogy without switching treatments.
+        completion_evidence: |
+          The learner constructs the integrated causal mechanism through comparison.
+
+          ---
+        next_move_ids: []

@@ -130,9 +130,11 @@ class ParticipantApplication:
             events = db.scalars(
                 select(ProtocolEvent).where(ProtocolEvent.session_id == session.id).order_by(ProtocolEvent.sequence_no)
             ).all()
-            completed_transition_ids = {
-                event.payload.get("transition_id") for event in events if event.event_type == "SECTION_COMPLETED"
+            completed_outcomes = {
+                event.payload.get("transition_id"): event.payload.get("scientific_outcome")
+                for event in events if event.event_type == "SECTION_COMPLETED" and event.payload.get("transition_id")
             }
+            completed_transition_ids = set(completed_outcomes)
 
             if session.current_transition_id in transition_ids:
                 current_index = transition_ids.index(session.current_transition_id)
@@ -149,7 +151,7 @@ class ParticipantApplication:
             sections = []
             for index, transition_id in enumerate(transition_ids):
                 if transition_id in completed_transition_ids:
-                    state = "completed"
+                    state = "unresolved" if completed_outcomes.get(transition_id) == "UNRESOLVED" else "completed"
                 elif index == current_index and session.phase != "TERMINAL":
                     state = "current"
                 elif index < current_index:
@@ -182,7 +184,8 @@ class ParticipantApplication:
                     event for event in reversed(events)
                     if event.event_type == "SECTION_COMPLETED" and event.payload.get("transition_id") == selected_transition_id
                 )
-                timeline.append({"kind": "section", "label": "Section completed", "timestamp": in_research_timezone(completed_event.occurred_at)})
+                outcome = completed_event.payload.get("scientific_outcome")
+                timeline.append({"kind": "section", "label": "Section ended — transition unresolved" if outcome == "UNRESOLVED" else "Section completed", "timestamp": in_research_timezone(completed_event.occurred_at)})
 
             current_attempt = db.get(Attempt, session.current_attempt_id) if session.current_attempt_id else None
             current_assessment = assessments_by_attempt.get(current_attempt.id) if current_attempt else None
@@ -209,6 +212,7 @@ class ParticipantApplication:
                 "is_current": is_current,
                 "is_read_only": not is_current or session.phase == "TERMINAL",
                 "is_final_section": current_index == len(transition_ids) - 1,
+                "section_scientific_outcome": completed_outcomes.get(selected_transition_id),
                 "timeline": timeline,
                 "attempt_status": current_attempt.status if current_attempt and is_current else None,
                 "activity_number": current_attempt.sequence_in_transition if current_attempt and is_current else None,

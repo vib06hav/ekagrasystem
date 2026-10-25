@@ -2,6 +2,10 @@
 
 SOLO Harness runs a single-participant learning study on recursive Fibonacci and memoization. It provides a FastAPI participant application, PostgreSQL persistence, an OpenAI-compatible LLM adapter, browser telemetry, optional Windows screen/webcam capture, and session export tools.
 
+## Study activation
+
+Bootstrap preserves an existing active study version by default. To activate a reviewed new authored pack such as `studies/python_fibonacci_memoization/v0.5`, point `STUDY_DIR` at that pack and explicitly set `ACTIVATE_STUDY_ON_BOOTSTRAP=true` for the activation run. Historical study versions are not rewritten.
+
 ## Run it with Docker (recommended)
 
 ### Prerequisites
@@ -133,6 +137,7 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
 python -m pip install -e ".[dev]"
+python -m playwright install chromium
 ```
 
 Create `.env` with the LLM settings shown above plus local database and study paths:
@@ -160,6 +165,19 @@ solo-harness validate-study
 solo-harness inspect-study
 pytest
 ```
+
+The browser suite requires a disposable PostgreSQL database and never targets the
+collection database. Set `TEST_DATABASE_URL` to that isolated database, then run:
+
+```powershell
+$env:TEST_DATABASE_URL = "postgresql+psycopg://solo_test:solo_test@127.0.0.1:55432/solo_test"
+python -m pytest tests/e2e/test_participant_browser.py -q
+```
+
+The deterministic browser tests use scripted model responses and make no external
+LLM calls. Chromium runs headless in the normal suite. The recorded validation
+driver in `scripts/recorded_reconstruction_e2e.py` launches a visible Chromium
+window and requires the real Windows capture preflight to pass.
 
 ## Project layout
 

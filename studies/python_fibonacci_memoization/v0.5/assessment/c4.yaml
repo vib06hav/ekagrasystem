@@ -1,0 +1,224 @@
+assessment_families:
+  - id: AF-C4
+    transition_id: C4
+    construct: |
+      Can the learner reason from memoization invariants in an unfamiliar Fibonacci situation rather than matching memorized canonical code?
+
+      Required evidence should involve abstraction, diagnosis, derivation, or cache-state prediction.
+    forms:
+      - id: C4-A1
+        material_tag: c4_scope_alpha
+        title: Diagnose ineffective cache lifetime
+        target_evidence_ids:
+          - C4-E1
+          - C4-E3
+          - C4-E5
+        relevant_misconception_ids: &id001
+          - M6
+          - M7
+          - M8
+          - M10
+        task_type: diagnose_ineffective_cache_lifetime
+        generation_goal: |
+          Generate a fresh assessment task that tests: Diagnose ineffective cache lifetime. The prose must be newly generated for this AssessmentInstance.
+        scenario_seed: |
+          ```python
+          def fib(n):
+              memo = {}
+
+              if n in memo:
+                  return memo[n]
+
+              if n <= 1:
+                  return n
+
+              result = fib(n - 1) + fib(n - 2)
+              memo[n] = result
+              return result
+          ```
+        equivalence_constraints:
+          - remain within recursive Fibonacci + memoization;
+          - use unfamiliar or transformed surface structure;
+          - require mechanism-based reasoning;
+          - avoid simply asking for the standard memorized memoized-Fibonacci function.
+        required_response_features:
+          - recognizes fresh `memo` per call;
+          - dictionary presence/check/store are insufficient without shared lifetime;
+          - derives need for shared relevant cache;
+          - recurrence itself is not the issue.
+        misconception_probes: *id001
+        prohibited_leakage:
+          - Do not reveal scoring criteria or expected answers.
+          - Do not reproduce the scenario seed verbatim.
+        target_kc_ids:
+          - K12
+          - K13
+          - K14
+        target_relation_ids:
+          - R9
+          - R10
+          - R11
+          - R12
+      - id: C4-A2
+        material_tag: c4_state_beta
+        title: Reason from an initial cache state
+        target_evidence_ids:
+          - C4-E1
+          - C4-E3
+          - C4-E4
+        relevant_misconception_ids: *id001
+        task_type: reason_from_an_initial_cache_state
+        generation_goal: |
+          Generate a fresh assessment task that tests: Reason from an initial cache state. The prose must be newly generated for this AssessmentInstance.
+        scenario_seed: |
+          Suppose a correct memoized recursive Fibonacci function uses a shared cache and begins a call to `fib(7)` with:
+
+          ```text
+          cache = {
+              2: 1,
+              3: 2,
+              4: 3
+          }
+          ```
+        equivalence_constraints:
+          - remain within recursive Fibonacci + memoization;
+          - use unfamiliar or transformed surface structure;
+          - require mechanism-based reasoning;
+          - avoid simply asking for the standard memorized memoized-Fibonacci function.
+        required_response_features:
+          - 2/3/4 are immediately reusable when requested;
+          - larger needed values 5, 6, 7 must still be solved (assuming not already cached);
+          - resulting values can be added;
+          - reasoning based on cache-state mechanism rather than memorized exact trace.
+        misconception_probes: *id001
+        prohibited_leakage:
+          - Do not reveal scoring criteria or expected answers.
+          - Do not reproduce the scenario seed verbatim.
+        target_kc_ids:
+          - K12
+          - K13
+          - K14
+        target_relation_ids:
+          - R9
+          - R10
+          - R11
+          - R12
+      - id: C4-A3
+        material_tag: c4_equivalent_gamma
+        title: Evaluate a different but valid organization
+        target_evidence_ids:
+          - C4-E1
+          - C4-E2
+          - C4-E3
+        relevant_misconception_ids: *id001
+        task_type: evaluate_a_different_but_valid_organization
+        generation_goal: |
+          Generate a fresh assessment task that tests: Evaluate a different but valid organization. The prose must be newly generated for this AssessmentInstance.
+        scenario_seed: |
+          Consider:
+
+          ```python
+          def fib(n, memo):
+              if n <= 1:
+                  return n
+
+              if n not in memo:
+                  left = fib(n - 1, memo)
+                  right = fib(n - 2, memo)
+                  memo[n] = left + right
+
+              return memo[n]
+          ```
+        equivalence_constraints:
+          - remain within recursive Fibonacci + memoization;
+          - use unfamiliar or transformed surface structure;
+          - require mechanism-based reasoning;
+          - avoid simply asking for the standard memorized memoized-Fibonacci function.
+        required_response_features:
+          - yes for non-base values under a shared `memo`;
+          - lookup/conditional prevents repeat computation;
+          - newly solved values stored;
+          - recursive calls share memo;
+          - base cases may be handled directly rather than cached;
+          - recurrence preserved.
+        misconception_probes: *id001
+        prohibited_leakage:
+          - Do not reveal scoring criteria or expected answers.
+          - Do not reproduce the scenario seed verbatim.
+        target_kc_ids:
+          - K12
+          - K13
+          - K14
+        target_relation_ids:
+          - R9
+          - R10
+          - R11
+          - R12
+      - id: C4-A4
+        material_tag: c4_derive_delta
+        title: Derive requirements from principle
+        target_evidence_ids:
+          - C4-E1
+          - C4-E2
+          - C4-E6
+        relevant_misconception_ids: *id001
+        task_type: derive_requirements_from_principle
+        generation_goal: |
+          Generate a fresh assessment task that tests: Derive requirements from principle. The prose must be newly generated for this AssessmentInstance.
+        scenario_seed: |
+          A programmer wants to write a memoized recursive Fibonacci function but does not want to copy a memorized implementation.
+        equivalence_constraints:
+          - remain within recursive Fibonacci + memoization;
+          - use unfamiliar or transformed surface structure;
+          - require mechanism-based reasoning;
+          - avoid simply asking for the standard memorized memoized-Fibonacci function.
+        required_response_features:
+          - correct recurrence/base logic;
+          - shared/accessible stored state;
+          - consistent input→result identity;
+          - lookup before redundant recursive expansion;
+          - return reuse on hit;
+          - store newly solved values;
+          - recognizes syntax/variable names/base-case caching as incidental.
+        misconception_probes: *id001
+        prohibited_leakage:
+          - Do not reveal scoring criteria or expected answers.
+          - Do not reproduce the scenario seed verbatim.
+        target_kc_ids:
+          - K12
+          - K13
+          - K14
+        target_relation_ids:
+          - R9
+          - R10
+          - R11
+          - R12
+    required_evidence_overview: |
+      Evidence is defined by the transition rubric and selected item.
+    equivalence_envelope: |
+      Forms must:
+
+      - remain within recursive Fibonacci + memoization;
+      - use unfamiliar or transformed surface structure;
+      - require mechanism-based reasoning;
+      - avoid simply asking for the standard memorized memoized-Fibonacci function.
+
+      ---
+    global_rules:
+      pedagogy_independence: |
+        The selector must not choose a form because the learner received Worked Example, Guided Questioning, or Contrasting Cases.
+      freshness: |
+        Within one session, an assessment form should not be reused.
+      equivalence: |
+        Forms within a transition family should be comparable in conceptual demand.
+      non_leakage: |
+        Reserved assessment material should not be used verbatim during intervention.
+      independent_response: |
+        During assessment:
+
+        - no tutoring;
+        - no hints;
+        - no intervention continuation;
+        - no corrective feedback before submission.
+
+        ---

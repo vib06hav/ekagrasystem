@@ -181,3 +181,32 @@ def test_semantic_events_are_timestamped_exported_and_do_not_change_protocol(dat
     manifest = browser / "manifest.json"; manifest.write_text(json.dumps({"schema_version": "1.0", "status": "PRESENT"}), encoding="utf-8")
     exported = build_session_export(URL, session_id, tmp_path)
     assert exported["data"]["participant_ui_events"] and exported["data"]["research_artifacts"]["manifests"]
+
+
+def test_delayed_semantic_event_uses_historical_activity_not_latest_attempt(database):
+    """A late batch for activity 1 must not be attached to newer activity 2."""
+    from solo_harness.db.models import Attempt
+    factory, session_id = database
+    run = uuid.uuid4()
+    with factory() as db:
+        session = db.get(Session, session_id)
+        first = db.get(Attempt, session.current_attempt_id)
+        second = Attempt(
+            session_id=session.id,
+            transition_id=first.transition_id,
+            sequence_in_transition=2,
+            pedagogy_id="P2" if first.pedagogy_id != "P2" else "P3",
+            status="ASSIGNED",
+            formal_state_before_id=session.formal_state_id,
+        )
+        db.add(second); db.flush()
+        session.current_attempt_id = second.id; session.current_attempt_number = 2; db.commit()
+        record_ui_events(db, session, [{
+            "event_type": "TUTOR_RESPONSE_SUBMIT_CLICKED", "surface": "teaching", "payload": {},
+            "browser_run_id": str(run), "client_sequence": 1,
+            "client_event_at_utc_ms": 1700000000000, "client_performance_ms": 10.0,
+            "performance_time_origin_ms": 1699999999000.0,
+            "section_number": 1, "teaching_activity_number": 1,
+        }])
+        row = db.scalar(select(ParticipantUIEvent).where(ParticipantUIEvent.browser_run_id == run))
+        assert row.attempt_id == first.id

@@ -29,7 +29,18 @@ from solo_harness.db.models import (
 )
 from solo_harness.research_time import RESEARCH_TIMEZONE_NAME, in_research_timezone
 
-EXPORT_SCHEMA_VERSION = "1.1"
+EXPORT_SCHEMA_VERSION = "1.2"
+
+
+def _derived_transition_outcomes(events) -> dict[str, str]:
+    """Derived only from persisted section-completion event payloads; unknown stays unknown."""
+    result = {}
+    for event in events:
+        if event.event_type == "SECTION_COMPLETED" and event.payload.get("transition_id"):
+            outcome = event.payload.get("scientific_outcome")
+            if outcome in {"PASSED", "UNRESOLVED"}:
+                result[event.payload["transition_id"]] = outcome
+    return result
 
 
 def _json_value(value: Any, field_name: str | None = None) -> Any:
@@ -139,6 +150,7 @@ def build_session_export(database_url: str, session_id: uuid.UUID, research_data
                 response_ids = [response.id for response in responses]
                 judgments = _ordered(db, Judgment, Judgment.assessment_response_id.in_(response_ids), Judgment.created_at, Judgment.id) if response_ids else []
                 judgment_ids = [judgment.id for judgment in judgments]
+                protocol_events = _ordered(db, ProtocolEvent, ProtocolEvent.session_id == session_id, ProtocolEvent.sequence_no)
                 data = {
                     "session": {
                         **_row(session, omit={"institutional_id"}),
@@ -154,7 +166,8 @@ def build_session_export(database_url: str, session_id: uuid.UUID, research_data
                     "judgments": [_row(item) for item in judgments],
                     "rubric_evaluations": [_row(item) for item in _ordered(db, RubricEvaluation, RubricEvaluation.judgment_id.in_(judgment_ids), RubricEvaluation.created_at, RubricEvaluation.id)] if judgment_ids else [],
                     "participant_ui_events": [_row(item) for item in _ordered(db, ParticipantUIEvent, ParticipantUIEvent.session_id == session_id, ParticipantUIEvent.server_received_at, ParticipantUIEvent.id)],
-                    "protocol_events": [_row(item) for item in _ordered(db, ProtocolEvent, ProtocolEvent.session_id == session_id, ProtocolEvent.sequence_no)],
+                    "protocol_events": [_row(item) for item in protocol_events],
+                    "derived_transition_scientific_outcomes": _derived_transition_outcomes(protocol_events),
                     "idempotency_records": [_row(item, omit={"request_hash"}) for item in _ordered(db, IdempotencyRecord, IdempotencyRecord.session_id == session_id, IdempotencyRecord.created_at, IdempotencyRecord.id)],
                     "research_artifacts": _artifact_index(research_data_root, session_id, session.capture_run_id),
                 }

@@ -14,6 +14,18 @@ def _ids(items, label: str) -> set[str]:
     return set(values)
 
 
+def _unique(values, label: str) -> None:
+    if len(values) != len(set(values)):
+        raise StudyValidationError(f"duplicate {label}")
+
+
+def _id_list(value, label: str) -> list[str]:
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        raise StudyValidationError(f"{label} must be a list of IDs")
+    _unique(value, label)
+    return value
+
+
 def validate(study: AuthoredStudy) -> None:
     def substantive(value: str, label: str, minimum: int = 60):
         if not isinstance(value, str) or len(value.strip()) < minimum:
@@ -105,11 +117,18 @@ def validate(study: AuthoredStudy) -> None:
             substantive(form.scenario_seed, f"assessment blueprint {form.id} scenario seed", 25)
             if not form.required_response_features:
                 raise StudyValidationError(f"assessment blueprint {form.id} lacks response features")
+            if any(not feature.strip() for feature in form.required_response_features) and study.manifest.content_version != "v0.4":
+                raise StudyValidationError(f"assessment blueprint {form.id} has blank response feature")
+            _unique(form.target_evidence_ids, f"assessment blueprint {form.id} target evidence IDs")
+            _unique(form.relevant_misconception_ids, f"assessment blueprint {form.id} misconception IDs")
             if not set(form.target_kc_ids).issubset(kc_ids) or not set(form.target_relation_ids).issubset(rel_ids):
                 raise StudyValidationError(f"assessment blueprint {form.id} has broken knowledge reference")
     if {r.transition_id for r in study.judge_rubrics} != transition_ids or len(rubric_ids) != len(transition_ids):
         raise StudyValidationError("one Judge rubric per transition is required")
     for rubric in study.judge_rubrics:
+        transition = next(item for item in study.knowledge.transitions if item.id == rubric.transition_id)
+        if rubric.target_state_id != transition.target_state_id:
+            raise StudyValidationError(f"rubric {rubric.id} target state does not match transition")
         if rubric.target_state_id not in state_ids or not set(rubric.blocking_misconception_ids).issubset(misconception_ids):
             raise StudyValidationError(f"rubric {rubric.id} has broken reference")
         evidence = {criterion.id: criterion for criterion in rubric.evidence_criteria}
@@ -120,6 +139,34 @@ def validate(study: AuthoredStudy) -> None:
         substantive(rubric.core_target, f"rubric {rubric.id} core target", 25)
         substantive(rubric.success_rule_text, f"rubric {rubric.id} success rule")
         family = next(item for item in study.assessment_families if item.transition_id == rubric.transition_id)
+        rule = rubric.success_rule
+        if not isinstance(rule, dict):
+            raise StudyValidationError(f"rubric {rubric.id} success_rule must be an object")
+        allowed = set(rubric.evidence_ids)
+        for key in ("requires", "requires_any"):
+            if key in rule and not set(_id_list(rule[key], f"rubric {rubric.id} {key}")).issubset(allowed):
+                raise StudyValidationError(f"rubric {rubric.id} {key} references unknown evidence")
+        if "requires_any_groups" in rule:
+            groups = rule["requires_any_groups"]
+            if not isinstance(groups, list) or not groups:
+                raise StudyValidationError(f"rubric {rubric.id} requires_any_groups must be a nonempty list")
+            for group in groups:
+                if not set(_id_list(group, f"rubric {rubric.id} requires_any group")).issubset(allowed) or not group:
+                    raise StudyValidationError(f"rubric {rubric.id} has malformed requires_any group")
+        form_rules = rule.get("required_by_assessment_form", {})
+        if not isinstance(form_rules, dict) or not set(form_rules).issubset({form.id for form in family.forms}):
+            raise StudyValidationError(f"rubric {rubric.id} has an unknown assessment form rule")
         for form in family.forms:
             if not set(form.target_evidence_ids).issubset(set(rubric.evidence_ids)):
                 raise StudyValidationError(f"assessment {form.id} references evidence outside rubric {rubric.id}")
+            if not set(form.relevant_misconception_ids).issubset(set(rubric.blocking_misconception_ids)):
+                raise StudyValidationError(f"assessment {form.id} references misconception outside rubric {rubric.id}")
+            required = set(rule.get("requires", []))
+            required_any = set(rule.get("requires_any", []))
+            groups = [set(group) for group in rule.get("requires_any_groups", [])]
+            form_required = set(_id_list(form_rules.get(form.id, []), f"rubric {rubric.id} form rule {form.id}"))
+            if not form_required.issubset(allowed):
+                raise StudyValidationError(f"rubric {rubric.id} form rule {form.id} references unknown evidence")
+            targeted = set(form.target_evidence_ids)
+            if not required.issubset(targeted) or (required_any and not targeted.intersection(required_any)) or any(not targeted.intersection(group) for group in groups) or not form_required.issubset(targeted) or len(targeted) < rule.get("minimum_evidence", 0):
+                raise StudyValidationError(f"assessment {form.id} cannot satisfy rubric {rubric.id}")

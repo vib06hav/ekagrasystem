@@ -11,10 +11,13 @@
   const activePresses = new Map(); // event.code is in-memory pairing state only.
 
   const context = (field) => {
-    const section = document.querySelector('#session-main [data-section-number]');
+    const root = document.querySelector('#session-main');
+    const section = root?.querySelector('[data-section-number]');
+    const activityNodes = root ? [...root.querySelectorAll('[data-teaching-activity-number]')] : [];
+    const activity = root?.querySelector('.composer[data-teaching-activity-number]') || activityNodes[activityNodes.length - 1];
     return {
       section_number: section ? Number(section.dataset.sectionNumber) : null,
-      teaching_activity_number: section?.dataset.teachingActivityNumber ? Number(section.dataset.teachingActivityNumber) : null,
+      teaching_activity_number: activity?.dataset.teachingActivityNumber ? Number(activity.dataset.teachingActivityNumber) : null,
       surface: field.id === 'learner-text' ? 'TUTOR_RESPONSE' : 'ASSESSMENT_RESPONSE',
     };
   };

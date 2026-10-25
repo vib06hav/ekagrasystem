@@ -2,9 +2,11 @@
 .env.*
 __pycache__/
 .pytest_cache/
+.venv/
 exports/
 research-data/
 artifacts/
+reports/
 graphify-out/
 .graphify_*.json
 .graphify_*.txt

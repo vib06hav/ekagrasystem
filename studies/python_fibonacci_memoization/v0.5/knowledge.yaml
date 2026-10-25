@@ -1,0 +1,711 @@
+topic_id: python_fibonacci_memoization
+domain: Python Programming
+topic: Recursive Fibonacci with Memoization
+in_scope:
+  - Fibonacci base cases;
+  - the Fibonacci recurrence;
+  - expression of the recurrence as recursive Python computation;
+  - recursive dependency structure;
+  - repeated subproblems in naive recursive Fibonacci;
+  - repeated computation caused by unresolved repeated subproblems;
+  - storing a solved result associated with its Fibonacci input;
+  - checking whether a result has already been stored;
+  - reusing a stored result;
+  - shared cache state within one top-level recursive computation;
+  - memoized recursive Fibonacci;
+  - why memoization reduces redundant recursive work;
+  - reasoning about cache contents and cache reuse;
+  - recognizing whether unfamiliar recursive Fibonacci code genuinely implements memoization;
+  - comparing alternative but equivalent memoization organizations;
+  - deriving implementation requirements from the underlying memoization mechanism.
+out_of_scope:
+  - iterative Fibonacci;
+  - bottom-up dynamic programming;
+  - tabulation;
+  - rolling-variable / space-optimized Fibonacci;
+  - general dynamic-programming problem solving;
+  - knapsack;
+  - longest common subsequence;
+  - graph algorithms;
+  - formal recurrence-solving mathematics;
+  - asymptotic-analysis notation as a success requirement;
+  - Python decorators such as `functools.lru_cache`;
+  - persistence of caches across unrelated program runs;
+  - concurrency/thread-safety;
+  - distributed caching.
+knowledge_components:
+  - id: K1
+    name: Fibonacci base cases
+    definition: |
+      `fib(0) = 0` and `fib(1) = 1` provide the terminating values for the recursive definition used in this POC.
+  - id: K2
+    name: Fibonacci recurrence
+    definition: |
+      For `n >= 2`:
+
+      `fib(n) = fib(n - 1) + fib(n - 2)`.
+  - id: K3
+    name: Recursive Python representation
+    definition: |
+      A Python function can express K2 by recursively requesting `fib(n - 1)` and `fib(n - 2)` and using K1 to terminate recursion.
+  - id: K4
+    name: Recursive dependency structure
+    definition: |
+      Computing a larger Fibonacci value creates dependent computations for smaller Fibonacci inputs.
+  - id: K5
+    name: Repeated subproblems
+    definition: |
+      During naive recursive evaluation, the same smaller input such as `fib(3)` can be requested from more than one branch of the computation.
+  - id: K6
+    name: Repeated computation
+    definition: |
+      If earlier solved results are not retained, a repeated request for the same subproblem causes that subproblem's recursive computation to be performed again.
+  - id: K7
+    name: Cache mapping
+    definition: |
+      A computed Fibonacci result can be retained in a mapping from the subproblem input to its result, conceptually:
+
+      `n → fib(n)`.
+
+      The concrete Python representation may vary, but the input/result association is essential.
+  - id: K8
+    name: Cache lookup and reuse
+    definition: |
+      When a Fibonacci input is requested again, the function can check whether a result for that input is already available and return/reuse it instead of recursively solving the same subproblem again.
+  - id: K9
+    name: Shared cache state
+    definition: |
+      For reuse to occur across recursive branches within a top-level computation, the recursive calls must have access to the same relevant cache state. Reinitializing an empty cache independently for every recursive call defeats cross-call reuse.
+  - id: K10
+    name: Integrated memoized-recursion mechanism
+    definition: |
+      Memoized recursive Fibonacci combines:
+
+      - the same Fibonacci recurrence;
+      - recursive decomposition;
+      - result storage;
+      - lookup before repeated recursive expansion;
+      - and reuse of already solved subproblems.
+
+      Memoization changes execution/reuse behavior; it does not redefine Fibonacci.
+  - id: K11
+    name: Efficiency mechanism
+    definition: |
+      The reduction in redundant work arises because already solved cacheable Fibonacci subproblems do not need to be recursively solved again when requested later within the same shared-cache computation.
+
+      The POC does not require formal Big-O notation to demonstrate this component.
+  - id: K12
+    name: Memoization invariants across implementations
+    definition: |
+      Different recursive Fibonacci implementations can organize syntax differently while implementing the same memoization mechanism if they preserve essential invariants:
+
+      - subproblems are identified consistently;
+      - previously stored results can be consulted before redundant recursive expansion;
+      - newly solved results are stored correctly;
+      - recursive calls participate in the relevant shared cache;
+      - the Fibonacci recurrence remains correct.
+  - id: K13
+    name: Cache-state reasoning
+    definition: |
+      Given an input and a stated initial cache, the learner can reason about which Fibonacci results are already reusable, which values must still be computed, and how the cache changes as the recursive computation proceeds.
+  - id: K14
+    name: Derivation/evaluation from mechanism
+    definition: |
+      The learner can use the memoization invariants to derive, diagnose, or evaluate an unfamiliar recursive Fibonacci implementation rather than relying on memorized canonical code.
+
+      ---
+relations:
+  - id: R1
+    name: Base cases + recurrence enable recursive Fibonacci
+    definition: |
+      K1 and K2 jointly support K3.
+
+      A recursive implementation needs both the recurrence and a terminating base condition.
+    kc_ids:
+      - K1
+      - K2
+      - K3
+  - id: R2
+    name: Recursive dependency can produce repeated subproblems
+    definition: |
+      K4 can generate K5 because branching recursive dependencies can reach the same smaller Fibonacci input from different branches.
+    kc_ids:
+      - K4
+      - K5
+  - id: R3
+    name: Repeated subproblems cause repeated computation when results are not retained
+    definition: |
+      K5 combined with absence of retained results produces K6.
+    kc_ids:
+      - K5
+      - K6
+  - id: R4
+    name: Solved results can be associated with their subproblem
+    definition: |
+      K7 provides the storage relation required for later reuse.
+    kc_ids:
+      - K7
+  - id: R5
+    name: Lookup + shared cache enable reuse
+    definition: |
+      K8 and K9 jointly explain how a later request can reuse a previously solved result.
+    kc_ids:
+      - K8
+      - K9
+  - id: R6
+    name: Storage and reuse integrate with recursion to form memoization
+    definition: |
+      K7, K8, K9 and the recursive recurrence integrate into K10.
+    kc_ids:
+      - K7
+      - K8
+      - K9
+      - K10
+  - id: R7
+    name: Memoization reduces redundant recursive work
+    definition: |
+      K10 explains K11: because already solved subproblems can be reused, repeated recursive evaluation of those subproblems can be avoided.
+    kc_ids:
+      - K10
+      - K11
+  - id: R8
+    name: The recurrence is invariant under memoization
+    definition: |
+      K2 remains true in both naive recursive Fibonacci and memoized recursive Fibonacci.
+
+      Memoization changes evaluation strategy, not the mathematical Fibonacci relationship.
+    kc_ids:
+      - K2
+      - K10
+  - id: R9
+    name: Cache scope affects effectiveness
+    definition: |
+      K9 is necessary for practical reuse across recursive branches. If a fresh empty cache is created independently inside every recursive call, stored results are not shared in the needed way.
+    kc_ids:
+      - K9
+  - id: R10
+    name: Multiple code organizations can realize the same mechanism
+    definition: |
+      K12 abstracts over specific syntax: equivalent implementations may differ in ordering or representation while preserving the essential mechanism.
+    kc_ids:
+      - K12
+  - id: R11
+    name: Cache state can be predicted from mechanism
+    definition: |
+      K13 follows from understanding storage, lookup, reuse, and cache scope.
+    kc_ids:
+      - K13
+  - id: R12
+    name: Mechanism supports derivation and diagnosis
+    definition: |
+      K12 and K13 support K14: the learner can reason about unfamiliar code and determine whether it really memoizes.
+
+      ---
+    kc_ids:
+      - K12
+      - K13
+      - K14
+misconceptions:
+  - id: M1
+    name: One-predecessor Fibonacci
+    definition: |
+      The learner believes recursive Fibonacci needs only one previous Fibonacci value.
+
+      **Conflicts with:** K2.
+    conflicts_with:
+      - K2
+  - id: M2
+    name: Base cases create the efficiency improvement
+    definition: |
+      The learner attributes the reduction in repeated work to the base cases rather than reuse of solved subproblems.
+
+      **Conflicts with:** K5, K6, K11.
+    conflicts_with:
+      - K11
+  - id: M3
+    name: Repeated occurrences are different problems
+    definition: |
+      The learner believes two requests for the same `fib(k)` are fundamentally different subproblems and therefore cannot reuse the same result.
+
+      **Conflicts with:** K5, K7, K8.
+    conflicts_with:
+      - K5
+      - K8
+  - id: M4
+    name: Memoization changes the Fibonacci recurrence
+    definition: |
+      The learner claims memoization changes the mathematical definition of Fibonacci.
+
+      **Conflicts with:** K2, K10, R8.
+    conflicts_with:
+      - K2
+      - K10
+  - id: M5
+    name: Cache stores calls rather than computed results
+    definition: |
+      The learner treats the cache as storing pending function-call objects rather than a usable association between an input and its solved Fibonacci value.
+
+      **Conflicts with:** K7.
+    conflicts_with:
+      - K7
+  - id: M6
+    name: Dictionary presence alone equals memoization
+    definition: |
+      The learner believes any function containing a dictionary is memoized even if the dictionary is never checked for reusable results.
+
+      **Conflicts with:** K8, K10, K12.
+    conflicts_with:
+      - K8
+      - K10
+  - id: M7
+    name: Cache lookup after full recomputation is sufficient
+    definition: |
+      The learner believes it is enough to check the cache only after recursively solving the subproblem again.
+
+      **Conflicts with:** K8, K11, K12.
+    conflicts_with:
+      - K8
+      - K11
+  - id: M8
+    name: Fresh cache per recursive call still provides full memoization
+    definition: |
+      The learner believes every recursive call may initialize an independent empty cache and still achieve reuse across branches.
+
+      **Conflicts with:** K9, R9.
+    conflicts_with:
+      - K9
+  - id: M9
+    name: Memoization means avoiding recursion entirely
+    definition: |
+      The learner believes a memoized recursive solution stops being recursive.
+
+      **Conflicts with:** K10.
+    conflicts_with:
+      - K10
+  - id: M10
+    name: One canonical code shape defines memoization
+    definition: |
+      The learner believes only the memorized dictionary-based code arrangement counts as memoization, even if another implementation preserves the same essential mechanism.
+
+      **Conflicts with:** K12, K14.
+
+      ---
+    conflicts_with:
+      - K12
+solo_states:
+  - id: P
+    definition: |
+      The learner does not yet demonstrate a usable conceptual relationship connecting the Fibonacci definition to recursive computation.
+
+      Possible evidence includes:
+
+      - irrelevant statements;
+      - guessing;
+      - treating recursion and Fibonacci as unrelated terms;
+      - materially incorrect dependence such as “`fib(n)` is just `fib(n-1)`”;
+      - code fragments with no usable recurrence relation.
+
+      Prestructural does not mean “knows nothing about Python.” It refers to organization within this bounded conceptual frontier.
+
+      ---
+  - id: U
+    definition: |
+      The learner demonstrates one central usable structure:
+
+      > Fibonacci values depend on the two previous Fibonacci values, and this dependence can be represented recursively with terminating base cases.
+
+      The learner may correctly understand K1/K2/K3 without yet recognizing the larger repeated-subproblem and memoization structure.
+
+      A typical U response can correctly explain or recognize the basic recursive definition but does not yet demonstrate several distinct relevant ideas about redundant recursion and caching.
+
+      ---
+  - id: M
+    definition: |
+      The learner demonstrates several relevant components of recursive Fibonacci and memoization but does not yet reliably integrate them into one causal mechanism.
+
+      The learner may correctly recognize several of:
+
+      - recursive dependencies;
+      - repeated subproblems;
+      - repeated computation;
+      - storing results;
+      - cache lookup;
+      - reuse;
+      - shared cache.
+
+      However, these ideas may appear as a list or loosely connected observations.
+
+      Example profile:
+
+      > “Recursive Fibonacci repeats calls. A dictionary can store results. You can check the dictionary and reuse values.”
+
+      This is relevant and multi-part, but the causal structure may still be incomplete.
+
+      ---
+  - id: R
+    definition: |
+      The learner integrates the relevant components into a coherent explanation of memoized recursive Fibonacci.
+
+      A relational account links:
+
+      ```text
+      branching recursive dependencies
+              ↓
+      same subproblem requested repeatedly
+              ↓
+      without retained result it is recomputed
+              ↓
+      first solved result is stored
+              ↓
+      later request checks shared cache
+              ↓
+      stored result is reused
+              ↓
+      redundant recursive evaluation is avoided
+      ```
+
+      The learner also understands that the Fibonacci recurrence remains unchanged.
+
+      The central distinction from M is organization and integration, not simply additional vocabulary.
+
+      ---
+  - id: EA
+    definition: |
+      The learner can reason from the underlying memoization mechanism beyond the canonical example/code shape.
+
+      Within this deliberately narrow topic, EA may be evidenced by the ability to:
+
+      - identify whether unfamiliar recursive Fibonacci code genuinely implements memoization;
+      - diagnose why superficially “cached” code fails to reuse results;
+      - reason correctly about cache scope/lifetime;
+      - predict cache behavior from an arbitrary valid input and stated initial cache;
+      - explain why different code organizations implement the same mechanism;
+      - derive the requirements of a correct memoized recursive implementation from principle rather than recalling one memorized program.
+
+      EA is not defined as merely answering a numerically larger or syntactically harder Fibonacci question.
+
+      ---
+transitions:
+  - id: C1
+    from_state_id: P
+    target_state_id: U
+    target_kc_ids:
+      - K1
+      - K2
+      - K3
+    target_relation_ids:
+      - R1
+    relevant_misconception_ids:
+      - M1
+    future_kc_ids:
+      - K4
+      - K5
+      - K6
+      - K7
+      - K8
+      - K9
+      - K10
+      - K11
+      - K12
+      - K13
+      - K14
+    structural_change: |
+      ```text
+      no usable recursive Fibonacci model
+              ↓
+      one coherent central relationship:
+      Fibonacci recurrence ↔ recursive computation
+      ```
+    assumed_at_entry: |
+      Only prerequisites.
+
+      No reliable topic-level understanding is assumed.
+    target_structure:
+      primary_target_knowledge: |
+        - K1
+        - K2
+        - K3
+      primary_target_relation: |
+        - R1
+    relevant_misconception_guidance: |
+      - M1
+    not_yet_required: |
+      - repeated-subproblem analysis;
+      - caching;
+      - memoization;
+      - efficiency mechanism;
+      - cache-state abstraction.
+
+      The intervention should not force future-transition knowledge into C1.
+
+      ---
+    canonical_slice: |
+      **Expected before:** prerequisites only  
+      **Target:** K1, K2, K3; R1  
+      **Structural goal:** one usable recurrence-to-recursion relationship  
+      **Future knowledge:** K4–K14
+  - id: C2
+    from_state_id: U
+    target_state_id: M
+    target_kc_ids:
+      - K4
+      - K5
+      - K6
+      - K7
+      - K8
+      - K9
+    target_relation_ids:
+      - R2
+      - R3
+      - R4
+      - R5
+    relevant_misconception_ids:
+      - M2
+      - M3
+      - M5
+      - M6
+      - M8
+    future_kc_ids:
+      - K10
+      - K11
+      - K12
+      - K13
+      - K14
+    structural_change: |
+      ```text
+      one central recursive model
+              ↓
+      multiple relevant components concerning
+      recursive dependency, repeated work, and result reuse
+      ```
+    assumed_at_entry: |
+      - K1
+      - K2
+      - K3
+      - R1
+    target_structure:
+      primary_target_knowledge: |
+        - K4
+        - K5
+        - K6
+        - K7
+        - K8
+        - K9
+      target_structural_character: |
+        The learner should be able to recognize multiple relevant components, even if they are not yet integrated into a complete causal explanation.
+    relevant_misconception_guidance: |
+      - M2
+      - M3
+      - M5
+      - M6
+      - M8
+    not_yet_required: |
+      The learner is not yet required to produce the full integrated causal mechanism of K10/K11.
+
+      A learner who does produce that mechanism may be observed above target, but C2 remains the formal transition under test.
+
+      ---
+    canonical_slice: |
+      **Expected before:** K1–K3; R1  
+      **Target:** K4–K9 as multiple relevant components  
+      **Structural goal:** several relevant pieces present  
+      **Future integration:** K10–K14
+  - id: C3
+    from_state_id: M
+    target_state_id: R
+    target_kc_ids:
+      - K10
+      - K11
+    target_relation_ids:
+      - R2
+      - R3
+      - R4
+      - R5
+      - R6
+      - R7
+      - R8
+      - R9
+    relevant_misconception_ids:
+      - M3
+      - M4
+      - M5
+      - M6
+      - M7
+      - M8
+      - M9
+    future_kc_ids:
+      - K12
+      - K13
+      - K14
+    structural_change: |
+      ```text
+      multiple correct but partly separate pieces
+              ↓
+      one integrated causal memoization mechanism
+      ```
+    assumed_at_entry: |
+      The learner is expected to have access to:
+
+      - K1 through K9 at least as separate relevant components.
+    target_structure:
+      primary_target_knowledge: |
+        - K10
+        - K11
+      primary_target_relations: |
+        - R2
+        - R3
+        - R4
+        - R5
+        - R6
+        - R7
+        - R8
+        - R9
+      critical_integration: |
+        The learner must connect:
+
+        ```text
+        repeated subproblem
+        → otherwise recomputed
+        → solved result stored
+        → later lookup/reuse
+        → avoided recursive recomputation
+        ```
+
+        while preserving the Fibonacci recurrence.
+    relevant_misconception_guidance: |
+      - M3
+      - M4
+      - M5
+      - M6
+      - M7
+      - M8
+      - M9
+
+      ---
+    not_yet_required: |
+      No additional boundary beyond the authored target and conceptual frontier.
+    canonical_slice: |
+      **Expected before:** K1–K9 available as components  
+      **Target:** K10, K11 and integration relations R2–R9  
+      **Structural goal:** coherent causal memoization mechanism  
+      **Future abstraction:** K12–K14
+  - id: C4
+    from_state_id: R
+    target_state_id: EA
+    target_kc_ids:
+      - K12
+      - K13
+      - K14
+    target_relation_ids:
+      - R9
+      - R10
+      - R11
+      - R12
+    relevant_misconception_ids:
+      - M6
+      - M7
+      - M8
+      - M10
+    future_kc_ids: []
+    structural_change: |
+      ```text
+      understands one integrated memoized-recursion mechanism
+              ↓
+      reasons from the mechanism across unfamiliar
+      but equivalent Fibonacci implementations and cache states
+      ```
+    assumed_at_entry: |
+      Integrated K1–K11.
+    target_structure:
+      primary_target_knowledge: |
+        - K12
+        - K13
+        - K14
+      primary_target_relations: |
+        - R9
+        - R10
+        - R11
+        - R12
+      abstraction_targets: |
+        The learner should be able to:
+
+        - distinguish essential memoization invariants from incidental syntax;
+        - evaluate unfamiliar recursive Fibonacci implementations;
+        - diagnose broken cache sharing/lookup logic;
+        - reason about cache contents and reuse;
+        - derive a correct mechanism from principle.
+      important_boundary: |
+        C4 transfer remains within the bounded topic of recursive Fibonacci + memoization.
+
+        The learner is not required to transfer the mechanism to knapsack, shortest paths, or another algorithmic domain.
+
+        ---
+    relevant_misconception_guidance: |
+      - M6
+      - M7
+      - M8
+      - M10
+    not_yet_required: |
+      No additional boundary beyond the authored target and conceptual frontier.
+    canonical_slice: |
+      **Expected before:** integrated K1–K11  
+      **Target:** K12–K14; R9–R12  
+      **Structural goal:** abstraction across unfamiliar implementations/cache states
+
+      ---
+prerequisite_assumptions: |
+  The learner is assumed to be able to:
+
+  - read a basic Python function definition;
+  - understand a function parameter;
+  - understand `return`;
+  - understand a simple `if` conditional;
+  - read integer literals and basic addition;
+  - understand that calling a function evaluates that function for a supplied input.
+
+  The study does not attempt to teach those prerequisites.
+
+  A learner who cannot interpret basic Python syntax should not automatically be treated as conceptually Prestructural in the target topic; prerequisite failure is a different issue.
+
+  ---
+conceptual_frontier:
+  in_scope: |
+    The POC may teach and assess:
+
+    - Fibonacci base cases;
+    - the Fibonacci recurrence;
+    - expression of the recurrence as recursive Python computation;
+    - recursive dependency structure;
+    - repeated subproblems in naive recursive Fibonacci;
+    - repeated computation caused by unresolved repeated subproblems;
+    - storing a solved result associated with its Fibonacci input;
+    - checking whether a result has already been stored;
+    - reusing a stored result;
+    - shared cache state within one top-level recursive computation;
+    - memoized recursive Fibonacci;
+    - why memoization reduces redundant recursive work;
+    - reasoning about cache contents and cache reuse;
+    - recognizing whether unfamiliar recursive Fibonacci code genuinely implements memoization;
+    - comparing alternative but equivalent memoization organizations;
+    - deriving implementation requirements from the underlying memoization mechanism.
+  out_of_scope: |
+    The POC does not require or intentionally teach:
+
+    - iterative Fibonacci;
+    - bottom-up dynamic programming;
+    - tabulation;
+    - rolling-variable / space-optimized Fibonacci;
+    - general dynamic-programming problem solving;
+    - knapsack;
+    - longest common subsequence;
+    - graph algorithms;
+    - formal recurrence-solving mathematics;
+    - asymptotic-analysis notation as a success requirement;
+    - Python decorators such as `functools.lru_cache`;
+    - persistence of caches across unrelated program runs;
+    - concurrency/thread-safety;
+    - distributed caching.
+
+    Out-of-scope material must not be introduced merely because an LLM considers it educationally useful.
+
+    ---

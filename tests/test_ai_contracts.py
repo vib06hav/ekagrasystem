@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import pytest
 from pydantic import ValidationError
 
-from solo_harness.runtime.ai import AssessmentGenerationOutput, CanonicalMessage, JudgeOutput, LLMRequest, PreparedLLMRequest, PromptCompiler, ProviderError, TutorTurnOutput, _decode_json_text, _provider_content_candidate, _validate_openai_strict_schema
+from solo_harness.runtime.ai import AssessmentGenerationOutput, CanonicalMessage, JudgeOutput, LLMRequest, PreparedLLMRequest, PromptCompiler, ProviderError, TutorTurnOutput, _decode_json_text, _provider_content_candidate, _validate_openai_strict_schema, validate_generated_assessment, validate_judge_evidence_scope
 
 
 def judge_payload(**overrides):
@@ -36,9 +36,9 @@ def test_tutor_contract_accepts_a_valid_structured_turn():
     assert value.current_move_id == "C1-P2-MOVE-1"
 
 
-def test_judge_contract_discards_inapplicable_not_gradable_reason():
-    value = JudgeOutput.model_validate(judge_payload(not_gradable_reason="OFF_TOPIC"))
-    assert value.not_gradable_reason is None
+@pytest.mark.parametrize("correctness", ["CORRECT", "MINOR_ERROR", "MATERIALLY_INCORRECT"])
+def test_judge_contract_accepts_each_gradable_correctness_value(correctness):
+    assert JudgeOutput.model_validate(judge_payload(correctness=correctness)).correctness == correctness
 
 
 def test_judge_contract_derives_not_gradable_without_redundant_boolean():
@@ -51,23 +51,30 @@ def test_judge_contract_derives_not_gradable_without_redundant_boolean():
     assert "gradable" not in value.model_dump()
 
 
-def test_judge_contract_discards_observed_state_when_not_gradable():
+@pytest.mark.parametrize("overrides", [
+    {"not_gradable_reason": "OFF_TOPIC"},
+    {"correctness": "NOT_GRADABLE", "not_gradable_reason": "UNINTERPRETABLE", "observed_solo_state_id": "R"},
+    {"correctness": "NOT_GRADABLE", "observed_solo_state_id": None},
+    {"observed_solo_state_id": None},
+])
+def test_judge_contract_rejects_conflicting_gradability_fields(overrides):
+    with pytest.raises(ValidationError):
+        JudgeOutput.model_validate(judge_payload(**overrides))
+
+
+def test_judge_contract_accepts_not_gradable_only_with_consistent_fields():
     value = JudgeOutput.model_validate(judge_payload(
         correctness="NOT_GRADABLE",
         not_gradable_reason="UNINTERPRETABLE",
-        observed_solo_state_id="R",
+        observed_solo_state_id=None,
     ))
-    assert value.observed_solo_state_id is None
+    assert not value.gradable
 
 
-def test_judge_contract_supplies_generic_reason_for_explicit_not_gradable_result():
-    value = JudgeOutput.model_validate(judge_payload(correctness="NOT_GRADABLE", observed_solo_state_id=None))
-    assert value.not_gradable_reason == "INSUFFICIENT_TO_EVALUATE"
-
-
-def test_judge_normalizes_provider_evidence_synonym_without_fabricating_evidence():
-    value=JudgeOutput.model_validate(judge_payload(correctness="PARTIAL", overall_evidence_summary="Some evidence."))
-    assert value.correctness=="MINOR_ERROR" and value.criterion_evidence==[]
+@pytest.mark.parametrize("alias", ["PARTIAL", "NOT_DEMONSTRATED", "CONTRADICTED"])
+def test_judge_contract_rejects_correctness_aliases(alias):
+    with pytest.raises(ValidationError):
+        JudgeOutput.model_validate(judge_payload(correctness=alias))
 
 
 def test_test_client_preserves_exact_prepared_request():
@@ -92,12 +99,79 @@ def test_judge_prompt_is_blind_to_treatment_and_dialogue():
     assert "P1" not in provider_text
     assert "prior-attempt" not in provider_text.lower()
     assert "Tutor dialogue" not in provider_text
+    assert "at most 300 characters" in provider_text
+    assert "at most 700 characters" in provider_text
+
+
+@pytest.mark.parametrize("transition_id", ["C1", "C2", "C3", "C4"])
+def test_new_judge_prompt_has_scoped_authored_guidance_and_no_treatment_data(transition_id):
+    from pathlib import Path
+    from solo_harness.studies.compiler import compile_study
+    from solo_harness.studies.loader import load
+    study = compile_study(load(Path("studies/python_fibonacci_memoization/v0.5")))
+    version = SimpleNamespace(id=uuid.uuid4(), content_hash="a" * 64, compiler_contract_version="3.1", snapshot_hash="b" * 64)
+    blueprint = study.assessment_families[transition_id]["forms"][0]
+    assessment = SimpleNamespace(id=uuid.uuid4(), transition_id=transition_id, assessment_form_id=blueprint["id"], blueprint_snapshot=blueprint, resolved_component_ids={}, prompt_snapshot="Explain the task in your own words.", hidden_scoring_context_snapshot="Private item context.")
+    envelope = PromptCompiler().compile_judge(version, study, assessment, SimpleNamespace(response_text="Learner response."))
+    provider_text = "\n".join(item.content for item in envelope.ordered_messages)
+    assert "[AUTHORED_JUDGE_CONTRACT]" in provider_text and "[SELECTED_RUBRIC_GUIDANCE]" in provider_text
+    assert len(envelope.canonical_prompt_text) <= PromptCompiler.MAX_JUDGE_CHARS
+    assert "P1" not in provider_text and "Tutor conversation" not in provider_text
+
+
+def test_assessment_resolver_uses_explicit_transition_not_blueprint_id_prefix():
+    from pathlib import Path
+    from solo_harness.studies.compiler import compile_study
+    from solo_harness.studies.loader import load
+    study = compile_study(load(Path("studies/python_fibonacci_memoization/v0.5")))
+    blueprint = dict(study.assessment_families["C1"]["forms"][0]); blueprint["id"] = "unrelated-name"
+    study.assessment_families["C1"]["forms"][0]["id"] = "unrelated-name"
+    assert PromptCompiler().resolver.assessment(study, blueprint, "C1")["blueprint"]["id"] == "unrelated-name"
+    with pytest.raises(ValueError, match="does not belong"):
+        PromptCompiler().resolver.assessment(study, blueprint, "C2")
 
 
 def test_json_text_contract_accepts_fenced_json_and_content_parts():
     assert _decode_json_text("```json\n{\"schema_version\":\"1.0\"}\n```") == {"schema_version": "1.0"}
     payload = {"choices": [{"message": {"content": [{"type": "text", "text": "{\"ok\":"}, {"type": "text", "text": "true}"}]}}]}
     assert _provider_content_candidate(payload) == '{"ok":true}'
+
+
+@pytest.mark.parametrize("text", ["note {\"schema_version\":\"1.0\"}", "{\"schema_version\":\"1.0\"} trailing", "```json\n{\"schema_version\":\"1.0\"}\n```"])
+def test_new_json_contract_rejects_non_object_wrapping(text):
+    with pytest.raises(ValueError):
+        _decode_json_text(text, strict=True)
+
+
+def test_new_json_contract_accepts_one_complete_object_with_whitespace_or_bom():
+    assert _decode_json_text("\ufeff  {\"schema_version\":\"1.0\"}\n", strict=True) == {"schema_version": "1.0"}
+
+
+def test_generated_assessment_gate_accepts_matching_function_and_rejects_mismatch_or_leakage():
+    from pathlib import Path
+    fixtures = json.loads((Path(__file__).parent / "fixtures/generated_assessments.json").read_text(encoding="utf-8"))
+    blueprint = {"required_response_features": ["uses recurrence explanation"]}
+    matching = AssessmentGenerationOutput(schema_version="1.0", **fixtures["valid_compute_term"])
+    validate_generated_assessment(matching, blueprint)
+    mismatch = AssessmentGenerationOutput(schema_version="1.0", **fixtures["invalid_compute_term_fib"])
+    with pytest.raises(ValueError, match="different learner-facing function"):
+        validate_generated_assessment(mismatch, blueprint)
+    leak = AssessmentGenerationOutput(schema_version="1.0", **fixtures["invalid_leakage"])
+    with pytest.raises(ValueError, match="leaks"):
+        validate_generated_assessment(leak, blueprint)
+
+
+def test_judge_evidence_scope_requires_exactly_once_and_not_gradable_empty_arrays():
+    evidence = {"status": "DEMONSTRATED", "citations": [], "concise_summary": "Shown."}
+    misconception = {"status": "NOT_DETECTED", "citations": [], "concise_summary": "Absent."}
+    blueprint = {"target_evidence_ids": ["E1", "E2"], "relevant_misconception_ids": ["M1"]}
+    valid = JudgeOutput.model_validate(judge_payload(criterion_evidence=[{**evidence, "criterion_id": "E1"}, {**evidence, "criterion_id": "E2"}], misconception_evidence=[{**misconception, "misconception_id": "M1"}]))
+    validate_judge_evidence_scope(valid, blueprint)
+    duplicate = valid.model_copy(update={"criterion_evidence": [valid.criterion_evidence[0], valid.criterion_evidence[0]]})
+    with pytest.raises(ValueError, match="exactly once"):
+        validate_judge_evidence_scope(duplicate, blueprint)
+    not_gradable = JudgeOutput.model_validate(judge_payload(correctness="NOT_GRADABLE", not_gradable_reason="OFF_TOPIC", observed_solo_state_id=None, criterion_evidence=[] , misconception_evidence=[]))
+    validate_judge_evidence_scope(not_gradable, blueprint)
 
 
 def test_judge_schema_uses_distinct_evidence_identifier_objects():

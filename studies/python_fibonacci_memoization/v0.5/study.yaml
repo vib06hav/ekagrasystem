@@ -1,0 +1,15 @@
+study_id: python_fibonacci_memoization
+content_version: v0.5
+study_schema_version: "1"
+title: Fibonacci POC Study Definition
+markdown_provenance:
+  manifest: MANIFEST.md
+  readme: README.md
+files:
+  knowledge: knowledge.yaml
+  pedagogy_families: intervention/pedagogies.yaml
+  intervention_cells: [intervention/cells/c1.yaml, intervention/cells/c2.yaml, intervention/cells/c3.yaml, intervention/cells/c4.yaml]
+  assessment_families: [assessment/c1.yaml, assessment/c2.yaml, assessment/c3.yaml, assessment/c4.yaml]
+  judge_contract: judge/contract.yaml
+  judge_rubrics: judge/rubrics.yaml
+  protocol: protocol.yaml

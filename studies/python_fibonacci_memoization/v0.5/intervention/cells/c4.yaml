@@ -1,0 +1,475 @@
+cells:
+  - id: C4-P1
+    transition_id: C4
+    pedagogy_id: P1
+    instructional_intent: |
+      Model how to evaluate an unfamiliar recursive Fibonacci implementation by checking memoization invariants rather than matching memorized syntax.
+    missing_structure: Abstraction across implementation forms and cache states.
+    target_kc_ids:
+      - K12
+      - K13
+      - K14
+    target_relation_ids:
+      - R9
+      - R10
+      - R11
+      - R12
+    relevant_misconception_ids:
+      - M6
+      - M7
+      - M8
+      - M10
+    prohibitions:
+      - Do not rely on one canonical code shape.
+    completion_condition: |
+      The invariants have been modeled and applied to at least one unfamiliar implementation.
+
+      ---
+    max_tutor_turns: 8
+    treatment_constraints: |
+      Follow the shared intervention envelope and assigned pedagogy without switching treatments.
+    move_ids:
+      - C4-P1-MOVE-1
+      - C4-P1-MOVE-2
+      - C4-P1-MOVE-3
+    moves:
+      - id: C4-P1-MOVE-1
+        transition_id: C4
+        pedagogy_id: P1
+        title: 'Worked example: superficially cached but ineffective sharing'
+        purpose: |
+          Model how to evaluate an unfamiliar recursive Fibonacci implementation by checking memoization invariants rather than matching memorized syntax.
+        kc_ids:
+          - K12
+          - K13
+          - K14
+        relation_ids:
+          - R9
+          - R10
+          - R11
+          - R12
+        misconception_ids:
+          - M6
+          - M7
+          - M8
+          - M10
+        material_blueprint: |
+          ```python
+          def fib(n):
+              memo = {}
+
+              if n in memo:
+                  return memo[n]
+
+              if n <= 1:
+                  return n
+
+              memo[n] = fib(n - 1) + fib(n - 2)
+              return memo[n]
+          ```
+        allowed_behavior:
+          - present solved example
+          - explain reasoning
+        prohibited_behavior:
+          - Follow the shared intervention envelope and assigned pedagogy without switching treatments.
+        completion_evidence: |
+          The invariants have been modeled and applied to at least one unfamiliar implementation.
+
+          ---
+        next_move_ids:
+          - C4-P1-MOVE-2
+      - id: C4-P1-MOVE-2
+        transition_id: C4
+        pedagogy_id: P1
+        title: Modeled analysis
+        purpose: |
+          Model how to evaluate an unfamiliar recursive Fibonacci implementation by checking memoization invariants rather than matching memorized syntax.
+        kc_ids:
+          - K12
+          - K13
+          - K14
+        relation_ids:
+          - R9
+          - R10
+          - R11
+          - R12
+        misconception_ids:
+          - M6
+          - M7
+          - M8
+          - M10
+        material_blueprint: |
+          The Tutor should reason explicitly:
+
+          1. There is a dictionary, but dictionary presence alone is not enough.
+          2. Every call to `fib` creates a new empty `memo`.
+          3. A result stored inside one call is not available to a sibling recursive call.
+          4. Therefore repeated subproblems cannot reliably reuse previously stored values across the recursive tree.
+          5. The code is still recursively computing Fibonacci, but it does not realize the intended shared memoization mechanism.
+
+          Then model a valid alternative whose cache is shared:
+
+          ```python
+          def fib(n, memo):
+              if n in memo:
+                  return memo[n]
+
+              if n <= 1:
+                  return n
+
+              result = fib(n - 1, memo) + fib(n - 2, memo)
+              memo[n] = result
+              return result
+          ```
+        allowed_behavior:
+          - present solved example
+          - explain reasoning
+        prohibited_behavior:
+          - Follow the shared intervention envelope and assigned pedagogy without switching treatments.
+        completion_evidence: |
+          The invariants have been modeled and applied to at least one unfamiliar implementation.
+
+          ---
+        next_move_ids:
+          - C4-P1-MOVE-3
+      - id: C4-P1-MOVE-3
+        transition_id: C4
+        pedagogy_id: P1
+        title: Abstraction
+        purpose: |
+          Model how to evaluate an unfamiliar recursive Fibonacci implementation by checking memoization invariants rather than matching memorized syntax.
+        kc_ids:
+          - K12
+          - K13
+          - K14
+        relation_ids:
+          - R9
+          - R10
+          - R11
+          - R12
+        misconception_ids:
+          - M6
+          - M7
+          - M8
+          - M10
+        material_blueprint: |
+          The Tutor should extract invariants:
+
+          ```text
+          valid memoized recursion does not depend on one exact code layout
+
+          what matters is:
+          - consistent subproblem identity;
+          - shared accessible stored results;
+          - lookup before redundant recursive expansion;
+          - correct storage of newly solved values;
+          - preserved recurrence.
+          ```
+        allowed_behavior:
+          - present solved example
+          - explain reasoning
+        prohibited_behavior:
+          - Follow the shared intervention envelope and assigned pedagogy without switching treatments.
+        completion_evidence: |
+          The invariants have been modeled and applied to at least one unfamiliar implementation.
+
+          ---
+        next_move_ids: []
+  - id: C4-P2
+    transition_id: C4
+    pedagogy_id: P2
+    instructional_intent: |
+      Guide the learner to derive memoization invariants from unfamiliar code and use them to diagnose implementation behavior.
+    missing_structure: Abstraction across implementation forms and cache states.
+    target_kc_ids:
+      - K12
+      - K13
+      - K14
+    target_relation_ids:
+      - R9
+      - R10
+      - R11
+      - R12
+    relevant_misconception_ids:
+      - M6
+      - M7
+      - M8
+      - M10
+    prohibitions:
+      - Do not give the complete invariant list first.
+    completion_condition: |
+      The learner derives invariants rather than reproducing canonical code.
+    max_tutor_turns: 8
+    treatment_constraints: |
+      Prohibition:
+      Do not give the complete invariant list before the learner has substantially constructed it.
+
+      ---
+    move_ids:
+      - C4-P2-MOVE-1
+      - C4-P2-MOVE-2
+    moves:
+      - id: C4-P2-MOVE-1
+        transition_id: C4
+        pedagogy_id: P2
+        title: Unfamiliar example
+        purpose: |
+          Guide the learner to derive memoization invariants from unfamiliar code and use them to diagnose implementation behavior.
+        kc_ids:
+          - K12
+          - K13
+          - K14
+        relation_ids:
+          - R9
+          - R10
+          - R11
+          - R12
+        misconception_ids:
+          - M6
+          - M7
+          - M8
+          - M10
+        material_blueprint: |
+          Use a snippet different from reserved assessments, for example one where the cache is passed as a parameter but lookup occurs too late.
+
+          Guide through:
+
+          1. “Where does the stored state live?”
+          2. “Do recursive calls see the same state?”
+          3. “At what point is the cache checked?”
+          4. “If recursive work happens before the check, what work has already been done?”
+          5. “What must be true for a repeated `fib(k)` request to avoid recursive expansion?”
+          6. “Which parts are essential mechanism and which are merely code style?”
+          7. “Can you state a set of requirements that any correct memoized recursive Fibonacci function should satisfy?”
+        allowed_behavior:
+          - ask bounded questions
+          - request prediction
+        prohibited_behavior:
+          - "Prohibition:\nDo not give the complete invariant list before the learner has substantially constructed it.\n\n\
+            ---"
+        completion_evidence: |
+          The learner derives invariants rather than reproducing canonical code.
+        next_move_ids:
+          - C4-P2-MOVE-2
+      - id: C4-P2-MOVE-2
+        transition_id: C4
+        pedagogy_id: P2
+        title: Desired learner construction
+        purpose: |
+          Guide the learner to derive memoization invariants from unfamiliar code and use them to diagnose implementation behavior.
+        kc_ids:
+          - K12
+          - K13
+          - K14
+        relation_ids:
+          - R9
+          - R10
+          - R11
+          - R12
+        misconception_ids:
+          - M6
+          - M7
+          - M8
+          - M10
+        material_blueprint: |
+          The learner derives invariants rather than reproducing canonical code.
+        allowed_behavior:
+          - ask bounded questions
+          - request prediction
+        prohibited_behavior:
+          - "Prohibition:\nDo not give the complete invariant list before the learner has substantially constructed it.\n\n\
+            ---"
+        completion_evidence: |
+          The learner derives invariants rather than reproducing canonical code.
+        next_move_ids: []
+  - id: C4-P3
+    transition_id: C4
+    pedagogy_id: P3
+    instructional_intent: |
+      Use contrasting unfamiliar implementations to help the learner infer which features are essential versus incidental.
+    missing_structure: Abstraction across implementation forms and cache states.
+    target_kc_ids:
+      - K12
+      - K13
+      - K14
+    target_relation_ids:
+      - R9
+      - R10
+      - R11
+      - R12
+    relevant_misconception_ids:
+      - M6
+      - M7
+      - M8
+      - M10
+    prohibitions:
+      - Do not collapse comparison into a canonical-code lecture.
+    completion_condition: |
+      The learner abstracts away from canonical syntax and identifies the essential mechanism.
+
+      ---
+    max_tutor_turns: 8
+    treatment_constraints: |
+      Follow the shared intervention envelope and assigned pedagogy without switching treatments.
+    move_ids:
+      - C4-P3-MOVE-1
+      - C4-P3-MOVE-2
+      - C4-P3-MOVE-3
+      - C4-P3-MOVE-4
+    moves:
+      - id: C4-P3-MOVE-1
+        transition_id: C4
+        pedagogy_id: P3
+        title: Example contrast
+        purpose: |
+          Use contrasting unfamiliar implementations to help the learner infer which features are essential versus incidental.
+        kc_ids:
+          - K12
+          - K13
+          - K14
+        relation_ids:
+          - R9
+          - R10
+          - R11
+          - R12
+        misconception_ids:
+          - M6
+          - M7
+          - M8
+          - M10
+        material_blueprint: |
+          Case A:
+
+          - cache passed through recursive calls;
+          - cache checked before recursive expansion;
+          - result stored after computation.
+
+          Case B:
+
+          - same recurrence;
+          - dictionary present;
+          - a fresh dictionary created inside every recursive call.
+
+          Keep other syntax as similar as possible.
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - Follow the shared intervention envelope and assigned pedagogy without switching treatments.
+        completion_evidence: |
+          The learner abstracts away from canonical syntax and identifies the essential mechanism.
+
+          ---
+        next_move_ids:
+          - C4-P3-MOVE-2
+      - id: C4-P3-MOVE-2
+        transition_id: C4
+        pedagogy_id: P3
+        title: Comparison sequence
+        purpose: |
+          Use contrasting unfamiliar implementations to help the learner infer which features are essential versus incidental.
+        kc_ids:
+          - K12
+          - K13
+          - K14
+        relation_ids:
+          - R9
+          - R10
+          - R11
+          - R12
+        misconception_ids:
+          - M6
+          - M7
+          - M8
+          - M10
+        material_blueprint: |
+          Ask:
+
+          1. what both cases share;
+          2. what differs in cache lifetime/scope;
+          3. whether the same computed result can be available to a later sibling request;
+          4. which implementation genuinely memoizes;
+          5. what general rule about cache sharing follows.
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - Follow the shared intervention envelope and assigned pedagogy without switching treatments.
+        completion_evidence: |
+          The learner abstracts away from canonical syntax and identifies the essential mechanism.
+
+          ---
+        next_move_ids:
+          - C4-P3-MOVE-3
+      - id: C4-P3-MOVE-3
+        transition_id: C4
+        pedagogy_id: P3
+        title: Second contrast dimension
+        purpose: |
+          Use contrasting unfamiliar implementations to help the learner infer which features are essential versus incidental.
+        kc_ids:
+          - K12
+          - K13
+          - K14
+        relation_ids:
+          - R9
+          - R10
+          - R11
+          - R12
+        misconception_ids:
+          - M6
+          - M7
+          - M8
+          - M10
+        material_blueprint: |
+          Optionally compare two **both-valid** implementations whose surface organization differs, for example:
+
+          - one pre-seeds base cases in the cache;
+          - one handles base cases directly and only caches non-base results.
+
+          Ask what invariant mechanism remains common.
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - Follow the shared intervention envelope and assigned pedagogy without switching treatments.
+        completion_evidence: |
+          The learner abstracts away from canonical syntax and identifies the essential mechanism.
+
+          ---
+        next_move_ids:
+          - C4-P3-MOVE-4
+      - id: C4-P3-MOVE-4
+        transition_id: C4
+        pedagogy_id: P3
+        title: Intended inference
+        purpose: |
+          Use contrasting unfamiliar implementations to help the learner infer which features are essential versus incidental.
+        kc_ids:
+          - K12
+          - K13
+          - K14
+        relation_ids:
+          - R9
+          - R10
+          - R11
+          - R12
+        misconception_ids:
+          - M6
+          - M7
+          - M8
+          - M10
+        material_blueprint: |
+          The learner abstracts away from canonical syntax and identifies the essential mechanism.
+
+          ---
+        allowed_behavior:
+          - present aligned cases
+          - ask for diagnostic difference
+        prohibited_behavior:
+          - Follow the shared intervention envelope and assigned pedagogy without switching treatments.
+        completion_evidence: |
+          The learner abstracts away from canonical syntax and identifies the essential mechanism.
+
+          ---
+        next_move_ids: []
