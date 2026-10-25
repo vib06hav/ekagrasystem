@@ -6,7 +6,12 @@
   <div class="nav-group">
   {% if section.enabled and not view.pending %}<a class="section-link {{ section.state }} {% if section.number == view.section_number %}selected{% endif %}" href="/session/sections/{{ section.number }}" {% if section.number == view.section_number %}aria-current="step"{% endif %}><span class="nav-label">Section</span> <span class="nav-num">{{ section.number }}</span></a>
   {% else %}<span class="section-link {{ section.state }} {% if view.pending %}disabled{% endif %}" aria-disabled="true"><span class="nav-label">Section</span> <span class="nav-num">{{ section.number }}</span></span>{% endif %}
-  {% if section.number == view.section_number and (acts or in_assessment) %}<ul class="nav-sub" aria-label="Section {{ section.number }} activities">{% for act in acts %}<li class="{% if view.is_current and loop.last and not in_assessment and view.phase == 'INTERVENTION_ACTIVE' %}current{% endif %}">{{ act.label }}</li>{% endfor %}{% if in_assessment %}<li class="current">Independent assessment</li>{% endif %}</ul>{% endif %}
+  {% if section.number == view.section_number and (acts or in_assessment) %}
+    <ul class="nav-sub" aria-label="Section {{ section.number }} activities">
+    {% for act in acts %}<li class="{% if view.is_current and loop.last and not in_assessment and view.phase == 'INTERVENTION_ACTIVE' %}current{% endif %}">{{ act.label }}</li>{% endfor %}
+    {% if in_assessment %}<li class="current">Independent assessment</li>{% endif %}
+    </ul>
+  {% endif %}
   </div>
 {% endfor %}
 </nav>
