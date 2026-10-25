@@ -2,6 +2,6 @@
 {% if view.pending %}
   <div class="composer" data-processing-kind="tutor"><div class="processing"><span>The study assistant is responding</span><span class="dots" aria-label="Processing"><i></i><i></i><i></i></span></div><button disabled>Retry</button></div><div data-operation-poll hx-get="/session/operation" hx-trigger="every 1s" hx-target="#session-main" hx-swap="outerHTML"></div>
 {% else %}
-  <div class="composer" data-teaching-activity-number="{{ view.activity_number }}"><form hx-post="/session/actions/tutor-message" hx-target="#tutor-composer" hx-swap="outerHTML" method="post"><input type="hidden" name="idempotency_key" value="{{ new_key }}"><label for="learner-text">Your response</label><div class="composer-row"><textarea id="learner-text" name="learner_text" required maxlength="8000"></textarea><button>Send</button></div></form></div>
+  <div class="composer" data-teaching-activity-number="{{ view.activity_number }}"><form hx-post="/session/actions/tutor-message" hx-target="#tutor-composer" hx-swap="outerHTML" method="post"><input type="hidden" name="idempotency_key" value="{{ new_key }}"><label class="sr" for="learner-text">Your response</label><div class="composer-row"><textarea id="learner-text" name="learner_text" required maxlength="8000" rows="1" placeholder="Write your response…"></textarea><button class="send"><span class="sr">Send</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/></svg></button></div></form></div>
 {% endif %}
 </div>
