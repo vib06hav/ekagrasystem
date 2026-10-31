@@ -17,3 +17,4 @@ _graphify_ast_runner.py
 *.ndjson
 ffmpeg_stderr.log
 tools/runtime/
+local-artifacts/
