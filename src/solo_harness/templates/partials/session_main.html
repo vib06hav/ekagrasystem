@@ -57,7 +57,6 @@
     {% elif view.phase == 'INTERVENTION_ACTIVE' %}
       {{ timeline(view) }}
       {% if view.attempt_status == 'ASSIGNED' %}<div class="composer begin-state" data-teaching-activity-number="{{ view.activity_number }}"><p class="begin-note">Select the button below to start the teaching conversation with the study assistant.</p><form hx-post="/session/actions/begin" hx-target="#session-main" hx-swap="outerHTML" method="post"><input type="hidden" name="idempotency_key" value="{{ new_key }}"><button>{% if not view.started_at %}Begin study{% else %}Begin teaching activity {{ view.activity_number }}{% endif %}</button></form></div>{% else %}{% include "partials/tutor_composer.html" %}{% endif %}
-      {% if settings.enable_f1_v04_development %}<div class="action-card"><h2>Development verification</h2><p>This local-only control records that teaching did not naturally complete and opens assessment generation for integration verification.</p><form hx-post="/session/actions/development-advance" hx-target="#session-main" hx-swap="outerHTML" method="post"><input type="hidden" name="idempotency_key" value="{{ new_key }}"><button>Advance to assessment (development only)</button></form></div>{% endif %}
     {% elif view.f1_assessment_submitted %}
       <section class="assessment" data-telemetry-surface="assessment"><div class="phase-badge">Independent assessment</div><h2>Assessment submitted</h2><p>Assessment submitted. Your responses have been saved.</p></section>
     {% elif view.phase == 'ASSESSMENT_ACTIVE' and view.f1_public_assessment %}
