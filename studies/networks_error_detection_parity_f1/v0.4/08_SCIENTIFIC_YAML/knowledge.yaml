@@ -1,0 +1,165 @@
+schema: ekagra.scientific.knowledge.v0.4
+study_id: F1_PARITY_SINGLE_TOPIC_V04
+status: CANDIDATE_UNAPPROVED
+domain: Computer Networks
+topic: Error detection with 1D and 2D even parity
+scope:
+  included:
+  - Single full-frame parity using an explicitly agreed even or odd convention
+  - Full two-dimensional row-and-column even parity with check bits and a corner bit
+  - Small newly defined parity-check groups and overlaps used for F1-level transfer in C4
+  excluded:
+  - Checksum, CRC, Hamming coding, networking-layer questions, probability of detection
+  - Any numerical item outside the inherited F1 workload boundary
+  bit_conventions:
+    numbering: one-based left to right
+    one_dimensional: 7 data bits followed by one parity bit; count all 8
+    two_dimensional: 3 data rows by 4 columns with right row checks, bottom column checks and corner check; all
+      4 rows and 5 columns even
+    error_universe: stated flips in transmitted frames including check bits unless explicitly restricted to data-only
+      for comparisons
+  prerequisites:
+  - identify 0/1, read left-to-right bit strings
+  - count at most eight 1s
+  - understand a sender can transmit bits that may change
+  prerequisite_failure_policy: Do not equate missing basic bit counting with SOLO Prestructural knowledge.
+components:
+- id: K1
+  claim: A bit can change in transmission; sender adds check bit computed from data; receiver cannot observe untransmitted
+    original.
+- id: K2
+  claim: A sender selects a single parity bit so that the complete transmitted frame (data plus check bit) meets
+    the explicitly agreed even/odd number-of-ones convention; do not fix the data length or values.
+- id: K3
+  claim: Receiver tests data and parity bit together; failure detects a violation, not the original error location
+    or repair.
+- id: K4
+  claim: For complete-frame single parity, every odd number of flipped bits toggles agreement and is detected.
+- id: K5
+  claim: For complete-frame single parity, every even number of flipped bits leaves agreement unchanged and passes;
+    passing does not certify identity with sent data.
+- id: K6
+  claim: One global parity check alone does not uniquely locate an altered bit; it only indicates violated parity.
+- id: K7
+  claim: Full 2D even parity enforces an independent constraint in each transmitted row and column, including
+    row/column check bits and a corner bit. The verified historical 3×4 data / 4×5 transmitted construction is
+    a reference, not a compulsory generated instance.
+- id: K8
+  claim: In a properly constructed full 2D row-column parity block, exactly one altered transmitted bit yields
+    one failed row and one failed column and can be uniquely located at their intersection under the single-flip
+    assumption.
+- id: K9
+  claim: In a full 2D parity block, two distinct transmitted-bit flips violate at least one check, but arbitrary
+    multiple-flip syndromes cannot be treated as uniquely locatable without additional assumptions.
+- id: K15
+  claim: Detection occurs exactly when the received frame violates at least one receiver-tested constraint; an
+    undetected corruption preserves all tested constraints.
+- id: K16
+  claim: For a fixed data universe and fixed error class, appending genuinely informative checks to existing checks
+    cannot reduce detection of data errors, but extra check bits alone do not imply dominance across different
+    schemes; location, correction and overhead are distinct outcomes.
+- id: K17
+  claim: 'Reason scheme-conditionally: whole-frame parity depends on flip-count parity; 2D parity depends on row-wise
+    and column-wise flip-count parity; group checks depend on each explicitly checked group. Presentation conventions
+    alone preserve data-error detection only when an equivalent relation is tested.'
+- id: K18
+  claim: Predict detect/pass/unique-location outcomes of a stated alteration by inspecting which declared constraints
+    it preserves or violates and what assumption (such as exactly one flip) supports unique localization.
+- id: K19
+  claim: Derive a general necessary and sufficient evasion condition for a newly defined parity-check arrangement
+    and justify a counterexample or principle-based modification; applying a provided rule to one novel frame
+    alone does not establish Extended Abstract evidence.
+relations:
+- id: R1
+  definition: The sender chooses the parity bit to make the complete frame obey the receiver’s shared test; together
+    these form one check mechanism.
+- id: R2
+  definition: Every flip toggles parity of its containing single-parity check; two toggles cancel within that
+    check, yielding the odd/even detection law.
+- id: R3
+  definition: In a full 2D parity grid a flipped bit participates in one row and one column; under exactly one
+    flip their failing intersection identifies it.
+- id: R4
+  definition: Compared with one global data-parity check, the 2D arrangement adds separate row/column constraints
+    and check-bit overhead; the comparison is restricted to stated data-only alterations unless specified otherwise.
+- id: R7
+  definition: Undetected errors are precisely error patterns that preserve every checked parity relation; a 2x2
+    rectangle of four data flips is a counterexample to perfect 2D detection.
+- id: R8
+  definition: A passing check establishes satisfaction of tests, not faithful transmission. A failed check permits
+    location only under justified assumptions.
+- id: R9
+  definition: An invariant is a property of the tested relation, not of the surface placement/naming of the check
+    bits.
+- id: R10
+  definition: For explicitly specified group membership, a pattern passes if and only if every group, including
+    its associated check bit, sees an even number of flips.
+- id: R11
+  definition: The group-wise even-flip condition supports construction of an evading pattern and an explanation
+    of how newly added independent checks change its detectability.
+misconceptions:
+- id: M1
+  error: Detection prevents corruption or reconstructs the original data without evidence.
+- id: M2
+  error: Parity is about whether frame length or numeric value is even.
+- id: M3
+  error: Confuses the given even/odd convention.
+- id: M4
+  error: Excludes the transmitted parity/check bit from its own receiver check.
+- id: M5
+  error: All corrupted frames necessarily fail a one-dimensional parity check.
+- id: M6
+  error: A passing parity check proves no bits changed.
+- id: M7
+  error: A single failed global parity check uniquely identifies the erroneous bit.
+- id: M8
+  error: 2D parity is merely repeating one global parity check, not row and column checks.
+- id: M9
+  error: Every detected multi-bit corruption can be uniquely located/corrected by 2D parity.
+- id: M13
+  error: A single universal flip-count threshold determines detection for all parity arrangements.
+- id: M14
+  error: A larger check-bit count unconditionally implies better detection in every comparison.
+- id: M15
+  error: Surface presentation changes always alter detection power, or changing actual checked groups cannot change
+    detection.
+scientific_invariants:
+- id: INV-1D
+  condition: one complete-frame single parity check, clean frame valid
+  pass_iff: number of transmitted bit flips is even
+  detected_iff: number of transmitted bit flips is odd
+  scope: includes parity bit
+- id: INV-2D
+  condition: complete 4x5 even row and column parity, clean block valid
+  pass_iff: every transmitted row and column contains an even number of flipped positions
+  detected_iff: at least one row or column has an odd number of flipped positions
+  scope: all 20 transmitted bits
+- id: INV-GROUP
+  condition: group checks have explicitly specified data positions plus their own check bit
+  pass_iff: each checked group contains an even number of flips
+  detected_iff: some checked group contains an odd number of flips
+  scope: group definitions must state all positions
+references:
+  source: Original revised Knowledge Pack and Intervention Pack attached in conversation; v0.3 author modifications
+    explicitly proposed; see decision register
+  technical_subject_references:
+  - 'Kurose & Ross Computer Networking: A Top-Down Approach 8e §6.2.1 (cited in earlier authoring; page claims
+    not newly verified)'
+  - Tanenbaum Computer Networks 5e §3.2.2 (cited in earlier authoring; not newly verified)
+  SOLO_references:
+  - 'Biggs & Collis 1982, Evaluating the Quality of Learning: The SOLO Taxonomy'
+  - University of Auckland Rethinking Assessment SOLO overview
+  derived_status: Technical parity invariants are internally derived and checked; operational SOLO and equivalence
+    claims remain candidate, not externally validated.
+runtime_numeric_scope:
+  single_parity_data_length_min: 3
+  single_parity_data_length_max: 7
+  manual_full_frame_count_max: 8
+  full_2d_reference_data_rows: 3
+  full_2d_reference_data_columns: 4
+  two_dimensional_task_boundary: Learner reasons from stated small row/column syndromes or bounded groups; do
+    not demand manual recount of more than eight bits in a single parity calculation. For multirow diagrams, give
+    check statuses if manual tally would exceed the F1 cap.
+  grouped_check_data_positions_max: 8
+  qualification: Range 3–7 for single-parity data is a proposed instance generator range WITHIN the original <=8
+    counted-bit cap, not a broadened scope; refine for psychometric calibration.

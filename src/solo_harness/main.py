@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from fastapi import FastAPI, Response
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.sessions import SessionMiddleware
 
 from solo_harness import __version__
 from solo_harness.bootstrap import bootstrap
@@ -26,6 +27,7 @@ def create_app(execution=None) -> FastAPI:
         yield
         state["ready"] = False
     app = FastAPI(title="SOLO Harness", version=__version__, lifespan=lifespan)
+    app.add_middleware(SessionMiddleware, secret_key=settings.web_session_secret.get_secret_value(), https_only=False, same_site="lax")
     app.mount("/static", StaticFiles(directory=str(Path(__file__).parent / "static")), name="static")
     @app.get("/health/live")
     async def live(): return {"status": "live"}

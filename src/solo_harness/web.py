@@ -2,13 +2,14 @@
 from __future__ import annotations
 
 import hashlib
+import secrets
 import json
 import uuid
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-from fastapi import APIRouter, BackgroundTasks, Form, Request
+from fastapi import APIRouter, BackgroundTasks, Form, Header, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
@@ -28,6 +29,7 @@ from solo_harness.db.models import (
 )
 from solo_harness.runtime.ai import AIExecutionRuntime, OpenAICompatibleClient
 from solo_harness.runtime.engine import SessionRuntime
+from solo_harness.runtime.v04_persistence import is_deliverable_f1, is_f1_frozen, is_f1_study, public_projection, submit_f1_response
 from solo_harness.research_time import in_research_timezone
 from solo_harness.telemetry import append_keyboard_batch, append_rrweb_batch, ensure_browser_manifest, record_ui_events
 
@@ -41,7 +43,6 @@ class ParticipantApplication:
         self.settings = settings
         self.factory = make_session_factory(settings.database_url)
         self.execution = execution or AIExecutionRuntime(SessionRuntime(catalog), OpenAICompatibleClient(settings), settings)
-        self.active_session_id: uuid.UUID | None = None
 
     def _active_capture_run_id(self, db) -> uuid.UUID | None:
         """Return the one fresh recorder marker, never guessing from stale files."""
@@ -70,11 +71,18 @@ class ParticipantApplication:
         with self.factory() as db:
             if db.scalar(select(Session.id).where(Session.institutional_id == normalized)):
                 return None
-            requires_capture = getattr(self.settings, "require_active_capture", False)
+            # Research enrollment remains capture-gated.  The separately
+            # configured v0.4 development mode is local verification only.
+            requires_capture = getattr(self.settings, "require_active_capture", False) and not self.settings.enable_f1_v04_development
             capture_run_id = self._active_capture_run_id(db) if requires_capture else None
             if requires_capture and capture_run_id is None: return None
             active = db.scalar(select(ActiveStudyVersion).order_by(ActiveStudyVersion.activated_at.desc()))
             if active is None: return None
+            compiled = self.execution.runtime.catalog.load(db, active.study_version_id)
+            # Candidate F1 v0.4 is development-only.  The source status is not
+            # transformed by this switch; production startup fails closed.
+            if (compiled.authored.get("v04") and not self.settings.enable_f1_v04_development):
+                return None
             try:
                 session = self.execution.runtime.create_session(db, active.study_version_id, build_id=self.settings.app_build_id, institutional_id=normalized, capture_run_id=capture_run_id, commit=False)
                 self.execution.runtime._event(db, session, "PARTICIPANT_ENTERED", {"entry_method": "INSTITUTIONAL_ID", "study_information_acknowledged": True}, session.current_attempt_id)
@@ -82,23 +90,26 @@ class ParticipantApplication:
             except IntegrityError:
                 db.rollback()
                 return None
-            self.active_session_id = session.id
             return session.id
 
-    def deactivate(self):
-        if self.active_session_id is not None:
+    def deactivate(self, browser_session):
+        active_session_id = self.require(browser_session)
+        if active_session_id is not None:
             with self.factory() as db:
-                session = db.get(Session, self.active_session_id)
+                session = db.get(Session, active_session_id)
                 if session:
                     self.execution.runtime._event(db, session, "PARTICIPANT_EXITED", {}, session.current_attempt_id)
                     db.commit()
-        self.active_session_id = None
+        browser_session.pop("participant_session_id", None)
 
-    def require(self) -> uuid.UUID | None:
-        if self.active_session_id is None:
+    def require(self, browser_session) -> uuid.UUID | None:
+        raw_id = browser_session.get("participant_session_id")
+        if not raw_id:
             return None
+        try: session_id=uuid.UUID(str(raw_id))
+        except (ValueError, TypeError): return None
         with self.factory() as db:
-            return self.active_session_id if db.get(Session, self.active_session_id) else None
+            return session_id if db.get(Session, session_id) else None
 
     def _transition_ids(self, db, session: Session) -> list[str]:
         return list(self.execution.runtime._compiled(db, session).protocol["transition_ids"])
@@ -109,7 +120,9 @@ class ParticipantApplication:
             session = db.get(Session, session_id)
             if not session:
                 return None
-            transition_ids = self._transition_ids(db, session)
+            compiled = self.execution.runtime._compiled(db, session)
+            transition_ids = list(compiled.protocol["transition_ids"])
+            f1_study = is_f1_study(compiled)
             attempts = db.scalars(
                 select(Attempt).where(Attempt.session_id == session.id).order_by(Attempt.assigned_at, Attempt.sequence_in_transition)
             ).all()
@@ -192,13 +205,22 @@ class ParticipantApplication:
             latest = db.scalar(
                 select(LLMCall).where(LLMCall.session_id == session.id).order_by(LLMCall.started_at.desc())
             )
+            # Assessment construction is an orchestrated operation.  Its child
+            # Writer/Reviewer rows are audit records, not the participant's
+            # retry target; a successful child must not hide a failed parent.
+            build = db.scalar(select(LLMCall).where(
+                LLMCall.assessment_instance_id == current_assessment.id,
+                LLMCall.purpose == "ASSESSMENT_BUILD",
+            ).order_by(LLMCall.started_at.desc())) if current_assessment and current_assessment.status == "GENERATING" else None
+            operation = build or latest
             stale = bool(
-                latest and latest.status == "STARTED"
-                and datetime.now(timezone.utc) - latest.started_at
+                operation and operation.status in ("STARTED", "SENDING")
+                and datetime.now(timezone.utc) - operation.started_at
                 >= timedelta(seconds=self.settings.llm_request_timeout_seconds + self.settings.llm_stale_grace_seconds)
             )
-            pending = bool(latest and latest.status in ("STARTED", "RECEIVED") and not stale)
-            retryable = bool(latest and (latest.status in ("FAILED", "INVALID_OUTPUT") or stale))
+            pending = bool(operation and operation.status in ("STARTED", "SENDING", "RECEIVED") and operation.error_class != "APPLICATION_FAILURE" and not stale)
+            retryable = bool(operation and (operation.status in ("FAILED", "INVALID_OUTPUT") or operation.error_class in ("REVIEW_HOLD", "APPLICATION_FAILURE") or stale))
+            technical_hold = bool(operation and operation.status == "TECHNICAL_HOLD")
             now = session.ended_at or datetime.now(timezone.utc)
             elapsed_seconds = max(0, int((now - session.started_at).total_seconds())) if session.started_at else 0
 
@@ -220,10 +242,22 @@ class ParticipantApplication:
                     current_assessment.prompt_snapshot
                     if current_assessment and current_assessment.status == "ACTIVE" and is_current else None
                 ),
+                "f1_public_assessment": (
+                    public_projection(current_assessment)
+                    if f1_study and current_assessment and current_assessment.status == "ACTIVE" and is_current and is_deliverable_f1(current_assessment, self.settings) else None
+                ),
+                "f1_assessment_submitted": bool(
+                    f1_study and current_assessment and current_assessment.status == "AWAITING_EVALUATION" and is_f1_frozen(current_assessment) and is_current
+                ),
+                "f1_assessment_unavailable": bool(
+                    f1_study and current_assessment and current_assessment.status == "ACTIVE" and is_current
+                    and not is_deliverable_f1(current_assessment, self.settings)
+                ),
                 "pending": pending,
-                "pending_status": latest.status if pending else None,
+                "pending_status": operation.status if pending else None,
                 "retryable": retryable,
-                "failed_purpose": latest.purpose if retryable else None,
+                "technical_hold": technical_hold,
+                "failed_purpose": operation.purpose if retryable else None,
                 "started_at": in_research_timezone(session.started_at),
                 "ended_at": in_research_timezone(session.ended_at),
                 "elapsed_seconds": elapsed_seconds,
@@ -236,7 +270,13 @@ class ParticipantApplication:
         except Exception as exc:
             with self.factory() as db:
                 call = db.get(LLMCall, call_id)
-                if call and call.status in ("STARTED", "RECEIVED"):
+                if call and call.status == "RECEIVED":
+                    # Provider output is durable.  Keep it in the recovery queue
+                    # so retry applies the same response without another send.
+                    call.error_class = "APPLICATION_FAILURE"
+                    call.error_message = str(exc)[:4000]
+                    db.commit()
+                elif call and call.status in ("STARTED", "SENDING"):
                     call.status = "FAILED"
                     call.error_class = "APPLICATION_ERROR"
                     call.error_message = str(exc)[:4000]
@@ -245,7 +285,10 @@ class ParticipantApplication:
 
     async def recover_persisted_operations(self):
         with self.factory() as db:
-            started = db.scalars(select(LLMCall).where(LLMCall.status == "STARTED")).all()
+            # The assessment build is a persisted orchestrator, not an external
+            # request.  Resume it after applying any saved role responses.
+            build_ids = list(db.scalars(select(LLMCall.id).where(LLMCall.status == "STARTED", LLMCall.purpose == "ASSESSMENT_BUILD")).all())
+            started = db.scalars(select(LLMCall).where(LLMCall.status.in_(("STARTED", "SENDING")), LLMCall.purpose != "ASSESSMENT_BUILD")).all()
             for call in started:
                 call.status = "FAILED"
                 call.error_class = "PROCESS_INTERRUPTED"
@@ -255,13 +298,28 @@ class ParticipantApplication:
             db.commit()
         for call_id in received_ids:
             await self.run_operation(call_id)
+        for call_id in build_ids:
+            await self.run_operation(call_id)
+        # Reconcile installations upgraded from the former split commit path.
+        # Locking the session makes repeated startup recovery idempotent.
+        with self.factory() as db:
+            generating = db.scalars(select(AssessmentInstance).where(AssessmentInstance.status == "GENERATING")).all()
+            orphaned=[]
+            for assessment in generating:
+                session=db.scalar(select(Session).where(Session.id==assessment.session_id).with_for_update())
+                existing=db.scalar(select(LLMCall.id).where(LLMCall.assessment_instance_id==assessment.id,LLMCall.purpose=="ASSESSMENT_BUILD").order_by(LLMCall.started_at.desc()))
+                if existing is None and session and session.phase=="ASSESSMENT_GENERATING":
+                    orphaned.append(self.execution.reserve_assessment(db,session.id,assessment.id,commit=False))
+            db.commit()
+        for call_id in orphaned:
+            await self.run_operation(call_id)
 
     @staticmethod
     def _request_hash(action_type: str, payload: dict) -> str:
         canonical = json.dumps({"action_type": action_type, "payload": payload}, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
         return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
-    def reserve_idempotent(self, db, session_id, action_type, idempotency_key, payload, reserve):
+    def reserve_idempotent(self, db, session_id, action_type, idempotency_key, payload, reserve, result_type="LLMCall"):
         key = idempotency_key.strip()
         if not key or len(key) > 200:
             raise ValueError("invalid idempotency key")
@@ -283,19 +341,23 @@ class ParticipantApplication:
             action_type=action_type,
             idempotency_key=key,
             request_hash=request_hash,
-            result_object_type="LLMCall",
+            result_object_type=result_type,
             response_snapshot={"state": "RESERVING"},
             expires_at=datetime.now(timezone.utc) + timedelta(seconds=self.settings.idempotency_retention_seconds),
         )
         db.add(record); db.flush()
         try:
-            call_id = reserve()
+            # Callback mutations (notably the learner message inserted while a
+            # Tutor turn is reserved) must disappear when reservation rejects.
+            # The outer idempotency row survives as an audited rejection.
+            with db.begin_nested():
+                call_id = reserve()
         except Exception:
             record.response_snapshot = {"state": "REJECTED"}
             db.commit()
             raise
         record.result_object_id = call_id
-        record.response_snapshot = {"state": "RESERVED", "llm_call_id": str(call_id)}
+        record.response_snapshot = {"state": "RESERVED", "object_id": str(call_id), "object_type": result_type}
         db.commit()
         return call_id, True
 
@@ -326,14 +388,16 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
 
     @router.post("/join", response_class=HTMLResponse)
     async def join(request: Request, institutional_id: str = Form(..., max_length=200), acknowledged: str = Form(...)):
-        if application.activate(institutional_id) is None:
+        session_id = application.activate(institutional_id)
+        if session_id is None:
             message = "The study is not ready yet. Please contact the researcher." if getattr(application.settings, "require_active_capture", False) else "This participant cannot start a new study session. Please contact the researcher."
             return templates.TemplateResponse(request, "join.html", {"error": message, "settings": application.settings}, status_code=403)
+        request.session["participant_session_id"] = str(session_id)
         return RedirectResponse("/session", status_code=303)
 
     @router.post("/leave")
-    async def leave():
-        application.deactivate()
+    async def leave(request: Request):
+        application.deactivate(request.session)
         return RedirectResponse("/join", status_code=303)
 
     def render_session(request: Request, session_id, selected_section=None):
@@ -342,14 +406,14 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
 
     @router.get("/session", response_class=HTMLResponse)
     async def session_page(request: Request):
-        session_id = application.require()
+        session_id = application.require(request.session)
         if not session_id:
             return RedirectResponse("/join", status_code=303)
         return render_session(request, session_id)
 
     @router.get("/session/sections/{section_number}", response_class=HTMLResponse)
     async def section_page(request: Request, section_number: int):
-        session_id = application.require()
+        session_id = application.require(request.session)
         if not session_id:
             return RedirectResponse("/join", status_code=303)
         current = application.view(session_id)
@@ -357,7 +421,7 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
 
     @router.get("/session/operation", response_class=HTMLResponse)
     async def operation(request: Request):
-        session_id = application.require()
+        session_id = application.require(request.session)
         if not session_id:
             return RedirectResponse("/join", status_code=303)
         # A pending operation has no participant-visible change. Returning 204
@@ -368,7 +432,7 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
 
     @router.post("/session/telemetry/rrweb")
     async def rrweb_telemetry(request: Request):
-        session_id = application.require()
+        session_id = application.require(request.session)
         if not session_id:
             return {"accepted": False}
         try:
@@ -385,7 +449,7 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
 
     @router.post("/session/telemetry/keyboard")
     async def keyboard_telemetry(request: Request):
-        session_id = application.require()
+        session_id = application.require(request.session)
         if not session_id:
             return {"accepted": False}
         try:
@@ -405,7 +469,7 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
 
     @router.post("/session/telemetry/ui-events")
     async def ui_telemetry(request: Request):
-        session_id = application.require()
+        session_id = application.require(request.session)
         if not session_id:
             return {"accepted": False}
         try:
@@ -426,7 +490,7 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
 
     @router.post("/session/actions/begin", response_class=HTMLResponse)
     async def begin(request: Request, background_tasks: BackgroundTasks, idempotency_key: str = Form(...)):
-        session_id = application.require()
+        session_id = application.require(request.session)
         if not session_id:
             return RedirectResponse("/join", status_code=303)
         try:
@@ -439,7 +503,7 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
 
     @router.post("/session/actions/tutor-message", response_class=HTMLResponse)
     async def tutor_message(request: Request, background_tasks: BackgroundTasks, learner_text: str = Form(..., max_length=8000), idempotency_key: str = Form(...)):
-        session_id = application.require()
+        session_id = application.require(request.session)
         if not session_id:
             return RedirectResponse("/join", status_code=303)
         try:
@@ -460,23 +524,50 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
         return response
 
     @router.post("/session/actions/assessment-response", response_class=HTMLResponse)
-    async def assessment_response(request: Request, background_tasks: BackgroundTasks, response_text: str = Form(..., max_length=12000), idempotency_key: str = Form(...)):
-        session_id = application.require()
+    async def assessment_response(request: Request, background_tasks: BackgroundTasks, response_text: str = Form(..., max_length=12000), idempotency_key: str = Form(...), mcq1_answer: str | None = Form(None), mcq2_answer: str | None = Form(None), mcq3_answer: str | None = Form(None)):
+        session_id = application.require(request.session)
         if not session_id:
             return RedirectResponse("/join", status_code=303)
         try:
             text = response_text.strip()
             action_id = uuid.uuid5(uuid.NAMESPACE_URL, f"solo-harness:{session_id}:{idempotency_key}")
-            call_id, created = reserve_action(session_id, "ASSESSMENT_RESPONSE", idempotency_key, {"response_text": text}, lambda db: application.execution.reserve_judge(db, session_id, text, action_id, commit=False))
+            with application.factory() as db:
+                session = db.get(Session, session_id)
+                attempt = db.get(Attempt, session.current_attempt_id) if session else None
+                assessment = db.scalar(select(AssessmentInstance).where(AssessmentInstance.attempt_id == attempt.id)) if attempt else None
+                compiled = application.execution.runtime._compiled(db, session)
+                f1_request = is_f1_study(compiled)
+                if f1_request:
+                    if not is_deliverable_f1(assessment, application.settings):
+                        raise ValueError("F1 assessment package is unavailable for learner delivery")
+                    answers = {"MCQ1": mcq1_answer or "", "MCQ2": mcq2_answer or "", "MCQ3": mcq3_answer or ""}
+                    payload = {"answers": answers, "subjective_response": text}
+                    f1_judge = {}
+                    def reserve_f1():
+                        response = submit_f1_response(db, application.execution.runtime, session_id, answers, text, action_id)
+                        f1_judge["id"] = application.execution.reserve_f1_judge(db, session_id, response, commit=False)
+                        return response.id
+                    call_id, created = application.reserve_idempotent(
+                        db, session_id, "F1_ASSESSMENT_RESPONSE", idempotency_key, payload,
+                        reserve_f1,
+                        result_type="AssessmentResponse",
+                    )
+                else:
+                    call_id, created = application.reserve_idempotent(
+                        db, session_id, "ASSESSMENT_RESPONSE", idempotency_key, {"response_text": text},
+                        lambda: application.execution.reserve_judge(db, session_id, text, action_id, commit=False),
+                    )
         except ValueError:
             return rejected(request, session_id)
-        if created:
+        if created and f1_request:
+            background_tasks.add_task(application.run_operation, f1_judge["id"])
+        elif created:
             background_tasks.add_task(application.run_operation, call_id)
         return application.render_main(request, session_id)
 
     @router.post("/session/actions/retry", response_class=HTMLResponse)
     async def retry(request: Request, background_tasks: BackgroundTasks, idempotency_key: str = Form(...)):
-        session_id = application.require()
+        session_id = application.require(request.session)
         if not session_id:
             return RedirectResponse("/join", status_code=303)
         try:
@@ -487,9 +578,34 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
             background_tasks.add_task(application.run_operation, call_id)
         return application.render_main(request, session_id)
 
+    @router.post("/internal/technical-holds/{call_id}/requeue")
+    async def requeue_technical_hold(call_id: uuid.UUID, background_tasks: BackgroundTasks, x_technical_hold_token: str | None = Header(None)):
+        configured=application.settings.technical_hold_resolution_token
+        if configured is None or x_technical_hold_token is None or not secrets.compare_digest(configured.get_secret_value(), x_technical_hold_token):
+            raise HTTPException(status_code=403, detail="researcher authorization required")
+        with application.factory() as db:
+            held=db.get(LLMCall,call_id)
+            if held is None or held.status!="TECHNICAL_HOLD": raise HTTPException(status_code=409, detail="operation is not an exhausted technical hold")
+            new_id=application.execution.reserve_manual_retry(db,held.session_id,commit=True,authorized_requeue=True)
+        background_tasks.add_task(application.run_operation,new_id)
+        return {"requeued_call_id":str(new_id),"requeued_from":str(call_id)}
+
+    @router.post("/session/actions/development-advance", response_class=HTMLResponse)
+    async def development_advance(request: Request, background_tasks: BackgroundTasks, idempotency_key: str = Form(...)):
+        session_id = application.require(request.session)
+        if not session_id:
+            return RedirectResponse("/join", status_code=303)
+        try:
+            call_id, created = reserve_action(session_id, "DEVELOPMENT_ADVANCE", idempotency_key, {}, lambda db: application.execution.reserve_development_assessment(db, session_id, commit=False))
+        except ValueError:
+            return rejected(request, session_id)
+        if created:
+            background_tasks.add_task(application.run_operation, call_id)
+        return application.render_main(request, session_id)
+
     @router.post("/session/actions/next", response_class=HTMLResponse)
     async def next_section(request: Request):
-        session_id = application.require()
+        session_id = application.require(request.session)
         if not session_id:
             return RedirectResponse("/join", status_code=303)
         try:
@@ -501,7 +617,7 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
 
     @router.post("/session/actions/finish", response_class=HTMLResponse)
     async def finish(request: Request):
-        session_id = application.require()
+        session_id = application.require(request.session)
         if not session_id:
             return RedirectResponse("/join", status_code=303)
         try:

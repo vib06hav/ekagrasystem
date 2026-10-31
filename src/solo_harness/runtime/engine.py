@@ -90,6 +90,12 @@ class SessionRuntime:
     def _event(self, db, session, event_type, payload, attempt_id=None):
         session.last_event_sequence += 1
         db.add(ProtocolEvent(session_id=session.id, sequence_no=session.last_event_sequence, event_type=event_type, event_version=1, attempt_id=attempt_id, actor="SYSTEM", correlation_id=uuid.uuid4(), payload=payload))
+    def complete_section(self, db, session, attempt, scientific_outcome, formal_state_advanced):
+        """Canonical, once-only scientific outcome for a completed transition."""
+        prior=db.scalar(select(ProtocolEvent.id).where(ProtocolEvent.session_id==session.id,ProtocolEvent.event_type=="SECTION_COMPLETED",ProtocolEvent.payload["transition_id"].as_string()==attempt.transition_id))
+        if prior is not None:
+            raise ValueError("transition already has a completion outcome")
+        self._event(db,session,"SECTION_COMPLETED",{"transition_id":attempt.transition_id,"scientific_outcome":scientific_outcome,"formal_state_advanced":formal_state_advanced},attempt.id)
     def _compiled(self, db, session): return self.catalog.load(db, session.study_version_id)
     def create_session(self, db: DbSession, study_version_id, build_id="test", runtime_config=None, institutional_id=None, capture_run_id=None, commit=True):
         compiled = self.catalog.load(db, study_version_id)
@@ -152,7 +158,7 @@ class SessionRuntime:
         if result.passed:
             session.formal_state_id=formal_state_after
             session.phase="SECTION_COMPLETE"
-            self._event(db,session,"SECTION_COMPLETED",{"transition_id":attempt.transition_id,"scientific_outcome":"PASSED","formal_state_advanced":can_advance_formally},attempt.id)
+            self.complete_section(db,session,attempt,"PASSED",can_advance_formally)
         else:
             used=db.scalars(select(Attempt.pedagogy_id).where(Attempt.session_id==session.id,Attempt.transition_id==attempt.transition_id)).all()
             if len(used)<compiled.protocol["max_attempts_per_transition"]: self._create_attempt(db,session,compiled,attempt.transition_id)
@@ -160,7 +166,7 @@ class SessionRuntime:
                 attempt.outcome_details={**(attempt.outcome_details or {}),"administrative_outcome":"PEDAGOGIES_EXHAUSTED_CONTINUE","scientific_outcome":"UNRESOLVED"}
                 session.phase="SECTION_COMPLETE"
                 self._event(db,session,"SECTION_CONTINUATION_ALLOWED",{"transition_id":attempt.transition_id,"reason":"PEDAGOGIES_EXHAUSTED_CONTINUE","scientific_outcome":"UNRESOLVED","formal_state_id":session.formal_state_id},attempt.id)
-                self._event(db,session,"SECTION_COMPLETED",{"transition_id":attempt.transition_id,"scientific_outcome":"UNRESOLVED","formal_state_advanced":False},attempt.id)
+                self.complete_section(db,session,attempt,"UNRESOLVED",False)
         db.commit(); return result
 
     def advance_section(self, db: DbSession, session_id, commit=True):
@@ -187,7 +193,7 @@ class SessionRuntime:
         transitions = self._compiled(db, session).protocol["transition_ids"]
         if session.current_transition_id != transitions[-1]:
             raise ValueError("only the final section can finish the session")
-        unresolved = db.scalar(select(ProtocolEvent.id).where(ProtocolEvent.session_id == session.id,ProtocolEvent.event_type == "SECTION_CONTINUATION_ALLOWED").limit(1)) is not None
+        unresolved = db.scalar(select(ProtocolEvent.id).where(ProtocolEvent.session_id == session.id, ProtocolEvent.event_type == "SECTION_COMPLETED", ProtocolEvent.payload["scientific_outcome"].as_string() == "UNRESOLVED").limit(1)) is not None
         session.status = "UNRESOLVED" if unresolved else "COMPLETED"
         session.phase = "TERMINAL"
         session.terminal_reason = "COMPLETED_WITH_UNRESOLVED_SECTIONS" if unresolved else "COMPLETED_EA"

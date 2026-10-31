@@ -1,0 +1,158 @@
+schema: ekagra.scientific.transitions.v0.4
+status: CANDIDATE_UNAPPROVED
+interpretation_policy: SOLO labels categorize demonstrated response structure on a scoped item, not a stable full
+  learner trait or validated state diagnosis. Formal study progression is a separate operational decision.
+note: 'C2 has no required R2/R3/R4: causal facts may be observed incidentally but are not demanded until C3.'
+transitions:
+- id: C1
+  before: No demonstrated topic-level understanding; prerequisites separately screened.
+  from: P
+  to: U
+  components:
+  - K1
+  - K2
+  - K3
+  relations:
+  - R1
+  misconceptions:
+  - M1
+  - M2
+  - M3
+  - M4
+  target: One usable sender-computed-parity / receiver-test aspect; learner identifies that an agreed check bit
+    makes a complete frame satisfy the receiver test.
+  positive_evidence: Accurately identifies the data-dependent check bit or the corresponding complete-frame receiver
+    test on a stated example; can link them when the prompt supplies context.
+  not_required: No multi-flip laws, 2D parity, causal derivation or scheme comparison.
+  below: Only vague extra bit / error prevention, no usable correct parity aspect.
+  above: Several independent scheme properties or a derived causal chain may be recorded, but not needed to pass
+    C1.
+  border_case: A correct isolated selection may demonstrate one relevant feature, but cannot establish that the
+    learner can independently explain the full mechanism.
+  rubric_0: No materially correct usable topic-specific parity aspect in response.
+  rubric_1: At least one clearly usable and correct sender-parity or complete-frame receiver-check aspect for
+    the posed item; statement not simply a correct numerical guess without identifiable rule.
+  rubric_2: Correctly explains how sender rule and receiver check are coupled under the stated convention, including
+    why the observed mismatch would matter.
+  scenario_independence: Do not require any fixed bit string, grid, answer sentence, correct letter, or named
+    historical fixture.
+  observed_structure_vs_score: Judge must record the actually observed structural organization separately from
+    material correctness and the provisional 0/1/2 item score.
+- id: C2
+  before: At least one usable sender/receiver parity aspect.
+  from: U
+  to: M
+  components:
+  - K4
+  - K5
+  - K6
+  - K7
+  - K8
+  - K9
+  relations: []
+  misconceptions:
+  - M1
+  - M4
+  - M5
+  - M6
+  - M7
+  - M8
+  - M9
+  target: Several separately relevant features of 1D and 2D parity; multiple properties must be present without
+    requiring a unified causal account.
+  positive_evidence: At least two distinct correctly identified properties, one pertaining to 1D parity and one
+    to 2D parity, under prompted comparable situations.
+  not_required: Explanations of WHY row/column constraints detect, why flips toggle parity, or how overhead trades
+    against coverage; those are C3-level integration.
+  below: One correct property repeated in different wording or two variations of the same single example.
+  above: An integrated explanation is observable but not required for M credit.
+  border_case: A list of 1D and 2D facts is M even when there is no connective causal explanation. Requiring a
+    polished because-chain here would bias toward R.
+  rubric_0: At most one correct relevant property or material contradiction of the required properties.
+  rubric_1: At least two distinct, materially correct properties spanning both parity families, allowed to be
+    unconnected.
+  rubric_2: Three or more precise distinct applicable properties spanning both families, with accurate scope and
+    limitations; no integration requirement.
+  scenario_independence: Do not require any fixed bit string, grid, answer sentence, correct letter, or named
+    historical fixture.
+  observed_structure_vs_score: Judge must record the actually observed structural organization separately from
+    material correctness and the provisional 0/1/2 item score.
+- id: C3
+  before: Several correct 1D/2D properties available but not necessarily causally integrated.
+  from: M
+  to: R
+  components:
+  - K15
+  - K16
+  relations:
+  - R2
+  - R3
+  - R4
+  - R7
+  - R8
+  misconceptions:
+  - M5
+  - M6
+  - M7
+  - M8
+  - M9
+  - M13
+  - M14
+  target: A connected, correct explanation using sender-enforced relation → specified flips alter/preserve constraints
+    → failed/passed tests → warranted detection/localization claim, with relevant limitations.
+  positive_evidence: 'The learner links at least two causal steps explicitly: what is tested, how the defined
+    alteration affects that test, why the receiver concludes pass/fail/location. May express chain in any order.'
+  not_required: Unfamiliar check-group generalization or new theorem-level counterexample; C4 reserved.
+  below: Correct but disconnected list (odd/even, rows/columns, 8 checks) without a case-linked causal explanation.
+  above: General conditions applying to a newly defined checking system are C4 candidates if genuinely derived.
+  border_case: Can explain one concrete 2D alteration relationally without asserting a law for all possible partitions.
+  rubric_0: Only separately listed facts, a guessed outcome, or materially incorrect causal link.
+  rubric_1: Materially correct, explicit case-linked relation → altered/preserved constraints → test/outcome explanation,
+    at least in one central mechanism.
+  rubric_2: Complete accurate case-specific causal explanation including relevant location/miss limitation or
+    comparison of constraints; do not demand generalized unknown-scheme derivation.
+  scenario_independence: Do not require any fixed bit string, grid, answer sentence, correct letter, or named
+    historical fixture.
+  observed_structure_vs_score: Judge must record the actually observed structural organization separately from
+    material correctness and the provisional 0/1/2 item score.
+- id: C4
+  before: Connected causal explanation of 1D/2D parity constraints and their limitations.
+  from: R
+  to: EA
+  components:
+  - K17
+  - K18
+  - K19
+  relations:
+  - R9
+  - R10
+  - R11
+  misconceptions:
+  - M6
+  - M13
+  - M14
+  - M15
+  target: 'Principle-level abstraction: independently derive a generally applicable evasion/detection condition
+    for a freshly defined subset-check system, then justify a counterexample or principled modification beyond
+    one worked case.'
+  positive_evidence: States a meaningful general condition covering a class of alterations, demonstrates why it
+    follows from the group membership, and uses it to derive a nontrivial valid instance, counterexample, or generalizable
+    design implication.
+  not_required: Transfer to CRC, Hamming codes, other networking layers, formal algebra, probabilistic error detection
+    or completely new domains.
+  below: One correctly predicted unfamiliar-pattern result by applying a supplied rule; that can show Relational
+    application but is not by itself EA.
+  above: More general theory or transfer to different systems can be noted but not required in bounded F1.
+  border_case: A correct observation that one pair of flips passes, without explaining the arbitrary-group even-count
+    condition, is not EA.
+  rubric_0: Only case-specific prediction/canonical recall, unjustified assertion, or invalid generalization.
+  rubric_1: Correctly derives and justifies a condition that applies beyond one concrete frame, and demonstrates
+    a valid application/counterexample within the new scheme.
+  rubric_2: Derives both necessary-and-sufficient group-wise condition and uses it to give a correct counterexample
+    plus an explicit boundary or implication; accept alternate valid derivations.
+  scenario_independence: Do not require any fixed bit string, grid, answer sentence, correct letter, or named
+    historical fixture.
+  observed_structure_vs_score: Judge must record the actually observed structural organization separately from
+    material correctness and the provisional 0/1/2 item score.
+transition_usage: Structural SOLO descriptors are response-level proposed operational anchors, not an empirically
+  demonstrated learner-state diagnostic.

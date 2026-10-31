@@ -29,10 +29,14 @@ class Settings(BaseSettings):
     app_host: str = "0.0.0.0"
     app_port: int = Field(default=8000, gt=0, le=65535)
     app_build_id: str = "dev"
+    web_session_secret: SecretStr = SecretStr("development-only-session-secret-change-before-research")
+    technical_hold_resolution_token: SecretStr | None = None
     log_level: str = "INFO"
     idempotency_retention_seconds: int = Field(default=43200, gt=0)
     research_data_dir: Path = Path("/app/research-data")
     require_active_capture: bool = False
+    enable_f1_v04_development: bool = False
+    f1_v04_study_dir: Path = Path("/app/studies/networks_error_detection_parity_f1/v0.4")
     active_capture_max_age_seconds: int = Field(default=300, gt=0)
     participant_study_title: str = "Learning study"
     participant_intro_text: str = "You will complete four guided learning sections. Each section contains a teaching conversation followed by an independent assessment."

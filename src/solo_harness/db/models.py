@@ -117,6 +117,15 @@ class AssessmentInstance(Base):
     resolved_component_ids: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
     generation_llm_call_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True))
     prompt_snapshot: Mapped[str | None] = mapped_column(Text); hidden_scoring_context_snapshot: Mapped[str | None] = mapped_column(Text)
+    # v0.4 keeps the complete package immutable on the server and exposes only
+    # frozen_public_snapshot to the participant view.
+    frozen_public_snapshot: Mapped[dict | None] = mapped_column(JSON)
+    frozen_private_snapshot: Mapped[dict | None] = mapped_column(JSON)
+    frozen_package_fingerprint: Mapped[str | None] = mapped_column(String(64))
+    frozen_schema_version: Mapped[str | None] = mapped_column(String)
+    frozen_metadata_snapshot: Mapped[dict | None] = mapped_column(JSON)
+    delivery_status: Mapped[str | None] = mapped_column(String)
+    frozen_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     selected_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False); submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True)); closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     __table_args__ = (UniqueConstraint("attempt_id"), UniqueConstraint("session_id", "assessment_form_id"))
 
@@ -125,6 +134,17 @@ class AssessmentResponse(Base):
     __tablename__ = "assessment_responses"
     id: Mapped[uuid.UUID] = uuid_pk(); assessment_instance_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("assessment_instances.id"), nullable=False, unique=True)
     response_text: Mapped[str] = mapped_column(Text, nullable=False); response_format: Mapped[str] = mapped_column(String, nullable=False); submitted_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False); client_action_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, unique=True)
+    structured_response: Mapped[dict | None] = mapped_column(JSON)
+    response_schema_version: Mapped[str | None] = mapped_column(String)
+
+
+class V04Evaluation(Base):
+    """One private immutable F1 v0.4 result per frozen learner response."""
+    __tablename__ = "phase2_evaluations"
+    id: Mapped[uuid.UUID] = uuid_pk(); assessment_response_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("assessment_responses.id"), nullable=False, unique=True)
+    status: Mapped[str] = mapped_column(String, nullable=False); mcq_results: Mapped[dict | None] = mapped_column(JSON); mcq_score: Mapped[int | None] = mapped_column(Integer)
+    subjective_score: Mapped[int | None] = mapped_column(Integer); judge_findings: Mapped[dict | None] = mapped_column(JSON); judge_llm_call_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("llm_calls.id"))
+    evaluation_version: Mapped[str] = mapped_column(String, nullable=False); passed: Mapped[bool | None] = mapped_column(Boolean); created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False); finalized_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
 
 class LLMCall(Base):

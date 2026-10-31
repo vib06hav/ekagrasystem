@@ -1,0 +1,156 @@
+schema: ekagra.scientific.scenarios.v0.4
+status: CANDIDATE_UNAPPROVED
+policy:
+  fresh_per_instance: true
+  no_runtime_fixture_reuse_as_contract: true
+  instruction_assessment_disjoint_instance_ids: true
+  randomization_independent_of_treatment: true
+  correctness_from_oracle_not_llm: true
+  independent_option_display_shuffle: true
+  difficulty_balance: Sample multiple parity outcomes, positions and convention variants while holding concept
+    and computational demand comparable; distribution to be empirically calibrated.
+numeric_scope_ref: knowledge.yaml#runtime_numeric_scope
+families:
+- id: sender_parity
+  sampling_definition: Choose a fresh data string and explicit parity convention; ask about the sender check bit.
+  oracle_rule: Parity bit is the one value making full-frame number-of-ones parity equal the stated convention.
+  oracle_function: sender_bit
+  acceptance: Generate actual instance parameters and verify by independent oracle; no preselected bit string
+    or fixed key.
+- id: receiver_parity
+  sampling_definition: Start from a valid single-parity frame; create valid or specified altered received frame.
+  oracle_rule: Receiver pass is parity(received full frame)==agreed convention; pass is not proof of no flips.
+  oracle_function: receiver_pass
+  acceptance: Generate actual instance parameters and verify by independent oracle; no preselected bit string
+    or fixed key.
+- id: single_flip_1d
+  sampling_definition: Choose valid full frame then flip exactly one transmitted position, possibly the check
+    bit.
+  oracle_rule: One flip toggles complete-frame parity, so receiver test fails.
+  oracle_function: receiver_pass
+  acceptance: Generate actual instance parameters and verify by independent oracle; no preselected bit string
+    or fixed key.
+- id: multiflip_1d
+  sampling_definition: Choose valid full frame and a bounded set of distinct flipped transmitted positions.
+  oracle_rule: Receiver fails iff number of flips is odd; cannot infer error count from one failure.
+  oracle_function: receiver_pass
+  acceptance: Generate actual instance parameters and verify by independent oracle; no preselected bit string
+    or fixed key.
+- id: checkbit_1d
+  sampling_definition: Generate a valid full frame with marked data and parity positions, optionally flip check
+    bit.
+  oracle_rule: Parity-check bit is included in tested frame; flip alters test exactly as any single bit.
+  oracle_function: receiver_pass
+  acceptance: Generate actual instance parameters and verify by independent oracle; no preselected bit string
+    or fixed key.
+- id: full2d_single
+  sampling_definition: Generate full small even-parity row-column block incl corner and exactly one flipped transmitted
+    position.
+  oracle_rule: Exactly one row and one column fail, whose intersection is the altered position under exactly-one-flip
+    assumption.
+  oracle_function: grid_syndrome
+  acceptance: Generate actual instance parameters and verify by independent oracle; no preselected bit string
+    or fixed key.
+- id: full2d_pair
+  sampling_definition: Generate a full small even-parity row-column block with two distinct altered transmitted
+    positions.
+  oracle_rule: Compute failed-row and failed-column sets from row/column syndromes; at least one fails; no unconditional
+    unique two-flip inference.
+  oracle_function: grid_syndrome
+  acceptance: Generate actual instance parameters and verify by independent oracle; no preselected bit string
+    or fixed key.
+- id: full2d_rectangle
+  sampling_definition: Generate a valid small 2D grid and change all four data bits at corners of a nondegenerate
+    rectangle.
+  oracle_rule: Every affected row and column has two changes and hence all parity tests pass; corruption remains
+    undetected.
+  oracle_function: grid_syndrome
+  acceptance: Generate actual instance parameters and verify by independent oracle; no preselected bit string
+    or fixed key.
+- id: full2d_compare
+  sampling_definition: Hold data and error universe fixed while contrasting global single parity and full 2D row-column
+    checks.
+  oracle_rule: Compute each scheme’s applicable checks separately; check-bit-error comparisons require explicitly
+    matched error universes.
+  oracle_function: grid_syndrome
+  acceptance: Generate actual instance parameters and verify by independent oracle; no preselected bit string
+    or fixed key.
+- id: full2d_checkbit
+  sampling_definition: Generate full 2D block and flip one named row, column, or corner check-bit position.
+  oracle_rule: Compute syndrome including the altered check-bit coordinate; single-flip intersection applies.
+  oracle_function: grid_syndrome
+  acceptance: Generate actual instance parameters and verify by independent oracle; no preselected bit string
+    or fixed key.
+- id: grouped_checks
+  sampling_definition: Generate <=8 data positions and 2–3 explicitly declared nonempty checked subsets with an
+    independent even-parity check bit for each.
+  oracle_rule: For data-only flips, check j fails iff number of flipped data positions in subset j is odd.
+  oracle_function: group_syndrome
+  acceptance: Generate actual instance parameters and verify by independent oracle; no preselected bit string
+    or fixed key.
+- id: grouped_two_flip
+  sampling_definition: Generate a grouped-check scheme with pairs sharing or differing in checked-subset membership.
+  oracle_rule: A two-data-bit alteration is invisible iff the two positions have identical check-membership signatures.
+  oracle_function: group_syndrome
+  acceptance: Generate actual instance parameters and verify by independent oracle; no preselected bit string
+    or fixed key.
+- id: grouped_uncovered
+  sampling_definition: Generate a grouped-check scheme with at least one data position in no checked subset.
+  oracle_rule: A flip on an uncovered data position violates no check; an added check covering it detects that
+    single data flip.
+  oracle_function: group_syndrome
+  acceptance: Generate actual instance parameters and verify by independent oracle; no preselected bit string
+    or fixed key.
+- id: grouped_evasion
+  sampling_definition: Generate a small bounded grouped-check scheme with a nonempty error subset that preserves
+    every check.
+  oracle_rule: All checks pass iff each checked subset contains an even number of flipped data positions; demonstrate
+    a nonempty witness by oracle.
+  oracle_function: group_syndrome
+  acceptance: Generate actual instance parameters and verify by independent oracle; no preselected bit string
+    or fixed key.
+- id: grouped_add_check
+  sampling_definition: Generate a scheme and known witness; introduce a candidate new parity subset while holding
+    the data-only error universe fixed.
+  oracle_rule: The new check detects that witness iff its overlap with witness positions has odd size; cannot
+    promise universal superiority across arbitrary error universes.
+  oracle_function: group_syndrome
+  acceptance: Generate actual instance parameters and verify by independent oracle; no preselected bit string
+    or fixed key.
+- id: full2d_four_compare
+  sampling_definition: Generate both rectangle and non-rectangle four-data-flip patterns on a full row-column
+    grid, computing each resulting syndrome independently.
+  oracle_rule: Pass if and only if every row and column has an even flip count; total count four alone is insufficient.
+  oracle_function: grid_syndrome
+  acceptance: Produce one valid rectangular and one independently verified non-rectangular pattern; compare their
+    row/column parity outcomes.
+c4_guardrails:
+- Groupings must be unfamiliar to the learner in assessment, but the general idea of group checks may have been
+  taught
+- Assumptions must state whether only data-bit errors or check-bit errors are allowed
+- Require class-level inference for subjective EA evidence; one novel numerical prediction is insufficient
+- No CRC or novel topic transfer
+two_dimensional_dimensions:
+  allowed_data_rows:
+  - 2
+  - 3
+  allowed_data_columns:
+  - 2
+  - 3
+  - 4
+  matrix_rules: include row checks, column checks and corner bit so every transmitted cell belongs to one row
+    and one column
+  manual_workload: never require manual count of more than 8 positions for a single parity calculation; supply
+    valid frame/check status when more involved
+  four_flip_cases: rectangular vs non-rectangular four distinct data positions only when adequate cells exist
+one_dimensional_conventions:
+- even
+- odd
+generation_constraints:
+- For sender_parity C1-A1 use even convention and for C1-A2 use odd; for other relevant blueprints convention
+  explicitly declared and balanced
+- For two-flip conditions sample distinct transmitted positions, and declare if data-only for cross-scheme claims
+- For C4 universal claims quantify explicitly over DATA-ONLY flips, unless another universe is formally specified
+- Generated grouped check schemes may have overlaps and uncovered positions where the blueprint permits; do not
+  assume checks are disjoint
+- No fixed parity result, ones count, bit index or correct letter imposed by a reusable assessment contract

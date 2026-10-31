@@ -1,0 +1,35 @@
+schema: ekagra.scientific.protocol.v0.4
+status: CANDIDATE_UNAPPROVED
+scope:
+  topic: F1 one-dimensional, full two-dimensional and bounded novel grouped parity only
+  other_topics: false
+  checksum: false
+assessment:
+  mcq_count: 3
+  mcq_options: 4
+  subjective_count: 1
+  mcq_min_correct: 2
+  subjective_points_min: 1
+  subjective_points_max: 2
+  pass_logic: MCQ_CORRECT>=2 AND SUBJECTIVE_POINTS>=1
+  status: PROVISIONAL_NOT_EMPIRICALLY_VALIDATED
+allocation:
+  blueprints_per_transition: 4
+  sampling: Available unexposed blueprint selected independently of pedagogy, Tutor transcript and previous correctness
+  question_scenario: Fresh generated within authorized family; independently verified and frozen
+  scoring: Deterministic MCQ key for this instance, blind LLM subjective rubric, deterministic conjunction
+  reuse_or_exhaustion: No unapproved reuse of a seen blueprint; retry/cap policy must be explicitly inherited
+    and documented by engineering from existing active single-topic flow, not invented by science authoring
+order:
+  candidate: Three MCQs then subjective, as inherited working four-item ordering
+  concern: MCQ cueing of subjective; review and pilot; do not silently swap order
+quality_gates:
+- No unreviewed semantically drifted options can be treated as correct
+- Technical or REVIEW_REQUIRED outcome does not consume scientific learner failure
+- No real-participant activation prior to human scientific review
+runtime: Isolated development and synthetic/live LLM testing allowed under explicit dev/test safeguards, followed
+  promptly by actual Docker browser/database integration.
+randomization: Preserve randomized initial pedagogy and without-replacement fallback where already specified in
+  original single-topic implementation; do not implement three-topic professor design; do not invent new repeated-cycle
+  policy.
+fidelity: Equal bounded opportunities across treatment arms; prevent teacher from seeing assessment instance/keys.

@@ -21,11 +21,15 @@ services:
         required: false
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://solo_harness:change-me@postgres:5432/solo_harness}
-      STUDY_DIR: /app/studies/python_fibonacci_memoization/v0.1
+      STUDY_DIR: /app/studies/networks_error_detection_parity_f1/v0.4
+      ACTIVATE_STUDY_ON_BOOTSTRAP: "true"
+      APP_BUILD_ID: f1-v04-consolidated-dev
+      ENABLE_F1_V04_DEVELOPMENT: "true"
+      LLM_STRUCTURED_OUTPUT_MODE: provider_native_json_schema
     ports:
       - "127.0.0.1:${APP_PORT:-8000}:8000"
     volumes:
-      - ./studies/python_fibonacci_memoization/v0.1:/app/studies/python_fibonacci_memoization/v0.1:ro
+      - ./studies/networks_error_detection_parity_f1/v0.4:/app/studies/networks_error_detection_parity_f1/v0.4:ro
       - ./exports:/app/exports
       - ./research-data:/app/research-data
     depends_on:

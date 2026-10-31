@@ -1,0 +1,460 @@
+{
+  "schema": "ekagra.scientific.coverage.v0.4",
+  "all_slots": [
+    {
+      "id": "C1-A1-Q1",
+      "transition": "C1",
+      "blueprint": "C1-A1",
+      "type": "MCQ",
+      "scenario_family": "sender_parity"
+    },
+    {
+      "id": "C1-A1-Q2",
+      "transition": "C1",
+      "blueprint": "C1-A1",
+      "type": "MCQ",
+      "scenario_family": "receiver_parity"
+    },
+    {
+      "id": "C1-A1-Q3",
+      "transition": "C1",
+      "blueprint": "C1-A1",
+      "type": "MCQ",
+      "scenario_family": "single_flip_1d"
+    },
+    {
+      "id": "C1-A1-S",
+      "transition": "C1",
+      "blueprint": "C1-A1",
+      "type": "SUBJECTIVE",
+      "scenario_family": "receiver_parity"
+    },
+    {
+      "id": "C1-A2-Q1",
+      "transition": "C1",
+      "blueprint": "C1-A2",
+      "type": "MCQ",
+      "scenario_family": "sender_parity"
+    },
+    {
+      "id": "C1-A2-Q2",
+      "transition": "C1",
+      "blueprint": "C1-A2",
+      "type": "MCQ",
+      "scenario_family": "receiver_parity"
+    },
+    {
+      "id": "C1-A2-Q3",
+      "transition": "C1",
+      "blueprint": "C1-A2",
+      "type": "MCQ",
+      "scenario_family": "single_flip_1d"
+    },
+    {
+      "id": "C1-A2-S",
+      "transition": "C1",
+      "blueprint": "C1-A2",
+      "type": "SUBJECTIVE",
+      "scenario_family": "receiver_parity"
+    },
+    {
+      "id": "C1-A3-Q1",
+      "transition": "C1",
+      "blueprint": "C1-A3",
+      "type": "MCQ",
+      "scenario_family": "sender_parity"
+    },
+    {
+      "id": "C1-A3-Q2",
+      "transition": "C1",
+      "blueprint": "C1-A3",
+      "type": "MCQ",
+      "scenario_family": "receiver_parity"
+    },
+    {
+      "id": "C1-A3-Q3",
+      "transition": "C1",
+      "blueprint": "C1-A3",
+      "type": "MCQ",
+      "scenario_family": "single_flip_1d"
+    },
+    {
+      "id": "C1-A3-S",
+      "transition": "C1",
+      "blueprint": "C1-A3",
+      "type": "SUBJECTIVE",
+      "scenario_family": "receiver_parity"
+    },
+    {
+      "id": "C1-A4-Q1",
+      "transition": "C1",
+      "blueprint": "C1-A4",
+      "type": "MCQ",
+      "scenario_family": "sender_parity"
+    },
+    {
+      "id": "C1-A4-Q2",
+      "transition": "C1",
+      "blueprint": "C1-A4",
+      "type": "MCQ",
+      "scenario_family": "checkbit_1d"
+    },
+    {
+      "id": "C1-A4-Q3",
+      "transition": "C1",
+      "blueprint": "C1-A4",
+      "type": "MCQ",
+      "scenario_family": "receiver_parity"
+    },
+    {
+      "id": "C1-A4-S",
+      "transition": "C1",
+      "blueprint": "C1-A4",
+      "type": "SUBJECTIVE",
+      "scenario_family": "sender_parity"
+    },
+    {
+      "id": "C2-A1-Q1",
+      "transition": "C2",
+      "blueprint": "C2-A1",
+      "type": "MCQ",
+      "scenario_family": "multiflip_1d"
+    },
+    {
+      "id": "C2-A1-Q2",
+      "transition": "C2",
+      "blueprint": "C2-A1",
+      "type": "MCQ",
+      "scenario_family": "full2d_single"
+    },
+    {
+      "id": "C2-A1-Q3",
+      "transition": "C2",
+      "blueprint": "C2-A1",
+      "type": "MCQ",
+      "scenario_family": "single_flip_1d"
+    },
+    {
+      "id": "C2-A1-S",
+      "transition": "C2",
+      "blueprint": "C2-A1",
+      "type": "SUBJECTIVE",
+      "scenario_family": "full2d_single"
+    },
+    {
+      "id": "C2-A2-Q1",
+      "transition": "C2",
+      "blueprint": "C2-A2",
+      "type": "MCQ",
+      "scenario_family": "multiflip_1d"
+    },
+    {
+      "id": "C2-A2-Q2",
+      "transition": "C2",
+      "blueprint": "C2-A2",
+      "type": "MCQ",
+      "scenario_family": "full2d_pair"
+    },
+    {
+      "id": "C2-A2-Q3",
+      "transition": "C2",
+      "blueprint": "C2-A2",
+      "type": "MCQ",
+      "scenario_family": "full2d_pair"
+    },
+    {
+      "id": "C2-A2-S",
+      "transition": "C2",
+      "blueprint": "C2-A2",
+      "type": "SUBJECTIVE",
+      "scenario_family": "full2d_pair"
+    },
+    {
+      "id": "C2-A3-Q1",
+      "transition": "C2",
+      "blueprint": "C2-A3",
+      "type": "MCQ",
+      "scenario_family": "checkbit_1d"
+    },
+    {
+      "id": "C2-A3-Q2",
+      "transition": "C2",
+      "blueprint": "C2-A3",
+      "type": "MCQ",
+      "scenario_family": "full2d_checkbit"
+    },
+    {
+      "id": "C2-A3-Q3",
+      "transition": "C2",
+      "blueprint": "C2-A3",
+      "type": "MCQ",
+      "scenario_family": "multiflip_1d"
+    },
+    {
+      "id": "C2-A3-S",
+      "transition": "C2",
+      "blueprint": "C2-A3",
+      "type": "SUBJECTIVE",
+      "scenario_family": "full2d_checkbit"
+    },
+    {
+      "id": "C2-A4-Q1",
+      "transition": "C2",
+      "blueprint": "C2-A4",
+      "type": "MCQ",
+      "scenario_family": "multiflip_1d"
+    },
+    {
+      "id": "C2-A4-Q2",
+      "transition": "C2",
+      "blueprint": "C2-A4",
+      "type": "MCQ",
+      "scenario_family": "full2d_rectangle"
+    },
+    {
+      "id": "C2-A4-Q3",
+      "transition": "C2",
+      "blueprint": "C2-A4",
+      "type": "MCQ",
+      "scenario_family": "full2d_four_compare"
+    },
+    {
+      "id": "C2-A4-S",
+      "transition": "C2",
+      "blueprint": "C2-A4",
+      "type": "SUBJECTIVE",
+      "scenario_family": "full2d_rectangle"
+    },
+    {
+      "id": "C3-A1-Q1",
+      "transition": "C3",
+      "blueprint": "C3-A1",
+      "type": "MCQ",
+      "scenario_family": "multiflip_1d"
+    },
+    {
+      "id": "C3-A1-Q2",
+      "transition": "C3",
+      "blueprint": "C3-A1",
+      "type": "MCQ",
+      "scenario_family": "full2d_pair"
+    },
+    {
+      "id": "C3-A1-Q3",
+      "transition": "C3",
+      "blueprint": "C3-A1",
+      "type": "MCQ",
+      "scenario_family": "full2d_compare"
+    },
+    {
+      "id": "C3-A1-S",
+      "transition": "C3",
+      "blueprint": "C3-A1",
+      "type": "SUBJECTIVE",
+      "scenario_family": "full2d_pair"
+    },
+    {
+      "id": "C3-A2-Q1",
+      "transition": "C3",
+      "blueprint": "C3-A2",
+      "type": "MCQ",
+      "scenario_family": "single_flip_1d"
+    },
+    {
+      "id": "C3-A2-Q2",
+      "transition": "C3",
+      "blueprint": "C3-A2",
+      "type": "MCQ",
+      "scenario_family": "full2d_single"
+    },
+    {
+      "id": "C3-A2-Q3",
+      "transition": "C3",
+      "blueprint": "C3-A2",
+      "type": "MCQ",
+      "scenario_family": "full2d_pair"
+    },
+    {
+      "id": "C3-A2-S",
+      "transition": "C3",
+      "blueprint": "C3-A2",
+      "type": "SUBJECTIVE",
+      "scenario_family": "full2d_pair"
+    },
+    {
+      "id": "C3-A3-Q1",
+      "transition": "C3",
+      "blueprint": "C3-A3",
+      "type": "MCQ",
+      "scenario_family": "multiflip_1d"
+    },
+    {
+      "id": "C3-A3-Q2",
+      "transition": "C3",
+      "blueprint": "C3-A3",
+      "type": "MCQ",
+      "scenario_family": "full2d_pair"
+    },
+    {
+      "id": "C3-A3-Q3",
+      "transition": "C3",
+      "blueprint": "C3-A3",
+      "type": "MCQ",
+      "scenario_family": "full2d_rectangle"
+    },
+    {
+      "id": "C3-A3-S",
+      "transition": "C3",
+      "blueprint": "C3-A3",
+      "type": "SUBJECTIVE",
+      "scenario_family": "full2d_rectangle"
+    },
+    {
+      "id": "C3-A4-Q1",
+      "transition": "C3",
+      "blueprint": "C3-A4",
+      "type": "MCQ",
+      "scenario_family": "multiflip_1d"
+    },
+    {
+      "id": "C3-A4-Q2",
+      "transition": "C3",
+      "blueprint": "C3-A4",
+      "type": "MCQ",
+      "scenario_family": "full2d_compare"
+    },
+    {
+      "id": "C3-A4-Q3",
+      "transition": "C3",
+      "blueprint": "C3-A4",
+      "type": "MCQ",
+      "scenario_family": "full2d_compare"
+    },
+    {
+      "id": "C3-A4-S",
+      "transition": "C3",
+      "blueprint": "C3-A4",
+      "type": "SUBJECTIVE",
+      "scenario_family": "full2d_compare"
+    },
+    {
+      "id": "C4-A1-Q1",
+      "transition": "C4",
+      "blueprint": "C4-A1",
+      "type": "MCQ",
+      "scenario_family": "grouped_checks"
+    },
+    {
+      "id": "C4-A1-Q2",
+      "transition": "C4",
+      "blueprint": "C4-A1",
+      "type": "MCQ",
+      "scenario_family": "grouped_two_flip"
+    },
+    {
+      "id": "C4-A1-Q3",
+      "transition": "C4",
+      "blueprint": "C4-A1",
+      "type": "MCQ",
+      "scenario_family": "grouped_evasion"
+    },
+    {
+      "id": "C4-A1-S",
+      "transition": "C4",
+      "blueprint": "C4-A1",
+      "type": "SUBJECTIVE",
+      "scenario_family": "grouped_evasion"
+    },
+    {
+      "id": "C4-A2-Q1",
+      "transition": "C4",
+      "blueprint": "C4-A2",
+      "type": "MCQ",
+      "scenario_family": "grouped_checks"
+    },
+    {
+      "id": "C4-A2-Q2",
+      "transition": "C4",
+      "blueprint": "C4-A2",
+      "type": "MCQ",
+      "scenario_family": "grouped_two_flip"
+    },
+    {
+      "id": "C4-A2-Q3",
+      "transition": "C4",
+      "blueprint": "C4-A2",
+      "type": "MCQ",
+      "scenario_family": "grouped_two_flip"
+    },
+    {
+      "id": "C4-A2-S",
+      "transition": "C4",
+      "blueprint": "C4-A2",
+      "type": "SUBJECTIVE",
+      "scenario_family": "grouped_two_flip"
+    },
+    {
+      "id": "C4-A3-Q1",
+      "transition": "C4",
+      "blueprint": "C4-A3",
+      "type": "MCQ",
+      "scenario_family": "grouped_uncovered"
+    },
+    {
+      "id": "C4-A3-Q2",
+      "transition": "C4",
+      "blueprint": "C4-A3",
+      "type": "MCQ",
+      "scenario_family": "grouped_uncovered"
+    },
+    {
+      "id": "C4-A3-Q3",
+      "transition": "C4",
+      "blueprint": "C4-A3",
+      "type": "MCQ",
+      "scenario_family": "grouped_add_check"
+    },
+    {
+      "id": "C4-A3-S",
+      "transition": "C4",
+      "blueprint": "C4-A3",
+      "type": "SUBJECTIVE",
+      "scenario_family": "grouped_uncovered"
+    },
+    {
+      "id": "C4-A4-Q1",
+      "transition": "C4",
+      "blueprint": "C4-A4",
+      "type": "MCQ",
+      "scenario_family": "grouped_checks"
+    },
+    {
+      "id": "C4-A4-Q2",
+      "transition": "C4",
+      "blueprint": "C4-A4",
+      "type": "MCQ",
+      "scenario_family": "grouped_evasion"
+    },
+    {
+      "id": "C4-A4-Q3",
+      "transition": "C4",
+      "blueprint": "C4-A4",
+      "type": "MCQ",
+      "scenario_family": "grouped_add_check"
+    },
+    {
+      "id": "C4-A4-S",
+      "transition": "C4",
+      "blueprint": "C4-A4",
+      "type": "SUBJECTIVE",
+      "scenario_family": "grouped_evasion"
+    }
+  ],
+  "counts": {
+    "blueprints": 16,
+    "mcqs": 48,
+    "subjective": 16,
+    "total_slots": 64,
+    "interventions": 12
+  }
+}

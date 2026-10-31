@@ -1,0 +1,392 @@
+schema: ekagra.scientific.interventions.v0.4
+status: CANDIDATE_UNAPPROVED
+instruction_pools: Retain verified instruction-only P1–P3, G1–G3; X1 row-only, X2 duplicate global parity, X6
+  placement/convention; no assessment pool IDs
+shared_rules:
+- One scientific target and matched opportunity budget per transition across P1/P2/P3
+- No use of private assessment instances or assessment keys by Tutor
+- Instructional scenarios are regenerated within approved F1 scope and checked; historical identifiers are examples
+  only
+- Tutor must condition each subsequent turn on the learner's latest response while preserving assigned treatment
+  mechanism
+- A fixed required-move checklist may guide fidelity review but must not advance automatically merely because
+  a turn elapsed
+- No compulsory numerical examples or same bit string every session
+pedagogies:
+- id: P1
+  label: Worked Example
+  mechanism: Tutor explicitly MODELS the target organization in a fully resolved instructional example, including
+    the why and the boundary of the conclusion.
+  must:
+  - show one complete, scientifically checked example from instruction pool
+  - verbalize target structural organization
+  - include a short engagement/application request without withholding the modeled chain
+  must_not:
+  - turn main example into learner-led discovery
+  - make pairwise contrast the main instruction
+  - reveal assessment-only scenarios
+  runtime_contract: Treatment signature must appear in actual student-visible actions, not just a label in a prompt
+    or stubbed fidelity note.
+- id: P2
+  label: Guided Questioning
+  mechanism: Tutor ELICITS the target organization through a bounded sequence of learner responses, contingent
+    probes, and minimal corrective facts.
+  must:
+  - pose a sequence that spans the required conceptual moves
+  - give learner time to construct links
+  - probe contradictions without announcing the final chain
+  - record inability to reach target within capped turns
+  must_not:
+  - write the complete model solution before learner constructs it
+  - switch to Worked Example on struggle
+  - make comparing prepared paired cases the primary teaching mechanism
+  runtime_contract: Treatment signature must appear in actual student-visible actions, not just a label in a prompt
+    or stubbed fidelity note.
+- id: P3
+  label: Contrasting Cases
+  mechanism: Tutor uses CONTROLLED CASE PAIRS varying one diagnostic feature to elicit the target idea from comparison.
+  must:
+  - state controlled invariants and only the purposeful differences
+  - ask which difference changes the receiver result and why
+  - include a discrimination or transfer question on a separately checked instructional case
+  must_not:
+  - substitute a sequence of unconnected questions
+  - change difficulty or number of variables across cases without reason
+  - turn into expository Worked Example
+  runtime_contract: Treatment signature must appear in actual student-visible actions, not just a label in a prompt
+    or stubbed fidelity note.
+cells:
+- id: C1-P1
+  transition_id: C1
+  pedagogy_id: P1
+  scientific_goal: Establish one usable relationship between sender-selected check bit and receiver-complete-frame
+    test.
+  target_refs: &id001
+  - K1
+  - K2
+  - K3
+  - R1
+  instructional_scenario: Show a fresh checked even-parity instructional frame, appended check bit, and its single-flip
+    receiver test. Then ask on distinct P2 why a receiver includes the parity bit.
+  required_moves:
+  - name agreed even-parity rule
+  - model parity-bit choice
+  - show complete-frame check and mismatch
+  - invite simple application
+  prohibition: Do not teach multi-flip miss laws or 2D location.
+  fidelity_observation: Inspect participant transcript to confirm Tutor explicitly MODELS the target organization
+    in a fully resolved instructional example, including the why and the boundary of the conclusion.
+  pool: P1–P3 and G1–G3 only; X1/X2/X6 instruction-only; no checksum
+  completion: Teaching budget complete or required moves attempted, never a science-pass declaration
+  instructional_scenario_note: Historical example IDs in this cell are provenance pointers only; they are not
+    compulsory runtime bit strings. Use a separately generated and verified instruction-only instance.
+  learner_contingency:
+    if_correct_without_reason: Elicit required level-specific explanation only, within assigned pedagogy
+    if_materially_incorrect: Diagnose misconception with verified bounded case and respond using assigned mechanism
+    if_sufficient: Consolidate; teaching cannot declare SOLO pass; assessment remains independent
+  must_not: Do not switch pedagogy, copy a fixed scripted dialogue, expose assessment scenarios, or advance when
+    student response was not actually processed.
+- id: C1-P2
+  transition_id: C1
+  pedagogy_id: P2
+  scientific_goal: Establish one usable relationship between sender-selected check bit and receiver-complete-frame
+    test.
+  target_refs: *id001
+  instructional_scenario: Ask learner to count ones in P3 and propose the appended bit; then ask what a receiver
+    counts after a supplied one-bit alteration.
+  required_moves:
+  - establish what receiver cannot see
+  - elicit rule choice
+  - elicit receiver test
+  - prompt concise synthesis
+  prohibition: A wrong answer prompts a narrower question, not the full worked answer.
+  fidelity_observation: Inspect participant transcript to confirm Tutor ELICITS the target organization through
+    a bounded sequence of learner responses, contingent probes, and minimal corrective facts.
+  pool: P1–P3 and G1–G3 only; X1/X2/X6 instruction-only; no checksum
+  completion: Teaching budget complete or required moves attempted, never a science-pass declaration
+  instructional_scenario_note: Historical example IDs in this cell are provenance pointers only; they are not
+    compulsory runtime bit strings. Use a separately generated and verified instruction-only instance.
+  learner_contingency:
+    if_correct_without_reason: Elicit required level-specific explanation only, within assigned pedagogy
+    if_materially_incorrect: Diagnose misconception with verified bounded case and respond using assigned mechanism
+    if_sufficient: Consolidate; teaching cannot declare SOLO pass; assessment remains independent
+  must_not: Do not switch pedagogy, copy a fixed scripted dialogue, expose assessment scenarios, or advance when
+    student response was not actually processed.
+- id: C1-P3
+  transition_id: C1
+  pedagogy_id: P3
+  scientific_goal: Establish one usable relationship between sender-selected check bit and receiver-complete-frame
+    test.
+  target_refs: *id001
+  instructional_scenario: Compare correct data-dependent P3 check bit with an incorrect always-zero check bit,
+    keeping data, check convention, and single alteration fixed.
+  required_moves:
+  - ask what is held constant
+  - compare clean acceptance and altered acceptance
+  - identify only diagnostic difference
+  - elicit rule for choosing check bit
+  prohibition: Do not introduce two flips or future-stage limitations.
+  fidelity_observation: Inspect participant transcript to confirm Tutor uses CONTROLLED CASE PAIRS varying one
+    diagnostic feature to elicit the target idea from comparison.
+  pool: P1–P3 and G1–G3 only; X1/X2/X6 instruction-only; no checksum
+  completion: Teaching budget complete or required moves attempted, never a science-pass declaration
+  instructional_scenario_note: Historical example IDs in this cell are provenance pointers only; they are not
+    compulsory runtime bit strings. Use a separately generated and verified instruction-only instance.
+  learner_contingency:
+    if_correct_without_reason: Elicit required level-specific explanation only, within assigned pedagogy
+    if_materially_incorrect: Diagnose misconception with verified bounded case and respond using assigned mechanism
+    if_sufficient: Consolidate; teaching cannot declare SOLO pass; assessment remains independent
+  must_not: Do not switch pedagogy, copy a fixed scripted dialogue, expose assessment scenarios, or advance when
+    student response was not actually processed.
+- id: C2-P1
+  transition_id: C2
+  pedagogy_id: P1
+  scientific_goal: Establish multiple discrete correct properties spanning 1D and 2D parity without requiring
+    causal integration.
+  target_refs: &id002
+  - K4
+  - K5
+  - K6
+  - K7
+  - K8
+  - K9
+  instructional_scenario: Show one verified 1D odd-flip detection and even-flip miss; separately show one 2D single-flip
+    intersection and two-flip ambiguity. Label them as distinct observations.
+  required_moves:
+  - model 1D distinct properties
+  - model 2D layout
+  - model location conditional on exactly one flip
+  - state 2D double-flip limitation
+  prohibition: Do not turn the entire lesson into an integrated abstract proof.
+  fidelity_observation: Inspect participant transcript to confirm Tutor explicitly MODELS the target organization
+    in a fully resolved instructional example, including the why and the boundary of the conclusion.
+  pool: P1–P3 and G1–G3 only; X1/X2/X6 instruction-only; no checksum
+  completion: Teaching budget complete or required moves attempted, never a science-pass declaration
+  instructional_scenario_note: Historical example IDs in this cell are provenance pointers only; they are not
+    compulsory runtime bit strings. Use a separately generated and verified instruction-only instance.
+  learner_contingency:
+    if_correct_without_reason: Elicit required level-specific explanation only, within assigned pedagogy
+    if_materially_incorrect: Diagnose misconception with verified bounded case and respond using assigned mechanism
+    if_sufficient: Consolidate; teaching cannot declare SOLO pass; assessment remains independent
+  must_not: Do not switch pedagogy, copy a fixed scripted dialogue, expose assessment scenarios, or advance when
+    student response was not actually processed.
+- id: C2-P2
+  transition_id: C2
+  pedagogy_id: P2
+  scientific_goal: Establish multiple discrete correct properties spanning 1D and 2D parity without requiring
+    causal integration.
+  target_refs: *id002
+  instructional_scenario: Use a fresh valid single-parity case with one/two stated flips and G2 with one/two stated
+    flips; request separate property statements for each, confirming against stored values.
+  required_moves:
+  - ask 1D odd vs even outcomes
+  - ask if whole-frame parity locates
+  - ask which 2D lines fail on a single flip
+  - ask what two flips do
+  prohibition: Question sequence must not demand C3 full relation chain.
+  fidelity_observation: Inspect participant transcript to confirm Tutor ELICITS the target organization through
+    a bounded sequence of learner responses, contingent probes, and minimal corrective facts.
+  pool: P1–P3 and G1–G3 only; X1/X2/X6 instruction-only; no checksum
+  completion: Teaching budget complete or required moves attempted, never a science-pass declaration
+  instructional_scenario_note: Historical example IDs in this cell are provenance pointers only; they are not
+    compulsory runtime bit strings. Use a separately generated and verified instruction-only instance.
+  learner_contingency:
+    if_correct_without_reason: Elicit required level-specific explanation only, within assigned pedagogy
+    if_materially_incorrect: Diagnose misconception with verified bounded case and respond using assigned mechanism
+    if_sufficient: Consolidate; teaching cannot declare SOLO pass; assessment remains independent
+  must_not: Do not switch pedagogy, copy a fixed scripted dialogue, expose assessment scenarios, or advance when
+    student response was not actually processed.
+- id: C2-P3
+  transition_id: C2
+  pedagogy_id: P3
+  scientific_goal: Establish multiple discrete correct properties spanning 1D and 2D parity without requiring
+    causal integration.
+  target_refs: *id002
+  instructional_scenario: Compare P3 one vs two flips; compare G3 single vs double flips. Hold the valid clean
+    frame fixed within each pair.
+  required_moves:
+  - identify one/two-flip differences
+  - compare location possibilities
+  - ask to state at least two separate properties
+  prohibition: Keep contrasts diagnostic; do not conflate 1D and 2D same-length frames as equivalent.
+  fidelity_observation: Inspect participant transcript to confirm Tutor uses CONTROLLED CASE PAIRS varying one
+    diagnostic feature to elicit the target idea from comparison.
+  pool: P1–P3 and G1–G3 only; X1/X2/X6 instruction-only; no checksum
+  completion: Teaching budget complete or required moves attempted, never a science-pass declaration
+  instructional_scenario_note: Historical example IDs in this cell are provenance pointers only; they are not
+    compulsory runtime bit strings. Use a separately generated and verified instruction-only instance.
+  learner_contingency:
+    if_correct_without_reason: Elicit required level-specific explanation only, within assigned pedagogy
+    if_materially_incorrect: Diagnose misconception with verified bounded case and respond using assigned mechanism
+    if_sufficient: Consolidate; teaching cannot declare SOLO pass; assessment remains independent
+  must_not: Do not switch pedagogy, copy a fixed scripted dialogue, expose assessment scenarios, or advance when
+    student response was not actually processed.
+- id: C3-P1
+  transition_id: C3
+  pedagogy_id: P1
+  scientific_goal: Learner constructs or sees case-specific causal relation among checks, flips, receiver information
+    and justified conclusion.
+  target_refs: &id003
+  - K15
+  - K16
+  - R2
+  - R3
+  - R4
+  - R7
+  - R8
+  instructional_scenario: Use a fresh full 2D case with one flip and two flips same row; explicitly show row/column
+    flip-parity mechanism and why only the single-error assumption permits unique localization.
+  required_moves:
+  - state sender constraints
+  - trace flips into row/column syndromes
+  - derive detected/not uniquely located
+  - compare overhead to one global parity bit with stated fixed data universe
+  prohibition: Do not assert that more check bits always dominates unrelated schemes.
+  fidelity_observation: Inspect participant transcript to confirm Tutor explicitly MODELS the target organization
+    in a fully resolved instructional example, including the why and the boundary of the conclusion.
+  pool: P1–P3 and G1–G3 only; X1/X2/X6 instruction-only; no checksum
+  completion: Teaching budget complete or required moves attempted, never a science-pass declaration
+  instructional_scenario_note: Historical example IDs in this cell are provenance pointers only; they are not
+    compulsory runtime bit strings. Use a separately generated and verified instruction-only instance.
+  learner_contingency:
+    if_correct_without_reason: Elicit required level-specific explanation only, within assigned pedagogy
+    if_materially_incorrect: Diagnose misconception with verified bounded case and respond using assigned mechanism
+    if_sufficient: Consolidate; teaching cannot declare SOLO pass; assessment remains independent
+  must_not: Do not switch pedagogy, copy a fixed scripted dialogue, expose assessment scenarios, or advance when
+    student response was not actually processed.
+- id: C3-P2
+  transition_id: C3
+  pedagogy_id: P2
+  scientific_goal: Learner constructs or sees case-specific causal relation among checks, flips, receiver information
+    and justified conclusion.
+  target_refs: *id003
+  instructional_scenario: From G3, elicit how a same-row pair cancels in row but not column checks; elicit what
+    a clean-looking rectangle means about the relation.
+  required_moves:
+  - ask what each row/column enforces
+  - ask effect of flips on each constraint
+  - ask which tests fail
+  - ask what conclusion is and is not licensed
+  prohibition: Do not disclose complete causal chain before learner links it.
+  fidelity_observation: Inspect participant transcript to confirm Tutor ELICITS the target organization through
+    a bounded sequence of learner responses, contingent probes, and minimal corrective facts.
+  pool: P1–P3 and G1–G3 only; X1/X2/X6 instruction-only; no checksum
+  completion: Teaching budget complete or required moves attempted, never a science-pass declaration
+  instructional_scenario_note: Historical example IDs in this cell are provenance pointers only; they are not
+    compulsory runtime bit strings. Use a separately generated and verified instruction-only instance.
+  learner_contingency:
+    if_correct_without_reason: Elicit required level-specific explanation only, within assigned pedagogy
+    if_materially_incorrect: Diagnose misconception with verified bounded case and respond using assigned mechanism
+    if_sufficient: Consolidate; teaching cannot declare SOLO pass; assessment remains independent
+  must_not: Do not switch pedagogy, copy a fixed scripted dialogue, expose assessment scenarios, or advance when
+    student response was not actually processed.
+- id: C3-P3
+  transition_id: C3
+  pedagogy_id: P3
+  scientific_goal: Learner constructs or sees case-specific causal relation among checks, flips, receiver information
+    and justified conclusion.
+  target_refs: *id003
+  instructional_scenario: Contrast full G3 2D checks with the row-only projection under exactly the same two-bit
+    alteration; distinguish row pass from column fail, then compare information gained.
+  required_moves:
+  - hold data/alteration constant
+  - identify checked relations
+  - compare syndromes
+  - elicit detection/location and cost tradeoff
+  prohibition: Do not frame row-only scheme as an assessed C4 unfamiliar variant.
+  fidelity_observation: Inspect participant transcript to confirm Tutor uses CONTROLLED CASE PAIRS varying one
+    diagnostic feature to elicit the target idea from comparison.
+  pool: P1–P3 and G1–G3 only; X1/X2/X6 instruction-only; no checksum
+  completion: Teaching budget complete or required moves attempted, never a science-pass declaration
+  instructional_scenario_note: Historical example IDs in this cell are provenance pointers only; they are not
+    compulsory runtime bit strings. Use a separately generated and verified instruction-only instance.
+  learner_contingency:
+    if_correct_without_reason: Elicit required level-specific explanation only, within assigned pedagogy
+    if_materially_incorrect: Diagnose misconception with verified bounded case and respond using assigned mechanism
+    if_sufficient: Consolidate; teaching cannot declare SOLO pass; assessment remains independent
+  must_not: Do not switch pedagogy, copy a fixed scripted dialogue, expose assessment scenarios, or advance when
+    student response was not actually processed.
+- id: C4-P1
+  transition_id: C4
+  pedagogy_id: P1
+  scientific_goal: Extract and justify a general constraint-preservation condition on an unfamiliar group-check
+    arrangement, not merely compute one example.
+  target_refs: &id004
+  - K17
+  - K18
+  - K19
+  - R9
+  - R10
+  - R11
+  instructional_scenario: Model a fully specified instruction-only row-only grid and dual-copy global parity variant
+    X1/X2; derive general error patterns preserving their constraints and why extra duplicate checks do not increase
+    data-error detection.
+  required_moves:
+  - define new checking relation
+  - derive a condition for all passing data-error patterns
+  - construct a counterexample
+  - explain why presentation changes and constraint changes differ
+  prohibition: Do not expose assessment-only grouped partitions X7/X8/X9.
+  fidelity_observation: Inspect participant transcript to confirm Tutor explicitly MODELS the target organization
+    in a fully resolved instructional example, including the why and the boundary of the conclusion.
+  pool: P1–P3 and G1–G3 only; X1/X2/X6 instruction-only; no checksum
+  completion: Teaching budget complete or required moves attempted, never a science-pass declaration
+  instructional_scenario_note: Historical example IDs in this cell are provenance pointers only; they are not
+    compulsory runtime bit strings. Use a separately generated and verified instruction-only instance.
+  learner_contingency:
+    if_correct_without_reason: Elicit required level-specific explanation only, within assigned pedagogy
+    if_materially_incorrect: Diagnose misconception with verified bounded case and respond using assigned mechanism
+    if_sufficient: Consolidate; teaching cannot declare SOLO pass; assessment remains independent
+  must_not: Do not switch pedagogy, copy a fixed scripted dialogue, expose assessment scenarios, or advance when
+    student response was not actually processed.
+- id: C4-P2
+  transition_id: C4
+  pedagogy_id: P2
+  scientific_goal: Extract and justify a general constraint-preservation condition on an unfamiliar group-check
+    arrangement, not merely compute one example.
+  target_refs: *id004
+  instructional_scenario: Guide derivation of row-only variant X1 evasion condition on G2; ask learner to propose
+    arbitrary row-even flip patterns and justify for any row.
+  required_moves:
+  - ask what is actually checked
+  - elicit necessary condition for undetected pattern
+  - seek counterexample with reason
+  - generalize independent of the particular bits
+  prohibition: Do not reveal the universal condition before learner attempts it.
+  fidelity_observation: Inspect participant transcript to confirm Tutor ELICITS the target organization through
+    a bounded sequence of learner responses, contingent probes, and minimal corrective facts.
+  pool: P1–P3 and G1–G3 only; X1/X2/X6 instruction-only; no checksum
+  completion: Teaching budget complete or required moves attempted, never a science-pass declaration
+  instructional_scenario_note: Historical example IDs in this cell are provenance pointers only; they are not
+    compulsory runtime bit strings. Use a separately generated and verified instruction-only instance.
+  learner_contingency:
+    if_correct_without_reason: Elicit required level-specific explanation only, within assigned pedagogy
+    if_materially_incorrect: Diagnose misconception with verified bounded case and respond using assigned mechanism
+    if_sufficient: Consolidate; teaching cannot declare SOLO pass; assessment remains independent
+  must_not: Do not switch pedagogy, copy a fixed scripted dialogue, expose assessment scenarios, or advance when
+    student response was not actually processed.
+- id: C4-P3
+  transition_id: C4
+  pedagogy_id: P3
+  scientific_goal: Extract and justify a general constraint-preservation condition on an unfamiliar group-check
+    arrangement, not merely compute one example.
+  target_refs: *id004
+  instructional_scenario: Contrast full two-dimensional vs row-only checks on the same G2 alteration, and standard
+    single-parity vs redundant twin-copy checks with fixed data-only errors.
+  required_moves:
+  - isolate whether constraints added or just copied
+  - compare passing error classes
+  - ask the learner to generalize a condition and construct passing patterns
+  prohibition: Do not let the model introduce novel assessment-only groupings as instruction.
+  fidelity_observation: Inspect participant transcript to confirm Tutor uses CONTROLLED CASE PAIRS varying one
+    diagnostic feature to elicit the target idea from comparison.
+  pool: P1–P3 and G1–G3 only; X1/X2/X6 instruction-only; no checksum
+  completion: Teaching budget complete or required moves attempted, never a science-pass declaration
+  instructional_scenario_note: Historical example IDs in this cell are provenance pointers only; they are not
+    compulsory runtime bit strings. Use a separately generated and verified instruction-only instance.
+  learner_contingency:
+    if_correct_without_reason: Elicit required level-specific explanation only, within assigned pedagogy
+    if_materially_incorrect: Diagnose misconception with verified bounded case and respond using assigned mechanism
+    if_sufficient: Consolidate; teaching cannot declare SOLO pass; assessment remains independent
+  must_not: Do not switch pedagogy, copy a fixed scripted dialogue, expose assessment scenarios, or advance when
+    student response was not actually processed.

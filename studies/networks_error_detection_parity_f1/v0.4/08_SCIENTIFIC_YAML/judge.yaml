@@ -1,0 +1,99 @@
+schema: ekagra.scientific.judge.v0.4
+status: CANDIDATE_UNAPPROVED
+role: Judge only exact learner-visible subjective prompt and verbatim response using frozen authored scenario
+  and transition evidence. Never judge MCQs or progression.
+input_allowlist:
+- subjective item as shown to learner
+- subjective response raw text
+- only item-specific verified scenario oracle
+- item-specific minimum/strong structure, material invalidators and permitted alternatives
+- transition rubric; scoped knowledge if truly needed
+- versioned grading schema
+input_denylist:
+- assigned pedagogy or history
+- Tutor transcript/analysis
+- previous MCQ answers, MCQ score or MCQ options
+- form correctness threshold
+- learner identity / attempt number
+- FULL/F1 profile name
+- future state or next pedagogy
+- model-generated unverified reference rationale
+interpretation:
+- Score meanings and causal relations, never keywords/word count/format.
+- 'Do not restrict alternatives to exemplars: accept materially correct equivalent reasoning.'
+- Do not infer concepts not visible in response. Distinguish correctness from evidenced SOLO structure.
+- If a learner proposes an unfamiliar parity configuration, verify it with the declared oracle if possible; otherwise
+  refer for human review rather than invent correct result.
+- Target 1-point anchors require target structure, not any partial or lower-level fact.
+- Material contradiction of the central mechanism makes response 0 despite complex structure; record observed
+  structural complexity separately.
+- A statement that may appear implicit is credited only if the logic is actually expressed or follows unambiguously
+  from their language.
+- For C4 credit alternate correct nonzero witnesses if independently verified by group-membership oracle.
+- Item-specific scenario values are generated; judge receives actual frozen facts for this instance, never the
+  fixed historical example as a required response.
+scores:
+  '0': Insufficient or materially incorrect required structure
+  '1': Minimum correct target structure on presented question
+  '2': Strong supported correct target structure; 2 not awarded by length
+not_gradable_policy: Only technical context/key/provider issues are NOT_GRADABLE; blank/off-topic responses are
+  scientifically gradable at zero. Ambiguous but technically valid natural-language answers are REVIEW_REQUIRED
+  with reasons, not a manufactured zero.
+evidence_statuses:
+- DEMONSTRATED
+- PARTIAL
+- ABSENT
+- CONTRADICTED
+output_fields:
+- gradable_status
+- subjective_points
+- observed_solo_structure
+- material_correctness
+- criterion_evidence
+- misconception_evidence
+- verbatim_quotes
+- alternative_reasoning_used
+- unverified_claims
+- review_reason
+- score_justification
+transition_anchors:
+- transition_id: C1
+  min_1: At least one clearly usable and correct sender-parity or complete-frame receiver-check aspect for the
+    posed item; statement not simply a correct numerical guess without identifiable rule.
+  full_2: Correctly explains how sender rule and receiver check are coupled under the stated convention, including
+    why the observed mismatch would matter.
+  zero: No materially correct usable topic-specific parity aspect in response.
+  borderline: A correct isolated selection may demonstrate one relevant feature, but cannot establish that the
+    learner can independently explain the full mechanism.
+- transition_id: C2
+  min_1: At least two distinct, materially correct properties spanning both parity families, allowed to be unconnected.
+  full_2: Three or more precise distinct applicable properties spanning both families, with accurate scope and
+    limitations; no integration requirement.
+  zero: At most one correct relevant property or material contradiction of the required properties.
+  borderline: A list of 1D and 2D facts is M even when there is no connective causal explanation. Requiring a
+    polished because-chain here would bias toward R.
+- transition_id: C3
+  min_1: Materially correct, explicit case-linked relation → altered/preserved constraints → test/outcome explanation,
+    at least in one central mechanism.
+  full_2: Complete accurate case-specific causal explanation including relevant location/miss limitation or comparison
+    of constraints; do not demand generalized unknown-scheme derivation.
+  zero: Only separately listed facts, a guessed outcome, or materially incorrect causal link.
+  borderline: Can explain one concrete 2D alteration relationally without asserting a law for all possible partitions.
+- transition_id: C4
+  min_1: Correctly derives and justifies a condition that applies beyond one concrete frame, and demonstrates
+    a valid application/counterexample within the new scheme.
+  full_2: Derives both necessary-and-sufficient group-wise condition and uses it to give a correct counterexample
+    plus an explicit boundary or implication; accept alternate valid derivations.
+  zero: Only case-specific prediction/canonical recall, unjustified assertion, or invalid generalization.
+  borderline: A correct observation that one pair of flips passes, without explaining the arbitrary-group even-count
+    condition, is not EA.
+backend_contract: Backend exact-key MCQs, score threshold and transition selection separately. Never let Judge
+  output next_action or transition_achieved.
+validation_note: A calibration set written by one model is not independently human-adjudicated ground truth.
+runtime_instance_policy:
+  exact_frozen_subjective_question_required: true
+  verified_case_facts_from_actual_instance_required: true
+  no_reference_answer_string_matching: true
+  material_truth_and_solo_structure_separately_reported: true
+  item_specific_criteria_from_resolved_subjective_contract: true
+  uncertainty_means_review_not_learner_failure: true

@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from solo_harness.db.models import ActiveStudyVersion, StudyVersion
 from solo_harness.studies.canonicalization import COMPILER_CONTRACT_VERSION, CONTENT_CANONICALIZATION_VERSION, SNAPSHOT_SCHEMA_VERSION, content_identity, snapshot_identity
-from solo_harness.studies.compiler import CompiledStudy
+from solo_harness.studies.v04_types import CompiledStudy
 
 
 def activate(db: Session, compiled: CompiledStudy, source_bundle: dict | None = None) -> StudyVersion:

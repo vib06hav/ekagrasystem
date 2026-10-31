@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from solo_harness.db.models import ActiveStudyVersion, StudyVersion
 from solo_harness.studies.canonicalization import snapshot_identity
-from solo_harness.studies.compiler import CompiledStudy
+from solo_harness.studies.v04_types import CompiledStudy
 
 
 class StudyCatalog:

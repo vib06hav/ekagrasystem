@@ -1,0 +1,938 @@
+schema: ekagra.scientific.typed_instance_policies.v0.4.1-CANDIDATE
+status: SCIENTIFIC_COMPANION_PENDING_REVIEW
+source: 08_SCIENTIFIC_YAML/assessment_families.yaml (v0.4; unchanged)
+scope: F1_ONLY
+policy_rule: Backend resolves source contract to typed policy before generation. Never use LLM-provided slot IDs,
+  never parse English constraint strings, never impose fixed numerical vectors or display letters.
+shared_bounds_refs:
+- 08_SCIENTIFIC_YAML/knowledge.yaml#runtime_numeric_scope
+- 08_SCIENTIFIC_YAML/scenario_rules.yaml#two_dimensional_dimensions
+- 08_SCIENTIFIC_YAML/scenario_rules.yaml#generation_constraints
+default_learner_fact_policy: input_facts_only; project task-specific givens, NEVER private oracle result, target
+  proposition, correct option identity or Judge rubric. A need to reveal receiver observations must be explicitly
+  specified and reviewed.
+allowed_case_relations:
+- independent_cases
+- same_valid_grid_distinct_error_patterns
+- same_grid_same_data_flips
+- same_data_same_error_universe
+- same_scheme_same_witness
+contracts:
+  C1-A1-Q1:
+    type: MCQ
+    scientific_contract_id: C1-A1-Q1
+    source_scenario_family: sender_parity
+    case_plan: single
+    cases:
+    - name: a
+      family: sender_parity
+      parameters:
+        convention: even
+    learner_fact_policy: input_facts_only
+    review_note: The original phrase "sample at least two independently generated data patterns" is a diversity
+      expectation across instances, not two datasets in one MCQ; verify with author before enforcement.
+  C1-A1-Q2:
+    type: MCQ
+    scientific_contract_id: C1-A1-Q2
+    source_scenario_family: receiver_parity
+    case_plan: single
+    cases:
+    - name: a
+      family: receiver_parity
+      parameters:
+        convention: even
+        receiver_state: valid
+        mark_check_bit: true
+    learner_fact_policy: input_facts_only
+  C1-A1-Q3:
+    type: MCQ
+    scientific_contract_id: C1-A1-Q3
+    source_scenario_family: single_flip_1d
+    case_plan: single
+    cases:
+    - name: a
+      family: single_flip_1d
+      parameters:
+        convention: even
+        flip_count: 1
+        position_universe: transmitted_full_frame
+    learner_fact_policy: input_facts_only
+  C1-A1-S:
+    type: SUBJECTIVE
+    scientific_contract_id: C1-A1-S
+    source_scenario_family: receiver_parity
+    case_plan: single
+    cases:
+    - name: a
+      family: receiver_parity
+      parameters:
+        convention: even
+        receiver_state: valid
+        mark_check_bit: true
+    learner_fact_policy: input_plus_stated_convention
+  C1-A2-Q1:
+    type: MCQ
+    scientific_contract_id: C1-A2-Q1
+    source_scenario_family: sender_parity
+    case_plan: single
+    cases:
+    - name: a
+      family: sender_parity
+      parameters:
+        convention: odd
+    learner_fact_policy: input_facts_only
+  C1-A2-Q2:
+    type: MCQ
+    scientific_contract_id: C1-A2-Q2
+    source_scenario_family: receiver_parity
+    case_plan: single
+    cases:
+    - name: a
+      family: receiver_parity
+      parameters:
+        convention: odd
+        receiver_state: valid
+        mark_check_bit: true
+    learner_fact_policy: input_facts_only
+  C1-A2-Q3:
+    type: MCQ
+    scientific_contract_id: C1-A2-Q3
+    source_scenario_family: single_flip_1d
+    case_plan: single
+    cases:
+    - name: a
+      family: single_flip_1d
+      parameters:
+        convention: odd
+        flip_count: 1
+        position_universe: transmitted_full_frame
+    learner_fact_policy: input_facts_only
+  C1-A2-S:
+    type: SUBJECTIVE
+    scientific_contract_id: C1-A2-S
+    source_scenario_family: receiver_parity
+    case_plan: single
+    cases:
+    - name: a
+      family: receiver_parity
+      parameters:
+        convention: odd
+        receiver_state: valid
+        mark_check_bit: true
+    learner_fact_policy: input_facts_only
+  C1-A3-Q1:
+    type: MCQ
+    scientific_contract_id: C1-A3-Q1
+    source_scenario_family: sender_parity
+    case_plan: single
+    cases:
+    - name: a
+      family: sender_parity
+      parameters:
+        convention: sample_even_or_odd
+    learner_fact_policy: input_facts_only
+  C1-A3-Q2:
+    type: MCQ
+    scientific_contract_id: C1-A3-Q2
+    source_scenario_family: receiver_parity
+    case_plan: single
+    cases:
+    - name: a
+      family: receiver_parity
+      parameters:
+        convention: sample_even_or_odd
+        receiver_state: sample_valid_or_invalid
+    learner_fact_policy: input_facts_only
+  C1-A3-Q3:
+    type: MCQ
+    scientific_contract_id: C1-A3-Q3
+    source_scenario_family: single_flip_1d
+    case_plan: single
+    cases:
+    - name: a
+      family: single_flip_1d
+      parameters:
+        convention: sample_even_or_odd
+        flip_count: 1
+        position_universe: transmitted_full_frame
+    learner_fact_policy: input_facts_only
+  C1-A3-S:
+    type: SUBJECTIVE
+    scientific_contract_id: C1-A3-S
+    source_scenario_family: receiver_parity
+    case_plan: single
+    cases:
+    - name: a
+      family: receiver_parity
+      parameters:
+        convention: sample_even_or_odd
+        receiver_state: sample_valid_or_invalid
+    learner_fact_policy: input_facts_only
+  C1-A4-Q1:
+    type: MCQ
+    scientific_contract_id: C1-A4-Q1
+    source_scenario_family: sender_parity
+    case_plan: single
+    cases:
+    - name: a
+      family: sender_parity
+      parameters:
+        convention: sample_even_or_odd
+        contrast_length_vs_ones: true
+    learner_fact_policy: input_facts_only
+  C1-A4-Q2:
+    type: MCQ
+    scientific_contract_id: C1-A4-Q2
+    source_scenario_family: checkbit_1d
+    case_plan: single
+    cases:
+    - name: a
+      family: checkbit_1d
+      parameters:
+        convention: sample_even_or_odd
+        mark_check_bit: true
+        alter_check_bit: false
+    learner_fact_policy: input_facts_only
+  C1-A4-Q3:
+    type: MCQ
+    scientific_contract_id: C1-A4-Q3
+    source_scenario_family: receiver_parity
+    case_plan: single
+    cases:
+    - name: a
+      family: receiver_parity
+      parameters:
+        convention: even
+        receiver_state: invalid
+        false_length_claim: true
+    learner_fact_policy: input_facts_only
+  C1-A4-S:
+    type: SUBJECTIVE
+    scientific_contract_id: C1-A4-S
+    source_scenario_family: sender_parity
+    case_plan: single
+    cases:
+    - name: a
+      family: sender_parity
+      parameters:
+        convention: even
+        false_length_claim: true
+    learner_fact_policy: input_facts_only
+  C2-A1-Q1:
+    type: MCQ
+    scientific_contract_id: C2-A1-Q1
+    source_scenario_family: multiflip_1d
+    case_plan: comparison
+    cases:
+    - name: a
+      family: multiflip_1d
+      parameters:
+        convention: sample_even_or_odd
+        flip_count: odd_bounded
+        position_universe: transmitted_full_frame
+    - name: b
+      family: multiflip_1d
+      parameters:
+        convention: sample_even_or_odd
+        flip_count: even_nonzero_bounded
+        position_universe: transmitted_full_frame
+    learner_fact_policy: input_facts_only
+    case_relation: independent_cases
+  C2-A1-Q2:
+    type: MCQ
+    scientific_contract_id: C2-A1-Q2
+    source_scenario_family: full2d_single
+    case_plan: single
+    cases:
+    - name: a
+      family: full2d_single
+      parameters:
+        flip_count: 1
+        position_universe: transmitted_full_grid
+    learner_fact_policy: input_facts_only
+  C2-A1-Q3:
+    type: MCQ
+    scientific_contract_id: C2-A1-Q3
+    source_scenario_family: single_flip_1d
+    case_plan: single
+    cases:
+    - name: a
+      family: single_flip_1d
+      parameters:
+        flip_count: 1
+        position_universe: transmitted_full_frame
+    learner_fact_policy: input_facts_only
+  C2-A1-S:
+    type: SUBJECTIVE
+    scientific_contract_id: C2-A1-S
+    source_scenario_family: full2d_single
+    case_plan: comparison
+    cases:
+    - name: a
+      family: single_flip_1d
+      parameters:
+        flip_count: 1
+        position_universe: transmitted_full_frame
+    - name: b
+      family: full2d_single
+      parameters:
+        flip_count: 1
+        position_universe: transmitted_full_grid
+    learner_fact_policy: input_facts_only
+    case_relation: independent_cases
+  C2-A2-Q1:
+    type: MCQ
+    scientific_contract_id: C2-A2-Q1
+    source_scenario_family: multiflip_1d
+    case_plan: single
+    cases:
+    - name: a
+      family: multiflip_1d
+      parameters:
+        flip_count: 2
+        position_universe: transmitted_full_frame
+    learner_fact_policy: input_facts_only
+  C2-A2-Q2:
+    type: MCQ
+    scientific_contract_id: C2-A2-Q2
+    source_scenario_family: full2d_pair
+    case_plan: single
+    cases:
+    - name: a
+      family: full2d_pair
+      parameters:
+        flip_count: 2
+        position_universe: data_cells
+        pair_geometry: same_row_distinct_columns
+    learner_fact_policy: input_facts_only
+  C2-A2-Q3:
+    type: MCQ
+    scientific_contract_id: C2-A2-Q3
+    source_scenario_family: full2d_pair
+    case_plan: single
+    cases:
+    - name: a
+      family: full2d_pair
+      parameters:
+        flip_count: 2
+        position_universe: transmitted_full_grid
+        forbid_unique_two_error_inference: true
+    learner_fact_policy: input_facts_only
+  C2-A2-S:
+    type: SUBJECTIVE
+    scientific_contract_id: C2-A2-S
+    source_scenario_family: full2d_pair
+    case_plan: comparison
+    cases:
+    - name: a
+      family: multiflip_1d
+      parameters:
+        flip_count: 2
+        position_universe: transmitted_full_frame
+    - name: b
+      family: full2d_pair
+      parameters:
+        flip_count: 2
+        position_universe: data_cells
+        pair_geometry: same_row_distinct_columns
+    learner_fact_policy: input_facts_only
+    case_relation: independent_cases
+  C2-A3-Q1:
+    type: MCQ
+    scientific_contract_id: C2-A3-Q1
+    source_scenario_family: checkbit_1d
+    case_plan: single
+    cases:
+    - name: a
+      family: checkbit_1d
+      parameters:
+        flip_count: 1
+        position_universe: check_bit_only
+    learner_fact_policy: input_facts_only
+  C2-A3-Q2:
+    type: MCQ
+    scientific_contract_id: C2-A3-Q2
+    source_scenario_family: full2d_checkbit
+    case_plan: single
+    cases:
+    - name: a
+      family: full2d_checkbit
+      parameters:
+        flip_count: 1
+        position_universe: full2d_check_cells
+        check_cell_kind: sample_row_column_corner
+    learner_fact_policy: input_facts_only
+  C2-A3-Q3:
+    type: MCQ
+    scientific_contract_id: C2-A3-Q3
+    source_scenario_family: multiflip_1d
+    case_plan: comparison
+    cases:
+    - name: a
+      family: checkbit_1d
+      parameters:
+        flip_count: 1
+        position_universe: check_bit_only
+    - name: b
+      family: multiflip_1d
+      parameters:
+        flip_count: 2
+        position_universe: transmitted_full_frame
+        must_include_check_bit: true
+    learner_fact_policy: input_facts_only
+    case_relation: independent_cases
+  C2-A3-S:
+    type: SUBJECTIVE
+    scientific_contract_id: C2-A3-S
+    source_scenario_family: full2d_checkbit
+    case_plan: comparison
+    cases:
+    - name: a
+      family: checkbit_1d
+      parameters:
+        flip_count: 1
+        position_universe: check_bit_only
+    - name: b
+      family: full2d_checkbit
+      parameters:
+        flip_count: 1
+        position_universe: full2d_check_cells
+        check_cell_kind: sample_row_column_corner
+    learner_fact_policy: input_facts_only
+    case_relation: independent_cases
+  C2-A4-Q1:
+    type: MCQ
+    scientific_contract_id: C2-A4-Q1
+    source_scenario_family: multiflip_1d
+    case_plan: single
+    cases:
+    - name: a
+      family: multiflip_1d
+      parameters:
+        flip_count: 4
+        position_universe: transmitted_full_frame
+    learner_fact_policy: input_facts_only
+  C2-A4-Q2:
+    type: MCQ
+    scientific_contract_id: C2-A4-Q2
+    source_scenario_family: full2d_rectangle
+    case_plan: single
+    cases:
+    - name: a
+      family: full2d_rectangle
+      parameters:
+        flip_count: 4
+        position_universe: data_cells
+        geometry: nondegenerate_rectangle
+    learner_fact_policy: input_facts_only
+  C2-A4-Q3:
+    type: MCQ
+    scientific_contract_id: C2-A4-Q3
+    source_scenario_family: full2d_four_compare
+    case_plan: comparison
+    cases:
+    - name: a
+      family: full2d_four_compare
+      parameters:
+        flip_count: 4
+        position_universe: data_cells
+        geometry: nondegenerate_rectangle
+    - name: b
+      family: full2d_four_compare
+      parameters:
+        flip_count: 4
+        position_universe: data_cells
+        geometry: non_rectangle
+    learner_fact_policy: input_facts_only
+    case_relation: same_valid_grid_distinct_error_patterns
+  C2-A4-S:
+    type: SUBJECTIVE
+    scientific_contract_id: C2-A4-S
+    source_scenario_family: full2d_rectangle
+    case_plan: comparison
+    cases:
+    - name: a
+      family: multiflip_1d
+      parameters:
+        flip_count: 4
+        position_universe: transmitted_full_frame
+    - name: b
+      family: full2d_rectangle
+      parameters:
+        flip_count: 4
+        position_universe: data_cells
+        geometry: nondegenerate_rectangle
+    learner_fact_policy: input_facts_only
+    case_relation: independent_cases
+  C3-A1-Q1:
+    type: MCQ
+    scientific_contract_id: C3-A1-Q1
+    source_scenario_family: multiflip_1d
+    case_plan: single
+    cases:
+    - name: a
+      family: multiflip_1d
+      parameters:
+        flip_count: 2
+        position_universe: transmitted_full_frame
+    learner_fact_policy: input_facts_only
+  C3-A1-Q2:
+    type: MCQ
+    scientific_contract_id: C3-A1-Q2
+    source_scenario_family: full2d_pair
+    case_plan: single
+    cases:
+    - name: a
+      family: full2d_pair
+      parameters:
+        flip_count: 2
+        position_universe: data_cells
+        pair_geometry: same_row_distinct_columns
+    learner_fact_policy: input_facts_only
+  C3-A1-Q3:
+    type: MCQ
+    scientific_contract_id: C3-A1-Q3
+    source_scenario_family: full2d_compare
+    case_plan: comparison
+    cases:
+    - name: a
+      family: full2d_compare
+      parameters:
+        check_scheme: row_only
+        flip_count: 2
+        position_universe: data_cells
+        pair_geometry: same_row_distinct_columns
+    - name: b
+      family: full2d_compare
+      parameters:
+        check_scheme: full_row_column
+        flip_count: 2
+        position_universe: data_cells
+        pair_geometry: same_row_distinct_columns
+    learner_fact_policy: input_facts_only
+    case_relation: same_grid_same_data_flips
+  C3-A1-S:
+    type: SUBJECTIVE
+    scientific_contract_id: C3-A1-S
+    source_scenario_family: full2d_pair
+    case_plan: single
+    cases:
+    - name: a
+      family: full2d_pair
+      parameters:
+        flip_count: 2
+        position_universe: data_cells
+        pair_geometry: same_row_distinct_columns
+    learner_fact_policy: input_facts_only
+  C3-A2-Q1:
+    type: MCQ
+    scientific_contract_id: C3-A2-Q1
+    source_scenario_family: single_flip_1d
+    case_plan: single
+    cases:
+    - name: a
+      family: single_flip_1d
+      parameters:
+        flip_count: 1
+        position_universe: transmitted_full_frame
+    learner_fact_policy: input_facts_only
+  C3-A2-Q2:
+    type: MCQ
+    scientific_contract_id: C3-A2-Q2
+    source_scenario_family: full2d_single
+    case_plan: single
+    cases:
+    - name: a
+      family: full2d_single
+      parameters:
+        flip_count: 1
+        position_universe: transmitted_full_grid
+    learner_fact_policy: input_facts_only
+  C3-A2-Q3:
+    type: MCQ
+    scientific_contract_id: C3-A2-Q3
+    source_scenario_family: full2d_pair
+    case_plan: single
+    cases:
+    - name: a
+      family: full2d_pair
+      parameters:
+        flip_count: 2
+        position_universe: transmitted_full_grid
+        forbid_unique_two_error_inference: true
+    learner_fact_policy: input_facts_only
+  C3-A2-S:
+    type: SUBJECTIVE
+    scientific_contract_id: C3-A2-S
+    source_scenario_family: full2d_pair
+    case_plan: comparison
+    cases:
+    - name: a
+      family: full2d_single
+      parameters:
+        flip_count: 1
+        position_universe: transmitted_full_grid
+    - name: b
+      family: full2d_pair
+      parameters:
+        flip_count: 2
+        position_universe: transmitted_full_grid
+    learner_fact_policy: input_facts_only
+    case_relation: independent_cases
+  C3-A3-Q1:
+    type: MCQ
+    scientific_contract_id: C3-A3-Q1
+    source_scenario_family: multiflip_1d
+    case_plan: comparison
+    cases:
+    - name: a
+      family: multiflip_1d
+      parameters:
+        flip_count: odd_bounded
+        position_universe: transmitted_full_frame
+    - name: b
+      family: multiflip_1d
+      parameters:
+        flip_count: even_nonzero_bounded
+        position_universe: transmitted_full_frame
+    learner_fact_policy: input_facts_only
+    case_relation: independent_cases
+  C3-A3-Q2:
+    type: MCQ
+    scientific_contract_id: C3-A3-Q2
+    source_scenario_family: full2d_pair
+    case_plan: comparison
+    cases:
+    - name: a
+      family: full2d_single
+      parameters:
+        flip_count: 1
+        position_universe: transmitted_full_grid
+    - name: b
+      family: full2d_pair
+      parameters:
+        flip_count: 2
+        position_universe: transmitted_full_grid
+    learner_fact_policy: input_facts_only
+    case_relation: independent_cases
+  C3-A3-Q3:
+    type: MCQ
+    scientific_contract_id: C3-A3-Q3
+    source_scenario_family: full2d_rectangle
+    case_plan: single
+    cases:
+    - name: a
+      family: full2d_rectangle
+      parameters:
+        flip_count: 4
+        position_universe: data_cells
+        geometry: nondegenerate_rectangle
+    learner_fact_policy: input_facts_only
+  C3-A3-S:
+    type: SUBJECTIVE
+    scientific_contract_id: C3-A3-S
+    source_scenario_family: full2d_rectangle
+    case_plan: comparison
+    cases:
+    - name: a
+      family: single_flip_1d
+      parameters:
+        flip_count: 1
+        position_universe: transmitted_full_frame
+    - name: b
+      family: multiflip_1d
+      parameters:
+        flip_count: 2
+        position_universe: transmitted_full_frame
+    - name: c
+      family: full2d_rectangle
+      parameters:
+        flip_count: 4
+        position_universe: data_cells
+        geometry: nondegenerate_rectangle
+    learner_fact_policy: input_facts_only
+    case_relation: independent_cases
+  C3-A4-Q1:
+    type: MCQ
+    scientific_contract_id: C3-A4-Q1
+    source_scenario_family: multiflip_1d
+    case_plan: single
+    cases:
+    - name: a
+      family: multiflip_1d
+      parameters:
+        flip_count: even_nonzero_bounded
+        position_universe: data_bits_only
+    learner_fact_policy: input_facts_only
+  C3-A4-Q2:
+    type: MCQ
+    scientific_contract_id: C3-A4-Q2
+    source_scenario_family: full2d_compare
+    case_plan: comparison
+    cases:
+    - name: a
+      family: full2d_compare
+      parameters:
+        check_scheme: global_parity_on_data
+        flip_count: sample_bounded_data_flips
+        position_universe: data_cells
+    - name: b
+      family: full2d_compare
+      parameters:
+        check_scheme: full_row_column
+        flip_count: sample_bounded_data_flips
+        position_universe: data_cells
+    learner_fact_policy: input_facts_only
+    case_relation: same_data_same_error_universe
+  C3-A4-Q3:
+    type: MCQ
+    scientific_contract_id: C3-A4-Q3
+    source_scenario_family: full2d_compare
+    case_plan: comparison
+    cases:
+    - name: a
+      family: full2d_compare
+      parameters:
+        check_scheme: global_parity_on_data
+        flip_count: sample_bounded_data_flips
+        position_universe: data_cells
+    - name: b
+      family: full2d_compare
+      parameters:
+        check_scheme: full_row_column
+        flip_count: sample_bounded_data_flips
+        position_universe: data_cells
+    learner_fact_policy: input_facts_only
+    case_relation: same_data_same_error_universe
+  C3-A4-S:
+    type: SUBJECTIVE
+    scientific_contract_id: C3-A4-S
+    source_scenario_family: full2d_compare
+    case_plan: comparison
+    cases:
+    - name: a
+      family: full2d_compare
+      parameters:
+        check_scheme: global_parity_on_data
+        flip_count: sample_bounded_data_flips
+        position_universe: data_cells
+    - name: b
+      family: full2d_compare
+      parameters:
+        check_scheme: full_row_column
+        flip_count: sample_bounded_data_flips
+        position_universe: data_cells
+    learner_fact_policy: input_facts_only
+    case_relation: same_data_same_error_universe
+    review_note: Present actual check overhead if asking about cost; do not imply universal superiority.
+  C4-A1-Q1:
+    type: MCQ
+    scientific_contract_id: C4-A1-Q1
+    source_scenario_family: grouped_checks
+    case_plan: single
+    cases:
+    - name: a
+      family: grouped_checks
+      parameters:
+        group_count: 2_or_3
+        group_map: fresh_nonempty_subsets
+    learner_fact_policy: input_facts_only
+  C4-A1-Q2:
+    type: MCQ
+    scientific_contract_id: C4-A1-Q2
+    source_scenario_family: grouped_two_flip
+    case_plan: single
+    cases:
+    - name: a
+      family: grouped_two_flip
+      parameters:
+        flip_count: 2
+        position_universe: data_bits_only
+        pair_signature_relation: sample_equal_or_different
+    learner_fact_policy: input_facts_only
+  C4-A1-Q3:
+    type: MCQ
+    scientific_contract_id: C4-A1-Q3
+    source_scenario_family: grouped_evasion
+    case_plan: single
+    cases:
+    - name: a
+      family: grouped_evasion
+      parameters:
+        flip_count: nonempty_even_overlap_witness
+        position_universe: data_bits_only
+        all_checks_pass: true
+    learner_fact_policy: input_facts_only
+  C4-A1-S:
+    type: SUBJECTIVE
+    scientific_contract_id: C4-A1-S
+    source_scenario_family: grouped_evasion
+    case_plan: single
+    cases:
+    - name: a
+      family: grouped_evasion
+      parameters:
+        flip_count: nonempty_even_overlap_witness
+        position_universe: data_bits_only
+        all_checks_pass: true
+    learner_fact_policy: input_facts_only
+  C4-A2-Q1:
+    type: MCQ
+    scientific_contract_id: C4-A2-Q1
+    source_scenario_family: grouped_checks
+    case_plan: single
+    cases:
+    - name: a
+      family: grouped_checks
+      parameters:
+        group_count: 2_or_3
+        group_map: fresh_nonempty_subsets
+        require_distinct_data_positions: 3
+    learner_fact_policy: input_facts_only
+  C4-A2-Q2:
+    type: MCQ
+    scientific_contract_id: C4-A2-Q2
+    source_scenario_family: grouped_two_flip
+    case_plan: single
+    cases:
+    - name: a
+      family: grouped_two_flip
+      parameters:
+        flip_count: 2
+        position_universe: data_bits_only
+        pair_signature_relation: sample_equal_or_different
+    learner_fact_policy: input_facts_only
+  C4-A2-Q3:
+    type: MCQ
+    scientific_contract_id: C4-A2-Q3
+    source_scenario_family: grouped_two_flip
+    case_plan: single
+    cases:
+    - name: a
+      family: grouped_two_flip
+      parameters:
+        group_map: fresh_nonempty_subsets
+        quantified_check: all_distinct_data_pairs
+    learner_fact_policy: input_facts_only
+  C4-A2-S:
+    type: SUBJECTIVE
+    scientific_contract_id: C4-A2-S
+    source_scenario_family: grouped_two_flip
+    case_plan: single
+    cases:
+    - name: a
+      family: grouped_two_flip
+      parameters:
+        group_map: fresh_nonempty_subsets
+        quantified_check: all_distinct_data_pairs
+    learner_fact_policy: input_facts_only
+  C4-A3-Q1:
+    type: MCQ
+    scientific_contract_id: C4-A3-Q1
+    source_scenario_family: grouped_uncovered
+    case_plan: single
+    cases:
+    - name: a
+      family: grouped_uncovered
+      parameters:
+        group_map: must_have_uncovered_position
+    learner_fact_policy: input_facts_only
+  C4-A3-Q2:
+    type: MCQ
+    scientific_contract_id: C4-A3-Q2
+    source_scenario_family: grouped_uncovered
+    case_plan: single
+    cases:
+    - name: a
+      family: grouped_uncovered
+      parameters:
+        group_map: must_have_uncovered_position
+        flip_count: 1
+        position_universe: uncovered_data_positions
+    learner_fact_policy: input_facts_only
+  C4-A3-Q3:
+    type: MCQ
+    scientific_contract_id: C4-A3-Q3
+    source_scenario_family: grouped_add_check
+    case_plan: single
+    cases:
+    - name: a
+      family: grouped_add_check
+      parameters:
+        group_map: must_have_uncovered_position
+        flip_count: 1
+        position_universe: uncovered_data_positions
+        additional_group_relation: must_cover_witness
+    learner_fact_policy: input_facts_only
+  C4-A3-S:
+    type: SUBJECTIVE
+    scientific_contract_id: C4-A3-S
+    source_scenario_family: grouped_uncovered
+    case_plan: comparison
+    cases:
+    - name: a
+      family: grouped_uncovered
+      parameters:
+        group_map: must_have_uncovered_position
+        flip_count: 1
+        position_universe: uncovered_data_positions
+    - name: b
+      family: grouped_add_check
+      parameters:
+        group_map: must_have_uncovered_position
+        flip_count: 1
+        position_universe: uncovered_data_positions
+        additional_group_relation: must_cover_witness
+    learner_fact_policy: input_facts_only
+    case_relation: same_scheme_same_witness
+  C4-A4-Q1:
+    type: MCQ
+    scientific_contract_id: C4-A4-Q1
+    source_scenario_family: grouped_checks
+    case_plan: single
+    cases:
+    - name: a
+      family: grouped_checks
+      parameters:
+        group_count: 2_or_3
+        group_map: fresh_nonempty_subsets
+    learner_fact_policy: input_facts_only
+  C4-A4-Q2:
+    type: MCQ
+    scientific_contract_id: C4-A4-Q2
+    source_scenario_family: grouped_evasion
+    case_plan: single
+    cases:
+    - name: a
+      family: grouped_evasion
+      parameters:
+        flip_count: nonempty_even_overlap_witness
+        position_universe: data_bits_only
+        all_checks_pass: true
+    learner_fact_policy: input_facts_only
+  C4-A4-Q3:
+    type: MCQ
+    scientific_contract_id: C4-A4-Q3
+    source_scenario_family: grouped_add_check
+    case_plan: single
+    cases:
+    - name: a
+      family: grouped_add_check
+      parameters:
+        flip_count: nonempty_even_overlap_witness
+        position_universe: data_bits_only
+        additional_group_relation: sample_detects_or_not
+    learner_fact_policy: input_facts_only
+  C4-A4-S:
+    type: SUBJECTIVE
+    scientific_contract_id: C4-A4-S
+    source_scenario_family: grouped_evasion
+    case_plan: single
+    cases:
+    - name: a
+      family: grouped_evasion
+      parameters:
+        flip_count: nonempty_even_overlap_witness
+        position_universe: data_bits_only
+        all_checks_pass: true
+    learner_fact_policy: input_facts_only

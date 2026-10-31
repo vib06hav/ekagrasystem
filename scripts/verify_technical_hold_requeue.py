@@ -1,0 +1,17 @@
+"""Exhausted technical hold requeue preserves one response and finalizes once."""
+from __future__ import annotations
+import asyncio,json,uuid
+from datetime import datetime,timezone
+from sqlalchemy import select
+from solo_harness.bootstrap import bootstrap
+from solo_harness.config import get_settings
+from solo_harness.db.engine import make_session_factory
+from solo_harness.db.models import AssessmentInstance,AssessmentResponse,Attempt,LLMCall,Session,V04Evaluation
+from solo_harness.runtime.ai import AIExecutionRuntime,OpenAICompatibleClient
+from solo_harness.runtime.engine import SessionRuntime
+
+def main():
+ c=get_settings();d=make_session_factory(c.database_url)();r=SessionRuntime(bootstrap(c));src=d.scalar(select(AssessmentInstance).where(AssessmentInstance.status=='CLOSED').order_by(AssessmentInstance.closed_at.desc()));sr=d.scalar(select(AssessmentResponse).where(AssessmentResponse.assessment_instance_id==src.id));s=r.create_session(d,d.get(Session,src.session_id).study_version_id,build_id='technical-hold',institutional_id='technical-hold-'+uuid.uuid4().hex[:8],commit=False);a=d.get(Attempt,s.current_attempt_id)
+ i=AssessmentInstance(session_id=s.id,attempt_id=a.id,transition_id=a.transition_id,assessment_family_id=src.assessment_family_id,assessment_form_id=src.assessment_form_id+'-hold',status='AWAITING_EVALUATION',candidate_form_ids=src.candidate_form_ids,selection_method='FAULT',selection_audit={},blueprint_snapshot=src.blueprint_snapshot,resolved_component_ids=src.resolved_component_ids,frozen_public_snapshot=src.frozen_public_snapshot,frozen_private_snapshot=src.frozen_private_snapshot,frozen_package_fingerprint=src.frozen_package_fingerprint,frozen_schema_version=src.frozen_schema_version,frozen_metadata_snapshot=src.frozen_metadata_snapshot,delivery_status='DEVELOPMENT_ONLY',frozen_at=datetime.now(timezone.utc));d.add(i);d.flush();resp=AssessmentResponse(assessment_instance_id=i.id,response_text=sr.response_text,response_format='plain',client_action_id=uuid.uuid4(),structured_response=sr.structured_response,response_schema_version='v04.native.2');d.add(resp);a.status='AWAITING_EVALUATION';s.phase='ASSESSMENT_AWAITING_EVALUATION';held=LLMCall(session_id=s.id,attempt_id=a.id,assessment_instance_id=i.id,purpose='JUDGE',status='TECHNICAL_HOLD',retry_group_id=uuid.uuid4(),retry_number=3,provider='fault',model='fault',generation_parameters={},request_payload={'failure_history':['injected']},request_body_text='{}',error_class='RETRY_EXHAUSTED',error_message='injected');d.add(held);d.commit()
+ ai=AIExecutionRuntime(r,OpenAICompatibleClient(c),c);new=ai.reserve_manual_retry(d,s.id,commit=True,authorized_requeue=True);asyncio.run(ai.execute(d,new));ev=d.scalars(select(V04Evaluation).join(AssessmentResponse).where(AssessmentResponse.assessment_instance_id==i.id)).all();newcall=d.get(LLMCall,new);result={'held_status':d.get(LLMCall,held.id).status,'new_call':str(new),'linked_to':newcall.request_payload.get('retry_of'),'response_count':len(d.scalars(select(AssessmentResponse).where(AssessmentResponse.assessment_instance_id==i.id)).all()),'evaluation_count':len(ev),'final_phase':d.get(Session,s.id).phase};assert result['held_status']=='TECHNICAL_HOLD' and result['linked_to']==str(held.id) and result['response_count']==1 and result['evaluation_count']==1;(c.research_data_dir/'technical_hold_trace.json').write_text(json.dumps(result,indent=2),encoding='utf-8');print(json.dumps(result))
+if __name__=='__main__':main()

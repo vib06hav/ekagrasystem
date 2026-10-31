@@ -1,0 +1,18 @@
+{
+  "mapping_count": 64,
+  "mcq_count": 48,
+  "subjective_count": 16,
+  "total_case_definitions": 81,
+  "all_source_ids_match": true,
+  "all_family_refs_resolve": true,
+  "review_note_ids": [
+    "C1-A1-Q1",
+    "C3-A4-S"
+  ],
+  "limits": [
+    "No scenario generator implemented here",
+    "No runtime or Docker execution",
+    "No LLM responses examined",
+    "Scientific interpretations require review"
+  ]
+}

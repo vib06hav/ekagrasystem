@@ -1,0 +1,2630 @@
+schema: ekagra.scientific.assessment_families.v0.4
+status: CANDIDATE_UNAPPROVED
+scope: F1 parity ONLY
+question_generation: All item contracts define VARIABLE question families, never fixed learner-facing instances.
+  Scenario values and option positions are instance-specific.
+form_policy:
+  transitions: 4
+  blueprints_per_transition: 4
+  mcqs_per_blueprint: 3
+  subjective_per_blueprint: 1
+  source_precedence: Slot contract + referenced shared science + independently verified instance; LLM only realizes
+    prose and semantic Judge only evaluates submitted response.
+  form_allocation: Random among available unexposed blueprints for target transition independently of pedagogy;
+    no automatic silent reuse; repeated-attempt exhaustion is unresolved pending protocol design.
+  source_distribution: Instructional and assessment instances must not share frozen instance identifiers; reject
+    identical numerical scenarios where exposure is documented.
+roles_by_transition:
+- transition_id: C1
+  roles:
+  - slot: 1
+    role: sender rule or parity-bit interpretation
+  - slot: 2
+    role: complete-frame receiver test
+  - slot: 3
+    role: stated detection consequence
+  - slot: 4
+    role: elicitation of one usable parity aspect with opportunity for sender-receiver connection
+- transition_id: C2
+  roles:
+  - slot: 1
+    role: independent one-dimensional property
+  - slot: 2
+    role: independent two-dimensional property
+  - slot: 3
+    role: distinct boundary/comparison property
+  - slot: 4
+    role: separate correct aspects spanning one- and two-dimensional parity
+- transition_id: C3
+  roles:
+  - slot: 1
+    role: causal effect on one-dimensional constraint
+  - slot: 2
+    role: causal relation among full two-dimensional checks
+  - slot: 3
+    role: causal limitation or cross-constraint comparison
+  - slot: 4
+    role: integrated case-specific constraint -> alteration -> observations -> inference
+- transition_id: C4
+  roles:
+  - slot: 1
+    role: interpret a newly defined check-group model
+  - slot: 2
+    role: derive consequence under new groups
+  - slot: 3
+    role: evaluate general limitation or principled modification
+  - slot: 4
+    role: derive general evasion condition plus nontrivial justified consequence
+blueprints:
+- id: C1-A1
+  transition_id: C1
+  title: Build/check even-parity frame
+  blueprint_focus: Build/check even-parity frame
+  scenario_exposure: Generated and independently verified; exclude instruction-only frozen instances.
+  required_solo_structure: One usable component is sufficient for U. Do not require parity flip-count theorem
+    or 2D understanding.
+  target_refs: &id001
+  - K1
+  - K2
+  - K3
+  - R1
+  items:
+  - id: C1-A1-Q1
+    type: MCQ
+    slot_number: 1
+    transition_id: C1
+    blueprint_id: C1-A1
+    shared_role: sender rule or parity-bit interpretation
+    scientific_purpose: Select the sender check bit for a freshly generated even-parity payload
+    solo_evidence_role: one applicable sender rule
+    scenario_family: sender_parity
+    generation_instruction: Choose a fresh data string and explicit parity convention; ask about the sender check
+      bit.
+    correctness_condition: Appended bit completes an even total number of ones
+    independent_oracle_rule: Parity bit is the one value making full-frame number-of-ones parity equal the stated
+      convention.
+    distractor_meanings:
+    - Apply odd-parity convention
+    - Count length rather than ones
+    - Assume fixed appended bit
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Build/check even-parity frame'
+    - 'Mandatory parity convention for this blueprint: even; numerical values not fixed'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Force stated even convention; sample at least two independently generated data
+      patterns
+  - id: C1-A1-Q2
+    type: MCQ
+    slot_number: 2
+    transition_id: C1
+    blueprint_id: C1-A1
+    shared_role: complete-frame receiver test
+    scientific_purpose: Interpret the receiver check on a clean even-parity full frame
+    solo_evidence_role: one applicable receiver check
+    scenario_family: receiver_parity
+    generation_instruction: Start from a valid single-parity frame; create valid or specified altered received
+      frame.
+    correctness_condition: Count complete received frame including appended bit and compare with even convention
+    independent_oracle_rule: Receiver pass is parity(received full frame)==agreed convention; pass is not proof
+      of no flips.
+    distractor_meanings:
+    - Exclude check bit
+    - Count zeroes
+    - Treat successful check as proof no corruption
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Build/check even-parity frame'
+    - 'Mandatory parity convention for this blueprint: even; numerical values not fixed'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Use an even-parity full frame and explicitly mark the appended bit
+  - id: C1-A1-Q3
+    type: MCQ
+    slot_number: 3
+    transition_id: C1
+    blueprint_id: C1-A1
+    shared_role: stated detection consequence
+    scientific_purpose: Interpret a single stated transmitted-bit alteration under even parity
+    solo_evidence_role: a usable consequence of the parity test
+    scenario_family: single_flip_1d
+    generation_instruction: Choose valid full frame then flip exactly one transmitted position, possibly the check
+      bit.
+    correctness_condition: A single alteration violates the originally satisfied even check
+    independent_oracle_rule: One flip toggles complete-frame parity, so receiver test fails.
+    distractor_meanings:
+    - Claim the bit is repaired
+    - Claim unchanged check result
+    - Claim location is known
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Build/check even-parity frame'
+    - 'Mandatory parity convention for this blueprint: even; numerical values not fixed'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Use exactly one flip in the transmitted full frame with even convention
+  - id: C1-A1-S
+    type: SUBJECTIVE
+    slot_number: 4
+    transition_id: C1
+    blueprint_id: C1-A1
+    shared_role: elicitation of one usable parity aspect with opportunity for sender-receiver connection
+    scientific_purpose: Explain how an even-parity check bit is chosen and what the receiver checks
+    scenario_family: receiver_parity
+    generation_instruction: Start from a valid single-parity frame; create valid or specified altered received
+      frame.
+    target_structural_evidence: at least one correct sender or complete-frame receiver aspect; linking both merits
+      full credit
+    partial_or_boundary_evidence: correct isolated rule with reason
+    materially_invalid_reasoning_example: equating parity with block length
+    legitimate_alternative_explanation: equivalent concise numerical or verbal reasoning
+    score_anchor: &id002
+      zero: No usable or materially correct parity aspect in the actual question context.
+      one: At least one correct usable sender-rule or complete-frame receiver-test aspect with identifiable reasoning,
+        not a numerical guess.
+      two: Correctly links sender choice and full-frame receiver check and appropriately interprets the actual
+        case.
+    judge_instruction: Assess the learner response against the exact frozen generated subjective question AND
+      verified instance. Accept valid nonstandard reasoning, no keyword or text-match requirements.
+    equivalence_conditions:
+    - Generated question must elicit the specified structural understanding, not merely a numerical answer
+    - Do not embed the key explanation or cue a unique expected sentence
+    - Allow materially equivalent explanations and justified alternative witnesses
+    - No identical mandatory stem, bit pattern or response text
+    verification:
+    - Subjective question retains item reasoning demand within bounded generated scenario
+    - Judge receives the real frozen question, real learner response and true instance facts; never pedagogy or
+      MCQ score
+    - Human calibration required for score and SOLO interpretation
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Synthetic responses are illustrative only; no canned correct sentence is an answer
+      authority.
+    required_instance_conditions: Use a fresh even-convention full frame; ask for a conceptual rule not only a
+      bit
+- id: C1-A2
+  transition_id: C1
+  title: Odd-parity convention
+  blueprint_focus: Odd-parity convention
+  scenario_exposure: Generated and independently verified; exclude instruction-only frozen instances.
+  required_solo_structure: One usable component is sufficient for U. Do not require parity flip-count theorem
+    or 2D understanding.
+  target_refs: *id001
+  items:
+  - id: C1-A2-Q1
+    type: MCQ
+    slot_number: 1
+    transition_id: C1
+    blueprint_id: C1-A2
+    shared_role: sender rule or parity-bit interpretation
+    scientific_purpose: Choose an odd-parity appended check bit for a generated payload
+    solo_evidence_role: usable odd-parity rule
+    scenario_family: sender_parity
+    generation_instruction: Choose a fresh data string and explicit parity convention; ask about the sender check
+      bit.
+    correctness_condition: Complete frame must have an odd number of ones
+    independent_oracle_rule: Parity bit is the one value making full-frame number-of-ones parity equal the stated
+      convention.
+    distractor_meanings:
+    - Use even-parity convention
+    - Use data length parity
+    - Ignore appended check bit
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Odd-parity convention'
+    - 'Mandatory parity convention for this blueprint: odd; numerical values not fixed'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Force odd convention, not a silent switch from even
+  - id: C1-A2-Q2
+    type: MCQ
+    slot_number: 2
+    transition_id: C1
+    blueprint_id: C1-A2
+    shared_role: complete-frame receiver test
+    scientific_purpose: Recognize odd-parity complete-frame validity after receiving a generated frame
+    solo_evidence_role: receiver convention correctly applied
+    scenario_family: receiver_parity
+    generation_instruction: Start from a valid single-parity frame; create valid or specified altered received
+      frame.
+    correctness_condition: Full received frame must have odd number of ones
+    independent_oracle_rule: Receiver pass is parity(received full frame)==agreed convention; pass is not proof
+      of no flips.
+    distractor_meanings:
+    - Count only data
+    - Accept even count under odd convention
+    - Infer all bits unchanged from pass
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Odd-parity convention'
+    - 'Mandatory parity convention for this blueprint: odd; numerical values not fixed'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Use a complete odd-parity received frame including its check bit
+  - id: C1-A2-Q3
+    type: MCQ
+    slot_number: 3
+    transition_id: C1
+    blueprint_id: C1-A2
+    shared_role: stated detection consequence
+    scientific_purpose: State the receiver consequence of one altered bit in a valid odd-parity frame
+    solo_evidence_role: mismatch recognition
+    scenario_family: single_flip_1d
+    generation_instruction: Choose valid full frame then flip exactly one transmitted position, possibly the check
+      bit.
+    correctness_condition: One flip changes odd to even; check fails
+    independent_oracle_rule: One flip toggles complete-frame parity, so receiver test fails.
+    distractor_meanings:
+    - Claim odd parity always detects and repairs
+    - Assume parity-bit flips are exempt
+    - Infer exact corrupted position
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Odd-parity convention'
+    - 'Mandatory parity convention for this blueprint: odd; numerical values not fixed'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Use exactly one altered bit of a valid odd frame
+  - id: C1-A2-S
+    type: SUBJECTIVE
+    slot_number: 4
+    transition_id: C1
+    blueprint_id: C1-A2
+    shared_role: elicitation of one usable parity aspect with opportunity for sender-receiver connection
+    scientific_purpose: Explain the sender/receiver use of an explicitly agreed odd-parity convention
+    scenario_family: receiver_parity
+    generation_instruction: Start from a valid single-parity frame; create valid or specified altered received
+      frame.
+    target_structural_evidence: one usable parity rule or complete-frame receiver test; complete causal link merits
+      stronger credit
+    partial_or_boundary_evidence: accurate one-aspect application
+    materially_invalid_reasoning_example: switching silently to even parity
+    legitimate_alternative_explanation: any mathematically equivalent statement of odd parity
+    score_anchor: *id002
+    judge_instruction: Assess the learner response against the exact frozen generated subjective question AND
+      verified instance. Accept valid nonstandard reasoning, no keyword or text-match requirements.
+    equivalence_conditions:
+    - Generated question must elicit the specified structural understanding, not merely a numerical answer
+    - Do not embed the key explanation or cue a unique expected sentence
+    - Allow materially equivalent explanations and justified alternative witnesses
+    - No identical mandatory stem, bit pattern or response text
+    verification:
+    - Subjective question retains item reasoning demand within bounded generated scenario
+    - Judge receives the real frozen question, real learner response and true instance facts; never pedagogy or
+      MCQ score
+    - Human calibration required for score and SOLO interpretation
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Synthetic responses are illustrative only; no canned correct sentence is an answer
+      authority.
+    required_instance_conditions: Retain explicitly stated odd convention in learner task
+- id: C1-A3
+  transition_id: C1
+  title: Receiver accepts/rejects frames
+  blueprint_focus: Receiver accepts/rejects frames
+  scenario_exposure: Generated and independently verified; exclude instruction-only frozen instances.
+  required_solo_structure: One usable component is sufficient for U. Do not require parity flip-count theorem
+    or 2D understanding.
+  target_refs: *id001
+  items:
+  - id: C1-A3-Q1
+    type: MCQ
+    slot_number: 1
+    transition_id: C1
+    blueprint_id: C1-A3
+    shared_role: sender rule or parity-bit interpretation
+    scientific_purpose: Identify which count the sender makes before transmission under a declared convention
+    solo_evidence_role: sender parity application
+    scenario_family: sender_parity
+    generation_instruction: Choose a fresh data string and explicit parity convention; ask about the sender check
+      bit.
+    correctness_condition: Sender selects check bit satisfying complete-frame parity
+    independent_oracle_rule: Parity bit is the one value making full-frame number-of-ones parity equal the stated
+      convention.
+    distractor_meanings:
+    - Choose bit by frame length alone
+    - Transmitter predicts error position
+    - Check bit always one
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Receiver accepts/rejects frames'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: State either even or odd convention before sender chooses the bit
+  - id: C1-A3-Q2
+    type: MCQ
+    slot_number: 2
+    transition_id: C1
+    blueprint_id: C1-A3
+    shared_role: complete-frame receiver test
+    scientific_purpose: Decide whether a given received complete frame passes its declared test
+    solo_evidence_role: receiver check application
+    scenario_family: receiver_parity
+    generation_instruction: Start from a valid single-parity frame; create valid or specified altered received
+      frame.
+    correctness_condition: Receiver compares all received frame positions to agreed parity condition
+    independent_oracle_rule: Receiver pass is parity(received full frame)==agreed convention; pass is not proof
+      of no flips.
+    distractor_meanings:
+    - Drop the parity position
+    - Use other convention
+    - Read pass as proof of integrity
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Receiver accepts/rejects frames'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Generate passing or failing received case; declare the convention
+  - id: C1-A3-Q3
+    type: MCQ
+    slot_number: 3
+    transition_id: C1
+    blueprint_id: C1-A3
+    shared_role: stated detection consequence
+    scientific_purpose: Distinguish a failing check from unique localization or data correction
+    solo_evidence_role: correct interpretation of detection
+    scenario_family: single_flip_1d
+    generation_instruction: Choose valid full frame then flip exactly one transmitted position, possibly the check
+      bit.
+    correctness_condition: Check violation supports detection of inconsistency, not self-correction
+    independent_oracle_rule: One flip toggles complete-frame parity, so receiver test fails.
+    distractor_meanings:
+    - Assume check repairs
+    - Assume check gives position
+    - Treat mismatch as normal
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Receiver accepts/rejects frames'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Present a failing check; do not provide actual bit-location information
+  - id: C1-A3-S
+    type: SUBJECTIVE
+    slot_number: 4
+    transition_id: C1
+    blueprint_id: C1-A3
+    shared_role: elicitation of one usable parity aspect with opportunity for sender-receiver connection
+    scientific_purpose: Explain the meaning of receiver pass and fail for a generated full frame
+    scenario_family: receiver_parity
+    generation_instruction: Start from a valid single-parity frame; create valid or specified altered received
+      frame.
+    target_structural_evidence: correctly interpret at least one check result; stronger credit links sender rule
+      and test
+    partial_or_boundary_evidence: valid pass or fail inference with rationale
+    materially_invalid_reasoning_example: pass guarantees faithful transmission
+    legitimate_alternative_explanation: explain using ones count or parity XOR
+    score_anchor: *id002
+    judge_instruction: Assess the learner response against the exact frozen generated subjective question AND
+      verified instance. Accept valid nonstandard reasoning, no keyword or text-match requirements.
+    equivalence_conditions:
+    - Generated question must elicit the specified structural understanding, not merely a numerical answer
+    - Do not embed the key explanation or cue a unique expected sentence
+    - Allow materially equivalent explanations and justified alternative witnesses
+    - No identical mandatory stem, bit pattern or response text
+    verification:
+    - Subjective question retains item reasoning demand within bounded generated scenario
+    - Judge receives the real frozen question, real learner response and true instance facts; never pedagogy or
+      MCQ score
+    - Human calibration required for score and SOLO interpretation
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Synthetic responses are illustrative only; no canned correct sentence is an answer
+      authority.
+    required_instance_conditions: Present received complete frame and stated convention; ask what results do and
+      do not show
+- id: C1-A4
+  transition_id: C1
+  title: Correct a friend's length misconception
+  blueprint_focus: Correct a friend's length misconception
+  scenario_exposure: Generated and independently verified; exclude instruction-only frozen instances.
+  required_solo_structure: One usable component is sufficient for U. Do not require parity flip-count theorem
+    or 2D understanding.
+  target_refs: *id001
+  items:
+  - id: C1-A4-Q1
+    type: MCQ
+    slot_number: 1
+    transition_id: C1
+    blueprint_id: C1-A4
+    shared_role: sender rule or parity-bit interpretation
+    scientific_purpose: Distinguish frame-length parity from number-of-ones parity in sender construction
+    solo_evidence_role: recognition of correct count
+    scenario_family: sender_parity
+    generation_instruction: Choose a fresh data string and explicit parity convention; ask about the sender check
+      bit.
+    correctness_condition: Required appended bit follows ones-count convention not evenness of frame length
+    independent_oracle_rule: Parity bit is the one value making full-frame number-of-ones parity equal the stated
+      convention.
+    distractor_meanings:
+    - Equate even length with even parity
+    - Inspect number of zeroes only
+    - Pick arbitrary fixed bit
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Correct a friend''s length misconception'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Select patterns where number of ones and parity of length yield distinct conclusions
+  - id: C1-A4-Q2
+    type: MCQ
+    slot_number: 2
+    transition_id: C1
+    blueprint_id: C1-A4
+    shared_role: complete-frame receiver test
+    scientific_purpose: Identify that the received check bit participates in the receiver recount
+    solo_evidence_role: complete-frame rule
+    scenario_family: checkbit_1d
+    generation_instruction: Generate a valid full frame with marked data and parity positions, optionally flip
+      check bit.
+    correctness_condition: Receiver counts data and transmitted check bit together
+    independent_oracle_rule: Parity-check bit is included in tested frame; flip alters test exactly as any single
+      bit.
+    distractor_meanings:
+    - Exclude check bit
+    - Treat check bit as automatic correction
+    - Count frame length
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Correct a friend''s length misconception'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Mark check-bit position; require its inclusion in count
+  - id: C1-A4-Q3
+    type: MCQ
+    slot_number: 3
+    transition_id: C1
+    blueprint_id: C1-A4
+    shared_role: stated detection consequence
+    scientific_purpose: Correct a claim that a particular frame is valid because it has an even length
+    solo_evidence_role: detect length misconception
+    scenario_family: receiver_parity
+    generation_instruction: Start from a valid single-parity frame; create valid or specified altered received
+      frame.
+    correctness_condition: Validity follows number-of-ones parity under agreed convention
+    independent_oracle_rule: Receiver pass is parity(received full frame)==agreed convention; pass is not proof
+      of no flips.
+    distractor_meanings:
+    - Accept due to eight positions
+    - Assume extra bit always one
+    - Conclude error-free from passing parity
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Correct a friend''s length misconception'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Present a peer claim based on frame length and an independently verified counterexample
+  - id: C1-A4-S
+    type: SUBJECTIVE
+    slot_number: 4
+    transition_id: C1
+    blueprint_id: C1-A4
+    shared_role: elicitation of one usable parity aspect with opportunity for sender-receiver connection
+    scientific_purpose: Respond to a peer who thinks even parity means an even-length message
+    scenario_family: sender_parity
+    generation_instruction: Choose a fresh data string and explicit parity convention; ask about the sender check
+      bit.
+    target_structural_evidence: explain the relevant number-of-ones rule with a concrete generated context
+    partial_or_boundary_evidence: correct distinction even without complete sender-receiver link
+    materially_invalid_reasoning_example: length rather than ones
+    legitimate_alternative_explanation: ordinary-language or symbolic parity explanation
+    score_anchor: *id002
+    judge_instruction: Assess the learner response against the exact frozen generated subjective question AND
+      verified instance. Accept valid nonstandard reasoning, no keyword or text-match requirements.
+    equivalence_conditions:
+    - Generated question must elicit the specified structural understanding, not merely a numerical answer
+    - Do not embed the key explanation or cue a unique expected sentence
+    - Allow materially equivalent explanations and justified alternative witnesses
+    - No identical mandatory stem, bit pattern or response text
+    verification:
+    - Subjective question retains item reasoning demand within bounded generated scenario
+    - Judge receives the real frozen question, real learner response and true instance facts; never pedagogy or
+      MCQ score
+    - Human calibration required for score and SOLO interpretation
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Synthetic responses are illustrative only; no canned correct sentence is an answer
+      authority.
+    required_instance_conditions: Pose a peer misconception; do not demand a specific response sentence
+- id: C2-A1
+  transition_id: C2
+  title: Stated alterations and outcomes
+  blueprint_focus: Stated alterations and outcomes
+  scenario_exposure: Generated and independently verified; exclude instruction-only frozen instances.
+  required_solo_structure: At least one distinct correct 1D and one distinct correct 2D aspect; do not turn item
+    into an unrequired derivation.
+  target_refs: &id003
+  - K4
+  - K5
+  - K6
+  - K7
+  - K8
+  - K9
+  items:
+  - id: C2-A1-Q1
+    type: MCQ
+    slot_number: 1
+    transition_id: C2
+    blueprint_id: C2-A1
+    shared_role: independent one-dimensional property
+    scientific_purpose: Distinguish odd-count from even-count alterations under single parity
+    solo_evidence_role: one 1D property
+    scenario_family: multiflip_1d
+    generation_instruction: Choose valid full frame and a bounded set of distinct flipped transmitted positions.
+    correctness_condition: Odd flips are detected and even flips preserve the parity check
+    independent_oracle_rule: Receiver fails iff number of flips is odd; cannot infer error count from one failure.
+    distractor_meanings:
+    - Any corruption fails
+    - Even means frame length
+    - Passing means untouched
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Stated alterations and outcomes'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Use one odd-count and one even-count bounded alteration for contrast
+  - id: C2-A1-Q2
+    type: MCQ
+    slot_number: 2
+    transition_id: C2
+    blueprint_id: C2-A1
+    shared_role: independent two-dimensional property
+    scientific_purpose: Identify the single-bit location implication of full row/column checks
+    solo_evidence_role: one 2D property
+    scenario_family: full2d_single
+    generation_instruction: Generate full small even-parity row-column block incl corner and exactly one flipped
+      transmitted position.
+    correctness_condition: Under exactly one altered transmitted bit, one failed row and column intersect at its
+      position
+    independent_oracle_rule: Exactly one row and one column fail, whose intersection is the altered position under
+      exactly-one-flip assumption.
+    distractor_meanings:
+    - A global parity check locates
+    - Intersection without one-flip assumption always identifies every error
+    - 2D has only one global check
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Stated alterations and outcomes'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Exactly one altered transmitted position in full 2D with explicit assumption
+  - id: C2-A1-Q3
+    type: MCQ
+    slot_number: 3
+    transition_id: C2
+    blueprint_id: C2-A1
+    shared_role: distinct boundary/comparison property
+    scientific_purpose: Contrast a 1D failure with the absence of unique position evidence
+    solo_evidence_role: different 1D diagnostic property
+    scenario_family: single_flip_1d
+    generation_instruction: Choose valid full frame then flip exactly one transmitted position, possibly the check
+      bit.
+    correctness_condition: Global parity detects its violation but does not reveal which frame bit changed
+    independent_oracle_rule: One flip toggles complete-frame parity, so receiver test fails.
+    distractor_meanings:
+    - Failed 1D check gives bit index
+    - 1D repairs automatically
+    - One failed global check proves two flips
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Stated alterations and outcomes'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Show global 1D failure without enough information to locate position
+  - id: C2-A1-S
+    type: SUBJECTIVE
+    slot_number: 4
+    transition_id: C2
+    blueprint_id: C2-A1
+    shared_role: separate correct aspects spanning one- and two-dimensional parity
+    scientific_purpose: List distinct verified features of single parity and full 2D parity on stated changes
+    scenario_family: full2d_single
+    generation_instruction: Generate full small even-parity row-column block incl corner and exactly one flipped
+      transmitted position.
+    target_structural_evidence: at least one materially correct 1D feature and one distinct 2D feature; causal
+      chain not required
+    partial_or_boundary_evidence: one correct feature from each scheme
+    materially_invalid_reasoning_example: two restatements of single parity
+    legitimate_alternative_explanation: valid separate facts in any order
+    score_anchor: &id004
+      zero: Does not provide distinct materially correct facts spanning one-dimensional and full two-dimensional
+        parity.
+      one: At least one correct distinct property of each of 1D and 2D parity relevant to the presented task.
+      two: Multiple accurate, differentiated properties spanning both schemes, including pertinent limitations;
+        no causal derivation required.
+    judge_instruction: Assess the learner response against the exact frozen generated subjective question AND
+      verified instance. Accept valid nonstandard reasoning, no keyword or text-match requirements.
+    equivalence_conditions:
+    - Generated question must elicit the specified structural understanding, not merely a numerical answer
+    - Do not embed the key explanation or cue a unique expected sentence
+    - Allow materially equivalent explanations and justified alternative witnesses
+    - No identical mandatory stem, bit pattern or response text
+    verification:
+    - Subjective question retains item reasoning demand within bounded generated scenario
+    - Judge receives the real frozen question, real learner response and true instance facts; never pedagogy or
+      MCQ score
+    - Human calibration required for score and SOLO interpretation
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Synthetic responses are illustrative only; no canned correct sentence is an answer
+      authority.
+    required_instance_conditions: Show one 1D and one full 2D case with separate inferable properties
+- id: C2-A2
+  transition_id: C2
+  title: Odd/even and same-row changes
+  blueprint_focus: Odd/even and same-row changes
+  scenario_exposure: Generated and independently verified; exclude instruction-only frozen instances.
+  required_solo_structure: At least one distinct correct 1D and one distinct correct 2D aspect; do not turn item
+    into an unrequired derivation.
+  target_refs: *id003
+  items:
+  - id: C2-A2-Q1
+    type: MCQ
+    slot_number: 1
+    transition_id: C2
+    blueprint_id: C2-A2
+    shared_role: independent one-dimensional property
+    scientific_purpose: Classify two transmitted flips under one global parity check
+    solo_evidence_role: even-flip 1D property
+    scenario_family: multiflip_1d
+    generation_instruction: Choose valid full frame and a bounded set of distinct flipped transmitted positions.
+    correctness_condition: Two flips preserve the single parity constraint
+    independent_oracle_rule: Receiver fails iff number of flips is odd; cannot infer error count from one failure.
+    distractor_meanings:
+    - All changes fail
+    - Two flips always locate
+    - Pass means no change
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Odd/even and same-row changes'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Exactly two distinct transmitted flips in a valid 1D frame
+  - id: C2-A2-Q2
+    type: MCQ
+    slot_number: 2
+    transition_id: C2
+    blueprint_id: C2-A2
+    shared_role: independent two-dimensional property
+    scientific_purpose: Classify two data-bit flips in the same row but different columns in full 2D
+    solo_evidence_role: 2D row/column property
+    scenario_family: full2d_pair
+    generation_instruction: Generate a full small even-parity row-column block with two distinct altered transmitted
+      positions.
+    correctness_condition: Row parity stays valid while the two changed columns fail
+    independent_oracle_rule: Compute failed-row and failed-column sets from row/column syndromes; at least one
+      fails; no unconditional unique two-flip inference.
+    distractor_meanings:
+    - Entire 2D check passes
+    - Row and only row fails
+    - Two failed columns uniquely identify both positions without assumptions
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Odd/even and same-row changes'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Exactly two DATA flips in SAME row and DIFFERENT columns of full 2D
+  - id: C2-A2-Q3
+    type: MCQ
+    slot_number: 3
+    transition_id: C2
+    blueprint_id: C2-A2
+    shared_role: distinct boundary/comparison property
+    scientific_purpose: Recognize that two-flip syndrome does not establish unconditional unique locations
+    solo_evidence_role: distinct location limitation
+    scenario_family: full2d_pair
+    generation_instruction: Generate a full small even-parity row-column block with two distinct altered transmitted
+      positions.
+    correctness_condition: Syndrome gives failed constraints, not guaranteed exact two-error locations
+    independent_oracle_rule: Compute failed-row and failed-column sets from row/column syndromes; at least one
+      fails; no unconditional unique two-flip inference.
+    distractor_meanings:
+    - Any two failed checks identify exactly two bits
+    - 2D cannot detect any two flips
+    - Number of flips is always determined
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Odd/even and same-row changes'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Exactly two flips in full 2D, do not assume a unique two-error decoding
+  - id: C2-A2-S
+    type: SUBJECTIVE
+    slot_number: 4
+    transition_id: C2
+    blueprint_id: C2-A2
+    shared_role: separate correct aspects spanning one- and two-dimensional parity
+    scientific_purpose: State one 1D two-flip property and one distinct 2D same-row pair property
+    scenario_family: full2d_pair
+    generation_instruction: Generate a full small even-parity row-column block with two distinct altered transmitted
+      positions.
+    target_structural_evidence: at least one correct property of each of 1D and 2D parity; integration optional
+    partial_or_boundary_evidence: separate correct 1D and 2D outcomes
+    materially_invalid_reasoning_example: claim same-row pair always undetected by full 2D
+    legitimate_alternative_explanation: alternate concise descriptions of row/column failures
+    score_anchor: *id004
+    judge_instruction: Assess the learner response against the exact frozen generated subjective question AND
+      verified instance. Accept valid nonstandard reasoning, no keyword or text-match requirements.
+    equivalence_conditions:
+    - Generated question must elicit the specified structural understanding, not merely a numerical answer
+    - Do not embed the key explanation or cue a unique expected sentence
+    - Allow materially equivalent explanations and justified alternative witnesses
+    - No identical mandatory stem, bit pattern or response text
+    verification:
+    - Subjective question retains item reasoning demand within bounded generated scenario
+    - Judge receives the real frozen question, real learner response and true instance facts; never pedagogy or
+      MCQ score
+    - Human calibration required for score and SOLO interpretation
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Synthetic responses are illustrative only; no canned correct sentence is an answer
+      authority.
+    required_instance_conditions: Present 1D double flip and same-row full 2D double flip as distinct cases
+- id: C2-A3
+  transition_id: C2
+  title: Flipped parity bit and missed errors
+  blueprint_focus: Flipped parity bit and missed errors
+  scenario_exposure: Generated and independently verified; exclude instruction-only frozen instances.
+  required_solo_structure: At least one distinct correct 1D and one distinct correct 2D aspect; do not turn item
+    into an unrequired derivation.
+  target_refs: *id003
+  items:
+  - id: C2-A3-Q1
+    type: MCQ
+    slot_number: 1
+    transition_id: C2
+    blueprint_id: C2-A3
+    shared_role: independent one-dimensional property
+    scientific_purpose: Treat a flipped transmitted parity bit as a genuine single-parity error
+    solo_evidence_role: 1D check-bit inclusion
+    scenario_family: checkbit_1d
+    generation_instruction: Generate a valid full frame with marked data and parity positions, optionally flip
+      check bit.
+    correctness_condition: An altered parity/check bit changes the received full-frame test
+    independent_oracle_rule: Parity-check bit is included in tested frame; flip alters test exactly as any single
+      bit.
+    distractor_meanings:
+    - Receiver excludes check bit
+    - Only payload flips matter
+    - Wrong check bit repairs itself
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Flipped parity bit and missed errors'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Exactly one flipped transmitted 1D parity/check bit
+  - id: C2-A3-Q2
+    type: MCQ
+    slot_number: 2
+    transition_id: C2
+    blueprint_id: C2-A3
+    shared_role: independent two-dimensional property
+    scientific_purpose: Distinguish row, column and corner check-bit errors under exactly one full 2D flip
+    solo_evidence_role: 2D check-bit scope
+    scenario_family: full2d_checkbit
+    generation_instruction: Generate full 2D block and flip one named row, column, or corner check-bit position.
+    correctness_condition: The failed row and column intersect at the changed check-bit coordinate
+    independent_oracle_rule: Compute syndrome including the altered check-bit coordinate; single-flip intersection
+      applies.
+    distractor_meanings:
+    - Only data cells are locatable
+    - Check bit is not in any parity constraint
+    - Any check-bit error passes
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Flipped parity bit and missed errors'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Exactly one altered row, column or corner check bit in full 2D
+  - id: C2-A3-Q3
+    type: MCQ
+    slot_number: 3
+    transition_id: C2
+    blueprint_id: C2-A3
+    shared_role: distinct boundary/comparison property
+    scientific_purpose: Contrast odd and even total transmitted flips including a parity position
+    solo_evidence_role: independent 1D parity property
+    scenario_family: multiflip_1d
+    generation_instruction: Choose valid full frame and a bounded set of distinct flipped transmitted positions.
+    correctness_condition: Single global check depends on flip-count parity including check bit
+    independent_oracle_rule: Receiver fails iff number of flips is odd; cannot infer error count from one failure.
+    distractor_meanings:
+    - Check-bit changes never count
+    - Every pair triggers alarm
+    - Passing proves no alteration
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Flipped parity bit and missed errors'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Contrast one transmitted flip with a two-flip pattern that includes check bit
+  - id: C2-A3-S
+    type: SUBJECTIVE
+    slot_number: 4
+    transition_id: C2
+    blueprint_id: C2-A3
+    shared_role: separate correct aspects spanning one- and two-dimensional parity
+    scientific_purpose: Describe at least one 1D and one full 2D consequence of altered check bits
+    scenario_family: full2d_checkbit
+    generation_instruction: Generate full 2D block and flip one named row, column, or corner check-bit position.
+    target_structural_evidence: accurate separate properties for each scheme; no compulsory causal derivation
+    partial_or_boundary_evidence: distinguish valid 1D and 2D results
+    materially_invalid_reasoning_example: ignore check-bit positions in all receiver tests
+    legitimate_alternative_explanation: valid coordinate or verbal descriptions
+    score_anchor: *id004
+    judge_instruction: Assess the learner response against the exact frozen generated subjective question AND
+      verified instance. Accept valid nonstandard reasoning, no keyword or text-match requirements.
+    equivalence_conditions:
+    - Generated question must elicit the specified structural understanding, not merely a numerical answer
+    - Do not embed the key explanation or cue a unique expected sentence
+    - Allow materially equivalent explanations and justified alternative witnesses
+    - No identical mandatory stem, bit pattern or response text
+    verification:
+    - Subjective question retains item reasoning demand within bounded generated scenario
+    - Judge receives the real frozen question, real learner response and true instance facts; never pedagogy or
+      MCQ score
+    - Human calibration required for score and SOLO interpretation
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Synthetic responses are illustrative only; no canned correct sentence is an answer
+      authority.
+    required_instance_conditions: One case each for 1D check bit and 2D check-bit syndrome
+- id: C2-A4
+  transition_id: C2
+  title: Four flips / check limits
+  blueprint_focus: Four flips / check limits
+  scenario_exposure: Generated and independently verified; exclude instruction-only frozen instances.
+  required_solo_structure: At least one distinct correct 1D and one distinct correct 2D aspect; do not turn item
+    into an unrequired derivation.
+  target_refs: *id003
+  items:
+  - id: C2-A4-Q1
+    type: MCQ
+    slot_number: 1
+    transition_id: C2
+    blueprint_id: C2-A4
+    shared_role: independent one-dimensional property
+    scientific_purpose: Classify four distinct flips in a single-parity full frame
+    solo_evidence_role: one 1D even-flip property
+    scenario_family: multiflip_1d
+    generation_instruction: Choose valid full frame and a bounded set of distinct flipped transmitted positions.
+    correctness_condition: Four flips preserve the single parity test
+    independent_oracle_rule: Receiver fails iff number of flips is odd; cannot infer error count from one failure.
+    distractor_meanings:
+    - Four always fail
+    - Four are auto-corrected
+    - Pass means data unchanged
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Four flips / check limits'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Exactly four DISTINCT flipped positions of a <=8-bit complete 1D frame
+  - id: C2-A4-Q2
+    type: MCQ
+    slot_number: 2
+    transition_id: C2
+    blueprint_id: C2-A4
+    shared_role: independent two-dimensional property
+    scientific_purpose: Recognize an undetected four-data-bit rectangle under full 2D
+    solo_evidence_role: one 2D limitation
+    scenario_family: full2d_rectangle
+    generation_instruction: Generate a valid small 2D grid and change all four data bits at corners of a nondegenerate
+      rectangle.
+    correctness_condition: Four rectangle corners change twice per affected row and column and pass all checks
+    independent_oracle_rule: Every affected row and column has two changes and hence all parity tests pass; corruption
+      remains undetected.
+    distractor_meanings:
+    - All four-bit changes must fail
+    - All four-bit changes correctable
+    - 2D has no misses
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Four flips / check limits'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Flip four corners of a nondegenerate rectangle in full 2D data cells
+  - id: C2-A4-Q3
+    type: MCQ
+    slot_number: 3
+    transition_id: C2
+    blueprint_id: C2-A4
+    shared_role: distinct boundary/comparison property
+    scientific_purpose: Distinguish a rectangle miss from a generic four-flip claim
+    solo_evidence_role: independent 2D case distinction
+    scenario_family: full2d_four_compare
+    generation_instruction: Generate both rectangle and non-rectangle four-data-flip patterns on a full row-column
+      grid, computing each resulting syndrome independently.
+    correctness_condition: 2D pass/fail depends on each row and column, not just total flip count
+    independent_oracle_rule: Pass if and only if every row and column has an even flip count; total count four
+      alone is insufficient.
+    distractor_meanings:
+    - Every four-bit pattern invisible to 2D
+    - Only global number of flips matters
+    - 2D always locates four flips
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Four flips / check limits'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Use a grid with enough data cells to create rectangle and NONrectangle four-bit
+      patterns
+  - id: C2-A4-S
+    type: SUBJECTIVE
+    slot_number: 4
+    transition_id: C2
+    blueprint_id: C2-A4
+    shared_role: separate correct aspects spanning one- and two-dimensional parity
+    scientific_purpose: State one single-parity four-flip outcome and a distinct 2D limitation
+    scenario_family: full2d_rectangle
+    generation_instruction: Generate a valid small 2D grid and change all four data bits at corners of a nondegenerate
+      rectangle.
+    target_structural_evidence: at least one accurate 1D property and one accurate 2D property; no theorem derivation
+      demanded
+    partial_or_boundary_evidence: separate correct claims
+    materially_invalid_reasoning_example: claim all 2D four-flip patterns are invisible
+    legitimate_alternative_explanation: description of rectangle or row/column check result
+    score_anchor: *id004
+    judge_instruction: Assess the learner response against the exact frozen generated subjective question AND
+      verified instance. Accept valid nonstandard reasoning, no keyword or text-match requirements.
+    equivalence_conditions:
+    - Generated question must elicit the specified structural understanding, not merely a numerical answer
+    - Do not embed the key explanation or cue a unique expected sentence
+    - Allow materially equivalent explanations and justified alternative witnesses
+    - No identical mandatory stem, bit pattern or response text
+    verification:
+    - Subjective question retains item reasoning demand within bounded generated scenario
+    - Judge receives the real frozen question, real learner response and true instance facts; never pedagogy or
+      MCQ score
+    - Human calibration required for score and SOLO interpretation
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Synthetic responses are illustrative only; no canned correct sentence is an answer
+      authority.
+    required_instance_conditions: Present one full-frame 1D four-flip fact and one 2D rectangular-miss fact
+- id: C3-A1
+  transition_id: C3
+  title: Row check passes, columns detect
+  blueprint_focus: Row check passes, columns detect
+  scenario_exposure: Generated and independently verified; exclude instruction-only frozen instances.
+  required_solo_structure: Require meaningful constraint-to-syndrome causal integration rather than listing facts;
+    no abstract theorem demand.
+  target_refs: &id005
+  - K15
+  - K16
+  - R2
+  - R3
+  - R4
+  - R7
+  - R8
+  items:
+  - id: C3-A1-Q1
+    type: MCQ
+    slot_number: 1
+    transition_id: C3
+    blueprint_id: C3-A1
+    shared_role: causal effect on one-dimensional constraint
+    scientific_purpose: Explain why two flips preserve the global parity constraint
+    solo_evidence_role: specific cancellation mechanism
+    scenario_family: multiflip_1d
+    generation_instruction: Choose valid full frame and a bounded set of distinct flipped transmitted positions.
+    correctness_condition: Two toggles cancel within a single parity check
+    independent_oracle_rule: Receiver fails iff number of flips is odd; cannot infer error count from one failure.
+    distractor_meanings:
+    - Two flips cannot occur
+    - Check repairs one flip
+    - Even parity refers to length
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Row check passes, columns detect'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Exactly two distinct transmitted positions under single parity
+  - id: C3-A1-Q2
+    type: MCQ
+    slot_number: 2
+    transition_id: C3
+    blueprint_id: C3-A1
+    shared_role: causal relation among full two-dimensional checks
+    scientific_purpose: Infer which checks fail for two changes in the same row of full 2D parity
+    solo_evidence_role: row-column constraint mechanism
+    scenario_family: full2d_pair
+    generation_instruction: Generate a full small even-parity row-column block with two distinct altered transmitted
+      positions.
+    correctness_condition: Both altered columns fail while the common row check passes
+    independent_oracle_rule: Compute failed-row and failed-column sets from row/column syndromes; at least one
+      fails; no unconditional unique two-flip inference.
+    distractor_meanings:
+    - Row fails because bits changed
+    - Every check passes
+    - Syndrome uniquely fixes the two bits without assumptions
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Row check passes, columns detect'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Exactly two DATA flips in same row, distinct columns of full 2D block
+  - id: C3-A1-Q3
+    type: MCQ
+    slot_number: 3
+    transition_id: C3
+    blueprint_id: C3-A1
+    shared_role: causal limitation or cross-constraint comparison
+    scientific_purpose: Explain the added value of columns over row-only testing on the same pair
+    solo_evidence_role: mechanism of independent constraints
+    scenario_family: full2d_compare
+    generation_instruction: Hold data and error universe fixed while contrasting global single parity and full
+      2D row-column checks.
+    correctness_condition: Independent column checks detect pair that cancels within its row check
+    independent_oracle_rule: Compute each scheme’s applicable checks separately; check-bit-error comparisons require
+      explicitly matched error universes.
+    distractor_meanings:
+    - Extra check bits alone guarantee all detection
+    - Row-only detects a same-row pair
+    - A passing row guarantees no corruption
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Row check passes, columns detect'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Compare row-only checks with full row-and-column checks on the SAME two data
+      flips
+  - id: C3-A1-S
+    type: SUBJECTIVE
+    slot_number: 4
+    transition_id: C3
+    blueprint_id: C3-A1
+    shared_role: integrated case-specific constraint -> alteration -> observations -> inference
+    scientific_purpose: Explain causally why a same-row pair can pass row checks yet be detected by columns
+    scenario_family: full2d_pair
+    generation_instruction: Generate a full small even-parity row-column block with two distinct altered transmitted
+      positions.
+    target_structural_evidence: connect changed positions→row cancellation and column violation→warranted receiver
+      inference
+    partial_or_boundary_evidence: sound causal relation but incomplete limitation
+    materially_invalid_reasoning_example: list row and column facts without linking them
+    legitimate_alternative_explanation: constraint-toggle or parity-preservation explanation
+    score_anchor: &id006
+      zero: Facts are disconnected from the case or proposed mechanism is materially false.
+      one: A materially correct, case-linked causal chain relates checked constraint, alteration and receiver
+        result.
+      two: A coherent and supported causal account additionally addresses a relevant limit, assumption or contrast.
+    judge_instruction: Assess the learner response against the exact frozen generated subjective question AND
+      verified instance. Accept valid nonstandard reasoning, no keyword or text-match requirements.
+    equivalence_conditions:
+    - Generated question must elicit the specified structural understanding, not merely a numerical answer
+    - Do not embed the key explanation or cue a unique expected sentence
+    - Allow materially equivalent explanations and justified alternative witnesses
+    - No identical mandatory stem, bit pattern or response text
+    verification:
+    - Subjective question retains item reasoning demand within bounded generated scenario
+    - Judge receives the real frozen question, real learner response and true instance facts; never pedagogy or
+      MCQ score
+    - Human calibration required for score and SOLO interpretation
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Synthetic responses are illustrative only; no canned correct sentence is an answer
+      authority.
+    required_instance_conditions: Require explicit common-row cancellation and affected-column failures
+- id: C3-A2
+  transition_id: C3
+  title: Single flip intersection vs two flips
+  blueprint_focus: Single flip intersection vs two flips
+  scenario_exposure: Generated and independently verified; exclude instruction-only frozen instances.
+  required_solo_structure: Require meaningful constraint-to-syndrome causal integration rather than listing facts;
+    no abstract theorem demand.
+  target_refs: *id005
+  items:
+  - id: C3-A2-Q1
+    type: MCQ
+    slot_number: 1
+    transition_id: C3
+    blueprint_id: C3-A2
+    shared_role: causal effect on one-dimensional constraint
+    scientific_purpose: Explain how one transmitted-bit flip changes global parity
+    solo_evidence_role: whole-frame causal relation
+    scenario_family: single_flip_1d
+    generation_instruction: Choose valid full frame then flip exactly one transmitted position, possibly the check
+      bit.
+    correctness_condition: One toggle violates the clean full-frame constraint
+    independent_oracle_rule: One flip toggles complete-frame parity, so receiver test fails.
+    distractor_meanings:
+    - Check bit immune
+    - Global check returns unique location
+    - Parity counts frame length
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Single flip intersection vs two flips'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: One flip of transmitted 1D frame; check bit may be selected
+  - id: C3-A2-Q2
+    type: MCQ
+    slot_number: 2
+    transition_id: C3
+    blueprint_id: C3-A2
+    shared_role: causal relation among full two-dimensional checks
+    scientific_purpose: Explain why one flipped 2D position yields an intersecting row/column syndrome
+    solo_evidence_role: 2D causal localization
+    scenario_family: full2d_single
+    generation_instruction: Generate full small even-parity row-column block incl corner and exactly one flipped
+      transmitted position.
+    correctness_condition: Affected row and column each toggle, intersection locates under one-flip assumption
+    independent_oracle_rule: Exactly one row and one column fail, whose intersection is the altered position under
+      exactly-one-flip assumption.
+    distractor_meanings:
+    - One failed row sufficient
+    - Any syndrome implies single flip
+    - The corner bit cannot change
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Single flip intersection vs two flips'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: One flip anywhere in full 2D INCLUDING check bits; state one-flip assumption
+  - id: C3-A2-Q3
+    type: MCQ
+    slot_number: 3
+    transition_id: C3
+    blueprint_id: C3-A2
+    shared_role: causal limitation or cross-constraint comparison
+    scientific_purpose: Explain why a two-flip syndrome does not justify unconditional unique localization
+    solo_evidence_role: assumption-aware limitation
+    scenario_family: full2d_pair
+    generation_instruction: Generate a full small even-parity row-column block with two distinct altered transmitted
+      positions.
+    correctness_condition: Observed failures can arise from multiple candidate error patterns unless error-count
+      information is justified
+    independent_oracle_rule: Compute failed-row and failed-column sets from row/column syndromes; at least one
+      fails; no unconditional unique two-flip inference.
+    distractor_meanings:
+    - Two-column failures always identify exact pair
+    - Any failed check uniquely repairs
+    - 2D cannot detect two flips
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Single flip intersection vs two flips'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Two distinct transmitted 2D flips and their syndrome; no hidden assumption that
+      count known
+  - id: C3-A2-S
+    type: SUBJECTIVE
+    slot_number: 4
+    transition_id: C3
+    blueprint_id: C3-A2
+    shared_role: integrated case-specific constraint -> alteration -> observations -> inference
+    scientific_purpose: Explain how the full 2D syndrome supports single-flip location and why two flips differ
+    scenario_family: full2d_pair
+    generation_instruction: Generate a full small even-parity row-column block with two distinct altered transmitted
+      positions.
+    target_structural_evidence: connect check membership, syndrome and single-flip assumption; state limits for
+      multiple flips
+    partial_or_boundary_evidence: correct mechanism with partially stated caveat
+    materially_invalid_reasoning_example: infer unique pair from failures alone
+    legitimate_alternative_explanation: algebraic or coordinate intersection reasoning
+    score_anchor: *id006
+    judge_instruction: Assess the learner response against the exact frozen generated subjective question AND
+      verified instance. Accept valid nonstandard reasoning, no keyword or text-match requirements.
+    equivalence_conditions:
+    - Generated question must elicit the specified structural understanding, not merely a numerical answer
+    - Do not embed the key explanation or cue a unique expected sentence
+    - Allow materially equivalent explanations and justified alternative witnesses
+    - No identical mandatory stem, bit pattern or response text
+    verification:
+    - Subjective question retains item reasoning demand within bounded generated scenario
+    - Judge receives the real frozen question, real learner response and true instance facts; never pedagogy or
+      MCQ score
+    - Human calibration required for score and SOLO interpretation
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Synthetic responses are illustrative only; no canned correct sentence is an answer
+      authority.
+    required_instance_conditions: Compare a one-flip example with a two-flip case and explain the assumption boundary
+- id: C3-A3
+  transition_id: C3
+  title: One mechanism, three outcomes
+  blueprint_focus: One mechanism, three outcomes
+  scenario_exposure: Generated and independently verified; exclude instruction-only frozen instances.
+  required_solo_structure: Require meaningful constraint-to-syndrome causal integration rather than listing facts;
+    no abstract theorem demand.
+  target_refs: *id005
+  items:
+  - id: C3-A3-Q1
+    type: MCQ
+    slot_number: 1
+    transition_id: C3
+    blueprint_id: C3-A3
+    shared_role: causal effect on one-dimensional constraint
+    scientific_purpose: Relate odd and even transmitted flip counts to preservation of one global parity constraint
+    solo_evidence_role: causal invariance 1D
+    scenario_family: multiflip_1d
+    generation_instruction: Choose valid full frame and a bounded set of distinct flipped transmitted positions.
+    correctness_condition: A check toggles once for each flipped member; odd changes fail and even changes pass
+    independent_oracle_rule: Receiver fails iff number of flips is odd; cannot infer error count from one failure.
+    distractor_meanings:
+    - All flips detected
+    - Check identifies every changed bit
+    - Only data not parity-bit flips count
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: One mechanism, three outcomes'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Use odd and even flip counts on valid single-parity frames
+  - id: C3-A3-Q2
+    type: MCQ
+    slot_number: 2
+    transition_id: C3
+    blueprint_id: C3-A3
+    shared_role: causal relation among full two-dimensional checks
+    scientific_purpose: Explain contrasting one-flip and two-flip syndromes in full 2D
+    solo_evidence_role: causal relation across cases
+    scenario_family: full2d_pair
+    generation_instruction: Generate a full small even-parity row-column block with two distinct altered transmitted
+      positions.
+    correctness_condition: Single flip violates its row and column; two flips may cancel shared constraints while
+      violating others
+    independent_oracle_rule: Compute failed-row and failed-column sets from row/column syndromes; at least one
+      fails; no unconditional unique two-flip inference.
+    distractor_meanings:
+    - Two flips undetected always
+    - Row and column check are a single test
+    - Single flip cannot be located
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: One mechanism, three outcomes'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Provide separately checked one-flip and two-flip full 2D examples
+  - id: C3-A3-Q3
+    type: MCQ
+    slot_number: 3
+    transition_id: C3
+    blueprint_id: C3-A3
+    shared_role: causal limitation or cross-constraint comparison
+    scientific_purpose: Explain why four rectangle flips evade every row/column check
+    solo_evidence_role: causal mechanism for miss
+    scenario_family: full2d_rectangle
+    generation_instruction: Generate a valid small 2D grid and change all four data bits at corners of a nondegenerate
+      rectangle.
+    correctness_condition: Each affected constraint sees two flips, so all checks preserve their parity
+    independent_oracle_rule: Every affected row and column has two changes and hence all parity tests pass; corruption
+      remains undetected.
+    distractor_meanings:
+    - Any four flips pass
+    - Rectangle is detected by four failed checks
+    - 2D corrects rectangle
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: One mechanism, three outcomes'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Four rectangle-corner data flips plus independently verified syndrome
+  - id: C3-A3-S
+    type: SUBJECTIVE
+    slot_number: 4
+    transition_id: C3
+    blueprint_id: C3-A3
+    shared_role: integrated case-specific constraint -> alteration -> observations -> inference
+    scientific_purpose: Relate three different generated 1D/2D alteration cases using their constraint behavior
+    scenario_family: full2d_rectangle
+    generation_instruction: Generate a valid small 2D grid and change all four data bits at corners of a nondegenerate
+      rectangle.
+    target_structural_evidence: connected constraint→flip effects→receiver conclusion for at least two cases,
+      with justified contrast
+    partial_or_boundary_evidence: causal chain for one case and partial comparison
+    materially_invalid_reasoning_example: list three outcomes without relating them
+    legitimate_alternative_explanation: general parity-toggle logic without formal notation
+    score_anchor: *id006
+    judge_instruction: Assess the learner response against the exact frozen generated subjective question AND
+      verified instance. Accept valid nonstandard reasoning, no keyword or text-match requirements.
+    equivalence_conditions:
+    - Generated question must elicit the specified structural understanding, not merely a numerical answer
+    - Do not embed the key explanation or cue a unique expected sentence
+    - Allow materially equivalent explanations and justified alternative witnesses
+    - No identical mandatory stem, bit pattern or response text
+    verification:
+    - Subjective question retains item reasoning demand within bounded generated scenario
+    - Judge receives the real frozen question, real learner response and true instance facts; never pedagogy or
+      MCQ score
+    - Human calibration required for score and SOLO interpretation
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Synthetic responses are illustrative only; no canned correct sentence is an answer
+      authority.
+    required_instance_conditions: Provide multiple cases so learner links behavior to constraints not to memorized
+      outcomes
+- id: C3-A4
+  transition_id: C3
+  title: Coverage versus cost
+  blueprint_focus: Coverage versus cost
+  scenario_exposure: Generated and independently verified; exclude instruction-only frozen instances.
+  required_solo_structure: Require meaningful constraint-to-syndrome causal integration rather than listing facts;
+    no abstract theorem demand.
+  target_refs: *id005
+  items:
+  - id: C3-A4-Q1
+    type: MCQ
+    slot_number: 1
+    transition_id: C3
+    blueprint_id: C3-A4
+    shared_role: causal effect on one-dimensional constraint
+    scientific_purpose: Explain why one global parity check can miss some data-only changes
+    solo_evidence_role: single-check limitation
+    scenario_family: multiflip_1d
+    generation_instruction: Choose valid full frame and a bounded set of distinct flipped transmitted positions.
+    correctness_condition: Even data-flip count preserves sole tested constraint
+    independent_oracle_rule: Receiver fails iff number of flips is odd; cannot infer error count from one failure.
+    distractor_meanings:
+    - More parity bits always catch everything
+    - Global check corrects errors
+    - Check passing proves no change
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Coverage versus cost'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Even-count data-only changes of an otherwise valid single-parity frame
+  - id: C3-A4-Q2
+    type: MCQ
+    slot_number: 2
+    transition_id: C3
+    blueprint_id: C3-A4
+    shared_role: causal relation among full two-dimensional checks
+    scientific_purpose: Analyze what independent 2D row/column checks add on a matched data-only alteration
+    solo_evidence_role: matched comparison mechanism
+    scenario_family: full2d_compare
+    generation_instruction: Hold data and error universe fixed while contrasting global single parity and full
+      2D row-column checks.
+    correctness_condition: Additional independent constraints may catch patterns missed by global parity when
+      data-only universe fixed
+    independent_oracle_rule: Compute each scheme’s applicable checks separately; check-bit-error comparisons require
+      explicitly matched error universes.
+    distractor_meanings:
+    - More check bits guarantee all possible patterns
+    - 2D is identical to one global parity
+    - Check-bit errors counted inconsistently
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Coverage versus cost'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Same DATA-only error on same data represented by global vs full 2D scheme
+  - id: C3-A4-Q3
+    type: MCQ
+    slot_number: 3
+    transition_id: C3
+    blueprint_id: C3-A4
+    shared_role: causal limitation or cross-constraint comparison
+    scientific_purpose: Distinguish additional checking coverage from universally better decoding
+    solo_evidence_role: bounded tradeoff reasoning
+    scenario_family: full2d_compare
+    generation_instruction: Hold data and error universe fixed while contrasting global single parity and full
+      2D row-column checks.
+    correctness_condition: Added independent constraints can increase detection on fixed data error class, not
+      automatically correction or dominance across mismatched schemes
+    independent_oracle_rule: Compute each scheme’s applicable checks separately; check-bit-error comparisons require
+      explicitly matched error universes.
+    distractor_meanings:
+    - Count alone proves superiority
+    - More checks guarantee unique multi-error location
+    - Comparing different error universes is valid
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Coverage versus cost'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: State matched data-only error universe; do not compare check-bit-error outcomes
+      as identical
+  - id: C3-A4-S
+    type: SUBJECTIVE
+    slot_number: 4
+    transition_id: C3
+    blueprint_id: C3-A4
+    shared_role: integrated case-specific constraint -> alteration -> observations -> inference
+    scientific_purpose: Explain how added independent constraints may change detection and what overhead does
+      not prove
+    scenario_family: full2d_compare
+    generation_instruction: Hold data and error universe fixed while contrasting global single parity and full
+      2D row-column checks.
+    target_structural_evidence: connect specific missed pattern, added checked relations and matched-data comparison;
+      acknowledge limits
+    partial_or_boundary_evidence: correct causal improvement on stated case with partial caveat
+    materially_invalid_reasoning_example: unconditional superiority by bit count
+    legitimate_alternative_explanation: explain via independent failed tests, not slogans
+    score_anchor: *id006
+    judge_instruction: Assess the learner response against the exact frozen generated subjective question AND
+      verified instance. Accept valid nonstandard reasoning, no keyword or text-match requirements.
+    equivalence_conditions:
+    - Generated question must elicit the specified structural understanding, not merely a numerical answer
+    - Do not embed the key explanation or cue a unique expected sentence
+    - Allow materially equivalent explanations and justified alternative witnesses
+    - No identical mandatory stem, bit pattern or response text
+    verification:
+    - Subjective question retains item reasoning demand within bounded generated scenario
+    - Judge receives the real frozen question, real learner response and true instance facts; never pedagogy or
+      MCQ score
+    - Human calibration required for score and SOLO interpretation
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Synthetic responses are illustrative only; no canned correct sentence is an answer
+      authority.
+    required_instance_conditions: Require a justified detection improvement example and explain overhead/limits
+- id: C4-A1
+  transition_id: C4
+  title: Split parity
+  blueprint_focus: Split parity
+  scenario_exposure: Generated and independently verified; exclude instruction-only frozen instances.
+  required_solo_structure: Require a general condition over a class of alterations, with a justified consequence;
+    no CRC/other-topic transfer.
+  target_refs: &id007
+  - K17
+  - K18
+  - K19
+  - R9
+  - R10
+  - R11
+  items:
+  - id: C4-A1-Q1
+    type: MCQ
+    slot_number: 1
+    transition_id: C4
+    blueprint_id: C4-A1
+    shared_role: interpret a newly defined check-group model
+    scientific_purpose: Identify the actual checked subsets in a newly generated split-group parity scheme
+    solo_evidence_role: interpret novel constraints
+    scenario_family: grouped_checks
+    generation_instruction: Generate <=8 data positions and 2–3 explicitly declared nonempty checked subsets with
+      an independent even-parity check bit for each.
+    correctness_condition: Each check covers its declared subset and its own transmitted parity bit
+    independent_oracle_rule: For data-only flips, check j fails iff number of flipped data positions in subset
+      j is odd.
+    distractor_meanings:
+    - All checks cover every data bit
+    - Names/positions alone determine checks
+    - One global parity always replaces groups
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Split parity'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Construct a NEW group/subset membership map with explicitly declared check bits
+  - id: C4-A1-Q2
+    type: MCQ
+    slot_number: 2
+    transition_id: C4
+    blueprint_id: C4-A1
+    shared_role: derive consequence under new groups
+    scientific_purpose: Predict whether a pair of data flips in one or two groups violates checks
+    solo_evidence_role: derive membership consequence
+    scenario_family: grouped_two_flip
+    generation_instruction: Generate a grouped-check scheme with pairs sharing or differing in checked-subset
+      membership.
+    correctness_condition: A group flags when exactly one of the flipped positions belongs to it
+    independent_oracle_rule: A two-data-bit alteration is invisible iff the two positions have identical check-membership
+      signatures.
+    distractor_meanings:
+    - All pairs undetected
+    - All pairs detected
+    - Membership is irrelevant
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Split parity'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Generate pair with either equal or unequal check-membership signatures
+  - id: C4-A1-Q3
+    type: MCQ
+    slot_number: 3
+    transition_id: C4
+    blueprint_id: C4-A1
+    shared_role: evaluate general limitation or principled modification
+    scientific_purpose: Recognize the general condition for a data-error pattern to evade all group checks
+    solo_evidence_role: class-level condition
+    scenario_family: grouped_evasion
+    generation_instruction: Generate a small bounded grouped-check scheme with a nonempty error subset that preserves
+      every check.
+    correctness_condition: Every checked group must intersect the flipped positions in even cardinality
+    independent_oracle_rule: All checks pass iff each checked subset contains an even number of flipped data positions;
+      demonstrate a nonempty witness by oracle.
+    distractor_meanings:
+    - Total number of flips always sole criterion
+    - One passing group means all pass
+    - More checks guarantee no misses
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Split parity'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Generate a nonempty even-overlap witness for a new grouped scheme
+  - id: C4-A1-S
+    type: SUBJECTIVE
+    slot_number: 4
+    transition_id: C4
+    blueprint_id: C4-A1
+    shared_role: derive general evasion condition plus nontrivial justified consequence
+    scientific_purpose: Derive a general pass/fail condition for a newly specified split-check scheme and justify
+      a nonempty case
+    scenario_family: grouped_evasion
+    generation_instruction: Generate a small bounded grouped-check scheme with a nonempty error subset that preserves
+      every check.
+    target_structural_evidence: general all-groups even-intersection rule and independently justified witness
+      or impossibility under stated bounds
+    partial_or_boundary_evidence: correct class rule plus case with incomplete explanation
+    materially_invalid_reasoning_example: single worked prediction without general condition
+    legitimate_alternative_explanation: explain by membership counts or GF(2) without mandated terms
+    score_anchor: &id008
+      zero: Only one predicted unfamiliar result or recalled rule without derived class-level criterion.
+      one: A generally applicable correct condition is derived and applied to a justified nontrivial case or boundary.
+      two: A necessary-and-sufficient general condition, a verified nonempty witness or principled design consequence,
+        and an explicit scope/limit.
+    judge_instruction: Assess the learner response against the exact frozen generated subjective question AND
+      verified instance. Accept valid nonstandard reasoning, no keyword or text-match requirements.
+    equivalence_conditions:
+    - Generated question must elicit the specified structural understanding, not merely a numerical answer
+    - Do not embed the key explanation or cue a unique expected sentence
+    - Allow materially equivalent explanations and justified alternative witnesses
+    - No identical mandatory stem, bit pattern or response text
+    verification:
+    - Subjective question retains item reasoning demand within bounded generated scenario
+    - Judge receives the real frozen question, real learner response and true instance facts; never pedagogy or
+      MCQ score
+    - Human calibration required for score and SOLO interpretation
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Synthetic responses are illustrative only; no canned correct sentence is an answer
+      authority.
+    required_instance_conditions: Require general all-groups condition plus one independently verified nonempty
+      witness
+- id: C4-A2
+  transition_id: C4
+  title: Challenge a claim that all two-bit errors are detected
+  blueprint_focus: Challenge a claim that all two-bit errors are detected
+  scenario_exposure: Generated and independently verified; exclude instruction-only frozen instances.
+  required_solo_structure: Require a general condition over a class of alterations, with a justified consequence;
+    no CRC/other-topic transfer.
+  target_refs: *id007
+  items:
+  - id: C4-A2-Q1
+    type: MCQ
+    slot_number: 1
+    transition_id: C4
+    blueprint_id: C4-A2
+    shared_role: interpret a newly defined check-group model
+    scientific_purpose: Identify which pair membership signatures a new grouped-check arrangement compares
+    solo_evidence_role: check membership meaning
+    scenario_family: grouped_checks
+    generation_instruction: Generate <=8 data positions and 2–3 explicitly declared nonempty checked subsets with
+      an independent even-parity check bit for each.
+    correctness_condition: Two data positions are distinguishable by checks only when their group membership patterns
+      differ
+    independent_oracle_rule: For data-only flips, check j fails iff number of flipped data positions in subset
+      j is odd.
+    distractor_meanings:
+    - Group labels alone determine outcomes
+    - Every group contains every bit
+    - All two-bit errors always detectable
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Challenge a claim that all two-bit errors are detected'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Generate several distinct data positions with declared groups and membership
+      signatures
+  - id: C4-A2-Q2
+    type: MCQ
+    slot_number: 2
+    transition_id: C4
+    blueprint_id: C4-A2
+    shared_role: derive consequence under new groups
+    scientific_purpose: Find when a two-data-bit flip violates at least one new-group check
+    solo_evidence_role: derive pair condition
+    scenario_family: grouped_two_flip
+    generation_instruction: Generate a grouped-check scheme with pairs sharing or differing in checked-subset
+      membership.
+    correctness_condition: A pair is detected iff some group contains exactly one of its positions
+    independent_oracle_rule: A two-data-bit alteration is invisible iff the two positions have identical check-membership
+      signatures.
+    distractor_meanings:
+    - Two flips always pass
+    - Two flips always fail
+    - Check count alone decides
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Challenge a claim that all two-bit errors are detected'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Choose two data positions of equal or unequal signatures and verify
+  - id: C4-A2-Q3
+    type: MCQ
+    slot_number: 3
+    transition_id: C4
+    blueprint_id: C4-A2
+    shared_role: evaluate general limitation or principled modification
+    scientific_purpose: Evaluate an all-two-bit-detectable claim over the permitted data universe
+    solo_evidence_role: general claim evaluation
+    scenario_family: grouped_two_flip
+    generation_instruction: Generate a grouped-check scheme with pairs sharing or differing in checked-subset
+      membership.
+    correctness_condition: All pairs are detected iff distinct data positions have distinct group-membership signatures
+    independent_oracle_rule: A two-data-bit alteration is invisible iff the two positions have identical check-membership
+      signatures.
+    distractor_meanings:
+    - One observed detected pair proves universal claim
+    - One same-group pair proves universal detection
+    - Nonzero membership automatically distinguishes every pair
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Challenge a claim that all two-bit errors are detected'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Compare all permissible distinct pairs in bounded data universe; retain same
+      membership map
+  - id: C4-A2-S
+    type: SUBJECTIVE
+    slot_number: 4
+    transition_id: C4
+    blueprint_id: C4-A2
+    shared_role: derive general evasion condition plus nontrivial justified consequence
+    scientific_purpose: Derive whether a given grouped scheme detects every two-data-bit alteration and supply
+      a witness if not
+    scenario_family: grouped_two_flip
+    generation_instruction: Generate a grouped-check scheme with pairs sharing or differing in checked-subset
+      membership.
+    target_structural_evidence: general pair signature criterion plus valid specific equal-signature counterexample
+      or proof of uniqueness
+    partial_or_boundary_evidence: accurate general criterion but insufficient witness
+    materially_invalid_reasoning_example: one case extrapolated to every pair
+    legitimate_alternative_explanation: reason in words using group overlaps instead of bit-vector jargon
+    score_anchor: *id008
+    judge_instruction: Assess the learner response against the exact frozen generated subjective question AND
+      verified instance. Accept valid nonstandard reasoning, no keyword or text-match requirements.
+    equivalence_conditions:
+    - Generated question must elicit the specified structural understanding, not merely a numerical answer
+    - Do not embed the key explanation or cue a unique expected sentence
+    - Allow materially equivalent explanations and justified alternative witnesses
+    - No identical mandatory stem, bit pattern or response text
+    verification:
+    - Subjective question retains item reasoning demand within bounded generated scenario
+    - Judge receives the real frozen question, real learner response and true instance facts; never pedagogy or
+      MCQ score
+    - Human calibration required for score and SOLO interpretation
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Synthetic responses are illustrative only; no canned correct sentence is an answer
+      authority.
+    required_instance_conditions: Quantify claim over ALL data-only pairs in the supplied bounded scheme
+- id: C4-A3
+  transition_id: C4
+  title: Uncovered data bits
+  blueprint_focus: Uncovered data bits
+  scenario_exposure: Generated and independently verified; exclude instruction-only frozen instances.
+  required_solo_structure: Require a general condition over a class of alterations, with a justified consequence;
+    no CRC/other-topic transfer.
+  target_refs: *id007
+  items:
+  - id: C4-A3-Q1
+    type: MCQ
+    slot_number: 1
+    transition_id: C4
+    blueprint_id: C4-A3
+    shared_role: interpret a newly defined check-group model
+    scientific_purpose: Identify a truly unchecked data position in a new grouped-check coverage map
+    solo_evidence_role: construct coverage abstraction
+    scenario_family: grouped_uncovered
+    generation_instruction: Generate a grouped-check scheme with at least one data position in no checked subset.
+    correctness_condition: Uncovered position participates in no declared parity group
+    independent_oracle_rule: A flip on an uncovered data position violates no check; an added check covering it
+      detects that single data flip.
+    distractor_meanings:
+    - One group always checks all bits
+    - Any check-bit position counts as coverage
+    - Frame length implies coverage
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Uncovered data bits'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Guarantee at least one uncovered data position in newly generated groups
+  - id: C4-A3-Q2
+    type: MCQ
+    slot_number: 2
+    transition_id: C4
+    blueprint_id: C4-A3
+    shared_role: derive consequence under new groups
+    scientific_purpose: Predict check behavior for one data flip at an uncovered position
+    solo_evidence_role: derive unchecked flip result
+    scenario_family: grouped_uncovered
+    generation_instruction: Generate a grouped-check scheme with at least one data position in no checked subset.
+    correctness_condition: No group changes parity when a nonmember bit flips, so all pass
+    independent_oracle_rule: A flip on an uncovered data position violates no check; an added check covering it
+      detects that single data flip.
+    distractor_meanings:
+    - Every single data error fails
+    - Uncovered bit is corrected
+    - One group must fail regardless of membership
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Uncovered data bits'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Exactly one data-only flip at declared uncovered position
+  - id: C4-A3-Q3
+    type: MCQ
+    slot_number: 3
+    transition_id: C4
+    blueprint_id: C4-A3
+    shared_role: evaluate general limitation or principled modification
+    scientific_purpose: Determine a targeted extra constraint that detects the uncovered-position single flip
+    solo_evidence_role: principled repair with limited claim
+    scenario_family: grouped_add_check
+    generation_instruction: Generate a scheme and known witness; introduce a candidate new parity subset while
+      holding the data-only error universe fixed.
+    correctness_condition: New check must include that position, yielding odd overlap for that witness
+    independent_oracle_rule: The new check detects that witness iff its overlap with witness positions has odd
+      size; cannot promise universal superiority across arbitrary error universes.
+    distractor_meanings:
+    - Adding a check anywhere guarantees coverage
+    - Duplicating unrelated group fixes it
+    - One new check catches all error patterns
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Uncovered data bits'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: New group check includes previously uncovered position; hold SAME witness fixed
+  - id: C4-A3-S
+    type: SUBJECTIVE
+    slot_number: 4
+    transition_id: C4
+    blueprint_id: C4-A3
+    shared_role: derive general evasion condition plus nontrivial justified consequence
+    scientific_purpose: Derive what alteration class is invisible due to missing coverage and how an added check
+      changes it
+    scenario_family: grouped_uncovered
+    generation_instruction: Generate a grouped-check scheme with at least one data position in no checked subset.
+    target_structural_evidence: general even-intersection criterion applied to unchecked class plus justified
+      targeted repair and limits
+    partial_or_boundary_evidence: general class rule but incomplete design implication
+    materially_invalid_reasoning_example: one uncovered bit instance with no generalization
+    legitimate_alternative_explanation: valid set-based or plain-language explanation
+    score_anchor: *id008
+    judge_instruction: Assess the learner response against the exact frozen generated subjective question AND
+      verified instance. Accept valid nonstandard reasoning, no keyword or text-match requirements.
+    equivalence_conditions:
+    - Generated question must elicit the specified structural understanding, not merely a numerical answer
+    - Do not embed the key explanation or cue a unique expected sentence
+    - Allow materially equivalent explanations and justified alternative witnesses
+    - No identical mandatory stem, bit pattern or response text
+    verification:
+    - Subjective question retains item reasoning demand within bounded generated scenario
+    - Judge receives the real frozen question, real learner response and true instance facts; never pedagogy or
+      MCQ score
+    - Human calibration required for score and SOLO interpretation
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Synthetic responses are illustrative only; no canned correct sentence is an answer
+      authority.
+    required_instance_conditions: Require reasoning about an uncovered class, its detection status and targeted
+      addition
+- id: C4-A4
+  transition_id: C4
+  title: Construct an evading pattern
+  blueprint_focus: Construct an evading pattern
+  scenario_exposure: Generated and independently verified; exclude instruction-only frozen instances.
+  required_solo_structure: Require a general condition over a class of alterations, with a justified consequence;
+    no CRC/other-topic transfer.
+  target_refs: *id007
+  items:
+  - id: C4-A4-Q1
+    type: MCQ
+    slot_number: 1
+    transition_id: C4
+    blueprint_id: C4-A4
+    shared_role: interpret a newly defined check-group model
+    scientific_purpose: Interpret an unfamiliar group-check constraint table
+    solo_evidence_role: correct scheme abstraction
+    scenario_family: grouped_checks
+    generation_instruction: Generate <=8 data positions and 2–3 explicitly declared nonempty checked subsets with
+      an independent even-parity check bit for each.
+    correctness_condition: Every row is a declared parity equation over its member data positions
+    independent_oracle_rule: For data-only flips, check j fails iff number of flipped data positions in subset
+      j is odd.
+    distractor_meanings:
+    - Table layout changes tested relation
+    - Only total flip count matters
+    - A redundant check always improves detection
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Construct an evading pattern'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: New scheme with explicit membership matrix and independent group parity bits
+  - id: C4-A4-Q2
+    type: MCQ
+    slot_number: 2
+    transition_id: C4
+    blueprint_id: C4-A4
+    shared_role: derive consequence under new groups
+    scientific_purpose: Select or construct a nonzero alteration that preserves all stated group checks
+    solo_evidence_role: derive witness
+    scenario_family: grouped_evasion
+    generation_instruction: Generate a small bounded grouped-check scheme with a nonempty error subset that preserves
+      every check.
+    correctness_condition: Nonempty flip set intersects every group in an even number of positions
+    independent_oracle_rule: All checks pass iff each checked subset contains an even number of flipped data positions;
+      demonstrate a nonempty witness by oracle.
+    distractor_meanings:
+    - Any even total flips suffice
+    - Any changed group must fail
+    - Check-bits repair errors
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Construct an evading pattern'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Generate a verified nonempty all-checks-preserving data-only alteration
+  - id: C4-A4-Q3
+    type: MCQ
+    slot_number: 3
+    transition_id: C4
+    blueprint_id: C4-A4
+    shared_role: evaluate general limitation or principled modification
+    scientific_purpose: Analyze how an additional declared check affects the same previously invisible pattern
+    solo_evidence_role: generalizable constraint refinement
+    scenario_family: grouped_add_check
+    generation_instruction: Generate a scheme and known witness; introduce a candidate new parity subset while
+      holding the data-only error universe fixed.
+    correctness_condition: New check exposes witness iff its group overlaps witness oddly
+    independent_oracle_rule: The new check detects that witness iff its overlap with witness positions has odd
+      size; cannot promise universal superiority across arbitrary error universes.
+    distractor_meanings:
+    - More bits alone guarantee detection
+    - Check unrelated to witness still detects
+    - Added group always fixes all errors
+    scenario_constraints:
+    - Stay inside F1 numerical/cognitive bounds
+    - Generate actual parameters for this attempt; never copy a fixed historical bit string
+    - All assumptions necessary for truth must be visible to learner
+    - 'Blueprint focus: Construct an evading pattern'
+    equivalence_conditions:
+    - Preserve the specific construct and slot reasoning operation, not numerical literals
+    - Ensure exactly one correct proposition; three distractors express distinct false claims under THIS realized
+      scenario
+    - Avoid answering another item and avoid unexplained extra cognitive demand
+    - No fixed option-letter mapping or pre-authored learner-facing stem
+    verification:
+    - Compute scientific outcome from actual generated instance using designated oracle
+    - Check that generated visible propositions preserve distinct intended meanings and have one unequivocally
+      correct alternative
+    - Where semantics cannot be established confidently, flag for review; do not accept solely on syntax, IDs
+      or equality
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Historical v0.3 item instances may be used for calibration only, never as mandatory
+      live scenario or question wording.
+    required_instance_conditions: Add a candidate new group to SAME scheme and witness, check odd/even overlap
+  - id: C4-A4-S
+    type: SUBJECTIVE
+    slot_number: 4
+    transition_id: C4
+    blueprint_id: C4-A4
+    shared_role: derive general evasion condition plus nontrivial justified consequence
+    scientific_purpose: State a general evasion condition for a new check-family and build a verified nonzero
+      witness or explain feasibility
+    scenario_family: grouped_evasion
+    generation_instruction: Generate a small bounded grouped-check scheme with a nonempty error subset that preserves
+      every check.
+    target_structural_evidence: necessary-and-sufficient all-groups even-intersection law plus justified independent
+      witness and boundary
+    partial_or_boundary_evidence: general law plus incomplete witness rationale
+    materially_invalid_reasoning_example: one lucky example without class statement
+    legitimate_alternative_explanation: logical, matrix, or set-based derivation
+    score_anchor: *id008
+    judge_instruction: Assess the learner response against the exact frozen generated subjective question AND
+      verified instance. Accept valid nonstandard reasoning, no keyword or text-match requirements.
+    equivalence_conditions:
+    - Generated question must elicit the specified structural understanding, not merely a numerical answer
+    - Do not embed the key explanation or cue a unique expected sentence
+    - Allow materially equivalent explanations and justified alternative witnesses
+    - No identical mandatory stem, bit pattern or response text
+    verification:
+    - Subjective question retains item reasoning demand within bounded generated scenario
+    - Judge receives the real frozen question, real learner response and true instance facts; never pedagogy or
+      MCQ score
+    - Human calibration required for score and SOLO interpretation
+    - Verify the slot-specific required_instance_conditions, not only the generic scenario family
+    reference_restriction: Synthetic responses are illustrative only; no canned correct sentence is an answer
+      authority.
+    required_instance_conditions: Require class-level necessary+sufficient condition and independently justified
+      witness
