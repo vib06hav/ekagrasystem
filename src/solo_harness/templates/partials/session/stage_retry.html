@@ -1,0 +1,2 @@
+{% from "partials/session/macros.html" import timeline %}
+{% if view.phase == 'INTERVENTION_ACTIVE' %}{{ timeline(view) }}{% endif %}<div class="action-card" data-generation-error><h2>That step could not be completed</h2><p>Your work is saved. Try the same step again when you are ready.</p><form hx-post="/session/actions/retry" hx-target="#session-main" hx-swap="outerHTML" method="post"><input type="hidden" name="idempotency_key" value="{{ new_key }}"><button class="retry-button">Retry</button></form></div>

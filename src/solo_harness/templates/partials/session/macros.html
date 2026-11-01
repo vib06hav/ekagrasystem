@@ -1,0 +1,31 @@
+{% macro section_nav(view) %}
+{% set acts = (view.timeline or [])|selectattr('kind','in',['activity','assessment'])|list %}
+{% set in_assessment = view.is_current and view.phase in ['ASSESSMENT_GENERATING','ASSESSMENT_ACTIVE','JUDGING'] %}
+<nav class="section-nav" id="section-nav" aria-label="Study sections">
+{% for section in view.sections %}
+  <div class="nav-group">
+  {% if section.enabled and not view.pending %}<a class="section-link {{ section.state }} {% if section.number == view.section_number %}selected{% endif %}" href="/session/sections/{{ section.number }}" {% if section.number == view.section_number %}aria-current="step"{% endif %}><span class="nav-label">Section</span> <span class="nav-num">{{ section.number }}</span></a>
+  {% else %}<span class="section-link {{ section.state }} {% if view.pending %}disabled{% endif %}" aria-disabled="true"><span class="nav-label">Section</span> <span class="nav-num">{{ section.number }}</span></span>{% endif %}
+  {% if section.number == view.section_number and (acts or in_assessment) %}
+    <ul class="nav-sub" aria-label="Section {{ section.number }} activities">
+    {% for act in acts %}<li class="{% if view.is_current and loop.last and not in_assessment and view.phase == 'INTERVENTION_ACTIVE' %}current{% endif %}">{{ act.label }}</li>{% endfor %}
+    {% if in_assessment %}<li class="current">Independent assessment</li>{% endif %}
+    </ul>
+  {% endif %}
+  </div>
+{% endfor %}
+</nav>
+{% endmacro %}
+
+{% macro timeline(view) %}
+<div class="conversation" data-conversation>
+{% if not view.timeline %}<div class="empty">This section is ready to begin.</div>{% endif %}
+{% for item in view.timeline %}
+  {% if item.kind == 'message' %}
+    <article class="message {{ item.role|lower }}"{% if item.role == 'TUTOR' %} data-tutor-message-sequence="{{ item.sequence_no }}"{% endif %}><div class="message-meta"><span>{% if item.role == 'TUTOR' %}Study assistant{% else %}You{% endif %}</span><time>{{ item.timestamp.strftime('%H:%M:%S') }}</time></div>{{ item.content }}</article>
+  {% else %}
+    <div class="timeline-marker {{ item.kind }}"{% if item.kind == 'assessment' %} data-assessment-completed-marker{% endif %}{% if item.kind == 'activity' %} data-teaching-activity-number="{{ item.activity_number }}"{% endif %}><span>{{ item.label }}</span>{% if item.timestamp %}<time title="Time of day, not a duration">{% if item.kind == 'activity' %}Assigned at {% endif %}{{ item.timestamp.strftime('%H:%M:%S') }}</time>{% endif %}</div>
+  {% endif %}
+{% endfor %}
+</div>
+{% endmacro %}

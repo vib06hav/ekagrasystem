@@ -1,0 +1,2 @@
+{% from "partials/session/macros.html" import timeline %}
+{{ timeline(view) }}<div class="composer" data-section-complete><form hx-post="{% if view.is_final_section %}/session/actions/finish{% else %}/session/actions/next{% endif %}" hx-target="#session-main" hx-swap="outerHTML" method="post"><button>{% if view.is_final_section %}Finish study{% else %}Next section{% endif %}</button></form></div>

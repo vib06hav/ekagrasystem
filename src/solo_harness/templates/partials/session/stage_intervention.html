@@ -1,0 +1,3 @@
+{% from "partials/session/macros.html" import timeline %}
+{{ timeline(view) }}
+{% if view.attempt_status == 'ASSIGNED' %}<div class="composer begin-state" data-teaching-activity-number="{{ view.activity_number }}"><p class="begin-note">Select the button below to start the teaching conversation with the study assistant.</p><form hx-post="/session/actions/begin" hx-target="#session-main" hx-swap="outerHTML" method="post"><input type="hidden" name="idempotency_key" value="{{ new_key }}"><button>{% if not view.started_at %}Begin study{% else %}Begin teaching activity {{ view.activity_number }}{% endif %}</button></form></div>{% else %}{% include "partials/tutor_composer.html" %}{% endif %}

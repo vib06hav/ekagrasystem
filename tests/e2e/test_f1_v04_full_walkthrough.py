@@ -245,8 +245,10 @@ def main() -> None:
         page = context.new_page()
         try:
             page.goto(f"{BASE_URL}/join", wait_until="networkidle")
+            page.get_by_role("button", name="Continue").click()
+            page.locator("#consent-ack").check()
+            page.get_by_role("button", name="I acknowledge — continue").click()
             page.locator("#participant-code").fill(RUN_ID)
-            page.locator("input[name='acknowledged']").check()
             page.get_by_role("button", name="Continue").click()
             page.locator("#session-main").wait_for(state="visible", timeout=30_000)
             session_id = audit_session_id()
