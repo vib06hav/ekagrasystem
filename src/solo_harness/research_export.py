@@ -21,6 +21,7 @@ from solo_harness.db.models import (
     LearnerHistorySnapshot,
     LLMCall,
     Message,
+    PaasResponse,
     ParticipantUIEvent,
     ProtocolEvent,
     RubricEvaluation,
@@ -29,7 +30,7 @@ from solo_harness.db.models import (
 )
 from solo_harness.research_time import RESEARCH_TIMEZONE_NAME, in_research_timezone
 
-EXPORT_SCHEMA_VERSION = "1.2"
+EXPORT_SCHEMA_VERSION = "1.3"
 
 
 def _derived_transition_outcomes(events) -> dict[str, str]:
@@ -160,6 +161,7 @@ def build_session_export(database_url: str, session_id: uuid.UUID, research_data
                     "attempts": [_row(item) for item in attempts],
                     "learner_history_snapshots": [_row(item) for item in _ordered(db, LearnerHistorySnapshot, LearnerHistorySnapshot.session_id == session_id, LearnerHistorySnapshot.created_at, LearnerHistorySnapshot.id)],
                     "messages": [_row(item) for item in _ordered(db, Message, Message.attempt_id.in_(attempt_ids), Message.created_at, Message.attempt_id, Message.sequence_no)] if attempt_ids else [],
+                    "paas_responses": [_row(item) for item in _ordered(db, PaasResponse, PaasResponse.session_id == session_id, PaasResponse.recorded_at, PaasResponse.id)],
                     "assessment_instances": [_row(item) for item in assessments],
                     "assessment_responses": [_row(item) for item in responses],
                     "llm_calls": [_row(item) for item in _ordered(db, LLMCall, LLMCall.session_id == session_id, LLMCall.started_at, LLMCall.id)],

@@ -116,18 +116,59 @@ class SessionRuntime:
             db.add(LearnerHistorySnapshot(session_id=session.id, target_attempt_id=attempt.id, transition_id=transition_id, source_attempt_ids=[uuid.UUID(entry["source_attempt_id"]) for entry in history["attempts"]], summary=history, generation_method="DETERMINISTIC"))
         return attempt
     def complete_intervention(self, db: DbSession, session_id, reason="TUTOR_COMPLETE", commit=True):
-        session = db.get(Session, session_id); attempt = db.get(Attempt, session.current_attempt_id)
-        if session.phase != "INTERVENTION_ACTIVE": raise ValueError("intervention is not active")
-        compiled = self._compiled(db, session); family = compiled.assessment_families[attempt.transition_id]
+        """End teaching; require Paas before choosing or generating assessment.
+
+        No AssessmentInstance or LLM build exists at this stage. The phase is
+        durable and remains renderable after any restart.
+        """
+        from solo_harness.runtime.paas import INSTRUMENT_ID, INSTRUMENT_VERSION
+        session = db.scalar(select(Session).where(Session.id == session_id).with_for_update())
+        if session is None or session.phase != "INTERVENTION_ACTIVE":
+            raise ValueError("intervention is not active")
+        attempt = db.get(Attempt, session.current_attempt_id)
+        attempt.status = "PAAS_PENDING"
+        attempt.completion_reason = reason
+        attempt.intervention_completed_at = datetime.now(timezone.utc)
+        session.phase = "PAAS_PENDING"
+        self._event(db, session, "INTERVENTION_COMPLETED", {"reason": reason}, attempt.id)
+        self._event(db, session, "PAAS_PRESENTED", {"instrument_id": INSTRUMENT_ID, "instrument_version": INSTRUMENT_VERSION}, attempt.id)
+        if commit:
+            db.commit()
+        return attempt
+
+    def begin_assessment_after_paas(self, db: DbSession, session_id, commit=True):
+        """Select assessment only after the recorded effort rating exists."""
+        from solo_harness.db.models import PaasResponse
+        session = db.scalar(select(Session).where(Session.id == session_id).with_for_update())
+        if session is None or session.phase != "PAAS_PENDING":
+            raise ValueError("assessment cannot begin before Paas")
+        attempt = db.get(Attempt, session.current_attempt_id)
+        paas_id = db.scalar(select(PaasResponse.id).where(PaasResponse.attempt_id == attempt.id))
+        if paas_id is None:
+            raise ValueError("a recorded Paas response is required")
+        compiled = self._compiled(db, session)
+        family = compiled.assessment_families[attempt.transition_id]
         seen = db.scalars(select(AssessmentInstance.assessment_form_id).where(AssessmentInstance.session_id == session.id)).all()
         decision = self.selector.choose([form["id"] for form in family["forms"] if form["id"] not in seen], seen)
         form = next(item for item in family["forms"] if item["id"] == decision.selected_id)
-        attempt.status="ASSESSMENT_GENERATING"; attempt.completion_reason=reason; attempt.intervention_completed_at=datetime.now(timezone.utc)
-        component_ids={"kc_ids":form["target_kc_ids"],"relation_ids":form["target_relation_ids"],"evidence_ids":form["target_evidence_ids"],"misconception_ids":form["relevant_misconception_ids"]}
-        assessment = AssessmentInstance(session_id=session.id, attempt_id=attempt.id, transition_id=attempt.transition_id, assessment_family_id=family["id"], assessment_form_id=form["id"], status="GENERATING", candidate_form_ids=list(decision.eligible_candidate_ids), selection_method=decision.selection_method, selection_audit={"eligible_candidate_ids": decision.eligible_candidate_ids, "excluded_used_ids": decision.excluded_candidate_ids, "selected_id": decision.selected_id, "timestamp": decision.selected_at.isoformat()}, blueprint_snapshot=form, resolved_component_ids=component_ids, prompt_snapshot=None, hidden_scoring_context_snapshot=None)
-        db.add(assessment); db.flush(); session.phase="ASSESSMENT_GENERATING"; self._event(db, session, "INTERVENTION_COMPLETED", {"reason":reason}, attempt.id); self._event(db, session, "ASSESSMENT_SELECTED", assessment.selection_audit, attempt.id)
-        if commit: db.commit()
+        component_ids = {"kc_ids": form["target_kc_ids"], "relation_ids": form["target_relation_ids"], "evidence_ids": form["target_evidence_ids"], "misconception_ids": form["relevant_misconception_ids"]}
+        assessment = AssessmentInstance(
+            session_id=session.id, attempt_id=attempt.id, transition_id=attempt.transition_id,
+            assessment_family_id=family["id"], assessment_form_id=form["id"], status="GENERATING",
+            candidate_form_ids=list(decision.eligible_candidate_ids), selection_method=decision.selection_method,
+            selection_audit={"eligible_candidate_ids": decision.eligible_candidate_ids, "excluded_used_ids": decision.excluded_candidate_ids, "selected_id": decision.selected_id, "timestamp": decision.selected_at.isoformat()},
+            blueprint_snapshot=form, resolved_component_ids=component_ids,
+            prompt_snapshot=None, hidden_scoring_context_snapshot=None,
+        )
+        db.add(assessment)
+        db.flush()
+        attempt.status = "ASSESSMENT_GENERATING"
+        session.phase = "ASSESSMENT_GENERATING"
+        self._event(db, session, "ASSESSMENT_SELECTED", {**assessment.selection_audit, "paas_response_id": str(paas_id)}, attempt.id)
+        if commit:
+            db.commit()
         return assessment
+
     def submit_assessment(self, db: DbSession, session_id, response_text, client_action_id=None, commit=True):
         session=db.get(Session,session_id); attempt=db.get(Attempt,session.current_attempt_id)
         assessment=db.scalar(select(AssessmentInstance).where(AssessmentInstance.attempt_id==attempt.id))

@@ -88,9 +88,21 @@ def wait_for_assessment(page: Page, trace: list[dict]) -> None:
     log(trace, "assessment_visible", question_count=page.locator("fieldset.mcq").count())
 
 
+def complete_paas(page: Page, trace: list[dict]) -> None:
+    """Submit the visible, phase-specific Paas form before assessment work."""
+    page.locator("[data-paas-screen]").wait_for(state="visible", timeout=300_000)
+    choices = page.locator("[data-paas-screen] input[name='rating']")
+    if choices.count() != 9:
+        raise AssertionError("Paas must render exactly nine unselected categories")
+    choices.nth(4).check()  # category 5; a valid development response, not a score input
+    page.get_by_role("button", name="Continue to assessment").click()
+    log(trace, "paas_submitted", rating=5)
+
+
 def advance_from_tutor(page: Page, trace: list[dict]) -> None:
-    # Begin once, send a visible real learner message, then use only the labelled
-    # development control if the Tutor has not itself completed the activity.
+    # Begin once, send a visible real learner message, then require the normal
+    # Tutor-completion -> Paas gate. The development endpoint is intentionally
+    # not used by this participant-browser walkthrough.
     if page.get_by_role("button", name=re.compile("Begin (study|teaching activity)")).count():
         page.get_by_role("button", name=re.compile("Begin (study|teaching activity)")).click()
         wait_visible(page, "#learner-text", 300_000)
@@ -101,10 +113,7 @@ def advance_from_tutor(page: Page, trace: list[dict]) -> None:
     # The real Tutor response is rendered before the development advance.
     page.locator("[data-tutor-message-sequence]").nth(prior_tutor_messages).wait_for(state="visible", timeout=300_000)
     log(trace, "tutor_message_completed", visible_tutor_messages=page.locator("[data-tutor-message-sequence]").count())
-    advance = page.get_by_role("button", name="Advance to assessment (development only)")
-    if advance.count():
-        advance.click()
-        log(trace, "development_advance_clicked")
+    complete_paas(page, trace)
     wait_for_assessment(page, trace)
 
 

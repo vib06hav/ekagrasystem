@@ -107,6 +107,24 @@ class Message(Base):
     __table_args__ = (UniqueConstraint("attempt_id", "sequence_no"),)
 
 
+class PaasResponse(Base):
+    """One immutable self-report per completed teaching attempt (not an LLM score)."""
+    __tablename__ = "paas_responses"
+    id: Mapped[uuid.UUID] = uuid_pk()
+    session_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("sessions.id", ondelete="RESTRICT"), nullable=False)
+    attempt_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("attempts.id", ondelete="RESTRICT"), nullable=False, unique=True)
+    transition_id: Mapped[str] = mapped_column(String, nullable=False)
+    pedagogy_id: Mapped[str] = mapped_column(String, nullable=False)
+    completion_reason: Mapped[str] = mapped_column(String, nullable=False)
+    instrument_id: Mapped[str] = mapped_column(String, nullable=False)
+    instrument_version: Mapped[str] = mapped_column(String, nullable=False)
+    rating: Mapped[int] = mapped_column(Integer, nullable=False)
+    question_snapshot: Mapped[str] = mapped_column(Text, nullable=False)
+    anchors_snapshot: Mapped[list] = mapped_column(JSON, nullable=False)
+    recorded_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    __table_args__ = (CheckConstraint("rating BETWEEN 1 AND 9", name="ck_paas_rating_1_9"), Index("ix_paas_responses_session_id", "session_id"))
+
+
 class AssessmentInstance(Base):
     __tablename__ = "assessment_instances"
     id: Mapped[uuid.UUID] = uuid_pk(); session_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("sessions.id"), nullable=False)

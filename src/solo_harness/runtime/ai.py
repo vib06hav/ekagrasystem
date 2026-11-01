@@ -182,17 +182,30 @@ class AIExecutionRuntime:
                     seq=(db.scalar(select(Message.sequence_no).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no.desc())) or 0)+1
                     db.add(Message(attempt_id=attempt.id,sequence_no=seq,role="TUTOR",content_text=out.learner_message,content_format="markdown",llm_call_id=call.id,instructional_trace={"fidelity_note":out.fidelity_note},material_ids=[],exposed_kc_ids=[],exposed_relation_ids=[]))
                 call.parsed_response=out.model_dump(mode="json"); call.status="SUCCEEDED"; call.completed_at=datetime.now(timezone.utc)
-                build_id=None
                 if out.teaching_complete and session.phase=="INTERVENTION_ACTIVE":
-                    # The state transition and durable build reservation share one
-                    # transaction; a restart can never observe generation with no build.
-                    assessment=self.runtime.complete_intervention(db,session.id,"TUTOR_COMPLETE",commit=False)
-                    build_id=self.reserve_assessment(db,session.id,assessment.id,commit=False)
+                    # End instruction, but do not select a blueprint or call the
+                    # assessment writer until the learner records mental effort.
+                    self.runtime.complete_intervention(db,session.id,"TUTOR_COMPLETE",commit=False)
                 db.commit()
-                if build_id: await self.execute(db,build_id)
                 return
             call.parsed_response=out.model_dump(mode="json"); call.status="SUCCEEDED"; call.completed_at=datetime.now(timezone.utc)
             if out.gradable_status=="GRADABLE" and out.subjective_points is not None and not out.review_reason:
+                # A syntactically valid Judge result can still be unusable: its
+                # quoted evidence must occur literally in the learner's saved
+                # response.  This is a Judge review hold, not an application
+                # failure.  Persist the original output for audit, then allow a
+                # retry to reserve a *new* blind Judge call against the exact
+                # same frozen package and learner response.
+                from solo_harness.runtime.v04_native import validate_judge_quotes
+                response = db.scalar(select(AssessmentResponse).where(
+                    AssessmentResponse.assessment_instance_id == call.assessment_instance_id
+                ))
+                try:
+                    validate_judge_quotes(out, response.response_text if response else "")
+                except ValueError as exc:
+                    call.error_class="REVIEW_HOLD"; call.error_message=str(exc)[:4000]
+                    db.commit()
+                    return
                 from solo_harness.runtime.v04_execution import finalize_v04_evaluation
                 if not db.scalar(select(V04Evaluation.id).join(AssessmentResponse, V04Evaluation.assessment_response_id==AssessmentResponse.id).where(AssessmentResponse.assessment_instance_id==call.assessment_instance_id)):
                     finalize_v04_evaluation(db,self.runtime,session.id,out,call.id)
@@ -275,13 +288,29 @@ class AIExecutionRuntime:
         retry.request_payload={**retry.request_payload,"retry_of":str(previous.id),"retry_reason":previous.error_class,"authorized_requeue":authorized_requeue}
         if commit: db.commit()
         return call
-    def reserve_development_assessment(self,db,session_id,commit=True):
-        """Audited escape hatch for local provider verification, never research delivery."""
+    def reserve_development_paas(self,db,session_id,commit=True):
+        """Development-only end of instruction; Paas still cannot be bypassed."""
         if not self.settings.enable_f1_v04_development: raise ValueError("development advance is disabled")
-        session=db.get(Session,session_id); attempt=db.get(Attempt,session.current_attempt_id) if session else None
+        session=db.scalar(select(Session).where(Session.id==session_id).with_for_update())
+        attempt=db.get(Attempt,session.current_attempt_id) if session else None
         if not session or not attempt or session.phase!="INTERVENTION_ACTIVE": raise ValueError("development advance is unavailable")
-        details=dict(attempt.outcome_details or {}); details["development_only_advance"]={"reason":"NATURAL_TUTOR_COMPLETION_UNAVAILABLE","at":datetime.now(timezone.utc).isoformat()}; attempt.outcome_details=details
-        assessment=self.runtime.complete_intervention(db,session.id,"DEVELOPMENT_ONLY_MANUAL_ADVANCE",commit=False)
-        call=self.reserve_assessment(db,session.id,assessment.id,commit=False)
+        active=db.scalar(select(LLMCall.id).where(LLMCall.attempt_id==attempt.id,LLMCall.purpose=="TUTOR",LLMCall.status.in_(("STARTED","SENDING","RECEIVED"))))
+        if active: raise ValueError("Tutor response is pending; development advance unavailable")
+        details=dict(attempt.outcome_details or {})
+        details["development_only_advance"]={"reason":"NATURAL_TUTOR_COMPLETION_UNAVAILABLE","at":datetime.now(timezone.utc).isoformat()}
+        attempt.outcome_details=details
+        self.runtime.complete_intervention(db,session.id,"DEVELOPMENT_ONLY_MANUAL_ADVANCE",commit=False)
         if commit: db.commit()
-        return call
+        return attempt.id
+
+    def reserve_paas_assessment(self,db,session_id,rating:int,commit=True):
+        """Atomically persist Paas, select blueprint, and reserve build lease."""
+        from solo_harness.runtime.paas import INSTRUMENT_ID, INSTRUMENT_VERSION, record_paas_response
+        record_paas_response(db,session_id,rating,commit=False)
+        session=db.get(Session,session_id)
+        attempt=db.get(Attempt,session.current_attempt_id)
+        self.runtime._event(db,session,"PAAS_RECORDED",{"instrument_id":INSTRUMENT_ID,"instrument_version":INSTRUMENT_VERSION},attempt.id)
+        assessment=self.runtime.begin_assessment_after_paas(db,session_id,commit=False)
+        call_id=self.reserve_assessment(db,session_id,assessment.id,commit=False)
+        if commit: db.commit()
+        return call_id

@@ -29,6 +29,7 @@ from solo_harness.db.models import (
 )
 from solo_harness.runtime.ai import AIExecutionRuntime, OpenAICompatibleClient
 from solo_harness.runtime.engine import SessionRuntime
+from solo_harness.runtime.paas import instrument_snapshot
 from solo_harness.runtime.v04_persistence import is_deliverable_f1, is_f1_frozen, is_f1_study, public_projection, submit_f1_response
 from solo_harness.research_time import in_research_timezone
 from solo_harness.telemetry import append_keyboard_batch, append_rrweb_batch, ensure_browser_manifest, record_ui_events
@@ -212,7 +213,9 @@ class ParticipantApplication:
                 LLMCall.assessment_instance_id == current_assessment.id,
                 LLMCall.purpose == "ASSESSMENT_BUILD",
             ).order_by(LLMCall.started_at.desc())) if current_assessment and current_assessment.status == "GENERATING" else None
-            operation = build or latest
+            # Paas is a human-response gate, not an LLM operation. An older
+            # failed Tutor call must never cover its form with a Retry panel.
+            operation = None if session.phase == "PAAS_PENDING" else (build or latest)
             stale = bool(
                 operation and operation.status in ("STARTED", "SENDING")
                 and datetime.now(timezone.utc) - operation.started_at
@@ -237,6 +240,7 @@ class ParticipantApplication:
                 "section_scientific_outcome": completed_outcomes.get(selected_transition_id),
                 "timeline": timeline,
                 "attempt_status": current_attempt.status if current_attempt and is_current else None,
+                "paas_instrument": instrument_snapshot() if is_current and session.phase == "PAAS_PENDING" else None,
                 "activity_number": current_attempt.sequence_in_transition if current_attempt and is_current else None,
                 "assessment_prompt": (
                     current_assessment.prompt_snapshot
@@ -591,12 +595,30 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
         return {"requeued_call_id":str(new_id),"requeued_from":str(call_id)}
 
     @router.post("/session/actions/development-advance", response_class=HTMLResponse)
-    async def development_advance(request: Request, background_tasks: BackgroundTasks, idempotency_key: str = Form(...)):
+    async def development_advance(request: Request, idempotency_key: str = Form(...)):
+        session_id = application.require(request.session)
+        if not session_id:
+            return RedirectResponse("/join", status_code=303)
+        if not application.settings.enable_f1_v04_development:
+            raise HTTPException(status_code=404, detail="not found")
+        try:
+            reserve_action(session_id, "DEVELOPMENT_ADVANCE", idempotency_key, {},
+                           lambda db: application.execution.reserve_development_paas(db, session_id, commit=False))
+        except ValueError:
+            return rejected(request, session_id)
+        return application.render_main(request, session_id)
+
+    @router.post("/session/actions/paas", response_class=HTMLResponse)
+    async def submit_paas(request: Request, background_tasks: BackgroundTasks,
+                          rating: int = Form(...), idempotency_key: str = Form(...)):
         session_id = application.require(request.session)
         if not session_id:
             return RedirectResponse("/join", status_code=303)
         try:
-            call_id, created = reserve_action(session_id, "DEVELOPMENT_ADVANCE", idempotency_key, {}, lambda db: application.execution.reserve_development_assessment(db, session_id, commit=False))
+            call_id, created = reserve_action(
+                session_id, "PAAS_RESPONSE", idempotency_key, {"rating": rating},
+                lambda db: application.execution.reserve_paas_assessment(db, session_id, rating, commit=False),
+            )
         except ValueError:
             return rejected(request, session_id)
         if created:

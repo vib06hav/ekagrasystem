@@ -39,6 +39,30 @@
     :root[data-theme=light]{color-scheme:light}
     .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 
+    /* Compact Paas screen. All nine original response labels remain in the form. */
+    .panel:has([data-paas-screen]){min-height:27rem}
+    .paas-screen{width:min(100% - 2.5rem,35rem);margin:auto;padding:2.75rem 0 3rem}
+    .paas-step-context{display:flex;justify-content:space-between;gap:1rem;margin-bottom:1.25rem;color:var(--muted);font-size:.72rem;font-weight:650;letter-spacing:.055em;text-transform:uppercase}
+    .paas-screen h2{font-size:1.65rem;line-height:1.2;letter-spacing:-.025em;margin:0 0 1.35rem;font-weight:650}
+    .paas-choices{border:0;margin:0;padding:0;min-width:0}
+    .paas-choices legend{font-size:1rem;line-height:1.55;font-weight:500;margin-bottom:1.6rem;padding:0}
+    .paas-rating-scroll{overflow-x:auto;scrollbar-width:thin;overscroll-behavior-inline:contain;padding:.25rem .15rem .5rem}
+    .paas-rating-options{display:grid;grid-template-columns:repeat(9,minmax(2.75rem,1fr));gap:.4rem;min-width:26.8rem}
+    .paas-option{position:relative;display:grid;place-items:center;min-height:3rem;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--ink);cursor:pointer;transition:background .15s,border-color .15s}
+    .paas-option:hover{background:var(--soft);border-color:var(--muted)}
+    .paas-option:has(input:checked){background:var(--ink);border-color:var(--ink);color:var(--accent-on)}
+    .paas-option:has(input:focus-visible){outline:3px solid var(--ring);outline-offset:2px}
+    .paas-option input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:pointer}
+    .paas-number{font-weight:650;font-size:1rem;pointer-events:none}
+    .paas-scale-anchors{display:flex;justify-content:space-between;align-items:start;gap:.5rem;margin:.35rem 0 1.2rem;color:var(--muted);font-size:.73rem;line-height:1.35}
+    .paas-scale-anchors span{flex:1}.paas-scale-anchors span:nth-child(2){text-align:center}.paas-scale-anchors span:last-child{text-align:right}
+    .paas-selection{display:flex;align-items:center;justify-content:center;text-align:center;min-height:3.25rem;margin:0;padding:.7rem 1rem;border:1px solid var(--line);border-radius:10px;background:var(--soft);color:var(--muted);font-size:.86rem;line-height:1.5}
+    .paas-selection[data-selected]{color:var(--ink);font-weight:550}
+    .paas-action-row{display:flex;justify-content:flex-end;margin-top:1.75rem;padding-top:1.25rem;border-top:1px solid var(--line)}
+    .paas-action-row button{min-width:12.5rem}
+    @media(max-width:640px){.paas-screen{width:calc(100% - 2rem);padding:2rem 0 2.5rem}.paas-step-context{font-size:.65rem}.paas-screen h2{font-size:1.45rem}.paas-choices legend{margin-bottom:1.2rem}.paas-rating-options{min-width:27rem}.paas-action-row button{width:100%}}
+    @media(prefers-reduced-motion:reduce){.paas-option{transition:none}}
+
     /* Buttons */
     button{padding:.75rem 1.25rem;border:0;border-radius:999px;background:var(--accent);color:var(--accent-on);font:inherit;font-weight:600;cursor:pointer;transition:background .15s,box-shadow .15s,border-color .15s}
     button:hover:not(:disabled){background:var(--accent-hover)}
@@ -255,6 +279,25 @@
 </main>
 <script>
 function initStudyUI(){
+  // Enhance the Paas radio group after initial load and HTMX replacements.
+  // Native required radio validation still works if JavaScript is unavailable.
+  const paasForm=document.querySelector('[data-paas-screen] form');
+  if(paasForm){
+    const radios=[...paasForm.querySelectorAll('input[name="rating"]')];
+    const description=paasForm.querySelector('[data-paas-selection]');
+    const submit=paasForm.querySelector('button[type="submit"]');
+    const updatePaasSelection=()=>{
+      const checked=radios.find(radio=>radio.checked);
+      description.textContent=checked?`${checked.value} / 9 — ${checked.dataset.paasLabel}`:'Select one number to describe your effort.';
+      if(checked)description.dataset.selected='true';else delete description.dataset.selected;
+      submit.disabled=!checked;
+    };
+    if(paasForm.dataset.paasBound!=='true'){
+      paasForm.addEventListener('change',event=>{if(event.target.matches('input[name="rating"]'))updatePaasSelection()});
+      paasForm.dataset.paasBound='true';
+    }
+    updatePaasSelection();
+  }
   const clock=document.querySelector('[data-elapsed]'),root=document.querySelector('#session-main');
   if(clock&&root){const start=root.dataset.startedAt,end=root.dataset.endedAt;if(start!==clock.dataset.start||end!==clock.dataset.end){clock.dataset.start=start;clock.dataset.end=end;window.studyClock?.stop();window.studyClock=null}if(clock.dataset.start&&!window.studyClock){const startedAt=Date.parse(clock.dataset.start),endedAt=clock.dataset.end?Date.parse(clock.dataset.end):null,render=()=>{const seconds=Number.isFinite(startedAt)?Math.max(0,Math.floor(((endedAt||Date.now())-startedAt)/1000)):0,h=String(Math.floor(seconds/3600)).padStart(2,'0'),m=String(Math.floor(seconds%3600/60)).padStart(2,'0'),s=String(seconds%60).padStart(2,'0');clock.textContent=`Elapsed ${h}:${m}:${s}`};render();const interval=endedAt?null:setInterval(render,1000);window.studyClock={stop(){if(interval)clearInterval(interval)}}}}
   window.ParticipantTelemetry?.observeRender();

@@ -40,7 +40,7 @@
 {% else %}
   {{ section_nav(view) }}
   <section class="panel" data-section-number="{{ view.section_number }}" data-telemetry-mode="{% if not view.is_current %}review{% else %}{{ view.phase|lower }}{% endif %}">
-    <header class="panel-head"><h1>Section {{ view.section_number }}</h1><span class="phase-badge">{% if not view.is_current %}Review{% elif view.phase == 'ASSESSMENT_ACTIVE' or view.phase == 'JUDGING' or view.phase == 'ASSESSMENT_GENERATING' or view.phase == 'ASSESSMENT_AWAITING_EVALUATION' %}Assessment{% elif view.phase == 'SECTION_COMPLETE' %}Complete{% else %}Teaching{% endif %}</span></header>
+    <header class="panel-head"><h1>Section {{ view.section_number }}</h1><span class="phase-badge">{% if not view.is_current %}Review{% elif view.phase == 'PAAS_PENDING' %}Mental effort{% elif view.phase == 'ASSESSMENT_ACTIVE' or view.phase == 'JUDGING' or view.phase == 'ASSESSMENT_GENERATING' or view.phase == 'ASSESSMENT_AWAITING_EVALUATION' %}Assessment{% elif view.phase == 'SECTION_COMPLETE' %}Complete{% else %}Teaching{% endif %}</span></header>
 
     {% if not view.is_current %}
       {{ timeline(view) }}<div class="composer read-only" data-completed-section-review>This completed section is available for review. Its assessment remains stored with the study record.</div>
@@ -54,6 +54,35 @@
       <div class="action-card" data-technical-hold><h2>Technical hold</h2><p>Your work and assessment remain saved. Study staff must resolve this technical issue before this step can continue.</p></div>
     {% elif view.phase == 'SECTION_COMPLETE' %}
       {{ timeline(view) }}<div class="composer" data-section-complete>{% if view.section_scientific_outcome == 'UNRESOLVED' %}<p>Section ended — transition unresolved</p><p>You may continue to the next section for study administration; this does not mean the SOLO transition was achieved.</p>{% endif %}<form hx-post="{% if view.is_final_section %}/session/actions/finish{% else %}/session/actions/next{% endif %}" hx-target="#session-main" hx-swap="outerHTML" method="post"><button>{% if view.is_final_section %}Finish study{% else %}Next section{% endif %}</button></form></div>
+    {% elif view.phase == 'PAAS_PENDING' and view.paas_instrument %}
+      <section class="paas-screen" data-paas-screen data-telemetry-surface="paas" data-paas-presentation="compact-nine-point-v1" aria-labelledby="paas-title">
+        <div class="paas-step-context"><span>Teaching complete</span><span>Up next: assessment</span></div>
+        <h2 id="paas-title">Mental effort</h2>
+        <form hx-post="/session/actions/paas" hx-target="#session-main" hx-swap="outerHTML" method="post">
+          <input type="hidden" name="idempotency_key" value="{{ new_key }}">
+          <fieldset class="paas-choices">
+            <legend>{{ view.paas_instrument.question }}</legend>
+            <div class="paas-rating-scroll" role="group" aria-label="Mental effort rating, 1 through 9">
+              <div class="paas-rating-options">
+                {% for anchor in view.paas_instrument.anchors %}
+                  <label class="paas-option">
+                    <input type="radio" name="rating" value="{{ anchor.value }}" required data-paas-label="{{ anchor.label }}">
+                    <span class="paas-number" aria-hidden="true">{{ anchor.value }}</span>
+                    <span class="sr">{{ anchor.value }}: {{ anchor.label }}</span>
+                  </label>
+                {% endfor %}
+              </div>
+            </div>
+            <div class="paas-scale-anchors" aria-hidden="true">
+              <span>Very, very low</span>
+              <span>Neither low nor high</span>
+              <span>Very, very high</span>
+            </div>
+            <p class="paas-selection" data-paas-selection aria-live="polite" aria-atomic="true">Select one number to describe your effort.</p>
+          </fieldset>
+          <div class="paas-action-row"><button type="submit">Continue to assessment</button></div>
+        </form>
+      </section>
     {% elif view.phase == 'INTERVENTION_ACTIVE' %}
       {{ timeline(view) }}
       {% if view.attempt_status == 'ASSIGNED' %}<div class="composer begin-state" data-teaching-activity-number="{{ view.activity_number }}"><p class="begin-note">Select the button below to start the teaching conversation with the study assistant.</p><form hx-post="/session/actions/begin" hx-target="#session-main" hx-swap="outerHTML" method="post"><input type="hidden" name="idempotency_key" value="{{ new_key }}"><button>{% if not view.started_at %}Begin study{% else %}Begin teaching activity {{ view.activity_number }}{% endif %}</button></form></div>{% else %}{% include "partials/tutor_composer.html" %}{% endif %}

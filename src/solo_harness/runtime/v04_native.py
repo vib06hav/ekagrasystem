@@ -197,6 +197,21 @@ def judge_messages(study: ScientificStudyV04, resolved: dict, frozen_question: s
     compiled = study.compile_judge(slot["blueprint_id"], frozen_question,
                                    {"scenario": {"learner_facts": case["public"], "oracle": case["oracle"]},
                                     "contract": slot}, learner_response)
+    # The scientific Judge contract already requires citations to the learner's
+    # actual words.  Make that wire-level requirement explicit for every schema
+    # field which carries learner evidence.  In particular, a model must not
+    # join bullet points, normalize newlines, or use an ellipsis: the backend
+    # deliberately verifies literal provenance before it permits scoring.
+    compiled += (
+        "\n\n[EXACT_EVIDENCE_WIRE_RULE]\n"
+        "Every `verbatim_quotes`, `criterion_evidence[].learner_quote`, and "
+        "`misconception_evidence[].learner_quote` value MUST be one single "
+        "contiguous, character-for-character substring copied from "
+        "[LEARNER_RESPONSE]. Preserve punctuation and whitespace exactly. "
+        "Do not join separate sentences or lines, normalize bullet formatting, "
+        "or use ellipses. If an exact supporting substring cannot be supplied, "
+        "return REVIEW_REQUIRED rather than assigning a score.\n"
+    )
     compiled += "\n\n[OUTPUT_SCHEMA]\n" + _json(SubjectiveJudgment.model_json_schema())
     return _msg(compiled)
 

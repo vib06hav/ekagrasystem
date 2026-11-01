@@ -39,7 +39,7 @@ class Settings(BaseSettings):
     f1_v04_study_dir: Path = Path("/app/studies/networks_error_detection_parity_f1/v0.4")
     active_capture_max_age_seconds: int = Field(default=300, gt=0)
     participant_study_title: str = "Learning study"
-    participant_intro_text: str = "You will complete four guided learning sections. Each section contains a teaching conversation followed by an independent assessment."
+    participant_intro_text: str = "You will complete four guided learning sections. Each section contains a teaching conversation, a brief mental-effort rating, and an independent assessment."
     participant_privacy_text: str = "Privacy, consent, withdrawal, and data-use information will be provided here before participant deployment."
     participant_support_text: str = "Researcher contact and support instructions will be provided here."
 
