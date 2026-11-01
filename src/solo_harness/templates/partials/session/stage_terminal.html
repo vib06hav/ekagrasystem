@@ -1,0 +1,4 @@
+  <section class="panel completion" data-study-complete><div class="phase-badge">Study completed</div><h1>Thank you</h1><p>Your study responses have been saved.</p>
+    <div class="completion-grid"><div><strong>Total time</strong><span data-duration="{{ view.elapsed_seconds }}">{{ '%02d:%02d:%02d'|format(view.elapsed_seconds // 3600, (view.elapsed_seconds % 3600) // 60, view.elapsed_seconds % 60) }}</span></div><div><strong>Started</strong>{{ view.started_at.strftime('%Y-%m-%d %H:%M:%S') if view.started_at else '—' }}</div><div><strong>Finished</strong>{{ view.ended_at.strftime('%Y-%m-%d %H:%M:%S') if view.ended_at else '—' }}</div></div>
+    <p>Debrief information and researcher support details will appear here.</p>
+  </section>

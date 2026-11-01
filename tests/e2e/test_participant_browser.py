@@ -221,3 +221,27 @@ def test_fallback_reload_and_telemetry_failure_do_not_block_study(tmp_path):
             browser.close()
     finally:
         server.should_exit = True; thread.join(timeout=10)
+
+
+def test_rrweb_events_survive_navigation_before_periodic_flush(tmp_path):
+    """Pending rrweb events whose combined size exceeds one beacon (60000 characters) must still be saved on unload."""
+    playwright = pytest.importorskip("playwright.sync_api")
+    server, thread, port = _start_server(PassingStudyClient(), tmp_path)
+    session = _create_session()
+    try:
+        with playwright.sync_playwright() as api:
+            browser = api.chromium.launch(headless=True); page = browser.new_page()
+            page.goto(f"http://127.0.0.1:{port}/join")
+            page.get_by_label("University ID").fill(session["institutional_id"]); page.locator('input[name="acknowledged"]').check(); page.get_by_role("button", name="Continue").click()
+            page.get_by_role("button", name="Begin").wait_for(timeout=15000)
+            # A few large DOM mutations: fewer than 100 events (so no size-triggered flush) but together far above one beacon.
+            page.evaluate("""async () => { const box = document.createElement('div'); document.body.append(box);
+                for (let i = 0; i < 10; i += 1) { const node = document.createElement('p'); node.textContent = 'x'.repeat(20000); box.append(node); await new Promise((resolve) => setTimeout(resolve, 0)); } }""")
+            page.wait_for_timeout(500)
+            page.reload(); page.get_by_role("button", name="Begin").wait_for(timeout=15000); page.wait_for_timeout(1500)
+            rrweb_dir = next(tmp_path.iterdir()) / "browser" / "rrweb"
+            counts = [len(path.read_text(encoding="utf-8").splitlines()) for path in rrweb_dir.glob("*.ndjson")]
+            assert max(counts) >= 12, counts  # meta + full snapshot + 10 mutations from the first page load
+            browser.close()
+    finally:
+        server.should_exit = True; thread.join(timeout=10)

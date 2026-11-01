@@ -18,6 +18,9 @@
   let rrSequence = 0;
   let uiSequence = 0;
   let rrQueue = [];
+  let rrChars = 0;
+  const rrSizes = new WeakMap();
+  const RR_FLUSH_CHARS = 30000;
   let uiQueue = [];
   let flushing = false;
   let wasProcessing = false;
@@ -54,14 +57,35 @@
     if (flushing || (!rrQueue.length && !uiQueue.length)) return;
     flushing = true;
     const rr = rrQueue.splice(0, 100);
+    rr.forEach((event) => { rrChars -= rrSizes.get(event) || 0; });
     const ui = uiQueue.splice(0, 50);
     const work = [];
     if (rr.length) work.push(Promise.resolve(post('/session/telemetry/rrweb', {
       telemetry_schema_version: schema, browser_run_id: runId, batch_id: crypto.randomUUID(), run_metadata: metadata, events: rr,
-    }, beacon)).then((ok) => { if (!ok && !beacon) rrQueue.unshift(...rr); }));
+    }, beacon)).then((ok) => { if (!ok && !beacon) { rrQueue.unshift(...rr); rr.forEach((event) => { rrChars += rrSizes.get(event) || 0; }); } }));
     if (ui.length) work.push(Promise.resolve(post('/session/telemetry/ui-events', { events: ui }, beacon))
       .then((ok) => { if (!ok && !beacon) uiQueue.unshift(...ui); }));
     Promise.all(work).finally(() => { flushing = false; if ((rrQueue.length || uiQueue.length) && !beacon) setTimeout(flush, 250); });
+  };
+  // On page hide everything pending must be saved. A beacon is only used below 60000 characters and a keepalive
+  // fetch is capped near 64 KB, so drain the queues in several bounded batches instead of one 100-event batch.
+  const BEACON_BATCH_CHARS = 50000;
+  const flushOnHide = () => {
+    const overhead = 600 + JSON.stringify(metadata).length;
+    const batches = [];
+    let current = [];
+    let size = overhead;
+    rrChars = 0;
+    rrQueue.splice(0).forEach((event) => {
+      const length = JSON.stringify(event).length + 1;
+      if (current.length && (current.length >= 100 || size + length > BEACON_BATCH_CHARS)) { batches.push(current); current = []; size = overhead; }
+      current.push(event); size += length;
+    });
+    if (current.length) batches.push(current);
+    batches.forEach((events) => post('/session/telemetry/rrweb', {
+      telemetry_schema_version: schema, browser_run_id: runId, batch_id: crypto.randomUUID(), run_metadata: metadata, events,
+    }, true));
+    while (uiQueue.length) post('/session/telemetry/ui-events', { events: uiQueue.splice(0, 50) }, true);
   };
   const rendered = (key, type, surface, payload) => {
     if (seen.has(key)) return;
@@ -117,9 +141,12 @@
   if (window.rrwebRecord?.record) {
     window.rrwebRecord.record({
       emit: (rrwebEvent) => {
-        rrQueue.push({ telemetry_schema_version: schema, browser_run_id: runId, sequence: ++rrSequence,
-          client_emit_utc_ms: Date.now(), client_performance_ms: performance.now(), rrweb_event: rrwebEvent });
-        if (rrQueue.length >= 100) flush();
+        const wrapped = { telemetry_schema_version: schema, browser_run_id: runId, sequence: ++rrSequence,
+          client_emit_utc_ms: Date.now(), client_performance_ms: performance.now(), rrweb_event: rrwebEvent };
+        const size = JSON.stringify(wrapped).length;
+        rrSizes.set(wrapped, size); rrChars += size; rrQueue.push(wrapped);
+        // Flush by size as well as count so little is left pending that a 64 KB unload beacon cannot carry.
+        if (rrQueue.length >= 100 || rrChars >= RR_FLUSH_CHARS) flush();
       },
       maskAllInputs: true,
       sampling: { input: 'all' },
@@ -129,6 +156,6 @@
     });
   }
   setInterval(flush, 5000);
-  addEventListener('pagehide', () => flush(true));
+  addEventListener('pagehide', flushOnHide);
   addEventListener('DOMContentLoaded', observeRender);
 })();
