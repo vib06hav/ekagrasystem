@@ -1,0 +1,51 @@
+{# F1 v0.4 standardized POST-PASS recap; do not display on failed or unresolved outcomes. #}
+{% set recap = view.transition_summary %}
+<article class="transition-recap" data-transition-summary="{{ recap.id }}" data-transition-summary-version="{{ recap.version }}" aria-labelledby="transition-recap-title">
+  <header class="transition-recap-hero">
+    <div class="transition-recap-eyebrow"><span class="transition-recap-check" aria-hidden="true">✓</span><span>Section {{ view.section_number }} completed</span><span class="transition-recap-dash" aria-hidden="true"></span><span>SOLO {{ recap.from }} → {{ recap.to }}</span></div>
+    <h2 id="transition-recap-title">{{ recap.title }}</h2>
+    <p class="transition-recap-lede">{{ recap.subtitle }}</p>
+  </header>
+
+  <section class="transition-recap-section" aria-labelledby="transition-recap-principles-title">
+    <div class="transition-recap-section-head"><span class="transition-recap-kicker">01 / KEY IDEAS</span><h3 id="transition-recap-principles-title">What this transition covered</h3></div>
+    <ol class="transition-recap-principles">
+      {% for item in recap.points %}
+      <li><span class="transition-recap-index" aria-hidden="true">0{{ loop.index }}</span><div><h4>{{ item.heading }}</h4><p>{{ item.text }}</p></div></li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <section class="transition-recap-section" aria-labelledby="transition-recap-example-title">
+    <div class="transition-recap-section-head"><span class="transition-recap-kicker">02 / CHECKED EXAMPLE</span><h3 id="transition-recap-example-title">{{ recap.example_title }}</h3><p>{{ recap.example_lede }}</p></div>
+    <div class="transition-recap-example">
+      {% if recap.example_kind == 'frame' %}
+        <div class="transition-recap-table-wrap"><table class="transition-recap-table"><thead><tr><th scope="col">Stage</th><th scope="col">Bit sequence</th><th scope="col">What it shows</th></tr></thead><tbody>
+        {% for item in recap.frame_rows %}<tr><th scope="row">{{ item.label }}</th><td><code>{{ item.value }}</code></td><td>{{ item.note }}</td></tr>{% endfor %}
+        </tbody></table></div>
+      {% elif recap.example_kind == 'comparison' %}
+        <div class="transition-recap-table-wrap"><table class="transition-recap-table"><thead><tr>{% for col in recap.comparison_headers %}<th scope="col">{{ col }}</th>{% endfor %}</tr></thead><tbody>
+          {% for items in recap.comparison_rows %}<tr>{% for cell in items %}{% if loop.first %}<th scope="row">{{ cell }}</th>{% else %}<td>{{ cell }}</td>{% endif %}{% endfor %}</tr>{% endfor %}
+        </tbody></table></div>
+      {% elif recap.example_kind == 'grid' %}
+        <div class="transition-recap-table-wrap"><table class="transition-recap-table transition-recap-grid"><caption>Received transmitted grid and receiver check results</caption><thead><tr><th scope="col">Row</th>{% for header in recap.grid_headers %}<th scope="col">{{ header }}</th>{% endfor %}<th scope="col">Row test</th></tr></thead><tbody>
+          {% for row in recap.grid_rows %}{% set row_index = loop.index0 %}<tr><th scope="row">{{ row.label }}</th>{% for bit in row['values'] %}<td{% if row_index == recap.grid_flip[0] and loop.index0 == recap.grid_flip[1] %} class="transition-recap-flip" title="Flipped received bit"{% elif loop.last or row_index == 3 %} class="transition-recap-check-cell"{% endif %}><code>{{ bit }}</code>{% if row_index == recap.grid_flip[0] and loop.index0 == recap.grid_flip[1] %}<span class="sr">, flipped bit</span>{% endif %}</td>{% endfor %}<td class="{{ 'transition-recap-fail' if row.failed else 'transition-recap-pass' }}">{{ row.status }}</td></tr>{% endfor %}
+          <tr><th scope="row">Column test</th>{% for status in recap.grid_column_results %}<td class="{{ 'transition-recap-fail' if status == 'Fail' else 'transition-recap-pass' }}">{{ status }}</td>{% endfor %}<td class="transition-recap-na">—</td></tr>
+        </tbody></table></div>
+        <p class="transition-recap-mini-note">Highlighted cell = the altered transmitted bit. The row and column tests intersect at R2 · C3.</p>
+      {% elif recap.example_kind == 'groups' %}
+        <div class="transition-recap-groups" aria-label="Defined parity groups">{% for group in recap.groups %}<div class="transition-recap-group"><span>{{ group[0] }}</span><code>{{ group[1] }}</code></div>{% endfor %}</div>
+        <div class="transition-recap-table-wrap"><table class="transition-recap-table"><thead><tr><th scope="col">Flipped data positions</th><th scope="col">G1 flips</th><th scope="col">G2 flips</th><th scope="col">Receiver result</th></tr></thead><tbody>
+          {% for pattern in recap.patterns %}<tr><th scope="row"><code>{{ pattern.flips }}</code></th><td>{{ pattern.g1 }}</td><td>{{ pattern.g2 }}</td><td><strong>{{ pattern.outcome }}</strong></td></tr>{% endfor %}
+        </tbody></table></div>
+      {% endif %}
+      <p class="transition-recap-verdict"><span aria-hidden="true">↳</span><span>{{ recap.example_conclusion }}</span></p>
+    </div>
+  </section>
+
+  <aside class="transition-recap-boundary" aria-label="Important limitation"><div class="transition-recap-boundary-mark" aria-hidden="true">!</div><div><h3>{{ recap.boundary_title }}</h3><p>{{ recap.boundary }}</p></div></aside>
+
+  <footer class="transition-recap-footer"><div class="transition-recap-next"><span>COMING UP</span><p>{{ recap.next_preview }}</p></div>
+    <form hx-post="{% if view.is_final_section %}/session/actions/finish{% else %}/session/actions/next{% endif %}" hx-target="#session-main" hx-swap="outerHTML" method="post"><button type="submit">{% if view.is_final_section %}Finish study{% else %}Continue to section {{ view.section_number + 1 }}{% endif %}<span aria-hidden="true"> →</span></button></form>
+  </footer>
+</article>

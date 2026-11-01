@@ -10,6 +10,7 @@
     <ul class="nav-sub" aria-label="Section {{ section.number }} activities">
     {% for act in acts %}<li class="{% if view.is_current and loop.last and not in_assessment and view.phase == 'INTERVENTION_ACTIVE' %}current{% endif %}">{{ act.label }}</li>{% endfor %}
     {% if in_assessment %}<li class="current">Independent assessment</li>{% endif %}
+    {% if view.transition_summary and view.is_current %}<li class="current">Transition summary</li>{% endif %}
     </ul>
   {% endif %}
   </div>
@@ -22,7 +23,7 @@
 {% if not view.timeline %}<div class="empty">This section is ready to begin.</div>{% endif %}
 {% for item in view.timeline %}
   {% if item.kind == 'message' %}
-    <article class="message {{ item.role|lower }}"{% if item.role == 'TUTOR' %} data-tutor-message-sequence="{{ item.sequence_no }}"{% endif %}><div class="message-meta"><span>{% if item.role == 'TUTOR' %}Study assistant{% else %}You{% endif %}</span><time>{{ item.timestamp.strftime('%H:%M:%S') }}</time></div>{{ item.content }}</article>
+    <article class="message {{ item.role|lower }}"{% if item.role == 'TUTOR' %} data-tutor-message-sequence="{{ item.sequence_no }}"{% endif %}><div class="message-meta"><span>{% if item.role == 'TUTOR' %}Study assistant{% else %}You{% endif %}</span><time>{{ item.timestamp.strftime('%H:%M:%S') }}</time></div>{% if item.role == 'TUTOR' %}<div class="tutor-content" data-teaching-render="markdown-v1">{{ item.content | tutor_markdown }}</div>{% else %}{{ item.content }}{% endif %}</article>
   {% else %}
     <div class="timeline-marker {{ item.kind }}"{% if item.kind == 'assessment' %} data-assessment-completed-marker{% endif %}{% if item.kind == 'activity' %} data-teaching-activity-number="{{ item.activity_number }}"{% endif %}><span>{{ item.label }}</span>{% if item.timestamp %}<time title="Time of day, not a duration">{% if item.kind == 'activity' %}Assigned at {% endif %}{{ item.timestamp.strftime('%H:%M:%S') }}</time>{% endif %}</div>
   {% endif %}
@@ -40,7 +41,7 @@
 {% else %}
   {{ section_nav(view) }}
   <section class="panel" data-section-number="{{ view.section_number }}" data-telemetry-mode="{% if not view.is_current %}review{% else %}{{ view.phase|lower }}{% endif %}">
-    <header class="panel-head"><h1>Section {{ view.section_number }}</h1><span class="phase-badge">{% if not view.is_current %}Review{% elif view.phase == 'PAAS_PENDING' %}Mental effort{% elif view.phase == 'ASSESSMENT_ACTIVE' or view.phase == 'JUDGING' or view.phase == 'ASSESSMENT_GENERATING' or view.phase == 'ASSESSMENT_AWAITING_EVALUATION' %}Assessment{% elif view.phase == 'SECTION_COMPLETE' %}Complete{% else %}Teaching{% endif %}</span></header>
+    <header class="panel-head"><h1>Section {{ view.section_number }}</h1><span class="phase-badge">{% if not view.is_current %}Review{% elif view.phase == 'PAAS_PENDING' %}Mental effort{% elif view.phase == 'ASSESSMENT_ACTIVE' or view.phase == 'JUDGING' or view.phase == 'ASSESSMENT_GENERATING' or view.phase == 'ASSESSMENT_AWAITING_EVALUATION' %}Assessment{% elif view.phase == 'SECTION_COMPLETE' %}{% if view.transition_summary %}Summary{% else %}Complete{% endif %}{% else %}Teaching{% endif %}</span></header>
 
     {% if not view.is_current %}
       {{ timeline(view) }}<div class="composer read-only" data-completed-section-review>This completed section is available for review. Its assessment remains stored with the study record.</div>
@@ -52,6 +53,8 @@
       {% if view.phase == 'INTERVENTION_ACTIVE' %}{{ timeline(view) }}{% endif %}<div class="action-card" data-generation-error><h2>That step could not be completed</h2><p>Your work is saved. Try the same step again when you are ready.</p><form hx-post="/session/actions/retry" hx-target="#session-main" hx-swap="outerHTML" method="post"><input type="hidden" name="idempotency_key" value="{{ new_key }}"><button class="retry-button">Retry</button></form></div>
     {% elif view.technical_hold %}
       <div class="action-card" data-technical-hold><h2>Technical hold</h2><p>Your work and assessment remain saved. Study staff must resolve this technical issue before this step can continue.</p></div>
+    {% elif view.phase == 'SECTION_COMPLETE' and view.transition_summary %}
+      {% include "partials/transition_summary.html" %}
     {% elif view.phase == 'SECTION_COMPLETE' %}
       {{ timeline(view) }}<div class="composer" data-section-complete>{% if view.section_scientific_outcome == 'UNRESOLVED' %}<p>Section ended — transition unresolved</p><p>You may continue to the next section for study administration; this does not mean the SOLO transition was achieved.</p>{% endif %}<form hx-post="{% if view.is_final_section %}/session/actions/finish{% else %}/session/actions/next{% endif %}" hx-target="#session-main" hx-swap="outerHTML" method="post"><button>{% if view.is_final_section %}Finish study{% else %}Next section{% endif %}</button></form></div>
     {% elif view.phase == 'PAAS_PENDING' and view.paas_instrument %}
@@ -85,7 +88,7 @@
       </section>
     {% elif view.phase == 'INTERVENTION_ACTIVE' %}
       {{ timeline(view) }}
-      {% if view.attempt_status == 'ASSIGNED' %}<div class="composer begin-state" data-teaching-activity-number="{{ view.activity_number }}"><p class="begin-note">Select the button below to start the teaching conversation with the study assistant.</p><form hx-post="/session/actions/begin" hx-target="#session-main" hx-swap="outerHTML" method="post"><input type="hidden" name="idempotency_key" value="{{ new_key }}"><button>{% if not view.started_at %}Begin study{% else %}Begin teaching activity {{ view.activity_number }}{% endif %}</button></form></div>{% else %}{% include "partials/tutor_composer.html" %}{% endif %}
+      {% if view.attempt_status == 'ASSIGNED' %}{% include "partials/section_overview.html" %}{% else %}{% include "partials/tutor_composer.html" %}{% endif %}
     {% elif view.f1_assessment_submitted %}
       <section class="assessment" data-telemetry-surface="assessment"><div class="phase-badge">Independent assessment</div><h2>Assessment submitted</h2><p>Assessment submitted. Your responses have been saved.</p></section>
     {% elif view.phase == 'ASSESSMENT_ACTIVE' and view.f1_public_assessment %}

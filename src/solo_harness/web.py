@@ -29,12 +29,15 @@ from solo_harness.db.models import (
 )
 from solo_harness.runtime.ai import AIExecutionRuntime, OpenAICompatibleClient
 from solo_harness.runtime.engine import SessionRuntime
+from solo_harness.transition_summaries import post_pass_transition_summary
+from solo_harness.teaching_render import render_tutor_markdown
 from solo_harness.runtime.paas import instrument_snapshot
 from solo_harness.runtime.v04_persistence import is_deliverable_f1, is_f1_frozen, is_f1_study, public_projection, submit_f1_response
 from solo_harness.research_time import in_research_timezone
 from solo_harness.telemetry import append_keyboard_batch, append_rrweb_batch, ensure_browser_manifest, record_ui_events
 
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
+templates.env.filters["tutor_markdown"] = render_tutor_markdown
 
 
 class ParticipantApplication:
@@ -149,6 +152,10 @@ class ParticipantApplication:
                 for event in events if event.event_type == "SECTION_COMPLETED" and event.payload.get("transition_id")
             }
             completed_transition_ids = set(completed_outcomes)
+            # The recap is post-assessment material, authorized only by an
+            # already-persisted SECTION_COMPLETED PASSED outcome. Never show it
+            # on a failed attempt, administrative UNRESOLVED continuation, or
+            # other study types. It is identical for all three pedagogies.
 
             if session.current_transition_id in transition_ids:
                 current_index = transition_ids.index(session.current_transition_id)
@@ -215,7 +222,7 @@ class ParticipantApplication:
             ).order_by(LLMCall.started_at.desc())) if current_assessment and current_assessment.status == "GENERATING" else None
             # Paas is a human-response gate, not an LLM operation. An older
             # failed Tutor call must never cover its form with a Retry panel.
-            operation = None if session.phase == "PAAS_PENDING" else (build or latest)
+            operation = None if session.phase in ("PAAS_PENDING", "SECTION_COMPLETE", "TERMINAL") else (build or latest)
             stale = bool(
                 operation and operation.status in ("STARTED", "SENDING")
                 and datetime.now(timezone.utc) - operation.started_at
@@ -238,6 +245,13 @@ class ParticipantApplication:
                 "is_read_only": not is_current or session.phase == "TERMINAL",
                 "is_final_section": current_index == len(transition_ids) - 1,
                 "section_scientific_outcome": completed_outcomes.get(selected_transition_id),
+                "transition_summary": post_pass_transition_summary(
+                    f1_v04=bool(f1_study and compiled.authored.get("v04")),
+                    is_current=is_current,
+                    phase=session.phase,
+                    outcome=completed_outcomes.get(selected_transition_id),
+                    transition_id=selected_transition_id,
+                ),
                 "timeline": timeline,
                 "attempt_status": current_attempt.status if current_attempt and is_current else None,
                 "paas_instrument": instrument_snapshot() if is_current and session.phase == "PAAS_PENDING" else None,

@@ -12,6 +12,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, model_validator
 from solo_harness.runtime.ai import CanonicalMessage
+from solo_harness.runtime.tutor_presentation import TUTOR_PRESENTATION_GUIDANCE
 from solo_harness.studies.scientific_v04 import ScientificStudyV04
 from solo_harness.studies.scientific_v04_policy import resolve_typed_case
 
@@ -152,6 +153,7 @@ def tutor_messages(study: ScientificStudyV04, cell_id: str, dialogue: list[dict[
     if not instructional_instance.get("verified"):
         raise ValueError("Tutor instructional instance is not mathematically verified")
     contract = study.compile_tutor(cell_id, instructional_instance["public"], dialogue)
+    contract += "\n\n" + TUTOR_PRESENTATION_GUIDANCE
     contract += "\n\n[OUTPUT_SCHEMA]\n" + _json(TutorProse.model_json_schema())
     contract += "\nThe backend, not the model, authorizes completion. Do not expose assessment keys."
     return _msg(contract)
