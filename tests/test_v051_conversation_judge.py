@@ -79,7 +79,7 @@ def _output(action, guidance="Use the next treatment-faithful instructional move
     return {"decision": action, "guidance": guidance}
 
 
-def _setup(db):
+def _setup(db, with_history=True):
     compiled = compile_v051(load_scientific_v051(ROOT)); version = activate(db, compiled)
     runtime = SessionRuntime(SimpleNamespace(load=lambda _db, _id: compiled), selector=RandomSelector(_First()))
     session = Session(study_version_id=version.id, status="ACTIVE", phase="INTERVENTION_ACTIVE", formal_state_id="P", current_attempt_number=0, application_build_id="stage6-test", runtime_config_snapshot={})
@@ -87,8 +87,11 @@ def _setup(db):
     progress = runtime.inspect_v051_subsections(db, session.id)[0]
     tutor = Message(attempt_id=attempt.id, sequence_no=1, role="TUTOR", content_text="A visible, accurate explanation.", content_format="plain", instructional_trace={"subsection_id": progress.subsection_id}, material_ids=[], exposed_kc_ids=[], exposed_relation_ids=[])
     learner = Message(attempt_id=attempt.id, sequence_no=2, role="LEARNER", content_text="I do not know why.", content_format="plain", material_ids=[], exposed_kc_ids=[], exposed_relation_ids=[])
-    db.add_all([tutor, learner]); db.commit()
-    return runtime, session.id, progress, tutor.id
+    reply = Message(attempt_id=attempt.id, sequence_no=3, role="TUTOR", content_text="Here is a clarification responding to your doubt.", content_format="plain", instructional_trace={"subsection_id": progress.subsection_id}, material_ids=[], exposed_kc_ids=[], exposed_relation_ids=[])
+    if with_history:
+        db.add_all([tutor, learner, reply])
+    db.commit()
+    return runtime, session.id, progress, tutor.id if with_history else None
 
 
 def _historical_version(db, current):
@@ -143,12 +146,13 @@ def test_invalid_or_stale_judge_output_is_audited_and_freshly_retryable():
         ai = AIExecutionRuntime(runtime, _Client(_output("ADVANCE")), _settings())
         stale = ai.reserve_conversation_judge(db, session_id, commit=True)
         attempt = db.get(Attempt, runtime.inspect_v051_subsections(db, session_id)[0].attempt_id)
-        db.add(Message(attempt_id=attempt.id, sequence_no=3, role="LEARNER", content_text="A newer real learner turn.", content_format="plain", material_ids=[], exposed_kc_ids=[], exposed_relation_ids=[])); db.commit()
+        db.add(Message(attempt_id=attempt.id, sequence_no=4, role="LEARNER", content_text="A newer real learner turn.", content_format="plain", material_ids=[], exposed_kc_ids=[], exposed_relation_ids=[])); db.commit()
         asyncio.run(ai.execute(db, stale))
         stale_call = db.get(LLMCall, stale)
         assert stale_call.status == "INVALID_OUTPUT" and stale_call.error_class == "STALE_CONTEXT"
         retry = ai.reserve_manual_retry(db, session_id, commit=True)
         assert retry != stale and db.get(LLMCall, retry).request_payload["retry_of"] == str(stale)
+        assert db.get(LLMCall, retry).purpose == "TUTOR"
 
 
 def test_failed_advance_application_rolls_back_before_marking_a_transient_failure(monkeypatch):
@@ -208,18 +212,14 @@ def test_internal_candidate_selection_uses_configured_v052_not_registration_orde
         assert selected.id == current.id and selected.content_version == "v0.5.2"
 
 
-def test_real_persisted_tutor_judge_flow_progresses_once_per_learner_turn_to_paas_and_assessment():
+def test_real_persisted_tutor_judge_flow_advances_without_forced_learner_turns_to_paas_and_assessment():
     factory = make_session_factory(DATABASE_URL)
     with factory() as db:
-        runtime, session_id, _, _ = _setup(db)
+        runtime, session_id, _, _ = _setup(db, with_history=False)
         ai = AIExecutionRuntime(runtime, _WorkflowClient(), _settings())
         initial_tutor = ai.reserve_tutor(db, session_id, commit=True)
         asyncio.run(ai.execute(db, initial_tutor))
-        assert db.scalar(select(func.count()).select_from(LLMCall).where(LLMCall.attempt_id == db.get(Session, session_id).current_attempt_id, LLMCall.purpose == "CONVERSATION_JUDGE")) == 0
-        for _ in range(4):
-            judge = ai.reserve_tutor(db, session_id, learner_text="Please continue; I have no further question.", commit=True)
-            assert db.get(LLMCall, judge).purpose == "CONVERSATION_JUDGE"
-            asyncio.run(ai.execute(db, judge))
+        assert db.scalar(select(func.count()).select_from(Message).where(Message.attempt_id == db.get(Session, session_id).current_attempt_id, Message.role == "LEARNER")) == 0
         session = db.get(Session, session_id)
         assert session.phase == "PAAS_PENDING"
         assert all(row.status == "COMPLETED" for row in runtime.inspect_v051_subsections(db, session_id))
@@ -246,3 +246,46 @@ def test_continue_guidance_is_compiled_into_the_next_tutor_turn():
         next_tutor = db.scalar(select(LLMCall).where(LLMCall.session_id == session_id, LLMCall.purpose == "TUTOR").order_by(LLMCall.started_at.desc()))
         assert guidance in next_tutor.compiled_prompt_text
         assert "previous_conversation_judge_guidance" in next_tutor.compiled_prompt_text
+
+
+class _ReadinessClient(_WorkflowClient):
+    """Tutor first awaits a learner; its next response requests review."""
+    def __init__(self, ready_sequence):
+        super().__init__()
+        self.ready_sequence = iter(ready_sequence)
+
+    async def send(self, prepared):
+        if prepared.request.logical_role == "TUTOR":
+            ready = next(self.ready_sequence, False)
+            payload = {"learner_message": "This is instruction, not a mastery check.", "ready_for_judge": ready}
+            return RawLLMResponse(None, 200, json.dumps(payload), {"choices": [{"message": {"parsed": payload}}]}, payload, "stop", False, {}, 1)
+        return await super().send(prepared)
+
+
+def test_learner_question_reaches_tutor_before_judge_review():
+    factory = make_session_factory(DATABASE_URL)
+    with factory() as db:
+        runtime, session_id, _, _ = _setup(db, with_history=False)
+        ai = AIExecutionRuntime(runtime, _ReadinessClient([False, True, False]), _settings())
+        initial = ai.reserve_tutor(db, session_id, commit=True)
+        asyncio.run(ai.execute(db, initial))
+        assert db.scalar(select(func.count()).select_from(LLMCall).where(LLMCall.session_id == session_id, LLMCall.purpose == "CONVERSATION_JUDGE")) == 0
+        reply = ai.reserve_tutor(db, session_id, learner_text="I am confused about bit positions.", commit=True)
+        assert db.get(LLMCall, reply).purpose == "TUTOR"
+        asyncio.run(ai.execute(db, reply))
+        calls = db.scalars(select(LLMCall).where(LLMCall.session_id == session_id, LLMCall.purpose == "CONVERSATION_JUDGE")).all()
+        assert len(calls) == 1 and calls[0].status == "SUCCEEDED"
+        messages = db.scalars(select(Message).where(Message.attempt_id == db.get(Session, session_id).current_attempt_id).order_by(Message.sequence_no)).all()
+        assert messages[-3].role == "LEARNER" and messages[-2].role == "TUTOR" and messages[-1].role == "TUTOR"
+
+
+def test_unattended_continue_reviews_have_a_bound():
+    factory = make_session_factory(DATABASE_URL)
+    with factory() as db:
+        runtime, session_id, _, _ = _setup(db, with_history=False)
+        ai = AIExecutionRuntime(runtime, _WorkflowClient("CONTINUE", "Finish the contrast before advancing."), _settings())
+        initial = ai.reserve_tutor(db, session_id, commit=True)
+        asyncio.run(ai.execute(db, initial))
+        judge_count = db.scalar(select(func.count()).select_from(LLMCall).where(LLMCall.session_id == session_id, LLMCall.purpose == "CONVERSATION_JUDGE"))
+        assert judge_count == 6
+        assert runtime.inspect_v051_subsections(db, session_id)[0].status == "ACTIVE"

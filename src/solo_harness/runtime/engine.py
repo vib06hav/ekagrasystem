@@ -256,10 +256,17 @@ class SessionRuntime:
         attempt, progress = self._active_v051_progress(db, session)
         audit = (call.request_payload or {}).get("audit", {})
         if audit.get("subsection_id") != progress.subsection_id or audit.get("attempt_id") != str(attempt.id): raise StaleConversationJudgeContext("stale Conversation Judge subsection")
-        latest = db.scalar(select(Message).where(Message.attempt_id == attempt.id, Message.role == "LEARNER").order_by(Message.sequence_no.desc()))
-        if latest is None or audit.get("latest_learner_message_id") != str(latest.id): raise StaleConversationJudgeContext("stale Conversation Judge learner context")
+        transcript = db.scalars(select(Message).where(Message.attempt_id == attempt.id).order_by(Message.sequence_no)).all()
+        active_tutors = [message for message in transcript if message.role == "TUTOR" and
+                         isinstance(message.instructional_trace, dict) and message.instructional_trace.get("subsection_id") == progress.subsection_id]
+        if not active_tutors or transcript[-1].id != active_tutors[-1].id or audit.get("reviewed_tutor_message_id") != str(active_tutors[-1].id):
+            raise StaleConversationJudgeContext("stale Conversation Judge Tutor context")
+        latest = next((message for message in reversed(transcript) if message.role == "LEARNER" and
+                       message.sequence_no > active_tutors[0].sequence_no), None)
+        if audit.get("latest_learner_message_id") != (str(latest.id) if latest else None):
+            raise StaleConversationJudgeContext("stale Conversation Judge learner context")
         payload = output.model_dump(mode="json")
-        tutor_message_ids = [str(message.id) for message in db.scalars(select(Message).where(Message.attempt_id == attempt.id, Message.role == "TUTOR").order_by(Message.sequence_no)).all() if isinstance(message.instructional_trace, dict) and message.instructional_trace.get("subsection_id") == progress.subsection_id]
+        tutor_message_ids = [str(message.id) for message in active_tutors]
         if output.decision == "ADVANCE":
             if not tutor_message_ids: raise ConversationJudgeRejected("Conversation Judge cannot advance without active-subsection instruction")
             next_progress = db.scalar(select(SubsectionProgress).where(

@@ -4,13 +4,13 @@
 
 ## What to evaluate
 
-Read the complete supplied dialogue together with the active subsection, resolved P1/P2/P3 mechanism, ordered authored moves, locked facts, scientific boundaries, verified instructional instance, and latest real learner turn.
+Read the complete supplied dialogue together with the active subsection, resolved P1/P2/P3 mechanism, ordered authored moves, locked facts, scientific boundaries, verified instructional instance, and any learner turns in the current subsection. The Tutor may request review before any learner reply.
 
 1. Determine whether the Tutor has meaningfully and accurately delivered every required idea and treatment-faithful instructional move for this subsection. Read semantic meaning in the dialogue; do not demand exact quotations, message UUIDs, evidence arrays, curriculum IDs, or tutor self-reports.
 2. Check scientific correctness against the supplied verified facts and boundaries. Identify unsupported numbers, incorrect parity/check claims, premature future-topic teaching, missing prerequisites, or invalid inferences.
-3. Interpret the latest learner turn in context: a question, uncertainty, repeated “I don't know,” a partial response, or a request to continue may need different treatment-faithful instruction. Learner performance is never a secret completion test.
+3. If a learner has responded, interpret that response in context. An unanswered doubt, uncertainty, or incomplete clarification calls for `CONTINUE`. Learner performance is never a secret completion test. Do not require a learner turn merely to authorize progression.
 4. Verify that P1 models, P2 guides and consolidates contingently, and P3 uses diagnostic contrasts and explicit inference. Do not let a generic explanation substitute for the assigned treatment.
-5. Do not advance optimistically. `ADVANCE` is appropriate only when the complete required instruction is visibly present, scientifically sound, and the learner has had a natural optional doubt opportunity. If essential delivery cannot genuinely be repaired within scope, use `HOLD`.
+5. Do not advance optimistically. `ADVANCE` is appropriate only when the complete required instruction is visibly present, scientifically sound, and no learner doubt remains unanswered. Do not require an extra learner acknowledgement or boundary question. If essential delivery cannot genuinely be repaired within scope, use `HOLD`.
 
 ## Decision
 

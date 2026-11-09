@@ -37,7 +37,7 @@ def v051_tutor_prompt(compiled, progress, context: dict, dialogue: list[dict], j
         "verified_instructional_instance": instructional_instance,
         "dialogue": dialogue,
         "runtime_rules": {"no_mastery_gate": True, "tutor_readiness_is_non_authoritative": True,
-                          "wait_for_a_real_learner_turn_before_judge_review": True,
+                          "judge_review_follows_tutor_readiness_without_mandatory_learner_turn": True,
                           "no_assessment_content_or_keys": True},
     }
     return (compiled.authored["v051"]["prompts"]["TUTOR_PROMPT.md"]
@@ -47,13 +47,13 @@ def v051_tutor_prompt(compiled, progress, context: dict, dialogue: list[dict], j
             + json.dumps(V051TutorOutput.model_json_schema(), sort_keys=True, separators=(",", ":")))
 
 
-def conversation_judge_prompt(compiled, progress, context: dict, dialogue: list[dict], latest_learner_message_id: str, instructional_instance: dict | None) -> str:
+def conversation_judge_prompt(compiled, progress, context: dict, dialogue: list[dict], instructional_instance: dict | None) -> str:
     payload = {
         "active_section_id": context["parent_cell"]["transition_id"], "active_subsection": context["subsection"],
         "global_pedagogy": context["global_pedagogy"], "section_pedagogy_cell": context["parent_cell"],
         "subsection_pedagogy_cell": context["child_cell"], "locked_knowledge": context["knowledge"],
         "restrictions": context["restrictions"], "verified_instructional_instance": instructional_instance,
-        "dialogue": dialogue, "latest_learner_message_id": latest_learner_message_id,
+        "dialogue": dialogue,
     }
     return (compiled.authored["v051"]["prompts"]["CONVERSATION_JUDGE_PROMPT.md"]
             + "\n\n[V051_CONVERSATION_JUDGE_CONTEXT]\n"

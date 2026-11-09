@@ -52,6 +52,9 @@ def _decode(value):
     text=value.strip(); text=text[3:].lstrip("json\n")[:-3].strip() if text.startswith("```") and text.endswith("```") else text
     return json.loads(text)
 
+# Bound unattended model-to-model review cycles; real learner exchanges reset this count.
+_MAX_AUTONOMOUS_REVIEWS = 6
+
 class AIExecutionRuntime:
     def __init__(self,runtime:SessionRuntime,client:LLMClient,settings:Settings): self.runtime,self.client,self.settings=runtime,client,settings
     def _request(self,role,messages,model,schema,audit):
@@ -64,7 +67,7 @@ class AIExecutionRuntime:
     def _science(self):
         from solo_harness.studies.scientific_v04 import load_scientific_v04
         return load_scientific_v04(self.settings.study_dir)
-    def reserve_tutor(self,db,session_id,learner_text=None,commit=True):
+    def reserve_tutor(self,db,session_id,learner_text=None,commit=True,auto_reviews_since_learner=0):
         from solo_harness.runtime.v04_native import TutorProse,tutor_messages
         from solo_harness.studies.v04_instructional import resolve_instructional_instance
         # The session lock is the stage lease: distinct HTTP idempotency keys may
@@ -81,17 +84,21 @@ class AIExecutionRuntime:
         ))
         if active: raise ValueError("a Tutor operation is already active")
         if learner_text is not None:
+            candidate=self.runtime._v051(self.runtime._compiled(db,session))
+            if candidate and db.scalar(select(LLMCall.id).where(
+                LLMCall.attempt_id==attempt.id, LLMCall.purpose=="CONVERSATION_JUDGE",
+                LLMCall.status.in_(("STARTED","SENDING","RECEIVED")))):
+                raise ValueError("Conversation Judge review is still in progress")
             if not learner_text.strip(): raise ValueError("empty learner response")
             seq=(db.scalar(select(Message.sequence_no).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no.desc())) or 0)+1; db.add(Message(attempt_id=attempt.id,sequence_no=seq,role="LEARNER",content_text=learner_text.strip(),content_format="plain",material_ids=[],exposed_kc_ids=[],exposed_relation_ids=[]))
         if attempt.status=="ASSIGNED": attempt.status="INTERVENTION_ACTIVE"; attempt.intervention_started_at=datetime.now(timezone.utc); session.started_at=session.started_at or datetime.now(timezone.utc)
         compiled=self.runtime._compiled(db,session)
-        # Candidate v0.5.1 never routes through the legacy section-level Tutor.
-        # A learner turn is first interpreted by the persisted Conversation
-        # Judge; its concrete guidance becomes part of the next Tutor request.
+        # Candidate teaching is Tutor-first. The Tutor answers real learner
+        # turns; a Judge reviews resulting instruction only when ready.
         if self.runtime._v051(compiled):
             db.flush()
             if learner_text is not None:
-                return self.reserve_conversation_judge(db, session_id, commit=commit)
+                auto_reviews_since_learner = 0
             from solo_harness.runtime.v051_conversation import V051TutorOutput, v051_tutor_prompt
             from solo_harness.studies.v051_native_compiler import resolve_v051_tutor_context
             _, progress=self.runtime._active_v051_progress(db,session)
@@ -107,7 +114,7 @@ class AIExecutionRuntime:
                 state = progress.instructional_state
             guidance={key: state[key] for key in ("last_action","next_allowed_instruction","conversation_judge_call_id") if key in state} or None
             messages=(CanonicalMessage(role="system",content=v051_tutor_prompt(compiled,progress,context,dialogue,guidance,instructional)),)
-            call=self._reserve(db,session,attempt,None,"TUTOR",messages,V051TutorOutput,{"v051":True,"attempt_id":str(attempt.id),"subsection_id":progress.subsection_id,"pedagogy_id":attempt.pedagogy_id,"judge_guidance":guidance})
+            call=self._reserve(db,session,attempt,None,"TUTOR",messages,V051TutorOutput,{"v051":True,"attempt_id":str(attempt.id),"subsection_id":progress.subsection_id,"pedagogy_id":attempt.pedagogy_id,"judge_guidance":guidance,"auto_reviews_since_learner":auto_reviews_since_learner})
             if commit: db.commit()
             return call
         cell=compiled.cells[f"{attempt.transition_id}:{attempt.pedagogy_id}"]; dialogue=db.scalars(select(Message).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no)).all()
@@ -118,8 +125,8 @@ class AIExecutionRuntime:
         messages=tutor_messages(self._science(),cell["id"],[{"role":"assistant" if m.role=="TUTOR" else "user","content":m.content_text} for m in dialogue],instructional); call=self._reserve(db,session,attempt,None,"TUTOR",messages,TutorProse,{"v04":True,"cell_id":cell["id"],"instructional_instance_id":instructional["instance_id"]})
         if commit: db.commit()
         return call
-    def reserve_conversation_judge(self,db,session_id,commit=True):
-        """Reserve one semantic review after a real learner turn."""
+    def reserve_conversation_judge(self,db,session_id,commit=True,auto_reviews_since_learner=0):
+        """Review the latest active-subsection Tutor instruction."""
         from solo_harness.runtime.v051_conversation import ConversationJudgeOutput, conversation_judge_prompt
         from solo_harness.studies.v051_native_compiler import resolve_v051_tutor_context
         session=db.scalar(select(Session).where(Session.id==session_id).with_for_update()); attempt=db.get(Attempt,session.current_attempt_id) if session else None
@@ -127,14 +134,19 @@ class AIExecutionRuntime:
         if not session or not attempt or session.phase!="INTERVENTION_ACTIVE" or not self.runtime._v051(compiled): raise ValueError("Conversation Judge is unavailable")
         progress=db.scalar(select(SubsectionProgress).where(SubsectionProgress.attempt_id==attempt.id,SubsectionProgress.status=="ACTIVE").with_for_update())
         if progress is None: raise ValueError("no active v0.5.1 subsection")
-        latest=db.scalar(select(Message).where(Message.attempt_id==attempt.id,Message.role=="LEARNER").order_by(Message.sequence_no.desc()))
-        if latest is None: raise ValueError("Conversation Judge requires a learner message")
+        dialogue_rows=db.scalars(select(Message).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no)).all()
+        tutor_rows=[message for message in dialogue_rows if message.role=="TUTOR" and isinstance(message.instructional_trace,dict) and message.instructional_trace.get("subsection_id")==progress.subsection_id]
+        if not tutor_rows: raise ValueError("Conversation Judge requires active-subsection Tutor instruction")
+        reviewed_tutor=tutor_rows[-1]
+        if dialogue_rows[-1].id != reviewed_tutor.id:
+            raise ValueError("Conversation Judge must review the Tutor response to the latest learner turn")
+        latest=next((message for message in reversed(dialogue_rows) if message.role=="LEARNER" and message.sequence_no>tutor_rows[0].sequence_no),None)
         active=db.scalar(select(LLMCall.id).where(LLMCall.attempt_id==attempt.id,LLMCall.purpose=="CONVERSATION_JUDGE",LLMCall.status.in_(("STARTED","SENDING","RECEIVED"))))
         if active: raise ValueError("a Conversation Judge operation is already active")
-        dialogue=[{"id":str(message.id),"role":message.role,"content":message.content_text,"instructional_trace":message.instructional_trace} for message in db.scalars(select(Message).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no)).all()]
+        dialogue=[{"id":str(message.id),"role":message.role,"content":message.content_text,"instructional_trace":message.instructional_trace} for message in dialogue_rows]
         context=resolve_v051_tutor_context(compiled,progress.subsection_id,attempt.pedagogy_id)
-        prompt=conversation_judge_prompt(compiled,progress,context,dialogue,str(latest.id),(progress.instructional_state or {}).get("verified_instructional_instance"))
-        call=self._reserve(db,session,attempt,None,"CONVERSATION_JUDGE",(CanonicalMessage(role="system",content=prompt),),ConversationJudgeOutput,{"v051":True,"attempt_id":str(attempt.id),"subsection_id":progress.subsection_id,"latest_learner_message_id":str(latest.id)})
+        prompt=conversation_judge_prompt(compiled,progress,context,dialogue,(progress.instructional_state or {}).get("verified_instructional_instance"))
+        call=self._reserve(db,session,attempt,None,"CONVERSATION_JUDGE",(CanonicalMessage(role="system",content=prompt),),ConversationJudgeOutput,{"v051":True,"attempt_id":str(attempt.id),"subsection_id":progress.subsection_id,"latest_learner_message_id":str(latest.id) if latest else None,"reviewed_tutor_message_id":str(reviewed_tutor.id),"auto_reviews_since_learner":auto_reviews_since_learner})
         if commit: db.commit()
         return call
     def reserve_assessment(self,db,session_id,assessment_id=None,commit=True):
@@ -276,6 +288,7 @@ class AIExecutionRuntime:
             call.status="INVALID_OUTPUT"; call.error_class="VALIDATION_FAILURE"; call.error_message=str(exc)[:4000]; call.completed_at=datetime.now(timezone.utc); db.commit(); return
         try:
             attempt=db.get(Attempt,call.attempt_id)
+            audit=(call.request_payload or {}).get("audit", {})
             # A previously failed local application is now being re-applied.
             # Clear the marker only inside the successful transaction.
             call.error_class=None; call.error_message=None
@@ -290,7 +303,9 @@ class AIExecutionRuntime:
                     # The Judge is a real controller: its stored guidance is
                     # compiled into the next Tutor request, rather than merely
                     # being displayed or left for an external caller to use.
-                    next_call = self.reserve_tutor(db, session.id, commit=False)
+                    reviewed = int(audit.get("auto_reviews_since_learner", 0))
+                    next_call = self.reserve_tutor(db, session.id, commit=False,
+                        auto_reviews_since_learner=0 if decision.action == "ADVANCE" else reviewed)
                 db.commit(); return next_call or decision
             if call.purpose in ("ASSESSMENT_WRITER","SEMANTIC_REVIEW"):
                 # A received assessment role is applied as its own durable result.
@@ -300,7 +315,6 @@ class AIExecutionRuntime:
                 if not db.scalar(select(Message.id).where(Message.llm_call_id==call.id)):
                     seq=(db.scalar(select(Message.sequence_no).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no.desc())) or 0)+1
                     if self.runtime._v051(self.runtime._compiled(db,session)):
-                        audit=(call.request_payload or {}).get("audit", {})
                         trace={"subsection_id":audit["subsection_id"],"pedagogy_id":audit["pedagogy_id"],"ready_for_judge":out.ready_for_judge}
                     else:
                         trace={"fidelity_note":out.fidelity_note}
@@ -310,9 +324,10 @@ class AIExecutionRuntime:
                     message=db.scalar(select(Message).where(Message.llm_call_id==call.id))
                 call.parsed_response=out.model_dump(mode="json"); call.status="SUCCEEDED"; call.completed_at=datetime.now(timezone.utc)
                 if self.runtime._v051(self.runtime._compiled(db,session)):
-                    # Readiness is advisory.  A real learner turn starts one
-                    # Judge review, preventing unattended Tutor→Judge loops.
-                    next_call = None
+                    reviewed=int(audit.get("auto_reviews_since_learner", 0))
+                    next_call = (self.reserve_conversation_judge(db, session.id, commit=False,
+                        auto_reviews_since_learner=reviewed + 1)
+                        if out.ready_for_judge and reviewed < _MAX_AUTONOMOUS_REVIEWS else None)
                 elif out.teaching_complete and session.phase=="INTERVENTION_ACTIVE":
                     # End instruction, but do not select a blueprint or call the
                     # assessment writer until the learner records mental effort.
@@ -412,7 +427,19 @@ class AIExecutionRuntime:
             previous.status="TECHNICAL_HOLD"; previous.error_class="RETRY_EXHAUSTED"; previous.error_message="Recovery retry limit exhausted; learner outcome remains unscored."; previous.completed_at=datetime.now(timezone.utc)
             db.commit(); raise ValueError("retry limit exhausted")
         if previous.purpose=="CONVERSATION_JUDGE":
-            call=self.reserve_conversation_judge(db,session_id,commit=False)
+            audit=(previous.request_payload or {}).get("audit", {})
+            # A stale Judge was superseded by a real learner turn.  Resume the
+            # conversation by answering that turn; it is no longer valid to
+            # reapply or re-run the old review against it.
+            dialogue=db.scalars(select(Message).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no)).all()
+            reviewed_tutor_id=audit.get("reviewed_tutor_message_id")
+            reviewed_index=next((index for index, message in enumerate(dialogue) if str(message.id)==reviewed_tutor_id), None)
+            has_newer_learner=reviewed_index is not None and any(message.role=="LEARNER" for message in dialogue[reviewed_index+1:])
+            if has_newer_learner:
+                call=self.reserve_tutor(db,session_id,commit=False,auto_reviews_since_learner=0)
+            else:
+                call=self.reserve_conversation_judge(db,session_id,commit=False,
+                    auto_reviews_since_learner=int(audit.get("auto_reviews_since_learner", 0)))
         elif session.phase=="INTERVENTION_ACTIVE":
             call=self.reserve_tutor(db,session_id,commit=False)
         elif session.phase=="ASSESSMENT_GENERATING":
