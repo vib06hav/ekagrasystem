@@ -16,9 +16,11 @@ def finalize_v04_evaluation(db, runtime, session_id, result: SubjectiveJudgment,
         return existing
     score = evaluate_f1_response(assessment.frozen_public_snapshot or {}, assessment.frozen_private_snapshot or {}, (response.structured_response or {}).get("mcq_answers", {}), response.response_text, result)
     passed = score.passed; now = datetime.now(timezone.utc)
-    evaluation = V04Evaluation(assessment_response_id=response.id, status="FINALIZED", mcq_results=score.mcq_evidence, mcq_score=score.mcq_points, subjective_score=score.subjective_points, judge_findings=score.judge_evidence, judge_llm_call_id=judge_call_id, evaluation_version="v04.native.2", passed=passed, finalized_at=now)
+    compiled = runtime._compiled(db, session)
+    version = "v051.native.1" if runtime._v051(compiled) else "v04.native.2"
+    evaluation = V04Evaluation(assessment_response_id=response.id, status="FINALIZED", mcq_results=score.mcq_evidence, mcq_score=score.mcq_points, subjective_score=score.subjective_points, judge_findings=score.judge_evidence, judge_llm_call_id=judge_call_id, evaluation_version=version, passed=passed, finalized_at=now)
     db.add(evaluation); assessment.status="CLOSED"; assessment.closed_at=now; attempt.passed=passed; attempt.status="PASSED" if passed else "FAILED"; attempt.completed_at=now
-    compiled = runtime._compiled(db, session); transition=compiled.knowledge_slices[attempt.transition_id]["transition"]; formal_state_advanced=passed and session.formal_state_id==transition["from_state_id"]
+    transition=compiled.knowledge_slices[attempt.transition_id]["transition"]; formal_state_advanced=passed and session.formal_state_id==transition["from_state_id"]
     attempt.formal_state_after_id=transition["target_state_id"] if formal_state_advanced else session.formal_state_id
     runtime._event(db, session, "V04_EVALUATED", {"passed": passed, "formal_state_advanced":formal_state_advanced, "mcq_score": score.mcq_points, "subjective_score": score.subjective_points}, attempt.id)
     if passed:

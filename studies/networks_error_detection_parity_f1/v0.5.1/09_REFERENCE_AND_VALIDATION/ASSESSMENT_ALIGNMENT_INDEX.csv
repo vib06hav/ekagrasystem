@@ -1,0 +1,65 @@
+blueprint_id,item_id,type,scenario_family,mapped_locked_subsections,scientific_purpose
+C1-A1,C1-A1-Q1,MCQ,sender_parity,C1.4,Select the sender check bit for a freshly generated even-parity payload
+C1-A1,C1-A1-Q2,MCQ,receiver_parity,C1.4,Interpret the receiver check on a clean even-parity full frame
+C1-A1,C1-A1-Q3,MCQ,single_flip_1d,C1.2;C1.4,Interpret a single stated transmitted-bit alteration under even parity
+C1-A1,C1-A1-S,SUBJECTIVE,receiver_parity,C1.3;C1.4,Explain how an even-parity check bit is chosen and what the receiver checks
+C1-A2,C1-A2-Q1,MCQ,sender_parity,C1.4,Choose an odd-parity appended check bit for a generated payload
+C1-A2,C1-A2-Q2,MCQ,receiver_parity,C1.4,Recognize odd-parity complete-frame validity after receiving a generated frame
+C1-A2,C1-A2-Q3,MCQ,single_flip_1d,C1.2;C1.4,State the receiver consequence of one altered bit in a valid odd-parity frame
+C1-A2,C1-A2-S,SUBJECTIVE,receiver_parity,C1.3;C1.4,Explain the sender/receiver use of an explicitly agreed odd-parity convention
+C1-A3,C1-A3-Q1,MCQ,sender_parity,C1.4,Identify which count the sender makes before transmission under a declared convention
+C1-A3,C1-A3-Q2,MCQ,receiver_parity,C1.4,Decide whether a given received complete frame passes its declared test
+C1-A3,C1-A3-Q3,MCQ,single_flip_1d,C1.4,Distinguish a failing check from unique localization or data correction
+C1-A3,C1-A3-S,SUBJECTIVE,receiver_parity,C1.4,Explain the meaning of receiver pass and fail for a generated full frame
+C1-A4,C1-A4-Q1,MCQ,sender_parity,C1.4,Distinguish frame-length parity from number-of-ones parity in sender construction
+C1-A4,C1-A4-Q2,MCQ,checkbit_1d,C1.4,Identify that the received check bit participates in the receiver recount
+C1-A4,C1-A4-Q3,MCQ,receiver_parity,C1.4,Correct a claim that a particular frame is valid because it has an even length
+C1-A4,C1-A4-S,SUBJECTIVE,sender_parity,C1.4,Respond to a peer who thinks even parity means an even-length message
+C2-A1,C2-A1-Q1,MCQ,multiflip_1d,C2.1,Distinguish odd-count from even-count alterations under single parity
+C2-A1,C2-A1-Q2,MCQ,full2d_single,C2.3,Identify the single-bit location implication of full row/column checks
+C2-A1,C2-A1-Q3,MCQ,single_flip_1d,C2.1,Contrast a 1D failure with the absence of unique position evidence
+C2-A1,C2-A1-S,SUBJECTIVE,full2d_single,C2.1;C2.3,List distinct verified features of single parity and full 2D parity on stated changes
+C2-A2,C2-A2-Q1,MCQ,multiflip_1d,C2.1,Classify two transmitted flips under one global parity check
+C2-A2,C2-A2-Q2,MCQ,full2d_pair,C2.4,Classify two data-bit flips in the same row but different columns in full 2D
+C2-A2,C2-A2-Q3,MCQ,full2d_pair,C2.4,Recognize that two-flip syndrome does not establish unconditional unique locations
+C2-A2,C2-A2-S,SUBJECTIVE,full2d_pair,C2.1;C2.4,State one 1D two-flip property and one distinct 2D same-row pair property
+C2-A3,C2-A3-Q1,MCQ,checkbit_1d,C2.1,Treat a flipped transmitted parity bit as a genuine single-parity error
+C2-A3,C2-A3-Q2,MCQ,full2d_checkbit,C2.3,"Distinguish row, column and corner check-bit errors under exactly one full 2D flip"
+C2-A3,C2-A3-Q3,MCQ,multiflip_1d,C2.1,Contrast odd and even total transmitted flips including a parity position
+C2-A3,C2-A3-S,SUBJECTIVE,full2d_checkbit,C2.1;C2.3,Describe at least one 1D and one full 2D consequence of altered check bits
+C2-A4,C2-A4-Q1,MCQ,multiflip_1d,C2.1,Identify that exactly two flips in an initially valid 1D parity frame leave its one check passing.
+C2-A4,C2-A4-Q2,MCQ,full2d_pair,C2.4,"Identify guaranteed detection for any two distinct full 2D transmitted-cell flips, including checking cells."
+C2-A4,C2-A4-Q3,MCQ,full2d_pair,C2.4,Distinguish detecting a two-cell alteration from uniquely locating or correcting both changed cells.
+C2-A4,C2-A4-S,SUBJECTIVE,full2d_pair,C2.1;C2.4,State distinct 1D and full 2D two-bit error properties and the detection/correction distinction.
+C3-A1,C3-A1-Q1,MCQ,multiflip_1d,C3.1,Explain why two flips preserve the global parity constraint
+C3-A1,C3-A1-Q2,MCQ,full2d_pair,C3.1,Infer which checks fail for two changes in the same row of full 2D parity
+C3-A1,C3-A1-Q3,MCQ,full2d_compare,C3.1,Explain the added value of columns over row-only testing on the same pair
+C3-A1,C3-A1-S,SUBJECTIVE,full2d_pair,C3.1,Explain causally why a same-row pair can pass row checks yet be detected by columns
+C3-A2,C3-A2-Q1,MCQ,single_flip_1d,C3.1,Explain how one transmitted-bit flip changes global parity
+C3-A2,C3-A2-Q2,MCQ,full2d_single,C3.1,Explain why one flipped 2D position yields an intersecting row/column syndrome
+C3-A2,C3-A2-Q3,MCQ,full2d_pair,C3.2,Explain why a two-flip syndrome does not justify unconditional unique localization
+C3-A2,C3-A2-S,SUBJECTIVE,full2d_pair,C3.1;C3.2,Explain how the full 2D syndrome supports single-flip location and why two flips differ
+C3-A3,C3-A3-Q1,MCQ,multiflip_1d,C3.1,Relate odd and even transmitted flip counts to preservation of one global parity constraint
+C3-A3,C3-A3-Q2,MCQ,full2d_pair,C3.1,Explain contrasting one-flip and two-flip syndromes in full 2D
+C3-A3,C3-A3-Q3,MCQ,full2d_rectangle,C3.2,Explain why four rectangle flips evade every row/column check
+C3-A3,C3-A3-S,SUBJECTIVE,full2d_rectangle,C3.1;C3.2,Relate three different generated 1D/2D alteration cases using their constraint behavior
+C3-A4,C3-A4-Q1,MCQ,full2d_three_mimic,C3.2,Explain why a one-error pattern and a verified three-error L-pattern can yield identical 2D failed checks.
+C3-A4,C3-A4-Q2,MCQ,full2d_rectangle,C3.2,Explain why a nondegenerate four-corner data rectangle can produce all passing row and column checks.
+C3-A4,C3-A4-Q3,MCQ,full2d_evidence,C3.2,Identify which conclusions about hidden errors are and are not warranted by a specified receiver syndrome.
+C3-A4,C3-A4-S,SUBJECTIVE,full2d_evidence,C3.2,"Integrate changed positions, containing checks, cancellation, observable evidence and ambiguous inference."
+C4-A1,C4-A1-Q1,MCQ,grouped_checks,C4.1,Identify the actual checked subsets in a newly generated split-group parity scheme
+C4-A1,C4-A1-Q2,MCQ,grouped_two_flip,C4.2,Predict whether a pair of data flips in one or two groups violates checks
+C4-A1,C4-A1-Q3,MCQ,grouped_evasion,C4.2,Recognize the general condition for a data-error pattern to evade all group checks
+C4-A1,C4-A1-S,SUBJECTIVE,grouped_evasion,C4.1;C4.2,Derive a general pass/fail condition for a newly specified split-check scheme and justify a nonempty case
+C4-A2,C4-A2-Q1,MCQ,grouped_checks,C4.1,Interpret which explicitly listed data positions and separate check bit participate in each unfamiliar group rule.
+C4-A2,C4-A2-Q2,MCQ,grouped_two_flip,C4.2;C4.3,Predict which unfamiliar checking-group rules fail for two specified flipped data positions.
+C4-A2,C4-A2-Q3,MCQ,grouped_two_flip,C4.2;C4.3,Evaluate a broad claim that every two-data-bit change would be detected by this unfamiliar checking arrangement using a defensible counterexample or justified group-by-group analysis.
+C4-A2,C4-A2-S,SUBJECTIVE,grouped_two_flip,C4.2;C4.3,Challenge a general two-data-bit detection claim for an unfamiliar small group scheme using a justified prediction and a valid counterexample or bounded argument.
+C4-A3,C4-A3-Q1,MCQ,grouped_uncovered,C4.1,Identify a truly unchecked data position in a new grouped-check coverage map
+C4-A3,C4-A3-Q2,MCQ,grouped_uncovered,C4.2,Predict check behavior for one data flip at an uncovered position
+C4-A3,C4-A3-Q3,MCQ,grouped_add_check,C4.3,Determine a targeted extra constraint that detects the uncovered-position single flip
+C4-A3,C4-A3-S,SUBJECTIVE,grouped_uncovered,C4.2;C4.3,Derive what alteration class is invisible due to missing coverage and how an added check changes it
+C4-A4,C4-A4-Q1,MCQ,grouped_checks,C4.1,Interpret an unfamiliar group-check constraint table
+C4-A4,C4-A4-Q2,MCQ,grouped_evasion,C4.2,Select or construct a nonzero alteration that preserves all stated group checks
+C4-A4,C4-A4-Q3,MCQ,grouped_add_check,C4.3,Analyze how an additional declared check affects the same previously invisible pattern
+C4-A4,C4-A4-S,SUBJECTIVE,grouped_evasion,C4.2;C4.3,State a general evasion condition for a new check-family and build a verified nonzero witness or explain feasibility

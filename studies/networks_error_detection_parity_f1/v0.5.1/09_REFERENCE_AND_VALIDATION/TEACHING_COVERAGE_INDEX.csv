@@ -1,0 +1,232 @@
+subsection_id,pedagogy_id,content_ref,core_move_ids,required_fact
+C1.1,P1,C1.1.O01,C1.1-P1-M01;C1.1-P1-M04,What information and data mean in the context of digital communication.
+C1.1,P1,C1.1.O02,C1.1-P1-M01;C1.1-P1-M04,The idea that information exchanged between digital systems is represented as bits.
+C1.1,P1,C1.1.O03,C1.1-P1-M01;C1.1-P1-M04,"What a bit is and why its possible values are `0` and `1`, at an introductory conceptual level."
+C1.1,P1,C1.1.O04,C1.1-P1-M02;C1.1-P1-M04,How individual bits form sequences representing digital data.
+C1.1,P1,C1.1.O05,C1.1-P1-M02;C1.1-P1-M03,"Basic recognition of bit positions and counting `1`s, only as needed for later parity work."
+C1.1,P2,C1.1.O01,C1.1-P2-M01;C1.1-P2-M05,What information and data mean in the context of digital communication.
+C1.1,P2,C1.1.O02,C1.1-P2-M01;C1.1-P2-M05,The idea that information exchanged between digital systems is represented as bits.
+C1.1,P2,C1.1.O03,C1.1-P2-M01;C1.1-P2-M05,"What a bit is and why its possible values are `0` and `1`, at an introductory conceptual level."
+C1.1,P2,C1.1.O04,C1.1-P2-M02;C1.1-P2-M05,How individual bits form sequences representing digital data.
+C1.1,P2,C1.1.O05,C1.1-P2-M03;C1.1-P2-M04,"Basic recognition of bit positions and counting `1`s, only as needed for later parity work."
+C1.1,P3,C1.1.O01,C1.1-P3-M01;C1.1-P3-M04,What information and data mean in the context of digital communication.
+C1.1,P3,C1.1.O02,C1.1-P3-M01;C1.1-P3-M04,The idea that information exchanged between digital systems is represented as bits.
+C1.1,P3,C1.1.O03,C1.1-P3-M01;C1.1-P3-M04,"What a bit is and why its possible values are `0` and `1`, at an introductory conceptual level."
+C1.1,P3,C1.1.O04,C1.1-P3-M01;C1.1-P3-M02;C1.1-P3-M04,How individual bits form sequences representing digital data.
+C1.1,P3,C1.1.O05,C1.1-P3-M02;C1.1-P3-M03,"Basic recognition of bit positions and counting `1`s, only as needed for later parity work."
+C1.2,P1,C1.2.O01,C1.2-P1-M01,"Communication between systems: sender, receiver, and transmission channel/medium."
+C1.2,P1,C1.2.O02,C1.2-P1-M01,What it means to send and receive a sequence of bits.
+C1.2,P1,C1.2.O03,C1.2-P1-M02,What transmission corruption means: a mismatch between the bit sequence sent and the bit sequence received.
+C1.2,P1,C1.2.O04,C1.2-P1-M02,"The bit-flip model: a sent `0` arriving as `1`, or a sent `1` arriving as `0`."
+C1.2,P1,C1.2.O05,C1.2-P1-M02,"Where the relevant error occurs: **during transmission**, as represented by a changed received bit value."
+C1.2,P1,C1.2.O06,C1.2-P1-M03,Why the receiver ordinarily lacks a direct copy of the original data and cannot simply inspect the received sequence to know whether it was altered.
+C1.2,P1,C1.2.O07,C1.2-P1-M04,The consequent need for a way to detect possible corruption.
+C1.2,P2,C1.2.O01,C1.2-P2-M01,"Communication between systems: sender, receiver, and transmission channel/medium."
+C1.2,P2,C1.2.O02,C1.2-P2-M01,What it means to send and receive a sequence of bits.
+C1.2,P2,C1.2.O03,C1.2-P2-M02;C1.2-P2-M05,What transmission corruption means: a mismatch between the bit sequence sent and the bit sequence received.
+C1.2,P2,C1.2.O04,C1.2-P2-M02,"The bit-flip model: a sent `0` arriving as `1`, or a sent `1` arriving as `0`."
+C1.2,P2,C1.2.O05,C1.2-P2-M02;C1.2-P2-M05,"Where the relevant error occurs: **during transmission**, as represented by a changed received bit value."
+C1.2,P2,C1.2.O06,C1.2-P2-M03;C1.2-P2-M04,Why the receiver ordinarily lacks a direct copy of the original data and cannot simply inspect the received sequence to know whether it was altered.
+C1.2,P2,C1.2.O07,C1.2-P2-M05,The consequent need for a way to detect possible corruption.
+C1.2,P3,C1.2.O01,C1.2-P3-M02,"Communication between systems: sender, receiver, and transmission channel/medium."
+C1.2,P3,C1.2.O02,C1.2-P3-M01;C1.2-P3-M02,What it means to send and receive a sequence of bits.
+C1.2,P3,C1.2.O03,C1.2-P3-M01;C1.2-P3-M02,What transmission corruption means: a mismatch between the bit sequence sent and the bit sequence received.
+C1.2,P3,C1.2.O04,C1.2-P3-M01,"The bit-flip model: a sent `0` arriving as `1`, or a sent `1` arriving as `0`."
+C1.2,P3,C1.2.O05,C1.2-P3-M01,"Where the relevant error occurs: **during transmission**, as represented by a changed received bit value."
+C1.2,P3,C1.2.O06,C1.2-P3-M03,Why the receiver ordinarily lacks a direct copy of the original data and cannot simply inspect the received sequence to know whether it was altered.
+C1.2,P3,C1.2.O07,C1.2-P3-M04,The consequent need for a way to detect possible corruption.
+C1.3,P1,C1.3.O01,C1.3-P1-M01,The motivation for transmitting extra information that helps the receiver check for corruption.
+C1.3,P1,C1.3.O02,C1.3-P1-M02;C1.3-P1-M03,**Redundancy:** additional transmitted information used for checking rather than being part of the original payload.
+C1.3,P1,C1.3.O03,C1.3-P1-M02;C1.3-P1-M03,Introducing a **parity bit** as one extra checking bit whose value depends on the original data.
+C1.3,P1,C1.3.O04,C1.3-P1-M03;C1.3-P1-M04,"The principle that the parity bit is determined by an **agreed rule**, not selected arbitrarily."
+C1.3,P1,C1.3.O05,C1.3-P1-M04,Why sender and receiver must use the same checking convention.
+C1.3,P2,C1.3.O01,C1.3-P2-M01,The motivation for transmitting extra information that helps the receiver check for corruption.
+C1.3,P2,C1.3.O02,C1.3-P2-M02,**Redundancy:** additional transmitted information used for checking rather than being part of the original payload.
+C1.3,P2,C1.3.O03,C1.3-P2-M03,Introducing a **parity bit** as one extra checking bit whose value depends on the original data.
+C1.3,P2,C1.3.O04,C1.3-P2-M04;C1.3-P2-M05,"The principle that the parity bit is determined by an **agreed rule**, not selected arbitrarily."
+C1.3,P2,C1.3.O05,C1.3-P2-M05,Why sender and receiver must use the same checking convention.
+C1.3,P3,C1.3.O01,C1.3-P3-M01;C1.3-P3-M04,The motivation for transmitting extra information that helps the receiver check for corruption.
+C1.3,P3,C1.3.O02,C1.3-P3-M01;C1.3-P3-M03,**Redundancy:** additional transmitted information used for checking rather than being part of the original payload.
+C1.3,P3,C1.3.O03,C1.3-P3-M01;C1.3-P3-M02;C1.3-P3-M04,Introducing a **parity bit** as one extra checking bit whose value depends on the original data.
+C1.3,P3,C1.3.O04,C1.3-P3-M02;C1.3-P3-M03;C1.3-P3-M04,"The principle that the parity bit is determined by an **agreed rule**, not selected arbitrarily."
+C1.3,P3,C1.3.O05,C1.3-P3-M03;C1.3-P3-M04,Why sender and receiver must use the same checking convention.
+C1.4,P1,C1.4.O01,C1.4-P1-M01;C1.4-P1-M02,"**Even parity:** choose the parity bit so that the **complete transmitted bit sequence**, including that bit, contains an even number of `1`s."
+C1.4,P1,C1.4.O02,C1.4-P1-M01;C1.4-P1-M02,**Odd parity:** choose the parity bit so that the complete transmitted bit sequence contains an odd number of `1`s.
+C1.4,P1,C1.4.O03,C1.4-P1-M02,Counting the `1`s in the original data and calculating/appending the parity bit under **both** conventions.
+C1.4,P1,C1.4.O04,C1.4-P1-M03,"Receiver-side checking: count the `1`s in the **complete received sequence, including the parity bit**, and test the agreed convention."
+C1.4,P1,C1.4.O05,C1.4-P1-M04,"Interpreting the result: a **failed** check detects a violation of the convention; a **passed** check means that this convention was satisfied, not that transmission was certainly error-free."
+C1.4,P1,C1.4.O06,C1.4-P1-M04,"Basic distinction among **detecting**, **locating**, and **correcting** an error. The detailed limitations are developed in C2."
+C1.4,P2,C1.4.O01,C1.4-P2-M01;C1.4-P2-M02,"**Even parity:** choose the parity bit so that the **complete transmitted bit sequence**, including that bit, contains an even number of `1`s."
+C1.4,P2,C1.4.O02,C1.4-P2-M01;C1.4-P2-M03,**Odd parity:** choose the parity bit so that the complete transmitted bit sequence contains an odd number of `1`s.
+C1.4,P2,C1.4.O03,C1.4-P2-M02;C1.4-P2-M03,Counting the `1`s in the original data and calculating/appending the parity bit under **both** conventions.
+C1.4,P2,C1.4.O04,C1.4-P2-M04,"Receiver-side checking: count the `1`s in the **complete received sequence, including the parity bit**, and test the agreed convention."
+C1.4,P2,C1.4.O05,C1.4-P2-M05,"Interpreting the result: a **failed** check detects a violation of the convention; a **passed** check means that this convention was satisfied, not that transmission was certainly error-free."
+C1.4,P2,C1.4.O06,C1.4-P2-M05,"Basic distinction among **detecting**, **locating**, and **correcting** an error. The detailed limitations are developed in C2."
+C1.4,P3,C1.4.O01,C1.4-P3-M01;C1.4-P3-M02,"**Even parity:** choose the parity bit so that the **complete transmitted bit sequence**, including that bit, contains an even number of `1`s."
+C1.4,P3,C1.4.O02,C1.4-P3-M01;C1.4-P3-M02,**Odd parity:** choose the parity bit so that the complete transmitted bit sequence contains an odd number of `1`s.
+C1.4,P3,C1.4.O03,C1.4-P3-M02,Counting the `1`s in the original data and calculating/appending the parity bit under **both** conventions.
+C1.4,P3,C1.4.O04,C1.4-P3-M03,"Receiver-side checking: count the `1`s in the **complete received sequence, including the parity bit**, and test the agreed convention."
+C1.4,P3,C1.4.O05,C1.4-P3-M03;C1.4-P3-M04,"Interpreting the result: a **failed** check detects a violation of the convention; a **passed** check means that this convention was satisfied, not that transmission was certainly error-free."
+C1.4,P3,C1.4.O06,C1.4-P3-M04,"Basic distinction among **detecting**, **locating**, and **correcting** an error. The detailed limitations are developed in C2."
+C2.1,P1,C2.1.O01,C2.1-P1-M01,Briefly reconnect with the parity construction and verification learned in C1; do not reteach it as a new mechanism.
+C2.1,P1,C2.1.O02,C2.1-P1-M02,What happens when one or several transmitted bits flip.
+C2.1,P1,C2.1.O03,C2.1-P1-M02,"The rule that **odd numbers of flipped bits are detected**, whereas **even numbers of flipped bits leave a single parity check satisfied**, assuming the transmitted sequence initially met its rule. This applies to either even- or odd-parity convention."
+C2.1,P1,C2.1.O04,C2.1-P1-M03,"Why a single overall parity check cannot, on its own, identify **which bit** changed, even if exactly one bit flipped."
+C2.1,P1,C2.1.O05,C2.1-P1-M04,"Detection versus localization versus correction, in relation to the limitations above."
+C2.1,P1,C2.1.O06,C2.1-P1-M04,"The **two distinct limitations** motivating a richer checking arrangement: inability to locate an error, and failure to detect particular multi-bit error patterns."
+C2.1,P2,C2.1.O01,C2.1-P2-M01,Briefly reconnect with the parity construction and verification learned in C1; do not reteach it as a new mechanism.
+C2.1,P2,C2.1.O02,C2.1-P2-M01;C2.1-P2-M02,What happens when one or several transmitted bits flip.
+C2.1,P2,C2.1.O03,C2.1-P2-M03,"The rule that **odd numbers of flipped bits are detected**, whereas **even numbers of flipped bits leave a single parity check satisfied**, assuming the transmitted sequence initially met its rule. This applies to either even- or odd-parity convention."
+C2.1,P2,C2.1.O04,C2.1-P2-M04,"Why a single overall parity check cannot, on its own, identify **which bit** changed, even if exactly one bit flipped."
+C2.1,P2,C2.1.O05,C2.1-P2-M05,"Detection versus localization versus correction, in relation to the limitations above."
+C2.1,P2,C2.1.O06,C2.1-P2-M05,"The **two distinct limitations** motivating a richer checking arrangement: inability to locate an error, and failure to detect particular multi-bit error patterns."
+C2.1,P3,C2.1.O01,C2.1-P3-M01,Briefly reconnect with the parity construction and verification learned in C1; do not reteach it as a new mechanism.
+C2.1,P3,C2.1.O02,C2.1-P3-M01,What happens when one or several transmitted bits flip.
+C2.1,P3,C2.1.O03,C2.1-P3-M02;C2.1-P3-M04,"The rule that **odd numbers of flipped bits are detected**, whereas **even numbers of flipped bits leave a single parity check satisfied**, assuming the transmitted sequence initially met its rule. This applies to either even- or odd-parity convention."
+C2.1,P3,C2.1.O04,C2.1-P3-M03,"Why a single overall parity check cannot, on its own, identify **which bit** changed, even if exactly one bit flipped."
+C2.1,P3,C2.1.O05,C2.1-P3-M04,"Detection versus localization versus correction, in relation to the limitations above."
+C2.1,P3,C2.1.O06,C2.1-P3-M04,"The **two distinct limitations** motivating a richer checking arrangement: inability to locate an error, and failure to detect particular multi-bit error patterns."
+C2.2,P1,C2.2.O01,C2.2-P1-M01,Motivation for checking information organized into multiple constraints instead of one overall parity check.
+C2.2,P1,C2.2.O02,C2.2-P1-M01;C2.2-P1-M02,Arranging original data bits in **rows and columns**.
+C2.2,P1,C2.2.O03,C2.2-P1-M02,Calculating and adding a parity bit for each data row and each data column.
+C2.2,P1,C2.2.O04,C2.2-P1-M03,The **corner parity bit** and the complete transmitted rectangular grid.
+C2.2,P1,C2.2.O05,C2.2-P1-M03;C2.2-P1-M04,Using an agreed parity convention to make each **complete row and complete column** satisfy its parity rule.
+C2.2,P1,C2.2.O06,C2.2-P1-M04,"How the receiver verifies all row and column checks of the **full transmitted grid**, including the check-bit cells."
+C2.2,P2,C2.2.O01,C2.2-P2-M01,Motivation for checking information organized into multiple constraints instead of one overall parity check.
+C2.2,P2,C2.2.O02,C2.2-P2-M01;C2.2-P2-M02,Arranging original data bits in **rows and columns**.
+C2.2,P2,C2.2.O03,C2.2-P2-M02;C2.2-P2-M03,Calculating and adding a parity bit for each data row and each data column.
+C2.2,P2,C2.2.O04,C2.2-P2-M04,The **corner parity bit** and the complete transmitted rectangular grid.
+C2.2,P2,C2.2.O05,C2.2-P2-M04;C2.2-P2-M05,Using an agreed parity convention to make each **complete row and complete column** satisfy its parity rule.
+C2.2,P2,C2.2.O06,C2.2-P2-M05,"How the receiver verifies all row and column checks of the **full transmitted grid**, including the check-bit cells."
+C2.2,P3,C2.2.O01,C2.2-P3-M01,Motivation for checking information organized into multiple constraints instead of one overall parity check.
+C2.2,P3,C2.2.O02,C2.2-P3-M02,Arranging original data bits in **rows and columns**.
+C2.2,P3,C2.2.O03,C2.2-P3-M02,Calculating and adding a parity bit for each data row and each data column.
+C2.2,P3,C2.2.O04,C2.2-P3-M03,The **corner parity bit** and the complete transmitted rectangular grid.
+C2.2,P3,C2.2.O05,C2.2-P3-M03;C2.2-P3-M04,Using an agreed parity convention to make each **complete row and complete column** satisfy its parity rule.
+C2.2,P3,C2.2.O06,C2.2-P3-M04,"How the receiver verifies all row and column checks of the **full transmitted grid**, including the check-bit cells."
+C2.3,P1,C2.3.O01,C2.3-P1-M01,A transmission in which **exactly one transmitted bit** flips.
+C2.3,P1,C2.3.O02,C2.3-P1-M02,The resulting failed row and column checks.
+C2.3,P1,C2.3.O03,C2.3-P1-M03,"Identifying the affected position at their intersection, including the possibility that the position is a check-bit cell."
+C2.3,P1,C2.3.O04,C2.3-P1-M03,Correcting that one changed bit by reversing its received value.
+C2.3,P1,C2.3.O05,C2.3-P1-M01;C2.3-P1-M04,The **exactly-one-error assumption** required for reliable localization and correction.
+C2.3,P1,C2.3.O06,C2.3-P1-M04,How this capability addresses the localization limitation of single parity.
+C2.3,P2,C2.3.O01,C2.3-P2-M01,A transmission in which **exactly one transmitted bit** flips.
+C2.3,P2,C2.3.O02,C2.3-P2-M02;C2.3-P2-M03,The resulting failed row and column checks.
+C2.3,P2,C2.3.O03,C2.3-P2-M03,"Identifying the affected position at their intersection, including the possibility that the position is a check-bit cell."
+C2.3,P2,C2.3.O04,C2.3-P2-M04,Correcting that one changed bit by reversing its received value.
+C2.3,P2,C2.3.O05,C2.3-P2-M01;C2.3-P2-M05,The **exactly-one-error assumption** required for reliable localization and correction.
+C2.3,P2,C2.3.O06,C2.3-P2-M05,How this capability addresses the localization limitation of single parity.
+C2.3,P3,C2.3.O01,C2.3-P3-M01;C2.3-P3-M02,A transmission in which **exactly one transmitted bit** flips.
+C2.3,P3,C2.3.O02,C2.3-P3-M02;C2.3-P3-M03,The resulting failed row and column checks.
+C2.3,P3,C2.3.O03,C2.3-P3-M02;C2.3-P3-M03,"Identifying the affected position at their intersection, including the possibility that the position is a check-bit cell."
+C2.3,P3,C2.3.O04,C2.3-P3-M04,Correcting that one changed bit by reversing its received value.
+C2.3,P3,C2.3.O05,C2.3-P3-M04,The **exactly-one-error assumption** required for reliable localization and correction.
+C2.3,P3,C2.3.O06,C2.3-P3-M04,How this capability addresses the localization limitation of single parity.
+C2.4,P1,C2.4.O01,C2.4-P1-M01,A transmission in which **two distinct transmitted bits** flip.
+C2.4,P1,C2.4.O02,C2.4-P1-M02,The fact that **full two-dimensional parity detects every two-bit error pattern**.
+C2.4,P1,C2.4.O03,C2.4-P1-M03,"Comparison with single parity, which misses every two-bit flip pattern."
+C2.4,P1,C2.4.O04,C2.4-P1-M04,The distinction between **detecting** the two-bit corruption and uniquely **locating/correcting both** changed bits.
+C2.4,P1,C2.4.O05,C2.4-P1-M04,The fact that full 2D parity does **not generally** correct arbitrary two-bit errors uniquely.
+C2.4,P1,C2.4.O06,C2.4-P1-M04,The contrast between single-error conditional correction and two-error detection.
+C2.4,P2,C2.4.O01,C2.4-P2-M01,A transmission in which **two distinct transmitted bits** flip.
+C2.4,P2,C2.4.O02,C2.4-P2-M02;C2.4-P2-M03;C2.4-P2-M05,The fact that **full two-dimensional parity detects every two-bit error pattern**.
+C2.4,P2,C2.4.O03,C2.4-P2-M05,"Comparison with single parity, which misses every two-bit flip pattern."
+C2.4,P2,C2.4.O04,C2.4-P2-M04;C2.4-P2-M05,The distinction between **detecting** the two-bit corruption and uniquely **locating/correcting both** changed bits.
+C2.4,P2,C2.4.O05,C2.4-P2-M04;C2.4-P2-M05,The fact that full 2D parity does **not generally** correct arbitrary two-bit errors uniquely.
+C2.4,P2,C2.4.O06,C2.4-P2-M05,The contrast between single-error conditional correction and two-error detection.
+C2.4,P3,C2.4.O01,C2.4-P3-M01,A transmission in which **two distinct transmitted bits** flip.
+C2.4,P3,C2.4.O02,C2.4-P3-M02;C2.4-P3-M04,The fact that **full two-dimensional parity detects every two-bit error pattern**.
+C2.4,P3,C2.4.O03,C2.4-P3-M01,"Comparison with single parity, which misses every two-bit flip pattern."
+C2.4,P3,C2.4.O04,C2.4-P3-M03,The distinction between **detecting** the two-bit corruption and uniquely **locating/correcting both** changed bits.
+C2.4,P3,C2.4.O05,C2.4-P3-M03;C2.4-P3-M04,The fact that full 2D parity does **not generally** correct arbitrary two-bit errors uniquely.
+C2.4,P3,C2.4.O06,C2.4-P3-M04,The contrast between single-error conditional correction and two-error detection.
+C3.1,P1,C3.1.O01,C3.1-P1-M02,How changing one transmitted bit affects **every check that includes that bit**.
+C3.1,P1,C3.1.O02,C3.1-P1-M02,How multiple flipped bits combine within a given check.
+C3.1,P1,C3.1.O03,C3.1-P1-M02,"Why an **odd** number of flips within a checking group reverses whether that check passes, while an **even** number leaves its result unchanged, relative to an initially valid transmitted group."
+C3.1,P1,C3.1.O04,C3.1-P1-M03,How the **positions and combinations** of changes determine which familiar row and column checks pass or fail.
+C3.1,P1,C3.1.O05,C3.1-P1-M01;C3.1-P1-M04,Connecting these causal relationships to the single- and two-dimensional parity properties already learned in C2.
+C3.1,P1,C3.1.O06,C3.1-P1-M03;C3.1-P1-M04,"Reasoning **from an error pattern to checking results**, explaining *why* the observations arise rather than memorizing outcomes."
+C3.1,P2,C3.1.O01,C3.1-P2-M02,How changing one transmitted bit affects **every check that includes that bit**.
+C3.1,P2,C3.1.O02,C3.1-P2-M03,How multiple flipped bits combine within a given check.
+C3.1,P2,C3.1.O03,C3.1-P2-M03;C3.1-P2-M05,"Why an **odd** number of flips within a checking group reverses whether that check passes, while an **even** number leaves its result unchanged, relative to an initially valid transmitted group."
+C3.1,P2,C3.1.O04,C3.1-P2-M04,How the **positions and combinations** of changes determine which familiar row and column checks pass or fail.
+C3.1,P2,C3.1.O05,C3.1-P2-M01;C3.1-P2-M05,Connecting these causal relationships to the single- and two-dimensional parity properties already learned in C2.
+C3.1,P2,C3.1.O06,C3.1-P2-M04;C3.1-P2-M05,"Reasoning **from an error pattern to checking results**, explaining *why* the observations arise rather than memorizing outcomes."
+C3.1,P3,C3.1.O01,C3.1-P3-M01;C3.1-P3-M02,How changing one transmitted bit affects **every check that includes that bit**.
+C3.1,P3,C3.1.O02,C3.1-P3-M01;C3.1-P3-M02,How multiple flipped bits combine within a given check.
+C3.1,P3,C3.1.O03,C3.1-P3-M01;C3.1-P3-M02,"Why an **odd** number of flips within a checking group reverses whether that check passes, while an **even** number leaves its result unchanged, relative to an initially valid transmitted group."
+C3.1,P3,C3.1.O04,C3.1-P3-M03,How the **positions and combinations** of changes determine which familiar row and column checks pass or fail.
+C3.1,P3,C3.1.O05,C3.1-P3-M03;C3.1-P3-M04,Connecting these causal relationships to the single- and two-dimensional parity properties already learned in C2.
+C3.1,P3,C3.1.O06,C3.1-P3-M04,"Reasoning **from an error pattern to checking results**, explaining *why* the observations arise rather than memorizing outcomes."
+C3.2,P1,C3.2.O01,C3.2-P1-M01,"Reasoning **from observed checking results to possible error patterns**, without assuming that the original data are directly available to the receiver."
+C3.2,P1,C3.2.O02,C3.2-P1-M02,Understanding that **different actual error patterns can produce identical checking results**.
+C3.2,P1,C3.2.O03,C3.2-P1-M02,"Explaining how a multi-bit pattern can imitate the checking result of one changed bit, so correction based on a presumed one-error case may be unjustified."
+C3.2,P1,C3.2.O04,C3.2-P1-M03,"Explaining how some multiple-error arrangements remain undetected, including the familiar **four-corner rectangle** in a row/column parity grid."
+C3.2,P1,C3.2.O05,C3.2-P1-M04,Understanding how the number-of-errors assumption affects justified localization/correction claims.
+C3.2,P1,C3.2.O06,C3.2-P1-M04,"Integrating changed positions, affected rules, pass/fail patterns, ambiguity, and limits of receiver inference into coherent explanations."
+C3.2,P2,C3.2.O01,C3.2-P2-M01;C3.2-P2-M02,"Reasoning **from observed checking results to possible error patterns**, without assuming that the original data are directly available to the receiver."
+C3.2,P2,C3.2.O02,C3.2-P2-M03,Understanding that **different actual error patterns can produce identical checking results**.
+C3.2,P2,C3.2.O03,C3.2-P2-M03,"Explaining how a multi-bit pattern can imitate the checking result of one changed bit, so correction based on a presumed one-error case may be unjustified."
+C3.2,P2,C3.2.O04,C3.2-P2-M04,"Explaining how some multiple-error arrangements remain undetected, including the familiar **four-corner rectangle** in a row/column parity grid."
+C3.2,P2,C3.2.O05,C3.2-P2-M02;C3.2-P2-M05,Understanding how the number-of-errors assumption affects justified localization/correction claims.
+C3.2,P2,C3.2.O06,C3.2-P2-M05,"Integrating changed positions, affected rules, pass/fail patterns, ambiguity, and limits of receiver inference into coherent explanations."
+C3.2,P3,C3.2.O01,C3.2-P3-M01;C3.2-P3-M03,"Reasoning **from observed checking results to possible error patterns**, without assuming that the original data are directly available to the receiver."
+C3.2,P3,C3.2.O02,C3.2-P3-M01;C3.2-P3-M02;C3.2-P3-M03,Understanding that **different actual error patterns can produce identical checking results**.
+C3.2,P3,C3.2.O03,C3.2-P3-M01,"Explaining how a multi-bit pattern can imitate the checking result of one changed bit, so correction based on a presumed one-error case may be unjustified."
+C3.2,P3,C3.2.O04,C3.2-P3-M02,"Explaining how some multiple-error arrangements remain undetected, including the familiar **four-corner rectangle** in a row/column parity grid."
+C3.2,P3,C3.2.O05,C3.2-P3-M04,Understanding how the number-of-errors assumption affects justified localization/correction claims.
+C3.2,P3,C3.2.O06,C3.2-P3-M04,"Integrating changed positions, affected rules, pass/fail patterns, ambiguity, and limits of receiver inference into coherent explanations."
+C4.1,P1,C4.1.O01,C4.1-P1-M01,Revisiting single parity and 2D parity as **specific instances** of systems imposing parity rules over selected bits.
+C4.1,P1,C4.1.O02,C4.1-P1-M02,"Recognizing that a parity check does **not inherently require** a complete message, a row, or a column: it can apply to an **explicitly chosen group of bits**."
+C4.1,P1,C4.1.O03,C4.1-P1-M03,"Understanding how multiple checking groups may **overlap**, so one bit may participate in several rules."
+C4.1,P1,C4.1.O04,C4.1-P1-M02;C4.1-P1-M04,Connecting a group's members and its associated check information with how the receiver verifies its rule.
+C4.1,P1,C4.1.O05,C4.1-P1-M01;C4.1-P1-M04,Relating this generalized representation back to the familiar rule established in C1–C3.
+C4.1,P2,C4.1.O01,C4.1-P2-M01,Revisiting single parity and 2D parity as **specific instances** of systems imposing parity rules over selected bits.
+C4.1,P2,C4.1.O02,C4.1-P2-M02,"Recognizing that a parity check does **not inherently require** a complete message, a row, or a column: it can apply to an **explicitly chosen group of bits**."
+C4.1,P2,C4.1.O03,C4.1-P2-M03,"Understanding how multiple checking groups may **overlap**, so one bit may participate in several rules."
+C4.1,P2,C4.1.O04,C4.1-P2-M04,Connecting a group's members and its associated check information with how the receiver verifies its rule.
+C4.1,P2,C4.1.O05,C4.1-P2-M01;C4.1-P2-M05,Relating this generalized representation back to the familiar rule established in C1–C3.
+C4.1,P3,C4.1.O01,C4.1-P3-M01,Revisiting single parity and 2D parity as **specific instances** of systems imposing parity rules over selected bits.
+C4.1,P3,C4.1.O02,C4.1-P3-M02,"Recognizing that a parity check does **not inherently require** a complete message, a row, or a column: it can apply to an **explicitly chosen group of bits**."
+C4.1,P3,C4.1.O03,C4.1-P3-M02,"Understanding how multiple checking groups may **overlap**, so one bit may participate in several rules."
+C4.1,P3,C4.1.O04,C4.1-P3-M03;C4.1-P3-M04,Connecting a group's members and its associated check information with how the receiver verifies its rule.
+C4.1,P3,C4.1.O05,C4.1-P3-M01;C4.1-P3-M04,Relating this generalized representation back to the familiar rule established in C1–C3.
+C4.2,P1,C4.2.O01,C4.2-P1-M01,Extending the familiar bit-flip/check-outcome relationships to **multiple overlapping groups**.
+C4.2,P1,C4.2.O02,C4.2-P1-M02;C4.2-P1-M03,Reasoning about the effects of an error pattern on all relevant checking rules.
+C4.2,P1,C4.2.O03,C4.2-P1-M02;C4.2-P1-M04,Developing and justifying the general condition for **detection**: at least one checking rule is violated by the received message.
+C4.2,P1,C4.2.O04,C4.2-P1-M03;C4.2-P1-M04,Developing and justifying the condition for **non-detection**: all checking rules remain satisfied despite corruption.
+C4.2,P1,C4.2.O05,C4.2-P1-M03;C4.2-P1-M04,"In an initially valid parity system, establishing the equivalent flip-count condition: **every checking group contains an even number of flipped transmitted bits** for the corruption to escape every check."
+C4.2,P1,C4.2.O06,C4.2-P1-M04,Supporting or challenging general claims using reasoned examples and counterexamples.
+C4.2,P2,C4.2.O01,C4.2-P2-M01;C4.2-P2-M02,Extending the familiar bit-flip/check-outcome relationships to **multiple overlapping groups**.
+C4.2,P2,C4.2.O02,C4.2-P2-M02;C4.2-P2-M03;C4.2-P2-M04,Reasoning about the effects of an error pattern on all relevant checking rules.
+C4.2,P2,C4.2.O03,C4.2-P2-M03;C4.2-P2-M05,Developing and justifying the general condition for **detection**: at least one checking rule is violated by the received message.
+C4.2,P2,C4.2.O04,C4.2-P2-M04;C4.2-P2-M05,Developing and justifying the condition for **non-detection**: all checking rules remain satisfied despite corruption.
+C4.2,P2,C4.2.O05,C4.2-P2-M04;C4.2-P2-M05,"In an initially valid parity system, establishing the equivalent flip-count condition: **every checking group contains an even number of flipped transmitted bits** for the corruption to escape every check."
+C4.2,P2,C4.2.O06,C4.2-P2-M05,Supporting or challenging general claims using reasoned examples and counterexamples.
+C4.2,P3,C4.2.O01,C4.2-P3-M01,Extending the familiar bit-flip/check-outcome relationships to **multiple overlapping groups**.
+C4.2,P3,C4.2.O02,C4.2-P3-M02,Reasoning about the effects of an error pattern on all relevant checking rules.
+C4.2,P3,C4.2.O03,C4.2-P3-M02;C4.2-P3-M04,Developing and justifying the general condition for **detection**: at least one checking rule is violated by the received message.
+C4.2,P3,C4.2.O04,C4.2-P3-M02;C4.2-P3-M04,Developing and justifying the condition for **non-detection**: all checking rules remain satisfied despite corruption.
+C4.2,P3,C4.2.O05,C4.2-P3-M02;C4.2-P3-M04,"In an initially valid parity system, establishing the equivalent flip-count condition: **every checking group contains an even number of flipped transmitted bits** for the corruption to escape every check."
+C4.2,P3,C4.2.O06,C4.2-P3-M03;C4.2-P3-M04,Supporting or challenging general claims using reasoned examples and counterexamples.
+C4.3,P1,C4.3.O01,C4.3-P1-M01,"Applying generalized checking principles to **small, unfamiliar and explicitly defined** overlapping groups."
+C4.3,P1,C4.3.O02,C4.3-P1-M02,Predicting and justifying which specified error patterns are detected or undetected.
+C4.3,P1,C4.3.O03,C4.3-P1-M02,Identifying valid **counterexamples** to overbroad claims about a checking arrangement.
+C4.3,P1,C4.3.O04,C4.3-P1-M03,Evaluating whether one additional checking rule would detect a **specified previously undetected error pattern**.
+C4.3,P1,C4.3.O05,C4.3-P1-M03,"Recognizing that an extra rule may be redundant for the error patterns of interest, and therefore may not add detection capability."
+C4.3,P1,C4.3.O06,C4.3-P1-M04,Recognizing the **redundancy overhead** of additional independent checking information and the trade-off with detection capability.
+C4.3,P1,C4.3.O07,C4.3-P1-M04,Formulating and defending modest hypotheses or predictions about the consequences of changing a checking arrangement.
+C4.3,P2,C4.3.O01,C4.3-P2-M01,"Applying generalized checking principles to **small, unfamiliar and explicitly defined** overlapping groups."
+C4.3,P2,C4.3.O02,C4.3-P2-M02,Predicting and justifying which specified error patterns are detected or undetected.
+C4.3,P2,C4.3.O03,C4.3-P2-M03,Identifying valid **counterexamples** to overbroad claims about a checking arrangement.
+C4.3,P2,C4.3.O04,C4.3-P2-M04,Evaluating whether one additional checking rule would detect a **specified previously undetected error pattern**.
+C4.3,P2,C4.3.O05,C4.3-P2-M04,"Recognizing that an extra rule may be redundant for the error patterns of interest, and therefore may not add detection capability."
+C4.3,P2,C4.3.O06,C4.3-P2-M05,Recognizing the **redundancy overhead** of additional independent checking information and the trade-off with detection capability.
+C4.3,P2,C4.3.O07,C4.3-P2-M05,Formulating and defending modest hypotheses or predictions about the consequences of changing a checking arrangement.
+C4.3,P3,C4.3.O01,C4.3-P3-M01,"Applying generalized checking principles to **small, unfamiliar and explicitly defined** overlapping groups."
+C4.3,P3,C4.3.O02,C4.3-P3-M01,Predicting and justifying which specified error patterns are detected or undetected.
+C4.3,P3,C4.3.O03,C4.3-P3-M01,Identifying valid **counterexamples** to overbroad claims about a checking arrangement.
+C4.3,P3,C4.3.O04,C4.3-P3-M02;C4.3-P3-M03,Evaluating whether one additional checking rule would detect a **specified previously undetected error pattern**.
+C4.3,P3,C4.3.O05,C4.3-P3-M03,"Recognizing that an extra rule may be redundant for the error patterns of interest, and therefore may not add detection capability."
+C4.3,P3,C4.3.O06,C4.3-P3-M04,Recognizing the **redundancy overhead** of additional independent checking information and the trade-off with detection capability.
+C4.3,P3,C4.3.O07,C4.3-P3-M04,Formulating and defending modest hypotheses or predictions about the consequences of changing a checking arrangement.

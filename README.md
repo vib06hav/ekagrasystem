@@ -109,7 +109,7 @@ Recordings run on the Windows host, outside Docker. The application never starts
 
 4. Open the participant application and run the study. Stop recording with `Ctrl+C` after the participant finishes.
 
-Capture artifacts are written under `research-data/capture-runs/`. That directory, along with videos and telemetry exports, is ignored by Git. To require a live capture marker before allowing a participant session, set `REQUIRE_ACTIVE_CAPTURE=true` in `.env`.
+Capture artifacts are written under `research-data/capture-runs/`. That directory, along with videos and telemetry exports, is ignored by Git. `REQUIRE_ACTIVE_CAPTURE=true` now independently gates participant admission regardless of development mode; the default recording policy requires both webcam and screen. See [`docs/CAPTURE_ENVIRONMENT_MODES.md`](docs/CAPTURE_ENVIRONMENT_MODES.md) for the separate ordinary-development and capture-required development commands, heartbeat requirements, limitations, and safety notes.
 
 For a screen-only dry run:
 

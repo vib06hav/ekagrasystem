@@ -2,8 +2,9 @@
 from __future__ import annotations
 
 import hashlib
-import secrets
 import json
+import logging
+import secrets
 import uuid
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
@@ -16,6 +17,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from solo_harness.config import Settings
+from solo_harness.capture_gate import inspect_active_capture
 from solo_harness.db.engine import make_session_factory
 from solo_harness.db.models import (
     AssessmentInstance,
@@ -36,6 +38,8 @@ from solo_harness.runtime.v04_persistence import is_deliverable_f1, is_f1_frozen
 from solo_harness.research_time import in_research_timezone
 from solo_harness.telemetry import append_keyboard_batch, append_rrweb_batch, ensure_browser_manifest, record_ui_events
 
+logger = logging.getLogger(__name__)
+
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 templates.env.filters["tutor_markdown"] = render_tutor_markdown
 
@@ -49,24 +53,19 @@ class ParticipantApplication:
         self.execution = execution or AIExecutionRuntime(SessionRuntime(catalog), OpenAICompatibleClient(settings), settings)
 
     def _active_capture_run_id(self, db) -> uuid.UUID | None:
-        """Return the one fresh recorder marker, never guessing from stale files."""
-        marker = self.settings.research_data_dir / "active_capture.json"
-        try:
-            payload = json.loads(marker.read_text(encoding="utf-8"))
-            capture_run_id = uuid.UUID(str(payload["capture_run_id"]))
-            started = datetime.fromisoformat(str(payload["started_at_utc"]).replace("Z", "+00:00"))
-            relative = Path(str(payload["capture_directory"]))
-            if payload.get("schema_version") != "1.0" or payload.get("status") != "RECORDING": return None
-            if relative.is_absolute() or ".." in relative.parts: return None
-            if datetime.now(timezone.utc) - started.astimezone(timezone.utc) > timedelta(seconds=self.settings.active_capture_max_age_seconds): return None
-            directory = self.settings.research_data_dir / relative
-            if directory != self.settings.research_data_dir / "capture-runs" / str(capture_run_id): return None
-            manifest = json.loads((directory / "capture_manifest.json").read_text(encoding="utf-8"))
-            if not directory.is_dir() or manifest.get("capture_run_id") != str(capture_run_id) or manifest.get("status") != "RECORDING": return None
-            if db.scalar(select(Session.id).where(Session.capture_run_id == capture_run_id)): return None
-            return capture_run_id
-        except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError):
+        """Validate host recorder independently of candidate-study development mode."""
+        capture_run_id, reason = inspect_active_capture(
+            self.settings.research_data_dir,
+            required_streams=self.settings.required_capture_streams,
+            heartbeat_max_age_seconds=self.settings.active_capture_max_age_seconds,
+        )
+        if capture_run_id is None:
+            logger.warning("Capture-required enrollment blocked: %s", reason)
             return None
+        if db.scalar(select(Session.id).where(Session.capture_run_id == capture_run_id)):
+            logger.warning("Capture-required enrollment blocked: capture run already assigned")
+            return None
+        return capture_run_id
 
     def activate(self, institutional_id: str) -> uuid.UUID | None:
         normalized = institutional_id.strip()
@@ -75,20 +74,34 @@ class ParticipantApplication:
         with self.factory() as db:
             if db.scalar(select(Session.id).where(Session.institutional_id == normalized)):
                 return None
-            # Research enrollment remains capture-gated.  The separately
-            # configured v0.4 development mode is local verification only.
-            requires_capture = getattr(self.settings, "require_active_capture", False) and not self.settings.enable_f1_v04_development
+            # Capture policy and candidate-study development mode are orthogonal.
+            # Recorded development requires the same recorder marker as research.
+            requires_capture = self.settings.require_active_capture
             capture_run_id = self._active_capture_run_id(db) if requires_capture else None
             if requires_capture and capture_run_id is None: return None
             active = db.scalar(select(ActiveStudyVersion).order_by(ActiveStudyVersion.activated_at.desc()))
             if active is None: return None
             compiled = self.execution.runtime.catalog.load(db, active.study_version_id)
+            if compiled.authored.get("v051", {}).get("candidate_only"):
+                return None
             # Candidate F1 v0.4 is development-only.  The source status is not
             # transformed by this switch; production startup fails closed.
             if (compiled.authored.get("v04") and not self.settings.enable_f1_v04_development):
                 return None
             try:
-                session = self.execution.runtime.create_session(db, active.study_version_id, build_id=self.settings.app_build_id, institutional_id=normalized, capture_run_id=capture_run_id, commit=False)
+                session = self.execution.runtime.create_session(
+                    db, active.study_version_id,
+                    build_id=self.settings.app_build_id,
+                    institutional_id=normalized,
+                    capture_run_id=capture_run_id,
+                    runtime_config={
+                        "f1_v04_development_enabled": self.settings.enable_f1_v04_development,
+                        "capture_required_at_join": requires_capture,
+                        "capture_required_streams": self.settings.required_capture_streams if requires_capture else "none",
+                        "capture_heartbeat_max_age_seconds": self.settings.active_capture_max_age_seconds if requires_capture else None,
+                    },
+                    commit=False,
+                )
                 self.execution.runtime._event(db, session, "PARTICIPANT_ENTERED", {"entry_method": "INSTITUTIONAL_ID", "study_information_acknowledged": True}, session.current_attempt_id)
                 db.commit()
             except IntegrityError:

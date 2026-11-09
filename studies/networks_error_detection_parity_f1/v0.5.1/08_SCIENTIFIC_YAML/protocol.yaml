@@ -1,0 +1,88 @@
+schema: ekagra.scientific.protocol.v0.5-candidate
+status: CANDIDATE_UNAPPROVED_REQUIRES_HUMAN_REVIEW_AND_RUNTIME_INTEGRATION
+scope:
+  topic: Single-topic F1 parity novice C1–C4 with 13 locked subsections; NOT the professor three-topic Experiment 1.
+  other_topics: false
+  checksum: false
+assessment:
+  mcq_count: 3
+  mcq_options: 4
+  subjective_count: 1
+  mcq_min_correct: 2
+  subjective_points_min: 1
+  subjective_points_max: 2
+  pass_logic: MCQ_CORRECT>=2 AND SUBJECTIVE_POINTS>=1
+  status: PROVISIONAL_NOT_EMPIRICALLY_VALIDATED
+allocation:
+  blueprints_per_transition: 4
+  sampling: Available unexposed blueprint selected independently of pedagogy, Tutor transcript and previous correctness
+  question_scenario: Fresh generated within authorized family; independently verified and frozen
+  scoring: Deterministic MCQ key for this instance, blind LLM subjective rubric, deterministic conjunction
+  reuse_or_exhaustion: No unapproved reuse of a seen blueprint; retry/cap policy must be explicitly inherited and documented
+    by engineering from existing active single-topic flow, not invented by science authoring
+order:
+  candidate: Three MCQs then subjective, as inherited working four-item ordering
+  concern: MCQ cueing of subjective; review and pilot; do not silently swap order
+quality_gates:
+- No unreviewed semantically drifted options can be treated as correct
+- Technical or REVIEW_REQUIRED outcome does not consume scientific learner failure
+- No real-participant activation prior to human scientific review
+runtime: Isolated development and synthetic/live LLM testing allowed under explicit dev/test safeguards, followed promptly
+  by actual Docker browser/database integration.
+randomization: Preserve randomized initial pedagogy and without-replacement fallback where already specified in original
+  single-topic implementation; do not implement three-topic professor design; do not invent new repeated-cycle policy.
+fidelity: Matched locked content obligations, bounded opportunity and documented treatment-specific dialogue/disclosure.
+  Do not impose identical Tutor-turn count; monitor delivery from learner-visible evidence.
+instructional_lifecycle:
+  one_pedagogy_per_major_section_attempt: true
+  subsection_order:
+    C1:
+    - C1.1
+    - C1.2
+    - C1.3
+    - C1.4
+    C2:
+    - C2.1
+    - C2.2
+    - C2.3
+    - C2.4
+    C3:
+    - C3.1
+    - C3.2
+    C4:
+    - C4.1
+    - C4.2
+    - C4.3
+  subsection_mastery_gate: false
+  conversation_judge: LLM semantic instructional supervisor; decisions reviewed against content and pedagogy requirements.
+  tutor_completion_flag: Non-authoritative; requires Conversation Judge evidence and legal runtime transition.
+  final_optional_doubt_window: After core subsection delivery, offer one explicit optional opportunity to clarify or
+    continue; do not demand a comprehension answer.
+  at_subsection_advance: Persist completed move/content evidence and open doubt resolution; activate next subsection
+    under unchanged pedagogy.
+  at_section_completion: Only after all child subsections delivered, collect Paas once, then allocate independent formal
+    3-MCQ+subjective assessment.
+  repeat_study: On formal section assessment failure, retry the SAME major section from its first subsection under next
+    unused pedagogy as governed by existing protocol; do not silently create additional cycles.
+  after_exhausted_treatments: Retain unresolved/exhausted status per existing runtime protocol; do not manufacture a
+    pass.
+  technical_hold: Unresolved delivery/semantic review errors are not learner failures and must not consume an assessment
+    attempt.
+  input_isolation: No assessment-private instances or Judge scoring criteria in Tutor or Conversation Judge.
+candidate_exposure_policy:
+  status: PILOT_CALIBRATION_REQUIRED_NOT_APPROVED
+  source: subsection_interventions.yaml candidate_exposure_envelope per C×P child cell
+  principle: Specific taught content and P1/P2/P3 mechanism determine exposure; P2 naturally involves more dialogue than
+    P1.
+  limit_exhaustion: First permit prescribed fallback/consolidation within bound; if obligations remain, delivery exception/technical
+    hold, not skip-to-assessment.
+  not_mastery_scoring: Incorrect/unknown learner answers can trigger scaffolding but may not deny progress after required
+    instruction is delivered.
+runtime_integration_note: These YAMLs/prompts are authoring candidates, NOT drop-in compatible with the legacy 7-YAML/4-prompt
+  v0.4 loader or TutorProse output; add parser/schema/state/controller changes and test before live participants.
+approval_gates:
+- Human subject-matter audit of 13 curriculum mappings, 54 treatment specifications and 64 slot contracts.
+- Semantic validation of sample Tutor and Conversation Judge transcripts (including repeated I-dont-know).
+- Oracle validation of every actual instructional and assessment numeric case, including corner/check-bit errors.
+- Independent item semantic review and human calibration of formal Judge scoring.
+- Explicit human signoff of candidate exposure caps, error handling and study participant flow.

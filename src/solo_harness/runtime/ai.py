@@ -8,7 +8,7 @@ import httpx
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import and_, or_, select
 from solo_harness.config import Settings
-from solo_harness.db.models import AssessmentInstance, AssessmentResponse, Attempt, LLMCall, Message, Session, StudyVersion, V04Evaluation
+from solo_harness.db.models import AssessmentInstance, AssessmentResponse, Attempt, LLMCall, Message, Session, StudyVersion, SubsectionProgress, V04Evaluation
 from solo_harness.runtime.engine import SessionRuntime
 
 class CanonicalMessage(BaseModel):
@@ -55,9 +55,10 @@ def _decode(value):
 class AIExecutionRuntime:
     def __init__(self,runtime:SessionRuntime,client:LLMClient,settings:Settings): self.runtime,self.client,self.settings=runtime,client,settings
     def _request(self,role,messages,model,schema,audit):
-        return LLMRequest(role,uuid.uuid4(),uuid.uuid4(),0,self.settings.llm_provider,model,tuple(messages),schema.__name__,"1.0",schema.model_json_schema(),{"temperature":self.settings.judge_temperature if role=="JUDGE" else self.settings.tutor_temperature,"max_tokens":self.settings.judge_max_output_tokens if role=="JUDGE" else self.settings.tutor_max_output_tokens},self.settings.llm_request_timeout_seconds,audit)
+        judge_role=role in ("JUDGE","CONVERSATION_JUDGE")
+        return LLMRequest(role,uuid.uuid4(),uuid.uuid4(),0,self.settings.llm_provider,model,tuple(messages),schema.__name__,"1.0",schema.model_json_schema(),{"temperature":self.settings.judge_temperature if judge_role else self.settings.tutor_temperature,"max_tokens":self.settings.judge_max_output_tokens if judge_role else self.settings.tutor_max_output_tokens},self.settings.llm_request_timeout_seconds,audit)
     def _reserve(self,db,session,attempt,assessment,role,messages,schema,audit):
-        request=self._request(role,messages,self.settings.judge_model if role=="JUDGE" else self.settings.tutor_model,schema,audit); prepared=self.client.prepare(request)
+        request=self._request(role,messages,self.settings.judge_model if role in ("JUDGE","CONVERSATION_JUDGE") else self.settings.tutor_model,schema,audit); prepared=self.client.prepare(request)
         call=LLMCall(session_id=session.id,attempt_id=attempt.id,assessment_instance_id=assessment.id if assessment else None,purpose=role,status="STARTED",retry_group_id=request.retry_group_id,retry_number=0,provider=request.provider,model=request.model,generation_parameters=request.generation_parameters,compiled_prompt_text="\n\n".join(m.content for m in messages),request_payload={"messages":[m.model_dump() for m in messages],"schema":request.response_json_schema,"schema_name":request.response_schema_name,"audit":audit},request_body_text=prepared.body_text)
         db.add(call); db.flush(); self.runtime._event(db,session,"LLM_CALL_STARTED",{"role":role,"call_id":str(call.id)},attempt.id); return call.id
     def _science(self):
@@ -83,12 +84,58 @@ class AIExecutionRuntime:
             if not learner_text.strip(): raise ValueError("empty learner response")
             seq=(db.scalar(select(Message.sequence_no).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no.desc())) or 0)+1; db.add(Message(attempt_id=attempt.id,sequence_no=seq,role="LEARNER",content_text=learner_text.strip(),content_format="plain",material_ids=[],exposed_kc_ids=[],exposed_relation_ids=[]))
         if attempt.status=="ASSIGNED": attempt.status="INTERVENTION_ACTIVE"; attempt.intervention_started_at=datetime.now(timezone.utc); session.started_at=session.started_at or datetime.now(timezone.utc)
-        cell=self.runtime._compiled(db,session).cells[f"{attempt.transition_id}:{attempt.pedagogy_id}"]; dialogue=db.scalars(select(Message).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no)).all()
+        compiled=self.runtime._compiled(db,session)
+        # Candidate v0.5.1 never routes through the legacy section-level Tutor.
+        # A learner turn is first interpreted by the persisted Conversation
+        # Judge; its concrete guidance becomes part of the next Tutor request.
+        if self.runtime._v051(compiled):
+            db.flush()
+            if learner_text is not None:
+                return self.reserve_conversation_judge(db, session_id, commit=commit)
+            from solo_harness.runtime.v051_conversation import V051TutorOutput, v051_tutor_prompt
+            from solo_harness.studies.v051_native_compiler import resolve_v051_tutor_context
+            _, progress=self.runtime._active_v051_progress(db,session)
+            dialogue=[{"id":str(message.id),"role":message.role,"content":message.content_text,"instructional_trace":message.instructional_trace}
+                      for message in db.scalars(select(Message).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no)).all()]
+            context=resolve_v051_tutor_context(compiled,progress.subsection_id,attempt.pedagogy_id)
+            state=progress.instructional_state or {}
+            instructional = state.get("verified_instructional_instance")
+            if instructional is None:
+                from solo_harness.studies.v051_scenarios import resolve_v051_instructional_instance
+                instructional = resolve_v051_instructional_instance(compiled, progress.subsection_id, attempt.pedagogy_id)
+                progress.instructional_state = {**state, "verified_instructional_instance": instructional}
+                state = progress.instructional_state
+            guidance={key: state[key] for key in ("last_action","next_allowed_instruction","conversation_judge_call_id") if key in state} or None
+            messages=(CanonicalMessage(role="system",content=v051_tutor_prompt(compiled,progress,context,dialogue,guidance,instructional)),)
+            call=self._reserve(db,session,attempt,None,"TUTOR",messages,V051TutorOutput,{"v051":True,"attempt_id":str(attempt.id),"subsection_id":progress.subsection_id,"pedagogy_id":attempt.pedagogy_id,"judge_guidance":guidance})
+            if commit: db.commit()
+            return call
+        cell=compiled.cells[f"{attempt.transition_id}:{attempt.pedagogy_id}"]; dialogue=db.scalars(select(Message).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no)).all()
         details=dict(attempt.outcome_details or {}); instructional=details.get("v04_instructional_instance")
         if instructional is None:
             instructional=resolve_instructional_instance(self._science(),cell["id"])
             details["v04_instructional_instance"]=instructional; attempt.outcome_details=details
         messages=tutor_messages(self._science(),cell["id"],[{"role":"assistant" if m.role=="TUTOR" else "user","content":m.content_text} for m in dialogue],instructional); call=self._reserve(db,session,attempt,None,"TUTOR",messages,TutorProse,{"v04":True,"cell_id":cell["id"],"instructional_instance_id":instructional["instance_id"]})
+        if commit: db.commit()
+        return call
+    def reserve_conversation_judge(self,db,session_id,commit=True,checkpoint_tutor_message_id=None):
+        """Reserve the candidate semantic monitor for a learner turn or Tutor close checkpoint."""
+        from solo_harness.runtime.v051_conversation import ConversationJudgeOutput, conversation_judge_prompt
+        from solo_harness.studies.v051_native_compiler import resolve_v051_tutor_context
+        session=db.scalar(select(Session).where(Session.id==session_id).with_for_update()); attempt=db.get(Attempt,session.current_attempt_id) if session else None
+        compiled=self.runtime._compiled(db,session) if session else None
+        if not session or not attempt or session.phase!="INTERVENTION_ACTIVE" or not self.runtime._v051(compiled): raise ValueError("Conversation Judge is unavailable")
+        progress=db.scalar(select(SubsectionProgress).where(SubsectionProgress.attempt_id==attempt.id,SubsectionProgress.status=="ACTIVE").with_for_update())
+        if progress is None: raise ValueError("no active v0.5.1 subsection")
+        latest=db.scalar(select(Message).where(Message.attempt_id==attempt.id,Message.role=="LEARNER").order_by(Message.sequence_no.desc()))
+        if latest is None and checkpoint_tutor_message_id is None: raise ValueError("Conversation Judge requires a learner message or Tutor close checkpoint")
+        active=db.scalar(select(LLMCall.id).where(LLMCall.attempt_id==attempt.id,LLMCall.purpose=="CONVERSATION_JUDGE",LLMCall.status.in_(("STARTED","SENDING","RECEIVED"))))
+        if active: raise ValueError("a Conversation Judge operation is already active")
+        dialogue=[{"id":str(message.id),"role":message.role,"content":message.content_text,"instructional_trace":message.instructional_trace} for message in db.scalars(select(Message).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no)).all()]
+        context=resolve_v051_tutor_context(compiled,progress.subsection_id,attempt.pedagogy_id)
+        allowance=self.runtime.v051_clarification_allowance(db,session.id,progress.subsection_id)
+        prompt=conversation_judge_prompt(compiled,progress,context,dialogue,str(latest.id) if latest else None,allowance)
+        call=self._reserve(db,session,attempt,None,"CONVERSATION_JUDGE",(CanonicalMessage(role="system",content=prompt),),ConversationJudgeOutput,{"v051":True,"attempt_id":str(attempt.id),"subsection_id":progress.subsection_id,"latest_learner_message_id":str(latest.id) if latest else None,"checkpoint_tutor_message_id":str(checkpoint_tutor_message_id) if checkpoint_tutor_message_id else None})
         if commit: db.commit()
         return call
     def reserve_assessment(self,db,session_id,assessment_id=None,commit=True):
@@ -105,8 +152,9 @@ class AIExecutionRuntime:
         if session.phase!="ASSESSMENT_GENERATING" or item.status!="GENERATING": raise ValueError("assessment unavailable")
         # This is an orchestration marker only.  The constructor below creates the
         # real writer/reviewer LLMCall rows; do not spend a redundant provider call.
-        call=LLMCall(session_id=session.id,attempt_id=attempt.id,assessment_instance_id=item.id,purpose="ASSESSMENT_BUILD",status="STARTED",retry_group_id=uuid.uuid4(),retry_number=0,provider=self.settings.llm_provider,model=self.settings.tutor_model or "",generation_parameters={},compiled_prompt_text=None,request_payload={"operation":"v04_assessment_build"},request_body_text="{}")
-        db.add(call); db.flush(); item.generation_llm_call_id=call.id; self.runtime._event(db,session,"V04_ASSESSMENT_BUILD_RESERVED",{"assessment_id":str(item.id),"call_id":str(call.id)},attempt.id)
+        version = "v051" if self.runtime._v051(self.runtime._compiled(db,session)) else "v04"
+        call=LLMCall(session_id=session.id,attempt_id=attempt.id,assessment_instance_id=item.id,purpose="ASSESSMENT_BUILD",status="STARTED",retry_group_id=uuid.uuid4(),retry_number=0,provider=self.settings.llm_provider,model=self.settings.tutor_model or "",generation_parameters={},compiled_prompt_text=None,request_payload={"operation":f"{version}_assessment_build"},request_body_text="{}")
+        db.add(call); db.flush(); item.generation_llm_call_id=call.id; self.runtime._event(db,session,f"{version.upper()}_ASSESSMENT_BUILD_RESERVED",{"assessment_id":str(item.id),"call_id":str(call.id)},attempt.id)
         if commit: db.commit()
         return call.id
     def reserve_f1_judge(self,db,session_id,response,commit=True):
@@ -121,7 +169,15 @@ class AIExecutionRuntime:
         if active: raise ValueError("a Judge operation is already active")
         resolved=(item.frozen_private_snapshot or {}).get("subjective_resolved")
         if not resolved: raise ValueError("missing frozen subjective context")
-        messages=judge_messages(self._science(),resolved,item.frozen_public_snapshot["subjective"]["prompt"],response.response_text); call=self._reserve(db,session,attempt,item,"JUDGE",messages,SubjectiveJudgment,{"v04_blind":True})
+        compiled=self.runtime._compiled(db,session)
+        if self.runtime._v051(compiled):
+            from solo_harness.runtime.v051_assessment import v051_judge_messages
+            messages=v051_judge_messages(compiled,resolved,item.frozen_public_snapshot["subjective"]["prompt"],response.response_text)
+            audit={"v051_blind":True,"isolation":"no_tutor_or_assessment_mcq_inputs"}
+        else:
+            messages=judge_messages(self._science(),resolved,item.frozen_public_snapshot["subjective"]["prompt"],response.response_text)
+            audit={"v04_blind":True}
+        call=self._reserve(db,session,attempt,item,"JUDGE",messages,SubjectiveJudgment,audit)
         if commit: db.commit()
         return call
     async def _call(self,role,messages,schema):
@@ -129,7 +185,30 @@ class AIExecutionRuntime:
     async def _freeze(self,db,call,session,attempt):
         from solo_harness.runtime.v04_assessment import construct_four_item_assessment
         from solo_harness.runtime.v04_recorded import AssessmentCheckpoint, PersistedModelInvoker
-        item=db.get(AssessmentInstance,call.assessment_instance_id); scientific=self._science()
+        item=db.get(AssessmentInstance,call.assessment_instance_id); compiled=self.runtime._compiled(db,session)
+        if self.runtime._v051(compiled):
+            from solo_harness.runtime.v051_assessment import construct_v051_assessment
+            from solo_harness.runtime.v04_recorded import AssessmentCheckpoint, PersistedModelInvoker
+            # Treat every previously exposed instructional and assessment case
+            # in this learner session as a reuse collision, including retries.
+            from solo_harness.studies.v051_scenarios import scientific_case_fingerprints
+            instructional = [row.instructional_state.get("verified_instructional_instance", {})
+                             for row in db.scalars(select(SubsectionProgress).where(SubsectionProgress.session_id == session.id)).all()]
+            fingerprints = {fingerprint for record in instructional for fingerprint in record.get("case_fingerprints", [])}
+            earlier_attempt_ids = [row.id for row in db.scalars(select(Attempt).where(Attempt.session_id == session.id)).all()]
+            for prior in db.scalars(select(AssessmentInstance).where(AssessmentInstance.attempt_id.in_(earlier_attempt_ids))).all():
+                if prior.id == item.id:
+                    continue
+                checkpoints = (prior.frozen_metadata_snapshot or {}).get("generation_checkpoints", {})
+                for record in checkpoints.values():
+                    cases = (record.get("case") or {}).get("cases") if isinstance(record, dict) else None
+                    if cases:
+                        fingerprints.update(scientific_case_fingerprints(cases))
+            package=await construct_v051_assessment(compiled,item.blueprint_snapshot,PersistedModelInvoker(db,self,session.id,item.id,audit_version="v051"),AssessmentCheckpoint(db,item.id),completed=AssessmentCheckpoint(db,item.id).completed(),prior_instructional_fingerprints=fingerprints)
+            item=db.scalar(select(AssessmentInstance).where(AssessmentInstance.id==item.id).with_for_update())
+            metadata={**package["metadata"],"generation_checkpoints":dict((item.frozen_metadata_snapshot or {}).get("generation_checkpoints",{}))}
+            item.frozen_public_snapshot=package["public"]; item.frozen_private_snapshot=package["private"]; item.frozen_metadata_snapshot=metadata; item.frozen_package_fingerprint=package["fingerprint"]; item.frozen_schema_version="v051.native.1"; item.delivery_status=package["status"]; item.frozen_at=datetime.now(timezone.utc); item.status="ACTIVE"; attempt.status="ASSESSMENT_ACTIVE"; session.phase="ASSESSMENT_ACTIVE"; call.status="SUCCEEDED"; call.completed_at=datetime.now(timezone.utc); call.parsed_response={"frozen":True,"items":4,"v051":True}; self.runtime._event(db,session,"V051_ASSESSMENT_FROZEN",{"assessment_id":str(item.id),"fingerprint":package["fingerprint"]},attempt.id); db.commit(); return
+        scientific=self._science()
         records=db.scalars(select(Attempt).where(Attempt.session_id==session.id)).all()
         instructional=[(a.outcome_details or {}).get("v04_instructional_instance") for a in records]
         instructional=[x for x in instructional if x]
@@ -158,9 +237,10 @@ class AIExecutionRuntime:
     async def _finalize_received(self, db, call_id):
         """Apply one saved provider response exactly once; never call the provider."""
         from solo_harness.runtime.v04_native import MCQProse, SemanticReview, SubjectiveJudgment, SubjectiveProse, SubjectiveReview, TutorProse
+        from solo_harness.runtime.v051_conversation import ConversationJudgeOutput, V051TutorOutput
         call=db.scalar(select(LLMCall).where(LLMCall.id==call_id).with_for_update())
         if not call or call.status!="RECEIVED": return
-        schemas={"TUTOR":TutorProse,"ASSESSMENT_WRITER":MCQProse if call.request_payload.get("schema_name")=="MCQProse" else SubjectiveProse,"SEMANTIC_REVIEW":SemanticReview if call.request_payload.get("schema_name")=="SemanticReview" else SubjectiveReview,"JUDGE":SubjectiveJudgment}
+        schemas={"TUTOR":V051TutorOutput if (call.request_payload.get("audit") or {}).get("v051") else TutorProse,"ASSESSMENT_WRITER":MCQProse if call.request_payload.get("schema_name")=="MCQProse" else SubjectiveProse,"SEMANTIC_REVIEW":SemanticReview if call.request_payload.get("schema_name")=="SemanticReview" else SubjectiveReview,"JUDGE":SubjectiveJudgment,"CONVERSATION_JUDGE":ConversationJudgeOutput}
         schema=schemas.get(call.purpose)
         if schema is None:
             return
@@ -173,6 +253,16 @@ class AIExecutionRuntime:
             # A previously failed local application is now being re-applied.
             # Clear the marker only inside the successful transaction.
             call.error_class=None; call.error_message=None
+            if call.purpose=="CONVERSATION_JUDGE":
+                decision=self.runtime.apply_v051_conversation_judge(db,session.id,call.id,out,commit=False)
+                call.parsed_response=out.model_dump(mode="json"); call.status="SUCCEEDED"; call.completed_at=datetime.now(timezone.utc)
+                next_call = None
+                if decision.action != "DELIVERY_EXCEPTION" and session.phase == "INTERVENTION_ACTIVE":
+                    # The Judge is a real controller: its stored guidance is
+                    # compiled into the next Tutor request, rather than merely
+                    # being displayed or left for an external caller to use.
+                    next_call = self.reserve_tutor(db, session.id, commit=False)
+                db.commit(); return next_call or decision
             if call.purpose in ("ASSESSMENT_WRITER","SEMANTIC_REVIEW"):
                 # A received assessment role is applied as its own durable result.
                 # Accepted-item checkpoints remain the constructor's recovery boundary.
@@ -180,14 +270,32 @@ class AIExecutionRuntime:
             if call.purpose=="TUTOR":
                 if not db.scalar(select(Message.id).where(Message.llm_call_id==call.id)):
                     seq=(db.scalar(select(Message.sequence_no).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no.desc())) or 0)+1
-                    db.add(Message(attempt_id=attempt.id,sequence_no=seq,role="TUTOR",content_text=out.learner_message,content_format="markdown",llm_call_id=call.id,instructional_trace={"fidelity_note":out.fidelity_note},material_ids=[],exposed_kc_ids=[],exposed_relation_ids=[]))
+                    if self.runtime._v051(self.runtime._compiled(db,session)):
+                        audit=(call.request_payload or {}).get("audit", {})
+                        trace={"subsection_id":audit["subsection_id"],"pedagogy_id":audit["pedagogy_id"],"fidelity_note":out.fidelity_note,
+                               "proposed_move_ids":out.proposed_move_ids,"proposed_content_ids":out.proposed_content_ids,
+                               "proposes_subsection_close":out.proposes_subsection_close}
+                    else:
+                        trace={"fidelity_note":out.fidelity_note}
+                    message=Message(attempt_id=attempt.id,sequence_no=seq,role="TUTOR",content_text=out.learner_message,content_format="markdown",llm_call_id=call.id,instructional_trace=trace,material_ids=[],exposed_kc_ids=[],exposed_relation_ids=[])
+                    db.add(message); db.flush()
+                else:
+                    message=db.scalar(select(Message).where(Message.llm_call_id==call.id))
                 call.parsed_response=out.model_dump(mode="json"); call.status="SUCCEEDED"; call.completed_at=datetime.now(timezone.utc)
-                if out.teaching_complete and session.phase=="INTERVENTION_ACTIVE":
+                if self.runtime._v051(self.runtime._compiled(db,session)):
+                    # A closure proposal is a checkpoint, never a transition.
+                    # The Judge call is reserved from the same transaction and
+                    # must validate its own persisted evidence before advance.
+                    if out.proposes_subsection_close:
+                        next_call = self.reserve_conversation_judge(db,session.id,commit=False,checkpoint_tutor_message_id=message.id)
+                    else:
+                        next_call = None
+                elif out.teaching_complete and session.phase=="INTERVENTION_ACTIVE":
                     # End instruction, but do not select a blueprint or call the
                     # assessment writer until the learner records mental effort.
                     self.runtime.complete_intervention(db,session.id,"TUTOR_COMPLETE",commit=False)
                 db.commit()
-                return
+                return next_call if self.runtime._v051(self.runtime._compiled(db,session)) else None
             call.parsed_response=out.model_dump(mode="json"); call.status="SUCCEEDED"; call.completed_at=datetime.now(timezone.utc)
             if out.gradable_status=="GRADABLE" and out.subjective_points is not None and not out.review_reason:
                 # A syntactically valid Judge result can still be unusable: its
@@ -217,7 +325,10 @@ class AIExecutionRuntime:
     async def execute(self,db,call_id):
         call=db.scalar(select(LLMCall).where(LLMCall.id==call_id).with_for_update())
         if not call: return
-        if call.status=="RECEIVED": await self._finalize_received(db,call.id); return
+        if call.status=="RECEIVED":
+            next_call = await self._finalize_received(db,call.id)
+            if isinstance(next_call, uuid.UUID): await self.execute(db,next_call)
+            return
         if call.status!="STARTED": return
         if call.purpose=="ASSESSMENT_BUILD":
             session=db.get(Session,call.session_id); attempt=db.get(Attempt,call.attempt_id); await self._freeze(db,call,session,attempt); return
@@ -241,7 +352,8 @@ class AIExecutionRuntime:
             if not call or call.status!="SENDING": return
             call.request_payload={**call.request_payload,"automatic_transport_retries":transient}
             call.provider_request_id=raw.provider_request_id; call.raw_response_text=raw.raw_response_text; call.response_payload=raw.response_payload; call.latency_ms=raw.latency_ms; call.status="RECEIVED"; db.commit()
-            await self._finalize_received(db,call_id)
+            next_call = await self._finalize_received(db,call_id)
+            if isinstance(next_call, uuid.UUID): await self.execute(db,next_call)
         except Exception as exc:
             db.rollback()
             call=db.scalar(select(LLMCall).where(LLMCall.id==call_id).with_for_update())
@@ -274,7 +386,9 @@ class AIExecutionRuntime:
         if previous.retry_number >= 3 and not authorized_requeue:
             previous.status="TECHNICAL_HOLD"; previous.error_class="RETRY_EXHAUSTED"; previous.error_message="Recovery retry limit exhausted; learner outcome remains unscored."; previous.completed_at=datetime.now(timezone.utc)
             db.commit(); raise ValueError("retry limit exhausted")
-        if session.phase=="INTERVENTION_ACTIVE":
+        if previous.purpose=="CONVERSATION_JUDGE":
+            call=self.reserve_conversation_judge(db,session_id,commit=False)
+        elif session.phase=="INTERVENTION_ACTIVE":
             call=self.reserve_tutor(db,session_id,commit=False)
         elif session.phase=="ASSESSMENT_GENERATING":
             call=self.reserve_assessment(db,session_id,item.id,commit=False)

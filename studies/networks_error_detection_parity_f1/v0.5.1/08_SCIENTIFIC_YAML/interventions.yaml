@@ -1,0 +1,590 @@
+schema: ekagra.scientific.interventions.v0.5-candidate
+status: CANDIDATE_UNAPPROVED_REQUIRES_HUMAN_REVIEW_AND_RUNTIME_INTEGRATION
+instruction_pools: Use fresh, oracle-checked INSTRUCTION_ONLY examples; no assessment instances, prior participant stems,
+  or unverified fixed grid data.
+shared_rules:
+- Assigned pedagogy remains fixed across all subsections of one section attempt.
+- Every subsection must receive complete content-specific instruction; neither learner correctness nor nonresponse is
+  a subsection mastery gate.
+- P1/P2/P3 share scientific content responsibility but not identical reasoning disclosure or conversational rounds.
+- Learner doubts may interrupt instruction and must be handled within treatment-specific bounded allowance.
+- A Tutor self-reported teaching_complete is advisory only; Conversation Judge reviews semantic evidence and runtime
+  enforces transitions.
+- No Cn assessment until all required Cn subsections are instructionally completed and an optional final doubt opportunity
+  has been addressed.
+- Instructional exceptions are technical/data-quality events, not scientific learner failures.
+pedagogies:
+- id: P1
+  label: Worked Examples — MODEL
+  mechanism: Tutor presents complete, scientifically verified worked reasoning and explains why every material step is
+    justified before expecting learner discovery.
+  must:
+  - Establish unfamiliar prerequisites before examples.
+  - Model an explicit valid example and its reasoning, not only the result.
+  - Explain the scope/assumptions and summarize the taught insight.
+  - Offer learner-led doubt clarification by revisiting a step or using another checked simpler worked case.
+  must_not:
+  - Use an unanswered learner question as a prerequisite for revealing the modeled reasoning.
+  - Replace modeling with an extended Socratic question chain.
+  - Treat a voluntary application question as an assessed mastery gate.
+  disclosure: Complete target reasoning visible during core modeling, not withheld pending learner correctness.
+  confusion_fallback: &id001
+  - Identify the misunderstood worked step.
+  - Explain that step with a simpler checked example or representation.
+  - Conclude with the accurate model even if the learner is still uncertain.
+  runtime_contract: Pedagogy fidelity judged from learner-visible messages; fidelity_note alone cannot certify compliance.
+- id: P2
+  label: Guided Questioning — GUIDE
+  mechanism: Tutor provides missing prerequisite facts and guides construction of the target reasoning through short,
+    ordered, contingent questions and hints.
+  must:
+  - Never force a novice to guess an undefined concept.
+  - Pose questions corresponding to explicit authored moves, allow a response, and respond to its meaning.
+  - Narrow cues or add minimum corrective facts upon learner difficulty.
+  - Consolidate all required correct content by the end, whether or not learner derived it.
+  must_not:
+  - Give the whole target reasoning upfront as the main instructional strategy.
+  - Turn wrong answers into a subsection test or indefinite loop.
+  - Switch to P1 full worked demonstration at first difficulty.
+  disclosure: Progressive and contingent; first supply prerequisites, then focused questions, then hints and eventually
+    correct consolidation as needed.
+  confusion_fallback: &id003
+  - After one unproductive prompt, narrow or rephrase the cue and provide a useful fact.
+  - After further inability, state the needed local insight and continue to the next move.
+  - At budget limit, make the essential accurate consolidation rather than repeating a question.
+  runtime_contract: Pedagogy fidelity judged from learner-visible messages; fidelity_note alone cannot certify compliance.
+- id: P3
+  label: Contrasting Cases — COMPARE
+  mechanism: Tutor teaches through deliberately matched, independently checked cases varying a diagnostic feature and
+    explicitly connects comparison to the target idea.
+  must:
+  - Establish minimal prerequisites and label what is being held constant.
+  - Present at least one meaningful pair of checked cases differing diagnostically.
+  - Make relevant similarities/differences and the conceptual consequence explicit.
+  - Respond to doubts by focusing the comparison or using a simpler matched pair.
+  must_not:
+  - Use pairs that vary several uncontrolled properties, making the lesson uninterpretable.
+  - Replace controlled cases with unrelated questions or generic worked exposition.
+  - Require a correct learner comparison before delivering the conclusion.
+  disclosure: Diagnostic cases disclosed first; relevant difference and principle consolidated, not kept secret as a
+    test.
+  confusion_fallback: &id004
+  - Identify the distinguishing feature, holding other case elements fixed.
+  - Present the diagnostic side-by-side difference explicitly.
+  - State the shared principle after comparison if the learner cannot infer it.
+  runtime_contract: Pedagogy fidelity judged from learner-visible messages; fidelity_note alone cannot certify compliance.
+cells:
+- id: C1-P1
+  transition_id: C1
+  pedagogy_id: P1
+  scientific_goal: Establish a basic, usable sender/receiver parity mechanism; P→U requires one usable aspect, not an
+    integrated causal account.
+  target_refs:
+  - K0A
+  - K0B
+  - K0C
+  - K0D
+  - K1
+  - K2
+  - K3
+  - R1
+  subsection_order: &id002
+  - C1.1
+  - C1.2
+  - C1.3
+  - C1.4
+  section_level_moves:
+  - subsection_id: C1.1
+    instructional_destination: Understand what is being transmitted between computer systems and how that information
+      is represented using bits.
+  - subsection_id: C1.2
+    instructional_destination: Understand how data may become corrupted during communication, precisely what transmission
+      error is being studied, and why a receiver needs an error-detection mechanism.
+  - subsection_id: C1.3
+    instructional_destination: Understand why additional checking information is introduced, what a parity bit is, and
+      why its value depends on the original data and an agreed rule.
+  - subsection_id: C1.4
+    instructional_destination: Understand how both even- and odd-parity conventions allow the sender to construct a checkable
+      message and the receiver to detect a parity-rule violation.
+  required_moves:
+  - Follow P1 mechanism across every ordered subsection rather than running a generic section-wide monologue.
+  - Complete each C1 subsection using its own P1 authored move list and content obligations.
+  - Consolidate the section target only after all subsections have been covered; never certify a SOLO transition.
+  scope_boundary: No odd/even MULTI-FLIP theorem or 2D grids; C1 may count 1s for parity.
+  fidelity_observation: Tutor presents complete, scientifically verified worked reasoning and explains why every material
+    step is justified before expecting learner discovery.
+  prohibition: Do not skip subsections, reveal future-content as required current knowledge, or disclose assessment-private
+    instances.
+  learner_contingency:
+    on_doubt: *id001
+    on_nonresponse: Do not loop indefinitely; follow staged fallback and finish required instructional delivery.
+    on_correct_response: Use as conversational input, never as authorization to skip mandatory instruction.
+  completion: ALL child subsection delivery obligations verified plus final learner-clarification opportunity handled;
+    then Paas before independent section assessment.
+- id: C1-P2
+  transition_id: C1
+  pedagogy_id: P2
+  scientific_goal: Establish a basic, usable sender/receiver parity mechanism; P→U requires one usable aspect, not an
+    integrated causal account.
+  target_refs:
+  - K0A
+  - K0B
+  - K0C
+  - K0D
+  - K1
+  - K2
+  - K3
+  - R1
+  subsection_order: *id002
+  section_level_moves:
+  - subsection_id: C1.1
+    instructional_destination: Understand what is being transmitted between computer systems and how that information
+      is represented using bits.
+  - subsection_id: C1.2
+    instructional_destination: Understand how data may become corrupted during communication, precisely what transmission
+      error is being studied, and why a receiver needs an error-detection mechanism.
+  - subsection_id: C1.3
+    instructional_destination: Understand why additional checking information is introduced, what a parity bit is, and
+      why its value depends on the original data and an agreed rule.
+  - subsection_id: C1.4
+    instructional_destination: Understand how both even- and odd-parity conventions allow the sender to construct a checkable
+      message and the receiver to detect a parity-rule violation.
+  required_moves:
+  - Follow P2 mechanism across every ordered subsection rather than running a generic section-wide monologue.
+  - Complete each C1 subsection using its own P2 authored move list and content obligations.
+  - Consolidate the section target only after all subsections have been covered; never certify a SOLO transition.
+  scope_boundary: No odd/even MULTI-FLIP theorem or 2D grids; C1 may count 1s for parity.
+  fidelity_observation: Tutor provides missing prerequisite facts and guides construction of the target reasoning through
+    short, ordered, contingent questions and hints.
+  prohibition: Do not skip subsections, reveal future-content as required current knowledge, or disclose assessment-private
+    instances.
+  learner_contingency:
+    on_doubt: *id003
+    on_nonresponse: Do not loop indefinitely; follow staged fallback and finish required instructional delivery.
+    on_correct_response: Use as conversational input, never as authorization to skip mandatory instruction.
+  completion: ALL child subsection delivery obligations verified plus final learner-clarification opportunity handled;
+    then Paas before independent section assessment.
+- id: C1-P3
+  transition_id: C1
+  pedagogy_id: P3
+  scientific_goal: Establish a basic, usable sender/receiver parity mechanism; P→U requires one usable aspect, not an
+    integrated causal account.
+  target_refs:
+  - K0A
+  - K0B
+  - K0C
+  - K0D
+  - K1
+  - K2
+  - K3
+  - R1
+  subsection_order: *id002
+  section_level_moves:
+  - subsection_id: C1.1
+    instructional_destination: Understand what is being transmitted between computer systems and how that information
+      is represented using bits.
+  - subsection_id: C1.2
+    instructional_destination: Understand how data may become corrupted during communication, precisely what transmission
+      error is being studied, and why a receiver needs an error-detection mechanism.
+  - subsection_id: C1.3
+    instructional_destination: Understand why additional checking information is introduced, what a parity bit is, and
+      why its value depends on the original data and an agreed rule.
+  - subsection_id: C1.4
+    instructional_destination: Understand how both even- and odd-parity conventions allow the sender to construct a checkable
+      message and the receiver to detect a parity-rule violation.
+  required_moves:
+  - Follow P3 mechanism across every ordered subsection rather than running a generic section-wide monologue.
+  - Complete each C1 subsection using its own P3 authored move list and content obligations.
+  - Consolidate the section target only after all subsections have been covered; never certify a SOLO transition.
+  scope_boundary: No odd/even MULTI-FLIP theorem or 2D grids; C1 may count 1s for parity.
+  fidelity_observation: Tutor teaches through deliberately matched, independently checked cases varying a diagnostic
+    feature and explicitly connects comparison to the target idea.
+  prohibition: Do not skip subsections, reveal future-content as required current knowledge, or disclose assessment-private
+    instances.
+  learner_contingency:
+    on_doubt: *id004
+    on_nonresponse: Do not loop indefinitely; follow staged fallback and finish required instructional delivery.
+    on_correct_response: Use as conversational input, never as authorization to skip mandatory instruction.
+  completion: ALL child subsection delivery obligations verified plus final learner-clarification opportunity handled;
+    then Paas before independent section assessment.
+- id: C2-P1
+  transition_id: C2
+  pedagogy_id: P1
+  scientific_goal: Teach several distinct correct 1D/2D capabilities and limits without requiring the C3 integrated causal
+    account.
+  target_refs:
+  - K4
+  - K5
+  - K6
+  - K7
+  - K8
+  - K9
+  - K20
+  - K21
+  subsection_order: &id005
+  - C2.1
+  - C2.2
+  - C2.3
+  - C2.4
+  section_level_moves:
+  - subsection_id: C2.1
+    instructional_destination: 'Understand the two major limitations of a single parity check: lack of error localization
+      and missed even-flip error patterns.'
+  - subsection_id: C2.2
+    instructional_destination: Understand how full two-dimensional parity is constructed and how multiple row and column
+      checks operate on the transmitted bits.
+  - subsection_id: C2.3
+    instructional_destination: Understand how full two-dimensional parity can locate and correct a single flipped transmitted
+      bit **under the stated single-error assumption**.
+  - subsection_id: C2.4
+    instructional_destination: Understand full 2D parity's two-bit detection guarantee and distinguish that guarantee
+      from reliable location or correction of both errors.
+  required_moves:
+  - Follow P1 mechanism across every ordered subsection rather than running a generic section-wide monologue.
+  - Complete each C2 subsection using its own P1 authored move list and content obligations.
+  - Consolidate the section target only after all subsections have been covered; never certify a SOLO transition.
+  scope_boundary: No deceptive three-flip syndrome, four-bit rectangle, or C3 relational theorem; no arbitrary non-grid
+    groups.
+  fidelity_observation: Tutor presents complete, scientifically verified worked reasoning and explains why every material
+    step is justified before expecting learner discovery.
+  prohibition: Do not skip subsections, reveal future-content as required current knowledge, or disclose assessment-private
+    instances.
+  learner_contingency:
+    on_doubt: *id001
+    on_nonresponse: Do not loop indefinitely; follow staged fallback and finish required instructional delivery.
+    on_correct_response: Use as conversational input, never as authorization to skip mandatory instruction.
+  completion: ALL child subsection delivery obligations verified plus final learner-clarification opportunity handled;
+    then Paas before independent section assessment.
+- id: C2-P2
+  transition_id: C2
+  pedagogy_id: P2
+  scientific_goal: Teach several distinct correct 1D/2D capabilities and limits without requiring the C3 integrated causal
+    account.
+  target_refs:
+  - K4
+  - K5
+  - K6
+  - K7
+  - K8
+  - K9
+  - K20
+  - K21
+  subsection_order: *id005
+  section_level_moves:
+  - subsection_id: C2.1
+    instructional_destination: 'Understand the two major limitations of a single parity check: lack of error localization
+      and missed even-flip error patterns.'
+  - subsection_id: C2.2
+    instructional_destination: Understand how full two-dimensional parity is constructed and how multiple row and column
+      checks operate on the transmitted bits.
+  - subsection_id: C2.3
+    instructional_destination: Understand how full two-dimensional parity can locate and correct a single flipped transmitted
+      bit **under the stated single-error assumption**.
+  - subsection_id: C2.4
+    instructional_destination: Understand full 2D parity's two-bit detection guarantee and distinguish that guarantee
+      from reliable location or correction of both errors.
+  required_moves:
+  - Follow P2 mechanism across every ordered subsection rather than running a generic section-wide monologue.
+  - Complete each C2 subsection using its own P2 authored move list and content obligations.
+  - Consolidate the section target only after all subsections have been covered; never certify a SOLO transition.
+  scope_boundary: No deceptive three-flip syndrome, four-bit rectangle, or C3 relational theorem; no arbitrary non-grid
+    groups.
+  fidelity_observation: Tutor provides missing prerequisite facts and guides construction of the target reasoning through
+    short, ordered, contingent questions and hints.
+  prohibition: Do not skip subsections, reveal future-content as required current knowledge, or disclose assessment-private
+    instances.
+  learner_contingency:
+    on_doubt: *id003
+    on_nonresponse: Do not loop indefinitely; follow staged fallback and finish required instructional delivery.
+    on_correct_response: Use as conversational input, never as authorization to skip mandatory instruction.
+  completion: ALL child subsection delivery obligations verified plus final learner-clarification opportunity handled;
+    then Paas before independent section assessment.
+- id: C2-P3
+  transition_id: C2
+  pedagogy_id: P3
+  scientific_goal: Teach several distinct correct 1D/2D capabilities and limits without requiring the C3 integrated causal
+    account.
+  target_refs:
+  - K4
+  - K5
+  - K6
+  - K7
+  - K8
+  - K9
+  - K20
+  - K21
+  subsection_order: *id005
+  section_level_moves:
+  - subsection_id: C2.1
+    instructional_destination: 'Understand the two major limitations of a single parity check: lack of error localization
+      and missed even-flip error patterns.'
+  - subsection_id: C2.2
+    instructional_destination: Understand how full two-dimensional parity is constructed and how multiple row and column
+      checks operate on the transmitted bits.
+  - subsection_id: C2.3
+    instructional_destination: Understand how full two-dimensional parity can locate and correct a single flipped transmitted
+      bit **under the stated single-error assumption**.
+  - subsection_id: C2.4
+    instructional_destination: Understand full 2D parity's two-bit detection guarantee and distinguish that guarantee
+      from reliable location or correction of both errors.
+  required_moves:
+  - Follow P3 mechanism across every ordered subsection rather than running a generic section-wide monologue.
+  - Complete each C2 subsection using its own P3 authored move list and content obligations.
+  - Consolidate the section target only after all subsections have been covered; never certify a SOLO transition.
+  scope_boundary: No deceptive three-flip syndrome, four-bit rectangle, or C3 relational theorem; no arbitrary non-grid
+    groups.
+  fidelity_observation: Tutor teaches through deliberately matched, independently checked cases varying a diagnostic
+    feature and explicitly connects comparison to the target idea.
+  prohibition: Do not skip subsections, reveal future-content as required current knowledge, or disclose assessment-private
+    instances.
+  learner_contingency:
+    on_doubt: *id004
+    on_nonresponse: Do not loop indefinitely; follow staged fallback and finish required instructional delivery.
+    on_correct_response: Use as conversational input, never as authorization to skip mandatory instruction.
+  completion: ALL child subsection delivery obligations verified plus final learner-clarification opportunity handled;
+    then Paas before independent section assessment.
+- id: C3-P1
+  transition_id: C3
+  pedagogy_id: P1
+  scientific_goal: Teach integrated, bidirectional causal reasoning from flipped positions to checks and from checks
+    to possible errors; familiar 1D/2D only.
+  target_refs:
+  - K15
+  - K22
+  - K23
+  - R2
+  - R3
+  - R7
+  - R8
+  - R12
+  - R13
+  subsection_order: &id006
+  - C3.1
+  - C3.2
+  section_level_moves:
+  - subsection_id: C3.1
+    instructional_destination: Develop an integrated explanation of how bit positions, checking-group membership, and
+      the combined effects of changes produce observed parity-check results.
+  - subsection_id: C3.2
+    instructional_destination: Interpret checking evidence using a causal model, explain why ambiguous or undetected
+      outcomes arise, and distinguish justified inference from unsupported assumptions.
+  required_moves:
+  - Follow P1 mechanism across every ordered subsection rather than running a generic section-wide monologue.
+  - Complete each C3 subsection using its own P1 authored move list and content obligations.
+  - Consolidate the section target only after all subsections have been covered; never certify a SOLO transition.
+  scope_boundary: No arbitrary non-grid check groups or abstract generalized theorem; avoid cost/tradeoff as the central
+    target.
+  fidelity_observation: Tutor presents complete, scientifically verified worked reasoning and explains why every material
+    step is justified before expecting learner discovery.
+  prohibition: Do not skip subsections, reveal future-content as required current knowledge, or disclose assessment-private
+    instances.
+  learner_contingency:
+    on_doubt: *id001
+    on_nonresponse: Do not loop indefinitely; follow staged fallback and finish required instructional delivery.
+    on_correct_response: Use as conversational input, never as authorization to skip mandatory instruction.
+  completion: ALL child subsection delivery obligations verified plus final learner-clarification opportunity handled;
+    then Paas before independent section assessment.
+- id: C3-P2
+  transition_id: C3
+  pedagogy_id: P2
+  scientific_goal: Teach integrated, bidirectional causal reasoning from flipped positions to checks and from checks
+    to possible errors; familiar 1D/2D only.
+  target_refs:
+  - K15
+  - K22
+  - K23
+  - R2
+  - R3
+  - R7
+  - R8
+  - R12
+  - R13
+  subsection_order: *id006
+  section_level_moves:
+  - subsection_id: C3.1
+    instructional_destination: Develop an integrated explanation of how bit positions, checking-group membership, and
+      the combined effects of changes produce observed parity-check results.
+  - subsection_id: C3.2
+    instructional_destination: Interpret checking evidence using a causal model, explain why ambiguous or undetected
+      outcomes arise, and distinguish justified inference from unsupported assumptions.
+  required_moves:
+  - Follow P2 mechanism across every ordered subsection rather than running a generic section-wide monologue.
+  - Complete each C3 subsection using its own P2 authored move list and content obligations.
+  - Consolidate the section target only after all subsections have been covered; never certify a SOLO transition.
+  scope_boundary: No arbitrary non-grid check groups or abstract generalized theorem; avoid cost/tradeoff as the central
+    target.
+  fidelity_observation: Tutor provides missing prerequisite facts and guides construction of the target reasoning through
+    short, ordered, contingent questions and hints.
+  prohibition: Do not skip subsections, reveal future-content as required current knowledge, or disclose assessment-private
+    instances.
+  learner_contingency:
+    on_doubt: *id003
+    on_nonresponse: Do not loop indefinitely; follow staged fallback and finish required instructional delivery.
+    on_correct_response: Use as conversational input, never as authorization to skip mandatory instruction.
+  completion: ALL child subsection delivery obligations verified plus final learner-clarification opportunity handled;
+    then Paas before independent section assessment.
+- id: C3-P3
+  transition_id: C3
+  pedagogy_id: P3
+  scientific_goal: Teach integrated, bidirectional causal reasoning from flipped positions to checks and from checks
+    to possible errors; familiar 1D/2D only.
+  target_refs:
+  - K15
+  - K22
+  - K23
+  - R2
+  - R3
+  - R7
+  - R8
+  - R12
+  - R13
+  subsection_order: *id006
+  section_level_moves:
+  - subsection_id: C3.1
+    instructional_destination: Develop an integrated explanation of how bit positions, checking-group membership, and
+      the combined effects of changes produce observed parity-check results.
+  - subsection_id: C3.2
+    instructional_destination: Interpret checking evidence using a causal model, explain why ambiguous or undetected
+      outcomes arise, and distinguish justified inference from unsupported assumptions.
+  required_moves:
+  - Follow P3 mechanism across every ordered subsection rather than running a generic section-wide monologue.
+  - Complete each C3 subsection using its own P3 authored move list and content obligations.
+  - Consolidate the section target only after all subsections have been covered; never certify a SOLO transition.
+  scope_boundary: No arbitrary non-grid check groups or abstract generalized theorem; avoid cost/tradeoff as the central
+    target.
+  fidelity_observation: Tutor teaches through deliberately matched, independently checked cases varying a diagnostic
+    feature and explicitly connects comparison to the target idea.
+  prohibition: Do not skip subsections, reveal future-content as required current knowledge, or disclose assessment-private
+    instances.
+  learner_contingency:
+    on_doubt: *id004
+    on_nonresponse: Do not loop indefinitely; follow staged fallback and finish required instructional delivery.
+    on_correct_response: Use as conversational input, never as authorization to skip mandatory instruction.
+  completion: ALL child subsection delivery obligations verified plus final learner-clarification opportunity handled;
+    then Paas before independent section assessment.
+- id: C4-P1
+  transition_id: C4
+  pedagogy_id: P1
+  scientific_goal: Teach abstraction beyond grid checks, justified general conditions, counterexamples, and evaluating
+    an added rule, not a novel coding algorithm.
+  target_refs:
+  - K17
+  - K18
+  - K19
+  - K24
+  - K25
+  - K26
+  - R9
+  - R10
+  - R11
+  subsection_order: &id007
+  - C4.1
+  - C4.2
+  - C4.3
+  section_level_moves:
+  - subsection_id: C4.1
+    instructional_destination: Recognize the broader structure shared by familiar parity systems, and understand how
+      a checking rule can apply to explicitly defined groups outside a row/column grid.
+  - subsection_id: C4.2
+    instructional_destination: Formulate and justify a principle that predicts when parity-based checking arrangements
+      detect or miss an error, **independently of the spatial arrangement of their checks**.
+  - subsection_id: C4.3
+    instructional_destination: Transfer a generalized parity principle to unfamiliar systems, and use it for **justified
+      prediction, counterexample, and critical evaluation**, not merely more parity calculations.
+  required_moves:
+  - Follow P1 mechanism across every ordered subsection rather than running a generic section-wide monologue.
+  - Complete each C4 subsection using its own P1 authored move list and content obligations.
+  - Consolidate the section target only after all subsections have been covered; never certify a SOLO transition.
+  scope_boundary: No CRC computation, Hamming codes, parity-check matrices or optimization algorithms.
+  fidelity_observation: Tutor presents complete, scientifically verified worked reasoning and explains why every material
+    step is justified before expecting learner discovery.
+  prohibition: Do not skip subsections, reveal future-content as required current knowledge, or disclose assessment-private
+    instances.
+  learner_contingency:
+    on_doubt: *id001
+    on_nonresponse: Do not loop indefinitely; follow staged fallback and finish required instructional delivery.
+    on_correct_response: Use as conversational input, never as authorization to skip mandatory instruction.
+  completion: ALL child subsection delivery obligations verified plus final learner-clarification opportunity handled;
+    then Paas before independent section assessment.
+- id: C4-P2
+  transition_id: C4
+  pedagogy_id: P2
+  scientific_goal: Teach abstraction beyond grid checks, justified general conditions, counterexamples, and evaluating
+    an added rule, not a novel coding algorithm.
+  target_refs:
+  - K17
+  - K18
+  - K19
+  - K24
+  - K25
+  - K26
+  - R9
+  - R10
+  - R11
+  subsection_order: *id007
+  section_level_moves:
+  - subsection_id: C4.1
+    instructional_destination: Recognize the broader structure shared by familiar parity systems, and understand how
+      a checking rule can apply to explicitly defined groups outside a row/column grid.
+  - subsection_id: C4.2
+    instructional_destination: Formulate and justify a principle that predicts when parity-based checking arrangements
+      detect or miss an error, **independently of the spatial arrangement of their checks**.
+  - subsection_id: C4.3
+    instructional_destination: Transfer a generalized parity principle to unfamiliar systems, and use it for **justified
+      prediction, counterexample, and critical evaluation**, not merely more parity calculations.
+  required_moves:
+  - Follow P2 mechanism across every ordered subsection rather than running a generic section-wide monologue.
+  - Complete each C4 subsection using its own P2 authored move list and content obligations.
+  - Consolidate the section target only after all subsections have been covered; never certify a SOLO transition.
+  scope_boundary: No CRC computation, Hamming codes, parity-check matrices or optimization algorithms.
+  fidelity_observation: Tutor provides missing prerequisite facts and guides construction of the target reasoning through
+    short, ordered, contingent questions and hints.
+  prohibition: Do not skip subsections, reveal future-content as required current knowledge, or disclose assessment-private
+    instances.
+  learner_contingency:
+    on_doubt: *id003
+    on_nonresponse: Do not loop indefinitely; follow staged fallback and finish required instructional delivery.
+    on_correct_response: Use as conversational input, never as authorization to skip mandatory instruction.
+  completion: ALL child subsection delivery obligations verified plus final learner-clarification opportunity handled;
+    then Paas before independent section assessment.
+- id: C4-P3
+  transition_id: C4
+  pedagogy_id: P3
+  scientific_goal: Teach abstraction beyond grid checks, justified general conditions, counterexamples, and evaluating
+    an added rule, not a novel coding algorithm.
+  target_refs:
+  - K17
+  - K18
+  - K19
+  - K24
+  - K25
+  - K26
+  - R9
+  - R10
+  - R11
+  subsection_order: *id007
+  section_level_moves:
+  - subsection_id: C4.1
+    instructional_destination: Recognize the broader structure shared by familiar parity systems, and understand how
+      a checking rule can apply to explicitly defined groups outside a row/column grid.
+  - subsection_id: C4.2
+    instructional_destination: Formulate and justify a principle that predicts when parity-based checking arrangements
+      detect or miss an error, **independently of the spatial arrangement of their checks**.
+  - subsection_id: C4.3
+    instructional_destination: Transfer a generalized parity principle to unfamiliar systems, and use it for **justified
+      prediction, counterexample, and critical evaluation**, not merely more parity calculations.
+  required_moves:
+  - Follow P3 mechanism across every ordered subsection rather than running a generic section-wide monologue.
+  - Complete each C4 subsection using its own P3 authored move list and content obligations.
+  - Consolidate the section target only after all subsections have been covered; never certify a SOLO transition.
+  scope_boundary: No CRC computation, Hamming codes, parity-check matrices or optimization algorithms.
+  fidelity_observation: Tutor teaches through deliberately matched, independently checked cases varying a diagnostic
+    feature and explicitly connects comparison to the target idea.
+  prohibition: Do not skip subsections, reveal future-content as required current knowledge, or disclose assessment-private
+    instances.
+  learner_contingency:
+    on_doubt: *id004
+    on_nonresponse: Do not loop indefinitely; follow staged fallback and finish required instructional delivery.
+    on_correct_response: Use as conversational input, never as authorization to skip mandatory instruction.
+  completion: ALL child subsection delivery obligations verified plus final learner-clarification opportunity handled;
+    then Paas before independent section assessment.

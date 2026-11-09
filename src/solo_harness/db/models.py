@@ -87,6 +87,52 @@ class Attempt(Base):
     __table_args__ = (UniqueConstraint("session_id", "transition_id", "sequence_in_transition"), UniqueConstraint("session_id", "transition_id", "pedagogy_id"))
 
 
+class SubsectionProgress(Base):
+    """Durable candidate-v0.5.1 delivery ledger; formal assessment remains separate."""
+    __tablename__ = "subsection_progress"
+    id: Mapped[uuid.UUID] = uuid_pk()
+    session_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("sessions.id", ondelete="RESTRICT"), nullable=False)
+    attempt_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("attempts.id", ondelete="RESTRICT"), nullable=False)
+    subsection_id: Mapped[str] = mapped_column(String, nullable=False)
+    order_in_attempt: Mapped[int] = mapped_column(Integer, nullable=False)
+    pedagogy_id: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[str] = mapped_column(String, nullable=False)
+    required_move_ids: Mapped[list] = mapped_column(JSON, nullable=False)
+    required_content_ids: Mapped[list] = mapped_column(JSON, nullable=False)
+    move_evidence: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    content_evidence: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    clarification_evidence_ids: Mapped[list] = mapped_column(JSON, nullable=False, default=list)
+    instructional_state: Mapped[dict] = mapped_column(JSON, nullable=False, default=dict)
+    delivery_exception: Mapped[dict | None] = mapped_column(JSON)
+    opened_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    core_delivered_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    __table_args__ = (
+        UniqueConstraint("attempt_id", "subsection_id"),
+        UniqueConstraint("attempt_id", "order_in_attempt"),
+        Index("ix_subsection_progress_attempt_status", "attempt_id", "status"),
+    )
+
+
+class ConversationJudgeDecision(Base):
+    """One durable semantic-instruction decision, never a formal assessment result."""
+    __tablename__ = "conversation_judge_decisions"
+    id: Mapped[uuid.UUID] = uuid_pk()
+    session_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("sessions.id", ondelete="RESTRICT"), nullable=False)
+    attempt_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("attempts.id", ondelete="RESTRICT"), nullable=False)
+    subsection_progress_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("subsection_progress.id", ondelete="RESTRICT"), nullable=False)
+    llm_call_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("llm_calls.id", ondelete="RESTRICT"), nullable=False, unique=True)
+    latest_learner_message_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), ForeignKey("messages.id", ondelete="RESTRICT"))
+    action: Mapped[str] = mapped_column(String, nullable=False)
+    confidence: Mapped[str] = mapped_column(String, nullable=False)
+    payload: Mapped[dict] = mapped_column(JSON, nullable=False)
+    application_status: Mapped[str] = mapped_column(String, nullable=False)
+    application_reason: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
+    applied_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    __table_args__ = (Index("ix_conversation_judge_decisions_attempt", "attempt_id", "created_at"),)
+
+
 class LearnerHistorySnapshot(Base):
     __tablename__ = "learner_history_snapshots"
     id: Mapped[uuid.UUID] = uuid_pk(); session_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("sessions.id"), nullable=False)

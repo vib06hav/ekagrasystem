@@ -6,22 +6,27 @@ from sqlalchemy import select
 from solo_harness.config import get_settings
 from solo_harness.db.engine import make_session_factory
 from solo_harness.studies.catalog import StudyCatalog
-from solo_harness.studies.scientific_v04 import load_scientific_v04
-from solo_harness.studies.v04_native_compiler import compile_v04
+from solo_harness.studies.activation import activate
+from solo_harness.studies.loader import compile_scientific, load_scientific, source_bundle
 from solo_harness.studies.canonicalization import content_identity, snapshot_identity
 from solo_harness.research_export import inspect_session, write_session_export
 
 def main():
     parser = argparse.ArgumentParser(); sub = parser.add_subparsers(dest="command", required=True)
-    sub.add_parser("validate-study"); sub.add_parser("inspect-study")
+    sub.add_parser("validate-study"); sub.add_parser("inspect-study"); sub.add_parser("register-study")
     inspect = sub.add_parser("inspect-session"); inspect.add_argument("--session-id", required=True)
     export = sub.add_parser("export-session"); export.add_argument("--session-id", required=True); export.add_argument("--output", required=True); export.add_argument("--overwrite", action="store_true")
     args = parser.parse_args(); settings = get_settings()
     if args.command == "validate-study":
-        load_scientific_v04(settings.study_dir); print("study valid")
+        load_scientific(settings.study_dir); print("study valid")
     elif args.command == "inspect-study":
-        compiled = compile_v04(load_scientific_v04(settings.study_dir)); _, content_hash = content_identity(compiled.authored)
+        compiled = compile_scientific(load_scientific(settings.study_dir)); _, content_hash = content_identity(compiled.authored)
         print(json.dumps({"study_id": compiled.study_id, "content_hash": content_hash, "snapshot_hash": snapshot_identity(content_hash, compiled.to_snapshot())}, sort_keys=True))
+    elif args.command == "register-study":
+        scientific = load_scientific(settings.study_dir); compiled = compile_scientific(scientific)
+        with make_session_factory(settings.database_url)() as db:
+            version = activate(db, compiled, source_bundle(scientific), make_active=scientific.content_version != "v0.5.1")
+        print(json.dumps({"study_version_id": str(version.id), "study_id": version.study_id, "content_version": version.content_version, "active": scientific.content_version != "v0.5.1"}, sort_keys=True))
     elif args.command == "inspect-session":
         print(json.dumps(inspect_session(settings.database_url, uuid.UUID(args.session_id)), indent=2, sort_keys=True))
     else:

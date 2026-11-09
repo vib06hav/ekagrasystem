@@ -18,3 +18,11 @@ _graphify_ast_runner.py
 ffmpeg_stderr.log
 tools/runtime/
 local-artifacts/
+
+# Local handoff packages and verification notes; source files are tracked directly.
+/EKAGRAAI_*.zip
+/EkagraAI_F1_v05_1_Corrected_Candidate_Package.zip
+/STAGE2_HANDOFF.md
+/STAGE5_CHANGE_MANIFEST.md
+/STAGE6A_CHANGE_MANIFEST.md
+/STAGE6A_INTEGRATION_MANIFEST.md

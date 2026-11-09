@@ -215,15 +215,29 @@ def write_manifest(path: Path, document: dict) -> None:
     path.write_text(json.dumps(document, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def write_active_marker(root: Path, capture_run_id: uuid.UUID) -> Path:
+def write_active_marker(root: Path, capture_run_id: uuid.UUID, started_at_utc: str | None = None) -> Path:
+    """Publish an atomic heartbeat; caller writes only while all streams live."""
     path = root / "active_capture.json"
+    now = datetime.now(timezone.utc).isoformat()
     document = {"schema_version": SCHEMA_VERSION, "capture_run_id": str(capture_run_id), "status": "RECORDING",
-                "started_at_utc": datetime.now(timezone.utc).isoformat(), "host_pid": __import__("os").getpid(),
-                "capture_directory": f"capture-runs/{capture_run_id}"}
+                "started_at_utc": started_at_utc or now, "heartbeat_at_utc": now,
+                "host_pid": __import__("os").getpid(), "capture_directory": f"capture-runs/{capture_run_id}"}
     temporary = path.with_suffix(".json.tmp")
     temporary.write_text(json.dumps(document, sort_keys=True) + "\n", encoding="utf-8")
     temporary.replace(path)
     return path
+
+
+def stream_has_frames(stream: Stream) -> bool:
+    """First progress must report a captured frame, not just a launched process."""
+    return any(int(row["raw_progress"].get("frame", "0")) > 0
+               for row in stream.progress if row.get("raw_progress", {}).get("frame", "0").isdigit())
+
+
+def stream_progress_fresh(stream: Stream, *, max_age_seconds: float = 10.0) -> bool:
+    """A living process alone is insufficient if it stopped producing frames."""
+    return bool(stream.progress and time.perf_counter_ns() - stream.progress[-1]["monotonic_ns"]
+                <= max_age_seconds * 1_000_000_000)
 
 
 def record(args) -> int:
@@ -250,12 +264,19 @@ def record(args) -> int:
         for stream in streams:
             stream.start()
             manifest["streams"][stream.name] = {"command": stream.command, "status": "RUNNING"}
-        time.sleep(0.5)
-        failed = [stream.name for stream in streams if stream.process and stream.process.poll() is not None]
-        if failed:
-            raise RuntimeError(f"capture startup failed: {', '.join(failed)}")
+        deadline = time.monotonic() + 20
+        while True:
+            failed = [stream.name for stream in streams if not stream.process or stream.process.poll() is not None]
+            if failed:
+                raise RuntimeError(f"capture startup failed: {', '.join(failed)}")
+            if all(stream_has_frames(stream) for stream in streams):
+                break
+            if time.monotonic() >= deadline:
+                raise RuntimeError("capture startup timed out waiting for actual frames from every stream")
+            time.sleep(0.25)
         write_manifest(manifest_path, manifest)
-        marker = write_active_marker(data_root, capture_run_id)
+        marker_started_at = datetime.now(timezone.utc).isoformat()
+        marker = write_active_marker(data_root, capture_run_id, marker_started_at)
     except Exception:
         for stream in streams:
             stream.stop()
@@ -267,15 +288,37 @@ def record(args) -> int:
     print("Screen: recording")
     print(f"Capture run: {capture_run_id}")
     print("Participant may now begin. Press Ctrl+C after the participant finishes.")
+    interrupted = False
     try:
         started = time.monotonic()
-        while any(stream.process and stream.process.poll() is None for stream in streams):
+        last_heartbeat = time.monotonic()
+        while all(stream.process and stream.process.poll() is None for stream in streams):
             if args.max_seconds is not None and time.monotonic() - started >= args.max_seconds:
                 break
+            if not all(stream_progress_fresh(stream) for stream in streams):
+                # The host recorder will revoke admission in finally; don't keep
+                # publishing a heartbeat after either video source stalls.
+                raise RuntimeError("capture stream stopped reporting frames")
+            if time.monotonic() - last_heartbeat >= 2:
+                write_active_marker(data_root, capture_run_id, marker_started_at)
+                last_heartbeat = time.monotonic()
             time.sleep(0.5)
+        if any(stream.process and stream.process.poll() is not None for stream in streams):
+            interrupted = True
+            print("Recording interrupted: one of the FFmpeg streams exited unexpectedly.", file=sys.stderr)
     except KeyboardInterrupt:
         pass
+    except Exception:
+        interrupted = True
+        raise
     finally:
+        # Revoke admission before potentially slow ffprobe/hash finalization.
+        if marker:
+            try:
+                if json.loads(marker.read_text(encoding="utf-8")).get("capture_run_id") == str(capture_run_id):
+                    marker.unlink(missing_ok=True)
+            except (OSError, ValueError, TypeError):
+                pass
         for stream in streams:
             stream.stop()
             media = stream.directory / ("webcam.mkv" if stream.name == "webcam" else "screen.mkv")
@@ -291,15 +334,10 @@ def record(args) -> int:
                 "progress_anchors": stream.progress, "stderr": "ffmpeg_stderr.log", "stderr_timestamped": "ffmpeg_stderr_timestamped.ndjson",
                 "capture_events": "capture_events.ndjson", "media": media.name, "file_size": media.stat().st_size if media.exists() else None,
                 "sha256": sha256(media) if media.exists() else None, "ffprobe": probe}
-        manifest["status"] = "COMPLETED"
+        manifest["status"] = "INTERRUPTED" if interrupted else "COMPLETED"
         write_manifest(manifest_path, manifest)
         (root / "capture_manifest.sha256").write_text(sha256(manifest_path) + "  capture_manifest.json\n", encoding="utf-8")
-        try:
-            if marker:
-                marker.unlink()
-        except FileNotFoundError:
-            pass
-    return 0
+    return 1 if interrupted else 0
 
 
 def preflight(args) -> int:

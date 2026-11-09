@@ -1,0 +1,9 @@
+# Explicit capture-dependent development environment.
+# Usage: docker compose -f compose.yaml -f compose.recorded-dev.yaml up -d --build
+services:
+  app:
+    environment:
+      REQUIRE_ACTIVE_CAPTURE: "true"
+      REQUIRED_CAPTURE_STREAMS: "screen_and_webcam"
+      ACTIVE_CAPTURE_MAX_AGE_SECONDS: "15"
+      APP_BUILD_ID: f1-v04-recorded-dev

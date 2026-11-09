@@ -35,9 +35,10 @@ class Settings(BaseSettings):
     idempotency_retention_seconds: int = Field(default=43200, gt=0)
     research_data_dir: Path = Path("/app/research-data")
     require_active_capture: bool = False
+    required_capture_streams: Literal["screen", "screen_and_webcam"] = "screen_and_webcam"
     enable_f1_v04_development: bool = False
     f1_v04_study_dir: Path = Path("/app/studies/networks_error_detection_parity_f1/v0.4")
-    active_capture_max_age_seconds: int = Field(default=300, gt=0)
+    active_capture_max_age_seconds: int = Field(default=15, gt=0)  # recorder heartbeat age
     participant_study_title: str = "Learning study"
     participant_intro_text: str = "You will complete four guided learning sections. Each section contains a teaching conversation, a brief mental-effort rating, and an independent assessment."
     participant_privacy_text: str = "Privacy, consent, withdrawal, and data-use information will be provided here before participant deployment."

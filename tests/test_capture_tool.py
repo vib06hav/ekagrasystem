@@ -86,3 +86,32 @@ def test_active_marker_has_capture_identity_only(tmp_path):
     assert payload["status"] == "RECORDING"
     assert payload["capture_directory"] == f"capture-runs/{capture_run_id}"
     assert "session" not in json.dumps(payload).lower()
+
+
+def test_marker_contains_refreshed_heartbeat_and_stable_start(tmp_path):
+    run_id = uuid.uuid4()
+    started = "2026-10-30T12:30:00+00:00"
+    marker = record.write_active_marker(tmp_path, run_id, started)
+    before = json.loads(marker.read_text(encoding="utf-8"))
+    record.write_active_marker(tmp_path, run_id, started)
+    after = json.loads(marker.read_text(encoding="utf-8"))
+    assert before["heartbeat_at_utc"] and after["heartbeat_at_utc"]
+    assert after["started_at_utc"] == started
+
+
+def test_stream_has_real_frame_progress():
+    stream = record.Stream("screen", Path("unused"), ["ffmpeg"])
+    assert not record.stream_has_frames(stream)
+    stream.progress.append({"raw_progress": {"progress": "continue", "frame": "0"}})
+    assert not record.stream_has_frames(stream)
+    stream.progress.append({"raw_progress": {"progress": "continue", "frame": "2"}})
+    assert record.stream_has_frames(stream)
+
+
+def test_stream_progress_must_be_recent():
+    stream = record.Stream("screen", Path("unused"), ["ffmpeg"])
+    assert not record.stream_progress_fresh(stream)
+    stream.progress.append({"monotonic_ns": record.time.perf_counter_ns() - 20_000_000_000})
+    assert not record.stream_progress_fresh(stream)
+    stream.progress.append({"monotonic_ns": record.time.perf_counter_ns()})
+    assert record.stream_progress_fresh(stream)

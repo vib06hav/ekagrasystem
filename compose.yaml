@@ -25,11 +25,15 @@ services:
       ACTIVATE_STUDY_ON_BOOTSTRAP: "true"
       APP_BUILD_ID: f1-v04-consolidated-dev
       ENABLE_F1_V04_DEVELOPMENT: "true"
+      REQUIRE_ACTIVE_CAPTURE: ${REQUIRE_ACTIVE_CAPTURE:-false}
+      REQUIRED_CAPTURE_STREAMS: ${REQUIRED_CAPTURE_STREAMS:-screen_and_webcam}
+      ACTIVE_CAPTURE_MAX_AGE_SECONDS: ${ACTIVE_CAPTURE_MAX_AGE_SECONDS:-15}
       LLM_STRUCTURED_OUTPUT_MODE: provider_native_json_schema
     ports:
       - "127.0.0.1:${APP_PORT:-8000}:8000"
     volumes:
       - ./studies/networks_error_detection_parity_f1/v0.4:/app/studies/networks_error_detection_parity_f1/v0.4:ro
+      - ./studies/networks_error_detection_parity_f1/v0.5.1:/app/studies/networks_error_detection_parity_f1/v0.5.1:ro
       - ./exports:/app/exports
       - ./research-data:/app/research-data
     depends_on:

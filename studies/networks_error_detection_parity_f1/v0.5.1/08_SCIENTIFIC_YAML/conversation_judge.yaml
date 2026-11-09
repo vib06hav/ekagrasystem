@@ -1,0 +1,84 @@
+schema: ekagra.scientific.conversation_judge.v0.5-candidate
+status: CANDIDATE_UNAPPROVED_REQUIRES_HUMAN_REVIEW_AND_RUNTIME_INTEGRATION
+role: LLM semantic instructional supervisor; sees treatment, section, subsection and actual teaching dialogue. NOT an
+  independent learner assessment Judge.
+inputs_required:
+- Active section and subsection IDs; locked required_content refs and relevant goals/boundaries
+- Global pedagogy rules plus parent section×pedagogy and child subsection×pedagogy rules
+- Recent dialogue AND accumulated move-by-move evidence ledger (with previous-turn excerpts), so truncated context cannot
+  erase earlier teaching
+- Latest learner response, if any; Tutor proposed next action and any candidate completion flag
+- Verified instructional instance facts including stated assumptions/coordinates/convention
+- Current candidate exposure usage and approved operational limits, if active
+never_inputs:
+- Formal assessment question/answer/key
+- Formal Subjective Judge private evaluation or MCQ score
+- Other participant histories
+semantic_criteria:
+- id: CONTENT_DELIVERED
+  question: For EACH required fact, was a scientifically correct understandable explanation or demonstration actually
+    given, not just named/asked as an unanswered question?
+- id: MOVE_ENACTED
+  question: Did the learner-visible dialogue actually carry out the prescribed global/section/subsection pedagogy moves,
+    in the necessary order?
+- id: LEARNER_SIGNAL
+  question: 'What is the latest learner meaning: new doubt, specific misconception, silence, I do not know, frustration
+    with repetition, an answer to P2 prompting, or request to continue?'
+- id: SCIENCE_AND_SCOPE
+  question: Any incorrect bit count, row/column check, check-bit-cell error, missing corner, assumption violation or
+    later-section content prematurely demanded?
+- id: CONTINGENCY
+  question: Has the Tutor addressed the learner signal through the active pedagogy without requiring correctness and
+    without an unproductive repeated prompt?
+- id: BOUNDARY
+  question: Is there an outstanding relevant learner doubt and/or final clarification opportunity; were exposures within
+    approved limits?
+- id: EVIDENCE
+  question: Can each completed move be supported by precise learner-visible transcript excerpts and verified case IDs?
+    Missing evidence means not completed.
+decisions:
+- action: CONTINUE_TEACHING
+  precondition: Required content/move missing and a permitted core instruction remains.
+  output_guidance: Identify next move(s) and missing facts; do not reteach completed material gratuitously.
+- action: CLARIFY_OR_SCAFFOLD
+  precondition: Relevant learner doubt or mistaken premise needs a pedagogy-appropriate answer.
+  output_guidance: Specify the doubt and the permitted next hint/case/explanation.
+- action: CONSOLIDATE
+  precondition: Guidance has stalled or substantive content needs explicit accurate synthesis before a possible close.
+  output_guidance: Identify exactly which required conclusion must be provided; avoid new compulsory checks.
+- action: ADVANCE_SUBSECTION
+  precondition: All required facts + moves substantively delivered, serious science errors repaired, permitted clarifications
+    handled, final doubt opportunity satisfied, and runtime approves.
+  output_guidance: No learner mastery inference; move to next subsection or end teaching after last.
+- action: DELIVERY_EXCEPTION
+  precondition: Important instructional obligation cannot be completed or scientific defect cannot be repaired within
+    approved boundary.
+  output_guidance: Technical quality hold; no learner fail, no skipping to assessment.
+output_contract:
+  active_subsection_id: string
+  decision: enum of decisions.action
+  completed_move_ids: array of move IDs backed by evidence
+  required_content_status: array of {ref, status:DELIVERED|MISSING|INVALID, supporting_excerpt_or_reason}
+  pedagogy_fidelity: SATISFIED|DEVIATION|UNCERTAIN
+  learner_signal: specific short semantic interpretation, not a score
+  open_doubts: array of distinct relevant clarifications
+  evidence_refs: array of source transcript turn IDs or excerpts
+  next_allowed_instruction: a concrete, pedagogy-compliant, remaining move/fallback; never a subject assessment
+  delivery_exception_reason: null or explicit technical/instructional issue
+  confidence: HIGH|MEDIUM|LOW; LOW must not authorize progression
+invocation_candidate:
+  status: PROVISIONAL_REQUIRES_LATENCY_AND_RELIABILITY_PILOT
+  on_each_meaningful_learner_turn: true
+  on_tutor_subsection_close_proposal: true
+  on_detected_repetition_or_boundary_exhaustion: true
+  on_runtime_transition: true
+authority:
+  semantic_model: Recommends action based on learner text and evidenced delivery; does not determine formal SOLO or section
+    pass/fail.
+  runtime: Enforces legal subsection/section order, approved exposure limits and PAAS/assessment gate; rejects advance
+    with incomplete evidence.
+  tutor: Produces learner-visible pedagogy-constrained explanation and optional non-authoritative move progress notes.
+  no_infinite_loop: Repeated judge disagreements or missing delivery at exhaustion produce DELIVERY_EXCEPTION / technical
+    hold, not automatic assessment.
+independence: Formal assessment and formal Subjective Judge remain treatment-blind and never take this Judge output as
+  learner SOLO evidence.

@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "structural_checks": 1385,
+  "math_cases": {
+    "1D": 5456,
+    "2D_one": 940,
+    "2D_two": 5002,
+    "rectangle_and_mimic": 226,
+    "grouped_including_checkbits": 105438,
+    "grouped_two_signature": 10692
+  },
+  "errors": [],
+  "warnings": [],
+  "limitations": [
+    "Automated structure and parity identities do NOT validate pedagogical effectiveness.",
+    "Coverage refs were semantically remapped and audited as candidate authoring, but generated dialogue STILL requires transcript-based evidence and expert review.",
+    "Old inherited assessment slots and new prompts still require human semantic/scientific audit.",
+    "Candidate numerical limits and LLM monitor reliability require calibration and explicit researcher approval.",
+    "Package is not drop-in compatible with v0.4; service code was not modified."
+  ]
+}

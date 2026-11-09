@@ -1,0 +1,7 @@
+STATUS: PASS
+STRUCTURAL CHECKS: 1385
+MATHEMATICAL CASES: {'1D': 5456, '2D_one': 940, '2D_two': 5002, 'rectangle_and_mimic': 226, 'grouped_including_checkbits': 105438, 'grouped_two_signature': 10692}
+ERRORS:
+None
+WARNINGS:
+None

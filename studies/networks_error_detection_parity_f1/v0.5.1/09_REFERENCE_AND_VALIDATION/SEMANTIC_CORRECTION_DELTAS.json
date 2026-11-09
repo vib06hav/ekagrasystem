@@ -1,0 +1,1769 @@
+{
+  "baseline": "F1 v0.5 coordinated candidate package",
+  "revision": "F1 v0.5.1 corrected candidate; identifiers retained, no runtime changes",
+  "corrected_teaching_moves": 154,
+  "total_teaching_moves": 169,
+  "changed_coverage_refs": 104,
+  "reworded_instructional_actions": 151,
+  "assessment_items_revised": [
+    "C4-A2-Q1",
+    "C4-A2-Q2",
+    "C4-A2-Q3",
+    "C4-A2-S",
+    "C4-A4-Q1"
+  ],
+  "teaching_move_deltas": [
+    {
+      "move_id": "C1.1-P1-M01",
+      "old_refs": [
+        "C1.1.O01"
+      ],
+      "new_refs": [
+        "C1.1.O01",
+        "C1.1.O02",
+        "C1.1.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.1-P1-M02",
+      "old_refs": [
+        "C1.1.O02"
+      ],
+      "new_refs": [
+        "C1.1.O04",
+        "C1.1.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.1-P1-M03",
+      "old_refs": [
+        "C1.1.O03"
+      ],
+      "new_refs": [
+        "C1.1.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.1-P1-M04",
+      "old_refs": [
+        "C1.1.O04",
+        "C1.1.O05"
+      ],
+      "new_refs": [
+        "C1.1.O01",
+        "C1.1.O02",
+        "C1.1.O03",
+        "C1.1.O04"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.1-P2-M01",
+      "old_refs": [
+        "C1.1.O01"
+      ],
+      "new_refs": [
+        "C1.1.O01",
+        "C1.1.O02",
+        "C1.1.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.1-P2-M02",
+      "old_refs": [
+        "C1.1.O02"
+      ],
+      "new_refs": [
+        "C1.1.O04"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.1-P2-M03",
+      "old_refs": [
+        "C1.1.O03"
+      ],
+      "new_refs": [
+        "C1.1.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.1-P2-M04",
+      "old_refs": [
+        "C1.1.O04"
+      ],
+      "new_refs": [
+        "C1.1.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.1-P2-M05",
+      "old_refs": [
+        "C1.1.O05"
+      ],
+      "new_refs": [
+        "C1.1.O01",
+        "C1.1.O02",
+        "C1.1.O03",
+        "C1.1.O04"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.1-P3-M01",
+      "old_refs": [
+        "C1.1.O01"
+      ],
+      "new_refs": [
+        "C1.1.O01",
+        "C1.1.O02",
+        "C1.1.O03",
+        "C1.1.O04"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.1-P3-M02",
+      "old_refs": [
+        "C1.1.O02"
+      ],
+      "new_refs": [
+        "C1.1.O04",
+        "C1.1.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.1-P3-M03",
+      "old_refs": [
+        "C1.1.O03"
+      ],
+      "new_refs": [
+        "C1.1.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.1-P3-M04",
+      "old_refs": [
+        "C1.1.O04",
+        "C1.1.O05"
+      ],
+      "new_refs": [
+        "C1.1.O01",
+        "C1.1.O02",
+        "C1.1.O03",
+        "C1.1.O04"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.2-P1-M01",
+      "old_refs": [
+        "C1.2.O01"
+      ],
+      "new_refs": [
+        "C1.2.O01",
+        "C1.2.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.2-P1-M02",
+      "old_refs": [
+        "C1.2.O02",
+        "C1.2.O03"
+      ],
+      "new_refs": [
+        "C1.2.O03",
+        "C1.2.O04",
+        "C1.2.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.2-P1-M03",
+      "old_refs": [
+        "C1.2.O04",
+        "C1.2.O05"
+      ],
+      "new_refs": [
+        "C1.2.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.2-P1-M04",
+      "old_refs": [
+        "C1.2.O06",
+        "C1.2.O07"
+      ],
+      "new_refs": [
+        "C1.2.O07"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.2-P2-M01",
+      "old_refs": [
+        "C1.2.O01"
+      ],
+      "new_refs": [
+        "C1.2.O01",
+        "C1.2.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.2-P2-M02",
+      "old_refs": [
+        "C1.2.O02"
+      ],
+      "new_refs": [
+        "C1.2.O03",
+        "C1.2.O04",
+        "C1.2.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.2-P2-M03",
+      "old_refs": [
+        "C1.2.O03",
+        "C1.2.O04"
+      ],
+      "new_refs": [
+        "C1.2.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.2-P2-M04",
+      "old_refs": [
+        "C1.2.O05"
+      ],
+      "new_refs": [
+        "C1.2.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.2-P2-M05",
+      "old_refs": [
+        "C1.2.O06",
+        "C1.2.O07"
+      ],
+      "new_refs": [
+        "C1.2.O03",
+        "C1.2.O05",
+        "C1.2.O07"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.2-P3-M01",
+      "old_refs": [
+        "C1.2.O01"
+      ],
+      "new_refs": [
+        "C1.2.O02",
+        "C1.2.O03",
+        "C1.2.O04",
+        "C1.2.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.2-P3-M02",
+      "old_refs": [
+        "C1.2.O02",
+        "C1.2.O03"
+      ],
+      "new_refs": [
+        "C1.2.O01",
+        "C1.2.O02",
+        "C1.2.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.2-P3-M03",
+      "old_refs": [
+        "C1.2.O04",
+        "C1.2.O05"
+      ],
+      "new_refs": [
+        "C1.2.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.2-P3-M04",
+      "old_refs": [
+        "C1.2.O06",
+        "C1.2.O07"
+      ],
+      "new_refs": [
+        "C1.2.O07"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.3-P1-M01",
+      "old_refs": [
+        "C1.3.O01"
+      ],
+      "new_refs": [
+        "C1.3.O01"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.3-P1-M02",
+      "old_refs": [
+        "C1.3.O02"
+      ],
+      "new_refs": [
+        "C1.3.O02",
+        "C1.3.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.3-P1-M03",
+      "old_refs": [
+        "C1.3.O03"
+      ],
+      "new_refs": [
+        "C1.3.O02",
+        "C1.3.O03",
+        "C1.3.O04"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.3-P1-M04",
+      "old_refs": [
+        "C1.3.O04",
+        "C1.3.O05"
+      ],
+      "new_refs": [
+        "C1.3.O04",
+        "C1.3.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.3-P2-M01",
+      "old_refs": [
+        "C1.3.O01"
+      ],
+      "new_refs": [
+        "C1.3.O01"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.3-P2-M02",
+      "old_refs": [
+        "C1.3.O02"
+      ],
+      "new_refs": [
+        "C1.3.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.3-P2-M03",
+      "old_refs": [
+        "C1.3.O03"
+      ],
+      "new_refs": [
+        "C1.3.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.3-P2-M04",
+      "old_refs": [
+        "C1.3.O04"
+      ],
+      "new_refs": [
+        "C1.3.O04"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.3-P2-M05",
+      "old_refs": [
+        "C1.3.O05"
+      ],
+      "new_refs": [
+        "C1.3.O04",
+        "C1.3.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.3-P3-M01",
+      "old_refs": [
+        "C1.3.O01"
+      ],
+      "new_refs": [
+        "C1.3.O01",
+        "C1.3.O02",
+        "C1.3.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.3-P3-M02",
+      "old_refs": [
+        "C1.3.O02"
+      ],
+      "new_refs": [
+        "C1.3.O03",
+        "C1.3.O04"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.3-P3-M03",
+      "old_refs": [
+        "C1.3.O03"
+      ],
+      "new_refs": [
+        "C1.3.O02",
+        "C1.3.O04",
+        "C1.3.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.3-P3-M04",
+      "old_refs": [
+        "C1.3.O04",
+        "C1.3.O05"
+      ],
+      "new_refs": [
+        "C1.3.O01",
+        "C1.3.O03",
+        "C1.3.O04",
+        "C1.3.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.4-P1-M01",
+      "old_refs": [
+        "C1.4.O01"
+      ],
+      "new_refs": [
+        "C1.4.O01",
+        "C1.4.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.4-P1-M02",
+      "old_refs": [
+        "C1.4.O02",
+        "C1.4.O03"
+      ],
+      "new_refs": [
+        "C1.4.O01",
+        "C1.4.O02",
+        "C1.4.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.4-P1-M03",
+      "old_refs": [
+        "C1.4.O04"
+      ],
+      "new_refs": [
+        "C1.4.O04"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.4-P1-M04",
+      "old_refs": [
+        "C1.4.O05",
+        "C1.4.O06"
+      ],
+      "new_refs": [
+        "C1.4.O05",
+        "C1.4.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.4-P2-M01",
+      "old_refs": [
+        "C1.4.O01"
+      ],
+      "new_refs": [
+        "C1.4.O01",
+        "C1.4.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.4-P2-M02",
+      "old_refs": [
+        "C1.4.O02"
+      ],
+      "new_refs": [
+        "C1.4.O01",
+        "C1.4.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.4-P2-M03",
+      "old_refs": [
+        "C1.4.O03"
+      ],
+      "new_refs": [
+        "C1.4.O02",
+        "C1.4.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.4-P2-M04",
+      "old_refs": [
+        "C1.4.O04"
+      ],
+      "new_refs": [
+        "C1.4.O04"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.4-P2-M05",
+      "old_refs": [
+        "C1.4.O05",
+        "C1.4.O06"
+      ],
+      "new_refs": [
+        "C1.4.O05",
+        "C1.4.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.4-P3-M01",
+      "old_refs": [
+        "C1.4.O01"
+      ],
+      "new_refs": [
+        "C1.4.O01",
+        "C1.4.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.4-P3-M02",
+      "old_refs": [
+        "C1.4.O02",
+        "C1.4.O03"
+      ],
+      "new_refs": [
+        "C1.4.O01",
+        "C1.4.O02",
+        "C1.4.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.4-P3-M03",
+      "old_refs": [
+        "C1.4.O04"
+      ],
+      "new_refs": [
+        "C1.4.O04",
+        "C1.4.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C1.4-P3-M04",
+      "old_refs": [
+        "C1.4.O05",
+        "C1.4.O06"
+      ],
+      "new_refs": [
+        "C1.4.O05",
+        "C1.4.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.1-P2-M01",
+      "old_refs": [
+        "C2.1.O01"
+      ],
+      "new_refs": [
+        "C2.1.O01",
+        "C2.1.O02"
+      ],
+      "action_revised": false
+    },
+    {
+      "move_id": "C2.1-P3-M01",
+      "old_refs": [
+        "C2.1.O01"
+      ],
+      "new_refs": [
+        "C2.1.O01",
+        "C2.1.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.1-P3-M02",
+      "old_refs": [
+        "C2.1.O02",
+        "C2.1.O03"
+      ],
+      "new_refs": [
+        "C2.1.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.1-P3-M03",
+      "old_refs": [
+        "C2.1.O04"
+      ],
+      "new_refs": [
+        "C2.1.O04"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.1-P3-M04",
+      "old_refs": [
+        "C2.1.O05",
+        "C2.1.O06"
+      ],
+      "new_refs": [
+        "C2.1.O03",
+        "C2.1.O05",
+        "C2.1.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.2-P1-M01",
+      "old_refs": [
+        "C2.2.O01"
+      ],
+      "new_refs": [
+        "C2.2.O01",
+        "C2.2.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.2-P1-M02",
+      "old_refs": [
+        "C2.2.O02",
+        "C2.2.O03"
+      ],
+      "new_refs": [
+        "C2.2.O02",
+        "C2.2.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.2-P1-M03",
+      "old_refs": [
+        "C2.2.O04"
+      ],
+      "new_refs": [
+        "C2.2.O04",
+        "C2.2.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.2-P1-M04",
+      "old_refs": [
+        "C2.2.O05",
+        "C2.2.O06"
+      ],
+      "new_refs": [
+        "C2.2.O05",
+        "C2.2.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.2-P2-M01",
+      "old_refs": [
+        "C2.2.O01"
+      ],
+      "new_refs": [
+        "C2.2.O01",
+        "C2.2.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.2-P2-M02",
+      "old_refs": [
+        "C2.2.O02"
+      ],
+      "new_refs": [
+        "C2.2.O02",
+        "C2.2.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.2-P2-M03",
+      "old_refs": [
+        "C2.2.O03"
+      ],
+      "new_refs": [
+        "C2.2.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.2-P2-M04",
+      "old_refs": [
+        "C2.2.O04"
+      ],
+      "new_refs": [
+        "C2.2.O04",
+        "C2.2.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.2-P2-M05",
+      "old_refs": [
+        "C2.2.O05",
+        "C2.2.O06"
+      ],
+      "new_refs": [
+        "C2.2.O05",
+        "C2.2.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.2-P3-M01",
+      "old_refs": [
+        "C2.2.O01"
+      ],
+      "new_refs": [
+        "C2.2.O01"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.2-P3-M02",
+      "old_refs": [
+        "C2.2.O02",
+        "C2.2.O03"
+      ],
+      "new_refs": [
+        "C2.2.O02",
+        "C2.2.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.2-P3-M03",
+      "old_refs": [
+        "C2.2.O04"
+      ],
+      "new_refs": [
+        "C2.2.O04",
+        "C2.2.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.2-P3-M04",
+      "old_refs": [
+        "C2.2.O05",
+        "C2.2.O06"
+      ],
+      "new_refs": [
+        "C2.2.O05",
+        "C2.2.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.3-P1-M01",
+      "old_refs": [
+        "C2.3.O01"
+      ],
+      "new_refs": [
+        "C2.3.O01",
+        "C2.3.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.3-P1-M02",
+      "old_refs": [
+        "C2.3.O02",
+        "C2.3.O03"
+      ],
+      "new_refs": [
+        "C2.3.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.3-P1-M03",
+      "old_refs": [
+        "C2.3.O04"
+      ],
+      "new_refs": [
+        "C2.3.O03",
+        "C2.3.O04"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.3-P1-M04",
+      "old_refs": [
+        "C2.3.O05",
+        "C2.3.O06"
+      ],
+      "new_refs": [
+        "C2.3.O05",
+        "C2.3.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.3-P2-M01",
+      "old_refs": [
+        "C2.3.O01"
+      ],
+      "new_refs": [
+        "C2.3.O01",
+        "C2.3.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.3-P2-M02",
+      "old_refs": [
+        "C2.3.O02"
+      ],
+      "new_refs": [
+        "C2.3.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.3-P2-M03",
+      "old_refs": [
+        "C2.3.O03"
+      ],
+      "new_refs": [
+        "C2.3.O02",
+        "C2.3.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.3-P2-M04",
+      "old_refs": [
+        "C2.3.O04"
+      ],
+      "new_refs": [
+        "C2.3.O04"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.3-P2-M05",
+      "old_refs": [
+        "C2.3.O05",
+        "C2.3.O06"
+      ],
+      "new_refs": [
+        "C2.3.O05",
+        "C2.3.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.3-P3-M01",
+      "old_refs": [
+        "C2.3.O01"
+      ],
+      "new_refs": [
+        "C2.3.O01"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.3-P3-M02",
+      "old_refs": [
+        "C2.3.O02",
+        "C2.3.O03"
+      ],
+      "new_refs": [
+        "C2.3.O01",
+        "C2.3.O02",
+        "C2.3.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.3-P3-M03",
+      "old_refs": [
+        "C2.3.O04"
+      ],
+      "new_refs": [
+        "C2.3.O02",
+        "C2.3.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.3-P3-M04",
+      "old_refs": [
+        "C2.3.O05",
+        "C2.3.O06"
+      ],
+      "new_refs": [
+        "C2.3.O04",
+        "C2.3.O05",
+        "C2.3.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.4-P1-M01",
+      "old_refs": [
+        "C2.4.O01"
+      ],
+      "new_refs": [
+        "C2.4.O01"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.4-P1-M02",
+      "old_refs": [
+        "C2.4.O02",
+        "C2.4.O03"
+      ],
+      "new_refs": [
+        "C2.4.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.4-P1-M03",
+      "old_refs": [
+        "C2.4.O04"
+      ],
+      "new_refs": [
+        "C2.4.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.4-P1-M04",
+      "old_refs": [
+        "C2.4.O05",
+        "C2.4.O06"
+      ],
+      "new_refs": [
+        "C2.4.O04",
+        "C2.4.O05",
+        "C2.4.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.4-P2-M01",
+      "old_refs": [
+        "C2.4.O01"
+      ],
+      "new_refs": [
+        "C2.4.O01"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.4-P2-M02",
+      "old_refs": [
+        "C2.4.O02"
+      ],
+      "new_refs": [
+        "C2.4.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.4-P2-M03",
+      "old_refs": [
+        "C2.4.O03"
+      ],
+      "new_refs": [
+        "C2.4.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.4-P2-M04",
+      "old_refs": [
+        "C2.4.O04"
+      ],
+      "new_refs": [
+        "C2.4.O04",
+        "C2.4.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.4-P2-M05",
+      "old_refs": [
+        "C2.4.O05",
+        "C2.4.O06"
+      ],
+      "new_refs": [
+        "C2.4.O02",
+        "C2.4.O03",
+        "C2.4.O04",
+        "C2.4.O05",
+        "C2.4.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.4-P3-M01",
+      "old_refs": [
+        "C2.4.O01"
+      ],
+      "new_refs": [
+        "C2.4.O01",
+        "C2.4.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.4-P3-M02",
+      "old_refs": [
+        "C2.4.O02",
+        "C2.4.O03"
+      ],
+      "new_refs": [
+        "C2.4.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.4-P3-M03",
+      "old_refs": [
+        "C2.4.O04"
+      ],
+      "new_refs": [
+        "C2.4.O04",
+        "C2.4.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C2.4-P3-M04",
+      "old_refs": [
+        "C2.4.O05",
+        "C2.4.O06"
+      ],
+      "new_refs": [
+        "C2.4.O02",
+        "C2.4.O05",
+        "C2.4.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C3.1-P1-M01",
+      "old_refs": [
+        "C3.1.O01"
+      ],
+      "new_refs": [
+        "C3.1.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C3.1-P1-M02",
+      "old_refs": [
+        "C3.1.O02",
+        "C3.1.O03"
+      ],
+      "new_refs": [
+        "C3.1.O01",
+        "C3.1.O02",
+        "C3.1.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C3.1-P1-M03",
+      "old_refs": [
+        "C3.1.O04"
+      ],
+      "new_refs": [
+        "C3.1.O04",
+        "C3.1.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C3.1-P1-M04",
+      "old_refs": [
+        "C3.1.O05",
+        "C3.1.O06"
+      ],
+      "new_refs": [
+        "C3.1.O05",
+        "C3.1.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C3.1-P2-M01",
+      "old_refs": [
+        "C3.1.O01"
+      ],
+      "new_refs": [
+        "C3.1.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C3.1-P2-M02",
+      "old_refs": [
+        "C3.1.O02"
+      ],
+      "new_refs": [
+        "C3.1.O01"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C3.1-P2-M03",
+      "old_refs": [
+        "C3.1.O03"
+      ],
+      "new_refs": [
+        "C3.1.O02",
+        "C3.1.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C3.1-P2-M04",
+      "old_refs": [
+        "C3.1.O04"
+      ],
+      "new_refs": [
+        "C3.1.O04",
+        "C3.1.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C3.1-P2-M05",
+      "old_refs": [
+        "C3.1.O05",
+        "C3.1.O06"
+      ],
+      "new_refs": [
+        "C3.1.O03",
+        "C3.1.O05",
+        "C3.1.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C3.1-P3-M01",
+      "old_refs": [
+        "C3.1.O01"
+      ],
+      "new_refs": [
+        "C3.1.O01",
+        "C3.1.O02",
+        "C3.1.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C3.1-P3-M02",
+      "old_refs": [
+        "C3.1.O02",
+        "C3.1.O03"
+      ],
+      "new_refs": [
+        "C3.1.O01",
+        "C3.1.O02",
+        "C3.1.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C3.1-P3-M03",
+      "old_refs": [
+        "C3.1.O04"
+      ],
+      "new_refs": [
+        "C3.1.O04",
+        "C3.1.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C3.1-P3-M04",
+      "old_refs": [
+        "C3.1.O05",
+        "C3.1.O06"
+      ],
+      "new_refs": [
+        "C3.1.O05",
+        "C3.1.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C3.2-P2-M02",
+      "old_refs": [
+        "C3.2.O02"
+      ],
+      "new_refs": [
+        "C3.2.O01",
+        "C3.2.O05"
+      ],
+      "action_revised": false
+    },
+    {
+      "move_id": "C3.2-P2-M03",
+      "old_refs": [
+        "C3.2.O03"
+      ],
+      "new_refs": [
+        "C3.2.O02",
+        "C3.2.O03"
+      ],
+      "action_revised": false
+    },
+    {
+      "move_id": "C3.2-P3-M01",
+      "old_refs": [
+        "C3.2.O01"
+      ],
+      "new_refs": [
+        "C3.2.O01",
+        "C3.2.O02",
+        "C3.2.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C3.2-P3-M02",
+      "old_refs": [
+        "C3.2.O02",
+        "C3.2.O03"
+      ],
+      "new_refs": [
+        "C3.2.O02",
+        "C3.2.O04"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C3.2-P3-M03",
+      "old_refs": [
+        "C3.2.O04"
+      ],
+      "new_refs": [
+        "C3.2.O01",
+        "C3.2.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C3.2-P3-M04",
+      "old_refs": [
+        "C3.2.O05",
+        "C3.2.O06"
+      ],
+      "new_refs": [
+        "C3.2.O05",
+        "C3.2.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.1-P1-M01",
+      "old_refs": [
+        "C4.1.O01"
+      ],
+      "new_refs": [
+        "C4.1.O01",
+        "C4.1.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.1-P1-M02",
+      "old_refs": [
+        "C4.1.O02"
+      ],
+      "new_refs": [
+        "C4.1.O02",
+        "C4.1.O04"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.1-P1-M03",
+      "old_refs": [
+        "C4.1.O03"
+      ],
+      "new_refs": [
+        "C4.1.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.1-P1-M04",
+      "old_refs": [
+        "C4.1.O04",
+        "C4.1.O05"
+      ],
+      "new_refs": [
+        "C4.1.O04",
+        "C4.1.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.1-P2-M01",
+      "old_refs": [
+        "C4.1.O01"
+      ],
+      "new_refs": [
+        "C4.1.O01",
+        "C4.1.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.1-P2-M02",
+      "old_refs": [
+        "C4.1.O02"
+      ],
+      "new_refs": [
+        "C4.1.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.1-P2-M03",
+      "old_refs": [
+        "C4.1.O03"
+      ],
+      "new_refs": [
+        "C4.1.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.1-P2-M04",
+      "old_refs": [
+        "C4.1.O04"
+      ],
+      "new_refs": [
+        "C4.1.O04"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.1-P2-M05",
+      "old_refs": [
+        "C4.1.O05"
+      ],
+      "new_refs": [
+        "C4.1.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.1-P3-M01",
+      "old_refs": [
+        "C4.1.O01"
+      ],
+      "new_refs": [
+        "C4.1.O01",
+        "C4.1.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.1-P3-M02",
+      "old_refs": [
+        "C4.1.O02"
+      ],
+      "new_refs": [
+        "C4.1.O02",
+        "C4.1.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.1-P3-M03",
+      "old_refs": [
+        "C4.1.O03"
+      ],
+      "new_refs": [
+        "C4.1.O04"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.1-P3-M04",
+      "old_refs": [
+        "C4.1.O04",
+        "C4.1.O05"
+      ],
+      "new_refs": [
+        "C4.1.O04",
+        "C4.1.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.2-P1-M01",
+      "old_refs": [
+        "C4.2.O01"
+      ],
+      "new_refs": [
+        "C4.2.O01"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.2-P1-M02",
+      "old_refs": [
+        "C4.2.O02",
+        "C4.2.O03"
+      ],
+      "new_refs": [
+        "C4.2.O02",
+        "C4.2.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.2-P1-M03",
+      "old_refs": [
+        "C4.2.O04"
+      ],
+      "new_refs": [
+        "C4.2.O02",
+        "C4.2.O04",
+        "C4.2.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.2-P1-M04",
+      "old_refs": [
+        "C4.2.O05",
+        "C4.2.O06"
+      ],
+      "new_refs": [
+        "C4.2.O03",
+        "C4.2.O04",
+        "C4.2.O05",
+        "C4.2.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.2-P2-M01",
+      "old_refs": [
+        "C4.2.O01"
+      ],
+      "new_refs": [
+        "C4.2.O01"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.2-P2-M02",
+      "old_refs": [
+        "C4.2.O02"
+      ],
+      "new_refs": [
+        "C4.2.O01",
+        "C4.2.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.2-P2-M03",
+      "old_refs": [
+        "C4.2.O03"
+      ],
+      "new_refs": [
+        "C4.2.O02",
+        "C4.2.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.2-P2-M04",
+      "old_refs": [
+        "C4.2.O04"
+      ],
+      "new_refs": [
+        "C4.2.O02",
+        "C4.2.O04",
+        "C4.2.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.2-P2-M05",
+      "old_refs": [
+        "C4.2.O05",
+        "C4.2.O06"
+      ],
+      "new_refs": [
+        "C4.2.O03",
+        "C4.2.O04",
+        "C4.2.O05",
+        "C4.2.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.2-P3-M01",
+      "old_refs": [
+        "C4.2.O01"
+      ],
+      "new_refs": [
+        "C4.2.O01"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.2-P3-M02",
+      "old_refs": [
+        "C4.2.O02",
+        "C4.2.O03"
+      ],
+      "new_refs": [
+        "C4.2.O02",
+        "C4.2.O03",
+        "C4.2.O04",
+        "C4.2.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.2-P3-M03",
+      "old_refs": [
+        "C4.2.O04"
+      ],
+      "new_refs": [
+        "C4.2.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.2-P3-M04",
+      "old_refs": [
+        "C4.2.O05",
+        "C4.2.O06"
+      ],
+      "new_refs": [
+        "C4.2.O03",
+        "C4.2.O04",
+        "C4.2.O05",
+        "C4.2.O06"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.3-P1-M01",
+      "old_refs": [
+        "C4.3.O01"
+      ],
+      "new_refs": [
+        "C4.3.O01"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.3-P1-M02",
+      "old_refs": [
+        "C4.3.O02",
+        "C4.3.O03"
+      ],
+      "new_refs": [
+        "C4.3.O02",
+        "C4.3.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.3-P1-M03",
+      "old_refs": [
+        "C4.3.O04",
+        "C4.3.O05"
+      ],
+      "new_refs": [
+        "C4.3.O04",
+        "C4.3.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.3-P1-M04",
+      "old_refs": [
+        "C4.3.O06",
+        "C4.3.O07"
+      ],
+      "new_refs": [
+        "C4.3.O06",
+        "C4.3.O07"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.3-P2-M01",
+      "old_refs": [
+        "C4.3.O01"
+      ],
+      "new_refs": [
+        "C4.3.O01"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.3-P2-M02",
+      "old_refs": [
+        "C4.3.O02"
+      ],
+      "new_refs": [
+        "C4.3.O02"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.3-P2-M03",
+      "old_refs": [
+        "C4.3.O03",
+        "C4.3.O04"
+      ],
+      "new_refs": [
+        "C4.3.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.3-P2-M04",
+      "old_refs": [
+        "C4.3.O05"
+      ],
+      "new_refs": [
+        "C4.3.O04",
+        "C4.3.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.3-P2-M05",
+      "old_refs": [
+        "C4.3.O06",
+        "C4.3.O07"
+      ],
+      "new_refs": [
+        "C4.3.O06",
+        "C4.3.O07"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.3-P3-M01",
+      "old_refs": [
+        "C4.3.O01"
+      ],
+      "new_refs": [
+        "C4.3.O01",
+        "C4.3.O02",
+        "C4.3.O03"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.3-P3-M02",
+      "old_refs": [
+        "C4.3.O02",
+        "C4.3.O03"
+      ],
+      "new_refs": [
+        "C4.3.O04"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.3-P3-M03",
+      "old_refs": [
+        "C4.3.O04",
+        "C4.3.O05"
+      ],
+      "new_refs": [
+        "C4.3.O04",
+        "C4.3.O05"
+      ],
+      "action_revised": true
+    },
+    {
+      "move_id": "C4.3-P3-M04",
+      "old_refs": [
+        "C4.3.O06",
+        "C4.3.O07"
+      ],
+      "new_refs": [
+        "C4.3.O06",
+        "C4.3.O07"
+      ],
+      "action_revised": true
+    }
+  ],
+  "remaining_limitations": [
+    "Automated validation and assistant-authored semantic mapping do not replace independent expert review.",
+    "Candidate budgets and Judge timing require approval/calibration.",
+    "Actual Tutor and Conversation Judge transcripts have not been tested.",
+    "Study runtime, DB and UI remain v0.4; this ZIP is not drop-in compatible."
+  ]
+}

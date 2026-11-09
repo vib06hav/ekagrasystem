@@ -1,0 +1,429 @@
+schema: ekagra.scientific.curriculum.v0.5-candidate
+status: CANDIDATE_UNAPPROVED_REQUIRES_HUMAN_REVIEW_AND_RUNTIME_INTEGRATION
+content_authority: CURRICULUM_SOURCE_LOCKED.md (v1.0, 2026-11-08); bullet text and goals reproduced without rewriting.
+audience: Indian Class-12 graduate; no prior bit or networking knowledge assumed.
+curriculum_integrity: Teaching or assessment specifications may operationalize but must not edit or supersede locked
+  required_content and boundaries.
+sections:
+- id: C1
+  title: Fundamentals of Error Detection
+  solo_transition:
+    from: P
+    to: U
+  locked_section_goal: Establish a basic, usable sender/receiver parity mechanism; P→U requires one usable aspect, not
+    an integrated causal account.
+  dependency_chain: Data and bits → transmission corruption → checking information → even/odd parity construction and
+    receiver verification
+  subsection_ids:
+  - C1.1
+  - C1.2
+  - C1.3
+  - C1.4
+  assessment_boundary: Formal SOLO evidence is measured only by the independent end-of-section assessment, never by subsection
+    completion.
+- id: C2
+  title: Capabilities and Limitations of Parity-Based Error Detection
+  solo_transition:
+    from: U
+    to: M
+  locked_section_goal: Teach several distinct correct 1D/2D capabilities and limits without requiring the C3 integrated
+    causal account.
+  dependency_chain: Single-parity limitations → full 2D construction → conditional single-error correction → two-error
+    detection
+  subsection_ids:
+  - C2.1
+  - C2.2
+  - C2.3
+  - C2.4
+  assessment_boundary: Formal SOLO evidence is measured only by the independent end-of-section assessment, never by subsection
+    completion.
+- id: C3
+  title: Understanding and Interpreting Parity-Check Results
+  solo_transition:
+    from: M
+    to: R
+  locked_section_goal: Teach integrated, bidirectional causal reasoning from flipped positions to checks and from checks
+    to possible errors; familiar 1D/2D only.
+  dependency_chain: Causal effects of flip membership → inference from observed checks and limits
+  subsection_ids:
+  - C3.1
+  - C3.2
+  assessment_boundary: Formal SOLO evidence is measured only by the independent end-of-section assessment, never by subsection
+    completion.
+- id: C4
+  title: Generalizing and Evaluating Parity-Based Error Detection
+  solo_transition:
+    from: R
+    to: EA
+  locked_section_goal: Teach abstraction beyond grid checks, justified general conditions, counterexamples, and evaluating
+    an added rule, not a novel coding algorithm.
+  dependency_chain: General checking groups → detection/evasion principle → justify unfamiliar predictions and added
+    checks
+  subsection_ids:
+  - C4.1
+  - C4.2
+  - C4.3
+  assessment_boundary: Formal SOLO evidence is measured only by the independent end-of-section assessment, never by subsection
+    completion.
+subsections:
+- id: C1.1
+  section_id: C1
+  order_in_section: 1
+  title: Data and Bits
+  teaching_goal: Understand what is being transmitted between computer systems and how that information is represented
+    using bits.
+  required_content:
+  - id: C1.1.O01
+    required_fact: What information and data mean in the context of digital communication.
+  - id: C1.1.O02
+    required_fact: The idea that information exchanged between digital systems is represented as bits.
+  - id: C1.1.O03
+    required_fact: What a bit is and why its possible values are `0` and `1`, at an introductory conceptual level.
+  - id: C1.1.O04
+    required_fact: How individual bits form sequences representing digital data.
+  - id: C1.1.O05
+    required_fact: Basic recognition of bit positions and counting `1`s, only as needed for later parity work.
+  boundaries:
+  - kind: Depth boundary
+    text: A brief, sufficient introduction; **not** a lesson on binary arithmetic, numeric-base conversion, character
+      encoding, bytes, physical electronics, or computer architecture.
+  status: CONTENT_LOCKED_FROM_SOURCE
+  source_heading: '### 1.1 — Data and Bits'
+- id: C1.2
+  section_id: C1
+  order_in_section: 2
+  title: Data Communication and Transmission Errors
+  teaching_goal: Understand how data may become corrupted during communication, precisely what transmission error is
+    being studied, and why a receiver needs an error-detection mechanism.
+  required_content:
+  - id: C1.2.O01
+    required_fact: 'Communication between systems: sender, receiver, and transmission channel/medium.'
+  - id: C1.2.O02
+    required_fact: What it means to send and receive a sequence of bits.
+  - id: C1.2.O03
+    required_fact: 'What transmission corruption means: a mismatch between the bit sequence sent and the bit sequence
+      received.'
+  - id: C1.2.O04
+    required_fact: 'The bit-flip model: a sent `0` arriving as `1`, or a sent `1` arriving as `0`.'
+  - id: C1.2.O05
+    required_fact: 'Where the relevant error occurs: **during transmission**, as represented by a changed received bit
+      value.'
+  - id: C1.2.O06
+    required_fact: Why the receiver ordinarily lacks a direct copy of the original data and cannot simply inspect the
+      received sequence to know whether it was altered.
+  - id: C1.2.O07
+    required_fact: The consequent need for a way to detect possible corruption.
+  boundaries:
+  - kind: Depth boundary
+    text: The course does not study software bugs, wrong calculations, lost packets, or detailed physical noise processes
+      as its error model.
+  status: CONTENT_LOCKED_FROM_SOURCE
+  source_heading: '### 1.2 — Data Communication and Transmission Errors'
+- id: C1.3
+  section_id: C1
+  order_in_section: 3
+  title: Additional Checking Information and Parity Bits
+  teaching_goal: Understand why additional checking information is introduced, what a parity bit is, and why its value
+    depends on the original data and an agreed rule.
+  required_content:
+  - id: C1.3.O01
+    required_fact: The motivation for transmitting extra information that helps the receiver check for corruption.
+  - id: C1.3.O02
+    required_fact: '**Redundancy:** additional transmitted information used for checking rather than being part of the
+      original payload.'
+  - id: C1.3.O03
+    required_fact: Introducing a **parity bit** as one extra checking bit whose value depends on the original data.
+  - id: C1.3.O04
+    required_fact: The principle that the parity bit is determined by an **agreed rule**, not selected arbitrarily.
+  - id: C1.3.O05
+    required_fact: Why sender and receiver must use the same checking convention.
+  boundaries:
+  - kind: Boundary with 1.4
+    text: Establish the *purpose and definition* of a check bit here. **Do not require calculation of a concrete parity-bit
+      value before introducing the even/odd rule in 1.4.**
+  status: CONTENT_LOCKED_FROM_SOURCE
+  source_heading: '### 1.3 — Additional Checking Information and Parity Bits'
+- id: C1.4
+  section_id: C1
+  order_in_section: 4
+  title: Even and Odd Parity Rules and Error Detection
+  teaching_goal: Understand how both even- and odd-parity conventions allow the sender to construct a checkable message
+    and the receiver to detect a parity-rule violation.
+  required_content:
+  - id: C1.4.O01
+    required_fact: '**Even parity:** choose the parity bit so that the **complete transmitted bit sequence**, including
+      that bit, contains an even number of `1`s.'
+  - id: C1.4.O02
+    required_fact: '**Odd parity:** choose the parity bit so that the complete transmitted bit sequence contains an odd
+      number of `1`s.'
+  - id: C1.4.O03
+    required_fact: Counting the `1`s in the original data and calculating/appending the parity bit under **both** conventions.
+  - id: C1.4.O04
+    required_fact: 'Receiver-side checking: count the `1`s in the **complete received sequence, including the parity
+      bit**, and test the agreed convention.'
+  - id: C1.4.O05
+    required_fact: 'Interpreting the result: a **failed** check detects a violation of the convention; a **passed** check
+      means that this convention was satisfied, not that transmission was certainly error-free.'
+  - id: C1.4.O06
+    required_fact: Basic distinction among **detecting**, **locating**, and **correcting** an error. The detailed limitations
+      are developed in C2.
+  boundaries:
+  - kind: Boundary with C2
+    text: C1 requires counting the number of `1`s in a message to construct/check parity. It does **not** require the
+      general theorem about **odd versus even numbers of flipped transmitted bits**. Those are different counts, and
+      the detection-limit theorem is C2 content.
+  status: CONTENT_LOCKED_FROM_SOURCE
+  source_heading: '### 1.4 — Even and Odd Parity Rules and Error Detection'
+- id: C2.1
+  section_id: C2
+  order_in_section: 1
+  title: Limitations of Single Parity
+  teaching_goal: 'Understand the two major limitations of a single parity check: lack of error localization and missed
+    even-flip error patterns.'
+  required_content:
+  - id: C2.1.O01
+    required_fact: Briefly reconnect with the parity construction and verification learned in C1; do not reteach it as
+      a new mechanism.
+  - id: C2.1.O02
+    required_fact: What happens when one or several transmitted bits flip.
+  - id: C2.1.O03
+    required_fact: The rule that **odd numbers of flipped bits are detected**, whereas **even numbers of flipped bits
+      leave a single parity check satisfied**, assuming the transmitted sequence initially met its rule. This applies
+      to either even- or odd-parity convention.
+  - id: C2.1.O04
+    required_fact: Why a single overall parity check cannot, on its own, identify **which bit** changed, even if exactly
+      one bit flipped.
+  - id: C2.1.O05
+    required_fact: Detection versus localization versus correction, in relation to the limitations above.
+  - id: C2.1.O06
+    required_fact: 'The **two distinct limitations** motivating a richer checking arrangement: inability to locate an
+      error, and failure to detect particular multi-bit error patterns.'
+  boundaries:
+  - kind: Scientific qualification
+    text: Do **not** say single parity cannot detect multiple errors generally. It detects odd numbers of flips, including
+      three, five, etc.
+  status: CONTENT_LOCKED_FROM_SOURCE
+  source_heading: '### 2.1 — Limitations of Single Parity'
+- id: C2.2
+  section_id: C2
+  order_in_section: 2
+  title: Introduction and Construction of Two-Dimensional Parity
+  teaching_goal: Understand how full two-dimensional parity is constructed and how multiple row and column checks operate
+    on the transmitted bits.
+  required_content:
+  - id: C2.2.O01
+    required_fact: Motivation for checking information organized into multiple constraints instead of one overall parity
+      check.
+  - id: C2.2.O02
+    required_fact: Arranging original data bits in **rows and columns**.
+  - id: C2.2.O03
+    required_fact: Calculating and adding a parity bit for each data row and each data column.
+  - id: C2.2.O04
+    required_fact: The **corner parity bit** and the complete transmitted rectangular grid.
+  - id: C2.2.O05
+    required_fact: Using an agreed parity convention to make each **complete row and complete column** satisfy its parity
+      rule.
+  - id: C2.2.O06
+    required_fact: How the receiver verifies all row and column checks of the **full transmitted grid**, including the
+      check-bit cells.
+  boundaries:
+  - kind: Scientific qualification
+    text: The course consistently uses **full 2D parity with the corner check bit**, not a partially specified row-only/column-only
+      variant.
+  status: CONTENT_LOCKED_FROM_SOURCE
+  source_heading: '### 2.2 — Introduction and Construction of Two-Dimensional Parity'
+- id: C2.3
+  section_id: C2
+  order_in_section: 3
+  title: Single-Bit Error Localization and Correction
+  teaching_goal: Understand how full two-dimensional parity can locate and correct a single flipped transmitted bit **under
+    the stated single-error assumption**.
+  required_content:
+  - id: C2.3.O01
+    required_fact: A transmission in which **exactly one transmitted bit** flips.
+  - id: C2.3.O02
+    required_fact: The resulting failed row and column checks.
+  - id: C2.3.O03
+    required_fact: Identifying the affected position at their intersection, including the possibility that the position
+      is a check-bit cell.
+  - id: C2.3.O04
+    required_fact: Correcting that one changed bit by reversing its received value.
+  - id: C2.3.O05
+    required_fact: The **exactly-one-error assumption** required for reliable localization and correction.
+  - id: C2.3.O06
+    required_fact: How this capability addresses the localization limitation of single parity.
+  boundaries:
+  - kind: Scientific qualification
+    text: The pattern “one failed row and one failed column” does not **prove** that exactly one bit changed; other error
+      patterns can yield the same checks (developed in C3).
+  status: CONTENT_LOCKED_FROM_SOURCE
+  source_heading: '### 2.3 — Single-Bit Error Localization and Correction'
+- id: C2.4
+  section_id: C2
+  order_in_section: 4
+  title: Two-Bit Error Detection
+  teaching_goal: Understand full 2D parity's two-bit detection guarantee and distinguish that guarantee from reliable
+    location or correction of both errors.
+  required_content:
+  - id: C2.4.O01
+    required_fact: A transmission in which **two distinct transmitted bits** flip.
+  - id: C2.4.O02
+    required_fact: The fact that **full two-dimensional parity detects every two-bit error pattern**.
+  - id: C2.4.O03
+    required_fact: Comparison with single parity, which misses every two-bit flip pattern.
+  - id: C2.4.O04
+    required_fact: The distinction between **detecting** the two-bit corruption and uniquely **locating/correcting both**
+      changed bits.
+  - id: C2.4.O05
+    required_fact: The fact that full 2D parity does **not generally** correct arbitrary two-bit errors uniquely.
+  - id: C2.4.O06
+    required_fact: The contrast between single-error conditional correction and two-error detection.
+  boundaries:
+  - kind: Boundary with C3
+    text: C2 establishes the capabilities and caveats. It does not require a unified derivation of all row/column outcomes
+      or complex patterns such as deceptive three-bit results or undetected four-bit rectangles.
+  status: CONTENT_LOCKED_FROM_SOURCE
+  source_heading: '### 2.4 — Two-Bit Error Detection'
+- id: C3.1
+  section_id: C3
+  order_in_section: 1
+  title: Understanding the Relationships Behind Checking Results
+  teaching_goal: Develop an integrated explanation of how bit positions, checking-group membership, and the combined
+    effects of changes produce observed parity-check results.
+  required_content:
+  - id: C3.1.O01
+    required_fact: How changing one transmitted bit affects **every check that includes that bit**.
+  - id: C3.1.O02
+    required_fact: How multiple flipped bits combine within a given check.
+  - id: C3.1.O03
+    required_fact: Why an **odd** number of flips within a checking group reverses whether that check passes, while an
+      **even** number leaves its result unchanged, relative to an initially valid transmitted group.
+  - id: C3.1.O04
+    required_fact: How the **positions and combinations** of changes determine which familiar row and column checks pass
+      or fail.
+  - id: C3.1.O05
+    required_fact: Connecting these causal relationships to the single- and two-dimensional parity properties already
+      learned in C2.
+  - id: C3.1.O06
+    required_fact: Reasoning **from an error pattern to checking results**, explaining *why* the observations arise rather
+      than memorizing outcomes.
+  boundaries: []
+  status: CONTENT_LOCKED_FROM_SOURCE
+  source_heading: '### 3.1 — Understanding the Relationships Behind Checking Results'
+- id: C3.2
+  section_id: C3
+  order_in_section: 2
+  title: Interpreting Checking Evidence and Its Limitations
+  teaching_goal: Interpret checking evidence using a causal model, explain why ambiguous or undetected outcomes arise,
+    and distinguish justified inference from unsupported assumptions.
+  required_content:
+  - id: C3.2.O01
+    required_fact: Reasoning **from observed checking results to possible error patterns**, without assuming that the
+      original data are directly available to the receiver.
+  - id: C3.2.O02
+    required_fact: Understanding that **different actual error patterns can produce identical checking results**.
+  - id: C3.2.O03
+    required_fact: Explaining how a multi-bit pattern can imitate the checking result of one changed bit, so correction
+      based on a presumed one-error case may be unjustified.
+  - id: C3.2.O04
+    required_fact: Explaining how some multiple-error arrangements remain undetected, including the familiar **four-corner
+      rectangle** in a row/column parity grid.
+  - id: C3.2.O05
+    required_fact: Understanding how the number-of-errors assumption affects justified localization/correction claims.
+  - id: C3.2.O06
+    required_fact: Integrating changed positions, affected rules, pass/fail patterns, ambiguity, and limits of receiver
+      inference into coherent explanations.
+  boundaries:
+  - kind: Explanatory role of representative patterns
+    text: Same-row versus different-row/column two-bit changes, a deceptive three-bit arrangement, and an undetected
+      four-corner rectangle are examples supporting the **relational mechanism**, **not** independent error-pattern procedures
+      to memorize or an exhaustive enumeration requirement.
+  status: CONTENT_LOCKED_FROM_SOURCE
+  source_heading: '### 3.2 — Interpreting Checking Evidence and Its Limitations'
+- id: C4.1
+  section_id: C4
+  order_in_section: 1
+  title: Generalizing Parity Checking Beyond Rows and Columns
+  teaching_goal: Recognize the broader structure shared by familiar parity systems, and understand how a checking rule
+    can apply to explicitly defined groups outside a row/column grid.
+  required_content:
+  - id: C4.1.O01
+    required_fact: Revisiting single parity and 2D parity as **specific instances** of systems imposing parity rules
+      over selected bits.
+  - id: C4.1.O02
+    required_fact: 'Recognizing that a parity check does **not inherently require** a complete message, a row, or a column:
+      it can apply to an **explicitly chosen group of bits**.'
+  - id: C4.1.O03
+    required_fact: Understanding how multiple checking groups may **overlap**, so one bit may participate in several
+      rules.
+  - id: C4.1.O04
+    required_fact: Connecting a group's members and its associated check information with how the receiver verifies its
+      rule.
+  - id: C4.1.O05
+    required_fact: Relating this generalized representation back to the familiar rule established in C1–C3.
+  boundaries:
+  - kind: Critical prerequisite boundary
+    text: Introduce the meaning of an unfamiliar **checking group** clearly before demanding analysis. This is still
+      parity checking, **not a new error-detection algorithm**.
+  status: CONTENT_LOCKED_FROM_SOURCE
+  source_heading: '### 4.1 — Generalizing Parity Checking Beyond Rows and Columns'
+- id: C4.2
+  section_id: C4
+  order_in_section: 2
+  title: Developing General Principles of Error Detection
+  teaching_goal: Formulate and justify a principle that predicts when parity-based checking arrangements detect or miss
+    an error, **independently of the spatial arrangement of their checks**.
+  required_content:
+  - id: C4.2.O01
+    required_fact: Extending the familiar bit-flip/check-outcome relationships to **multiple overlapping groups**.
+  - id: C4.2.O02
+    required_fact: Reasoning about the effects of an error pattern on all relevant checking rules.
+  - id: C4.2.O03
+    required_fact: 'Developing and justifying the general condition for **detection**: at least one checking rule is
+      violated by the received message.'
+  - id: C4.2.O04
+    required_fact: 'Developing and justifying the condition for **non-detection**: all checking rules remain satisfied
+      despite corruption.'
+  - id: C4.2.O05
+    required_fact: 'In an initially valid parity system, establishing the equivalent flip-count condition: **every checking
+      group contains an even number of flipped transmitted bits** for the corruption to escape every check.'
+  - id: C4.2.O06
+    required_fact: Supporting or challenging general claims using reasoned examples and counterexamples.
+  boundaries:
+  - kind: Scope qualification
+    text: Group membership includes any transmitted checking bits that participate in a rule. The parity-preservation
+      condition holds for either even- or odd-parity conventions, provided the convention was satisfied before transmission.
+  status: CONTENT_LOCKED_FROM_SOURCE
+  source_heading: '### 4.2 — Developing General Principles of Error Detection'
+- id: C4.3
+  section_id: C4
+  order_in_section: 3
+  title: Applying and Evaluating Generalized Checking Principles
+  teaching_goal: Transfer a generalized parity principle to unfamiliar systems, and use it for **justified prediction,
+    counterexample, and critical evaluation**, not merely more parity calculations.
+  required_content:
+  - id: C4.3.O01
+    required_fact: Applying generalized checking principles to **small, unfamiliar and explicitly defined** overlapping
+      groups.
+  - id: C4.3.O02
+    required_fact: Predicting and justifying which specified error patterns are detected or undetected.
+  - id: C4.3.O03
+    required_fact: Identifying valid **counterexamples** to overbroad claims about a checking arrangement.
+  - id: C4.3.O04
+    required_fact: Evaluating whether one additional checking rule would detect a **specified previously undetected error
+      pattern**.
+  - id: C4.3.O05
+    required_fact: Recognizing that an extra rule may be redundant for the error patterns of interest, and therefore
+      may not add detection capability.
+  - id: C4.3.O06
+    required_fact: Recognizing the **redundancy overhead** of additional independent checking information and the trade-off
+      with detection capability.
+  - id: C4.3.O07
+    required_fact: Formulating and defending modest hypotheses or predictions about the consequences of changing a checking
+      arrangement.
+  boundaries:
+  - kind: Boundary
+    text: Designing an optimal detection system, developing CRC, or inventing a new coding algorithm is **not required**.
+      Evaluating a simple added rule is sufficient subject matter for the higher-order reasoning goal.
+  status: CONTENT_LOCKED_FROM_SOURCE
+  source_heading: '### 4.3 — Applying and Evaluating Generalized Checking Principles'

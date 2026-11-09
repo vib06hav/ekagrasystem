@@ -1,0 +1,40 @@
+{
+  "baseline": "F1 v0.4 (7 YAML, 4 prompt contracts, 12 pedagogy cells, 16 assessment blueprints and 64 slots)",
+  "new": "F1 v0.5.1 CORRECTED CANDIDATE (10 YAML, 5 role contracts, 54 treatment specs, same 64 slots)",
+  "changes": [
+    {
+      "area": "course",
+      "note": "13 locked, verbatim subsection content lists and goals in curriculum.yaml."
+    },
+    {
+      "area": "pedagogy",
+      "note": "Retained 3 global and 12 parent cells; authored 39 child cells with detailed moves, boundaries and candidate exposure constraints."
+    },
+    {
+      "area": "conversation",
+      "note": "New LLM semantic Conversation Judge role separated from blind formal Subjective Judge; evidence-based suggestion with runtime gate."
+    },
+    {
+      "area": "assessment",
+      "note": "Preserved exact item IDs; replaced C2-A4 and C3-A4 and clarified C4-A1 scope."
+    },
+    {
+      "area": "verification",
+      "note": "Extended scenario rules for beginner and C3 ambiguity examples, with mathematical oracle validation and candidate warnings."
+    },
+    {
+      "area": "runtime",
+      "note": "No implementation changes; old loader and TutorProse incompatible until upgraded."
+    },
+    {
+      "area": "v0.5.1 correction",
+      "note": "Audited 169 local teaching moves across 39 cells, corrected reference/action semantics and C4-A2 scope; see CORRECTION_REPORT.md."
+    }
+  ],
+  "candidate_unlocked_decisions": [
+    "Numeric range/caps per child treatment",
+    "LLM Conversation Judge frequency and recovery behavior",
+    "Formal pilot calibration and approval",
+    "Exhausted forms/retry policies are inherited but not freshly validated"
+  ]
+}

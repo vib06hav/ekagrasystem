@@ -22,11 +22,12 @@ from solo_harness.runtime.v04_assessment import RecordedResult
 class PersistedModelInvoker:
     """Scope to one current session/attempt/assessment, shared real/fake transport."""
 
-    def __init__(self, db, ai: AIExecutionRuntime, session_id, assessment_id):
+    def __init__(self, db, ai: AIExecutionRuntime, session_id, assessment_id, audit_version="v04"):
         self.db = db
         self.ai = ai
         self.session_id = session_id
         self.assessment_id = assessment_id
+        self.audit_version = audit_version
 
     async def __call__(self, role: str, messages: tuple, schema: type[BaseModel], audit: dict[str, Any]) -> RecordedResult:
         db = self.db
@@ -37,7 +38,7 @@ class PersistedModelInvoker:
         assessment = db.get(AssessmentInstance, self.assessment_id)
         if not attempt or not assessment or assessment.attempt_id != attempt.id or assessment.status != "GENERATING":
             raise ValueError("assessment generation is not active")
-        expected_audit = {"v04": True, **audit}
+        expected_audit = {self.audit_version: True, **audit}
         # Recovery re-enters the constructor after a process failure.  Reuse a
         # durable received/applied role output for this exact constructor step;
         # it is already an audited provider response and must never be sent again.

@@ -8,7 +8,7 @@ import uuid
 from sqlalchemy import select
 from sqlalchemy.orm import Session as DbSession
 
-from solo_harness.db.models import AssessmentInstance, AssessmentResponse, Attempt, Judgment, LearnerHistorySnapshot, LLMCall, Message, ProtocolEvent, RubricEvaluation, Session
+from solo_harness.db.models import AssessmentInstance, AssessmentResponse, Attempt, ConversationJudgeDecision, Judgment, LearnerHistorySnapshot, LLMCall, Message, ProtocolEvent, RubricEvaluation, Session, SubsectionProgress
 from solo_harness.studies.catalog import StudyCatalog
 
 
@@ -97,8 +97,231 @@ class SessionRuntime:
             raise ValueError("transition already has a completion outcome")
         self._event(db,session,"SECTION_COMPLETED",{"transition_id":attempt.transition_id,"scientific_outcome":scientific_outcome,"formal_state_advanced":formal_state_advanced},attempt.id)
     def _compiled(self, db, session): return self.catalog.load(db, session.study_version_id)
+
+    @staticmethod
+    def _v051(compiled): return getattr(compiled, "authored", {}).get("v051", {}).get("candidate_only") is True
+
+    def _v051_specs(self, compiled, attempt):
+        source = compiled.authored["v051"]["scientific"]
+        sections = {item["id"]: item for item in source["curriculum.yaml"]["sections"]}
+        children = {item["id"]: item for item in source["subsection_interventions.yaml"]["cells"]}
+        section = sections.get(attempt.transition_id)
+        if section is None: raise ValueError("v0.5.1 transition is absent from persisted curriculum")
+        result = []
+        for order, subsection_id in enumerate(section["subsection_ids"], start=1):
+            child = children.get(f"{subsection_id}-{attempt.pedagogy_id}")
+            if child is None: raise ValueError(f"v0.5.1 child context missing for {subsection_id}-{attempt.pedagogy_id}")
+            result.append((order, subsection_id, child))
+        return result
+
+    def initialize_v051_subsections(self, db: DbSession, session_id, commit=True):
+        """Create the ordered, immutable-in-scope delivery ledger for one attempt."""
+        session = db.scalar(select(Session).where(Session.id == session_id).with_for_update())
+        if session is None: raise ValueError("unknown session")
+        attempt = db.get(Attempt, session.current_attempt_id)
+        compiled = self._compiled(db, session)
+        if not attempt or not self._v051(compiled): raise ValueError("v0.5.1 subsection lifecycle is unavailable")
+        existing = db.scalars(select(SubsectionProgress).where(SubsectionProgress.attempt_id == attempt.id).order_by(SubsectionProgress.order_in_attempt)).all()
+        if existing:
+            return existing
+        now = datetime.now(timezone.utc)
+        records = []
+        for order, subsection_id, child in self._v051_specs(compiled, attempt):
+            record = SubsectionProgress(session_id=session.id, attempt_id=attempt.id, subsection_id=subsection_id,
+                order_in_attempt=order, pedagogy_id=attempt.pedagogy_id, status="ACTIVE" if order == 1 else "PENDING",
+                required_move_ids=[move["id"] for move in child["core_moves"]], required_content_ids=list(child["required_content_refs"]),
+                move_evidence={}, content_evidence={}, clarification_evidence_ids=[], instructional_state={}, delivery_exception=None,
+                opened_at=now if order == 1 else None)
+            db.add(record); records.append(record)
+        db.flush(); self._event(db, session, "V051_SUBSECTION_LIFECYCLE_INITIALIZED", {"attempt_id": str(attempt.id), "subsection_ids": [record.subsection_id for record in records]}, attempt.id)
+        if commit: db.commit()
+        return records
+
+    def inspect_v051_subsections(self, db: DbSession, session_id, attempt_id=None):
+        session = db.get(Session, session_id)
+        if session is None: raise ValueError("unknown session")
+        target = attempt_id or session.current_attempt_id
+        attempt = db.get(Attempt, target)
+        if attempt is None or attempt.session_id != session.id: raise ValueError("attempt does not belong to this session")
+        return db.scalars(select(SubsectionProgress).where(SubsectionProgress.attempt_id == target).order_by(SubsectionProgress.order_in_attempt)).all()
+
+    def _active_v051_progress(self, db, session, subsection_id=None):
+        attempt = db.get(Attempt, session.current_attempt_id)
+        if not attempt or attempt.session_id != session.id: raise ValueError("current attempt does not belong to this session")
+        progress = db.scalar(select(SubsectionProgress).where(SubsectionProgress.attempt_id == attempt.id, SubsectionProgress.status == "ACTIVE").with_for_update())
+        if progress is None: raise ValueError("no active subsection")
+        if subsection_id is not None and progress.subsection_id != subsection_id: raise ValueError("subsection advancement must follow locked order")
+        return attempt, progress
+
+    def _message_ids(self, db, attempt_id, subsection_id, evidence_ids):
+        if not isinstance(evidence_ids, list) or not evidence_ids: raise ValueError("evidence must contain persisted message ids")
+        parsed = []
+        for raw in evidence_ids:
+            try: parsed.append(uuid.UUID(str(raw)))
+            except (ValueError, TypeError): raise ValueError("invalid evidence message id")
+        if len(set(parsed)) != len(parsed): raise ValueError("duplicate evidence message id")
+        messages = db.scalars(select(Message).where(Message.id.in_(parsed), Message.attempt_id == attempt_id, Message.role == "TUTOR")).all()
+        if len(messages) != len(parsed) or any(not isinstance(message.instructional_trace, dict) or message.instructional_trace.get("subsection_id") != subsection_id for message in messages):
+            raise ValueError("evidence must reference Tutor messages from this active subsection")
+        return [str(value) for value in parsed]
+
+    def _v051_obligation_evidence(self, db, attempt_id, subsection_id, claims, required_ids, label):
+        """Validate the Judge's per-obligation, exact-text evidence claims.
+
+        This is intentionally a provenance and scope gate, not a replacement
+        for the Judge's semantic reading.  A claim must name the obligation,
+        point at an active-subsection Tutor turn, and quote text actually in
+        that turn.  The resulting ledger preserves the narrower proof rather
+        than assigning every Tutor message to every obligation.
+        """
+        if not isinstance(claims, list):
+            raise ValueError(f"{label} evidence must be a list")
+        result = {}
+        for claim in claims:
+            obligation = claim.obligation_id
+            if obligation not in required_ids:
+                raise ValueError(f"{label} evidence references an unauthorized obligation")
+            try:
+                message_id = uuid.UUID(str(claim.message_id))
+            except (ValueError, TypeError) as exc:
+                raise ValueError(f"{label} evidence has an invalid message id") from exc
+            message = db.scalar(select(Message).where(
+                Message.id == message_id, Message.attempt_id == attempt_id,
+                Message.role == "TUTOR"
+            ))
+            if (message is None or not isinstance(message.instructional_trace, dict)
+                    or message.instructional_trace.get("subsection_id") != subsection_id):
+                raise ValueError(f"{label} evidence must cite a Tutor message from the active subsection")
+            if claim.supporting_excerpt not in message.content_text:
+                raise ValueError(f"{label} evidence excerpt is absent from its Tutor message")
+            result.setdefault(obligation, []).append(str(message_id))
+        return {key: list(dict.fromkeys(value)) for key, value in result.items()}
+
+    def v051_clarification_allowance(self, db: DbSession, session_id, subsection_id=None, approved_limit: int | None = None):
+        """Report candidate limits without enforcing them until an approved limit is supplied."""
+        session = db.get(Session, session_id)
+        if session is None or not self._v051(self._compiled(db, session)): raise ValueError("v0.5.1 subsection lifecycle is unavailable")
+        attempt, progress = self._active_v051_progress(db, session, subsection_id)
+        child = next(child for _, subsection, child in self._v051_specs(self._compiled(db, session), attempt) if subsection == progress.subsection_id)
+        proposed = child.get("candidate_exposure_envelope", {}).get("learner_requested_clarification_exchanges_max")
+        if approved_limit is not None and (not isinstance(approved_limit, int) or approved_limit < 0): raise ValueError("approved clarification limit must be a non-negative integer")
+        used = len(progress.clarification_evidence_ids or [])
+        return {"used": used, "proposed_limit": proposed, "approved_limit": approved_limit, "remaining": max(approved_limit - used, 0) if approved_limit is not None else None}
+
+    def record_v051_subsection_evidence(self, db: DbSession, session_id, subsection_id, move_evidence: dict, content_evidence: dict, instructional_state: dict | None = None, clarification_evidence_ids: list | None = None, commit=True):
+        """Record future-Judge-ready delivery evidence; this never advances on Tutor assertions."""
+        session = db.scalar(select(Session).where(Session.id == session_id).with_for_update())
+        if session is None or not self._v051(self._compiled(db, session)): raise ValueError("v0.5.1 subsection lifecycle is unavailable")
+        attempt, progress = self._active_v051_progress(db, session, subsection_id)
+        if not isinstance(move_evidence, dict) or not isinstance(content_evidence, dict): raise ValueError("evidence must be keyed by required move/content ids")
+        if set(move_evidence) - set(progress.required_move_ids) or set(content_evidence) - set(progress.required_content_ids): raise ValueError("evidence references an unauthorized move or content item")
+        merged_moves, merged_content = dict(progress.move_evidence or {}), dict(progress.content_evidence or {})
+        for key, values in move_evidence.items():
+            valid = self._message_ids(db, attempt.id, progress.subsection_id, values)
+            merged_moves[key] = list(dict.fromkeys([*(merged_moves.get(key) or []), *valid]))
+        for key, values in content_evidence.items():
+            valid = self._message_ids(db, attempt.id, progress.subsection_id, values)
+            merged_content[key] = list(dict.fromkeys([*(merged_content.get(key) or []), *valid]))
+        progress.move_evidence, progress.content_evidence = merged_moves, merged_content
+        if instructional_state is not None:
+            if not isinstance(instructional_state, dict): raise ValueError("instructional state must be an object")
+            progress.instructional_state = dict(instructional_state)
+        if clarification_evidence_ids is not None:
+            prior = list(progress.clarification_evidence_ids or [])
+            progress.clarification_evidence_ids = prior + [value for value in self._message_ids(db, attempt.id, progress.subsection_id, clarification_evidence_ids) if value not in prior]
+        self._event(db, session, "V051_SUBSECTION_EVIDENCE_RECORDED", {"subsection_id": progress.subsection_id, "move_ids": sorted(move_evidence), "content_ids": sorted(content_evidence), "message_ids": sorted({value for values in [*move_evidence.values(), *content_evidence.values()] for value in values})}, attempt.id)
+        if commit: db.commit()
+        return progress
+
+    def record_v051_delivery_exception(self, db: DbSession, session_id, subsection_id, detail: dict, commit=True):
+        session = db.scalar(select(Session).where(Session.id == session_id).with_for_update())
+        if session is None or not self._v051(self._compiled(db, session)) or not isinstance(detail, dict) or not detail: raise ValueError("delivery exception detail is required")
+        attempt, progress = self._active_v051_progress(db, session, subsection_id)
+        progress.status, progress.delivery_exception = "DELIVERY_EXCEPTION", dict(detail)
+        self._event(db, session, "V051_SUBSECTION_DELIVERY_EXCEPTION", {"subsection_id": progress.subsection_id, "detail": progress.delivery_exception}, attempt.id)
+        if commit: db.commit()
+        return progress
+
+    def advance_v051_subsection(self, db: DbSession, session_id, subsection_id, commit=True):
+        session = db.scalar(select(Session).where(Session.id == session_id).with_for_update())
+        if session is None or not self._v051(self._compiled(db, session)): raise ValueError("v0.5.1 subsection lifecycle is unavailable")
+        attempt, progress = self._active_v051_progress(db, session, subsection_id)
+        if set(progress.required_move_ids) - set(progress.move_evidence or {}) or set(progress.required_content_ids) - set(progress.content_evidence or {}):
+            raise ValueError("required instructional evidence is incomplete")
+        now = datetime.now(timezone.utc); progress.status, progress.core_delivered_at, progress.completed_at = "COMPLETED", now, now
+        next_progress = db.scalar(select(SubsectionProgress).where(SubsectionProgress.attempt_id == attempt.id, SubsectionProgress.order_in_attempt == progress.order_in_attempt + 1).with_for_update())
+        if next_progress is not None:
+            if next_progress.status != "PENDING": raise ValueError("next subsection is not pending")
+            next_progress.status, next_progress.opened_at = "ACTIVE", now
+        self._event(db, session, "V051_SUBSECTION_ADVANCED", {"completed_subsection_id": progress.subsection_id, "next_subsection_id": next_progress.subsection_id if next_progress else None}, attempt.id)
+        if commit: db.commit()
+        return next_progress
+
+    def apply_v051_conversation_judge(self, db: DbSession, session_id, call_id, output, commit=True):
+        """Persist a semantic recommendation and apply only legal, evidence-backed actions."""
+        session = db.scalar(select(Session).where(Session.id == session_id).with_for_update())
+        if session is None or not self._v051(self._compiled(db, session)): raise ValueError("v0.5.1 Conversation Judge is unavailable")
+        call = db.scalar(select(LLMCall).where(LLMCall.id == call_id, LLMCall.session_id == session.id).with_for_update())
+        if call is None or call.purpose != "CONVERSATION_JUDGE" or call.status != "RECEIVED": raise ValueError("Conversation Judge call is not ready")
+        existing = db.scalar(select(ConversationJudgeDecision).where(ConversationJudgeDecision.llm_call_id == call.id))
+        if existing is not None: return existing
+        attempt, progress = self._active_v051_progress(db, session)
+        audit = (call.request_payload or {}).get("audit", {})
+        if audit.get("subsection_id") != progress.subsection_id or audit.get("attempt_id") != str(attempt.id): raise ValueError("stale Conversation Judge subsection")
+        latest = db.scalar(select(Message).where(Message.attempt_id == attempt.id, Message.role == "LEARNER").order_by(Message.sequence_no.desc()))
+        if audit.get("latest_learner_message_id") != (str(latest.id) if latest else None): raise ValueError("stale Conversation Judge learner context")
+        payload = output.model_dump(mode="json")
+        if output.active_subsection_id != progress.subsection_id: raise ValueError("Conversation Judge returned a different subsection")
+        content = {item.ref: item for item in output.required_content_status}
+        if set(content) != set(progress.required_content_ids) or len(content) != len(output.required_content_status): raise ValueError("Conversation Judge must report every required content item exactly once")
+        if set(output.completed_move_ids) - set(progress.required_move_ids): raise ValueError("Conversation Judge reported an unknown move")
+        move_claims = self._v051_obligation_evidence(db, attempt.id, progress.subsection_id,
+                                                     output.move_evidence, set(progress.required_move_ids), "move")
+        content_claims = self._v051_obligation_evidence(db, attempt.id, progress.subsection_id,
+                                                        output.content_evidence, set(progress.required_content_ids), "content")
+        completed_moves = set(output.completed_move_ids)
+        delivered_content = {item.ref for item in content.values() if item.status == "DELIVERED"}
+        if completed_moves - set(move_claims): raise ValueError("completed moves require obligation-specific Tutor evidence")
+        if delivered_content - set(content_claims): raise ValueError("delivered content requires obligation-specific Tutor evidence")
+        decision = ConversationJudgeDecision(session_id=session.id, attempt_id=attempt.id, subsection_progress_id=progress.id,
+            llm_call_id=call.id, latest_learner_message_id=latest.id if latest else None, action=output.decision,
+            confidence=output.confidence, payload=payload, application_status="RECORDED", application_reason=None)
+        db.add(decision); db.flush()
+        if output.decision == "ADVANCE_SUBSECTION":
+            if output.confidence != "HIGH" or output.pedagogy_fidelity != "SATISFIED": raise ValueError("Conversation Judge progression requires high-confidence fidelity")
+            if set(output.completed_move_ids) != set(progress.required_move_ids) or any(item.status != "DELIVERED" for item in content.values()): raise ValueError("Conversation Judge progression has incomplete delivery")
+            self.record_v051_subsection_evidence(db, session.id, progress.subsection_id,
+                {move_id: move_claims[move_id] for move_id in progress.required_move_ids},
+                {content_id: content_claims[content_id] for content_id in progress.required_content_ids},
+                instructional_state={**(progress.instructional_state or {}), "conversation_judge_call_id": str(call.id), "last_action": output.decision}, commit=False)
+            next_progress = self.advance_v051_subsection(db, session.id, progress.subsection_id, commit=False)
+            if next_progress is None:
+                # Only the semantic, evidence-backed final transition may end
+                # teaching.  The generic lifecycle helper remains usable for
+                # recovery and does not itself bypass the Paas gate.
+                self.complete_intervention(db, session.id, "V051_CONVERSATION_JUDGE_COMPLETE", commit=False)
+            decision.application_status, decision.applied_at = "APPLIED", datetime.now(timezone.utc)
+        elif output.decision == "DELIVERY_EXCEPTION":
+            if not output.delivery_exception_reason: raise ValueError("delivery exception requires a reason")
+            self.record_v051_delivery_exception(db, session.id, progress.subsection_id, {"conversation_judge_call_id": str(call.id), "reason": output.delivery_exception_reason}, commit=False)
+            decision.application_status, decision.applied_at = "APPLIED", datetime.now(timezone.utc)
+        else:
+            # Preserve valid partial delivery evidence across Judge cycles.  It
+            # is still insufficient for advancement until all obligations have
+            # their own claims and the Judge returns a legal advance decision.
+            if move_claims or content_claims:
+                self.record_v051_subsection_evidence(db, session.id, progress.subsection_id,
+                    {key: value for key, value in move_claims.items() if key in completed_moves},
+                    {key: value for key, value in content_claims.items() if key in delivered_content}, commit=False)
+            progress.instructional_state = {**(progress.instructional_state or {}), "conversation_judge_call_id": str(call.id), "last_action": output.decision, "next_allowed_instruction": output.next_allowed_instruction}
+            decision.application_status, decision.applied_at = "APPLIED", datetime.now(timezone.utc)
+        self._event(db, session, "V051_CONVERSATION_JUDGE_APPLIED", {"call_id": str(call.id), "subsection_id": progress.subsection_id, "action": output.decision, "confidence": output.confidence, "application_status": decision.application_status}, attempt.id)
+        if commit: db.commit()
+        return decision
     def create_session(self, db: DbSession, study_version_id, build_id="test", runtime_config=None, institutional_id=None, capture_run_id=None, commit=True):
         compiled = self.catalog.load(db, study_version_id)
+        if compiled.authored.get("v051", {}).get("candidate_only"):
+            raise ValueError("v0.5.1 candidate studies are not participant-executable")
         session = Session(study_version_id=study_version_id, institutional_id=institutional_id, capture_run_id=capture_run_id, status="ACTIVE", phase="TRANSITION_READY", formal_state_id=compiled.protocol["initial_state_id"], current_attempt_number=0, application_build_id=build_id, runtime_config_snapshot=runtime_config or {})
         db.add(session); db.flush(); self._event(db, session, "SESSION_CREATED", {"study_version_id": str(study_version_id), "capture_run_id": str(capture_run_id) if capture_run_id else None}); self._create_attempt(db, session, compiled, compiled.protocol["transition_ids"][0]);
         if commit: db.commit()
@@ -111,6 +334,7 @@ class SessionRuntime:
         db.add(attempt); db.flush(); session.current_transition_id=transition_id; session.current_attempt_id=attempt.id; session.current_attempt_number=ordinal; session.phase="INTERVENTION_ACTIVE"
         self._event(db, session, "PEDAGOGY_SELECTED", {"eligible_candidate_ids": decision.eligible_candidate_ids, "excluded_used_ids": decision.excluded_candidate_ids, "selected_id": decision.selected_id, "selection_method": decision.selection_method, "timestamp": decision.selected_at.isoformat()}, attempt.id)
         self._event(db, session, "ATTEMPT_CREATED", {"transition_id": transition_id, "pedagogy_id": decision.selected_id}, attempt.id)
+        if self._v051(compiled): self.initialize_v051_subsections(db, session.id, commit=False)
         if ordinal > 1:
             history = self.history_builder.build(db, session.id, transition_id, attempt.id)
             db.add(LearnerHistorySnapshot(session_id=session.id, target_attempt_id=attempt.id, transition_id=transition_id, source_attempt_ids=[uuid.UUID(entry["source_attempt_id"]) for entry in history["attempts"]], summary=history, generation_method="DETERMINISTIC"))
@@ -126,6 +350,11 @@ class SessionRuntime:
         if session is None or session.phase != "INTERVENTION_ACTIVE":
             raise ValueError("intervention is not active")
         attempt = db.get(Attempt, session.current_attempt_id)
+        compiled = self._compiled(db, session) if self.catalog is not None else None
+        if compiled is not None and self._v051(compiled):
+            progress = self.inspect_v051_subsections(db, session.id, attempt.id)
+            if not progress or any(item.status != "COMPLETED" for item in progress):
+                raise ValueError("all v0.5.1 subsections must complete before section completion")
         attempt.status = "PAAS_PENDING"
         attempt.completion_reason = reason
         attempt.intervention_completed_at = datetime.now(timezone.utc)
