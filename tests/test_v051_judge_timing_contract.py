@@ -10,7 +10,7 @@ from solo_harness.studies.scientific_v051 import load_scientific_v051
 from solo_harness.studies.v051_native_compiler import compile_v051, resolve_v051_tutor_context
 
 
-SOURCE = Path("studies/networks_error_detection_parity_f1/v0.5.1")
+SOURCE = Path("studies/networks_error_detection_parity_f1/v0.5")
 
 
 def test_tutor_review_readiness_does_not_require_an_extra_learner_turn():

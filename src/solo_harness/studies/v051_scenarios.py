@@ -1,9 +1,9 @@
-"""Typed, oracle-backed v0.5.1 scenario realization.
+"""Typed, oracle-backed v0.5 scenario realization.
 
-The corrected v0.5.1 contracts retain the stable F1 slot identifiers.  We
+The corrected v0.5 contracts retain the stable F1 slot identifiers.  We
 reuse the mature v0.4 typed executor only as a mathematical sampler, validate
-the resulting cases against the persisted v0.5.1 contract, and replace the
-seven corrected-policy entries whose scientific family changed in v0.5.1.
+the resulting cases against the persisted v0.5 contract, and replace the
+seven corrected-policy entries whose scientific family changed in v0.5.
 """
 from __future__ import annotations
 
@@ -42,8 +42,8 @@ def _base_policies(): return load_policy(_v04_root())
 
 
 # These are explicit replacements for the seven source contracts corrected
-# between v0.4 and v0.5.1.  The remaining 57 policies are independently
-# checked against the v0.5.1 source family and type on every resolution.
+# between v0.4 and v0.5.  The remaining 57 policies are independently
+# checked against the v0.5 source family and type on every resolution.
 _CORRECTED = {
     "C2-A4-Q2": {"case_relation": None, "cases": [{"name": "a", "family": "full2d_pair", "parameters": {"flip_count": 2, "position_universe": "transmitted_full_grid", "forbid_unique_two_error_inference": True}}]},
     "C2-A4-Q3": {"case_relation": None, "cases": [{"name": "a", "family": "full2d_pair", "parameters": {"flip_count": 2, "position_universe": "transmitted_full_grid", "forbid_unique_two_error_inference": True}}]},
@@ -54,7 +54,7 @@ _CORRECTED = {
     "C3-A4-S": {"case_relation": "receiver_evidence_candidates", "cases": [{"name": "receiver_evidence", "family": "full2d_evidence", "parameters": {}}]},
 }
 
-# v0.5.1 deliberately changed seven v0.4 contract families.  These are
+# v0.5 deliberately changed seven v0.4 contract families.  These are
 # expected SOURCE family names, not values to copy into the typed policy.
 _REVISED_SOURCE_FAMILIES = {
     "C2-A4-Q2": "full2d_pair", "C2-A4-Q3": "full2d_pair", "C2-A4-S": "full2d_pair",
@@ -65,8 +65,8 @@ _REVISED_SOURCE_FAMILIES = {
 
 def typed_policy(compiled, slot_id: str) -> dict:
     slots = {item["id"]: item for blueprint in compiled.authored["v051"]["scientific"]["assessment_families.yaml"]["blueprints"] for item in blueprint["items"]}
-    slot = slots.get(slot_id); _require(slot is not None, f"unknown v0.5.1 slot: {slot_id}")
-    base = _base_policies().get(slot_id); _require(base is not None, f"missing typed v0.5.1 policy: {slot_id}")
+    slot = slots.get(slot_id); _require(slot is not None, f"unknown v0.5 slot: {slot_id}")
+    base = _base_policies().get(slot_id); _require(base is not None, f"missing typed v0.5 policy: {slot_id}")
     policy = copy.deepcopy(base)
     expected = _REVISED_SOURCE_FAMILIES.get(slot_id, base["source_scenario_family"])
     _require(slot["scenario_family"] == expected, f"typed policy/source family disagreement: {slot_id}")

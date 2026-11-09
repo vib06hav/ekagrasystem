@@ -1,19 +1,25 @@
 from pathlib import Path
 from tempfile import TemporaryDirectory
+import os
 
 import pytest
 
 from solo_harness.studies.catalog import StudyCatalog
+from solo_harness.studies.loader import load_scientific
 from solo_harness.studies.scientific_v051 import ScientificV051Error, load_scientific_v051
 from solo_harness.studies.v051_native_compiler import compile_v051, resolve_v051_tutor_context
 from solo_harness.studies.canonicalization import content_identity
+from solo_harness.runtime.v051_conversation import ConversationJudgeOutput, V051TutorOutput
 
 
-ROOT = Path("studies/networks_error_detection_parity_f1/v0.5.1")
+ROOT = Path("studies/networks_error_detection_parity_f1/v0.5")
+TEST_TEMP_DIR = Path(os.environ.get("V051_TEST_TEMP_DIR", Path.cwd()))
 
 
 def test_v051_load_compile_and_snapshot_preserve_every_authored_context():
     study = load_scientific_v051(ROOT)
+    assert load_scientific(ROOT).content_version == "v0.5"
+    assert study.content_version == "v0.5"
     compiled = compile_v051(study)
     snapshot = compiled.to_snapshot()
     restored = compiled.from_snapshot(snapshot)
@@ -22,6 +28,11 @@ def test_v051_load_compile_and_snapshot_preserve_every_authored_context():
     assert len(source["subsection_interventions.yaml"]["cells"]) == 39
     assert len(source["curriculum.yaml"]["subsections"]) == 13
     assert sum(len(form["v051_item_contracts"]) for family in restored.assessment_families.values() for form in family["forms"]) == 64
+    assert restored.authored["manifest"]["content_version"] == "v0.5"
+    assert restored.authored["v051"]["prompts"]["TUTOR_PROMPT.md"] == (ROOT / "07_PROMPT_CONTRACTS/TUTOR_PROMPT.md").read_text(encoding="utf-8")
+    assert restored.authored["v051"]["prompts"]["CONVERSATION_JUDGE_PROMPT.md"] == (ROOT / "07_PROMPT_CONTRACTS/CONVERSATION_JUDGE_PROMPT.md").read_text(encoding="utf-8")
+    assert set(V051TutorOutput.model_fields) == {"learner_message", "ready_for_judge"}
+    assert set(ConversationJudgeOutput.model_fields) == {"decision", "guidance"}
     for child in source["subsection_interventions.yaml"]["cells"]:
         context = resolve_v051_tutor_context(restored, child["subsection_id"], child["pedagogy_id"])
         assert context["global_pedagogy"]["id"] == child["pedagogy_id"]
@@ -43,8 +54,8 @@ def test_v051_role_contexts_are_isolated():
 
 def test_v051_rejects_missing_duplicate_and_incompatible_sources():
     import shutil
-    with TemporaryDirectory(dir=Path.cwd()) as temp:
-        copied = Path(temp) / "v0.5.1"
+    with TemporaryDirectory(dir=TEST_TEMP_DIR) as temp:
+        copied = Path(temp) / "v0.5"
         shutil.copytree(ROOT, copied)
         (copied / "08_SCIENTIFIC_YAML/curriculum.yaml").write_text("schema: incompatible.schema\n", encoding="utf-8")
         with pytest.raises(ScientificV051Error):
@@ -93,8 +104,8 @@ def test_catalog_reloads_v051_snapshot_and_runtime_gate_is_detectable():
 def test_v051_content_identity_is_stable_and_tracks_locked_source():
     import shutil
     baseline = compile_v051(load_scientific_v051(ROOT))
-    with TemporaryDirectory(dir=Path.cwd()) as temp:
-        copied = Path(temp) / "v0.5.1"
+    with TemporaryDirectory(dir=TEST_TEMP_DIR) as temp:
+        copied = Path(temp) / "v0.5"
         shutil.copytree(ROOT, copied)
         locked = copied / "CURRICULUM_SOURCE_LOCKED.md"
         locked.write_text(locked.read_text(encoding="utf-8") + "\n<!-- provenance test -->\n", encoding="utf-8")

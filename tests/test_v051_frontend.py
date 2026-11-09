@@ -10,7 +10,7 @@ from solo_harness.studies.v051_native_compiler import compile_v051
 from solo_harness.web import _internal_v051_access_enabled, _operation_refresh_required, _v051_subsection_projection
 
 
-ROOT = Path("studies/networks_error_detection_parity_f1/v0.5.1")
+ROOT = Path("studies/networks_error_detection_parity_f1/v0.5")
 
 
 def _compiled():

@@ -1,4 +1,4 @@
-"""Controlled PostgreSQL integration tests for the v0.5.1 semantic Judge path."""
+"""Controlled PostgreSQL integration tests for the v0.5 semantic Judge path."""
 from __future__ import annotations
 
 import asyncio
@@ -23,7 +23,7 @@ from solo_harness.web import _internal_v051_candidate
 
 DATABASE_URL = os.environ.get("EKAGRA_STAGE3_DATABASE_URL")
 pytestmark = pytest.mark.skipif(not DATABASE_URL, reason="set EKAGRA_STAGE3_DATABASE_URL for PostgreSQL integration")
-ROOT = Path("studies/networks_error_detection_parity_f1/v0.5.1")
+ROOT = Path("studies/networks_error_detection_parity_f1/v0.5")
 
 
 class _First:
@@ -202,14 +202,14 @@ def test_historical_v051_judge_response_is_held_for_audit_without_reinterpretati
             ai.reserve_manual_retry(db, session_id, commit=True, authorized_requeue=True)
 
 
-def test_internal_candidate_selection_uses_configured_v052_not_registration_order():
+def test_internal_candidate_selection_uses_configured_v05_not_registration_order():
     factory = make_session_factory(DATABASE_URL)
     with factory() as db:
         runtime, session_id, _, _ = _setup(db)
         current = db.get(StudyVersion, db.get(Session, session_id).study_version_id)
         _historical_version(db, current)
-        selected = _internal_v051_candidate(db, SimpleNamespace(v051_internal_candidate_version="v0.5.2"))
-        assert selected.id == current.id and selected.content_version == "v0.5.2"
+        selected = _internal_v051_candidate(db, SimpleNamespace(v051_internal_candidate_version="v0.5"))
+        assert selected.id == current.id and selected.content_version == "v0.5"
 
 
 def test_real_persisted_tutor_judge_flow_advances_without_forced_learner_turns_to_paas_and_assessment():

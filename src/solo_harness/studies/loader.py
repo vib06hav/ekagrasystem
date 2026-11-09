@@ -11,13 +11,13 @@ def load_scientific(root: Path):
     version = root.name
     if version == "v0.4":
         return load_scientific_v04(root)
-    if version == "v0.5.1":
+    if version == "v0.5":
         return load_scientific_v051(root)
     raise ValueError(f"unsupported study source version directory: {version}")
 
 
 def compile_scientific(scientific):
-    return compile_v051(scientific) if scientific.content_version.startswith("v0.5.") else compile_v04(scientific)
+    return compile_v051(scientific) if scientific.content_version == "v0.5" else compile_v04(scientific)
 
 
 def source_bundle(scientific) -> dict:

@@ -133,7 +133,7 @@ class AIExecutionRuntime:
         compiled=self.runtime._compiled(db,session) if session else None
         if not session or not attempt or session.phase!="INTERVENTION_ACTIVE" or not self.runtime._v051(compiled): raise ValueError("Conversation Judge is unavailable")
         progress=db.scalar(select(SubsectionProgress).where(SubsectionProgress.attempt_id==attempt.id,SubsectionProgress.status=="ACTIVE").with_for_update())
-        if progress is None: raise ValueError("no active v0.5.1 subsection")
+        if progress is None: raise ValueError("no active v0.5 subsection")
         dialogue_rows=db.scalars(select(Message).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no)).all()
         tutor_rows=[message for message in dialogue_rows if message.role=="TUTOR" and isinstance(message.instructional_trace,dict) and message.instructional_trace.get("subsection_id")==progress.subsection_id]
         if not tutor_rows: raise ValueError("Conversation Judge requires active-subsection Tutor instruction")
@@ -261,8 +261,8 @@ class AIExecutionRuntime:
         """Keep incompatible candidate calls auditable without reinterpreting them."""
         call.status="TECHNICAL_HOLD"
         call.error_class="HISTORICAL_CONTRACT_INCOMPATIBLE"
-        call.error_message=(f"v0.5.1 Tutor/Conversation Judge response is retained for audit only; "
-                            f"it cannot be parsed using the v0.5.2 contract (study version {version_label}).")
+        call.error_message=(f"Historical Tutor/Conversation Judge response is retained for audit only; "
+                            f"it cannot be parsed using the current v0.5 contract (study version {version_label}).")
         call.completed_at=datetime.now(timezone.utc)
         db.commit()
 
@@ -275,7 +275,7 @@ class AIExecutionRuntime:
         session=db.get(Session,call.session_id)
         version=db.get(StudyVersion,session.study_version_id) if session else None
         audit=call.request_payload.get("audit") or {}
-        if audit.get("v051") and call.purpose in ("TUTOR","CONVERSATION_JUDGE") and (version is None or version.content_version != "v0.5.2"):
+        if audit.get("v051") and call.purpose in ("TUTOR","CONVERSATION_JUDGE") and (version is None or version.content_version != "v0.5"):
             self._hold_historical_v051_call(db,call,version.content_version if version else "unknown")
             return
         schemas={"TUTOR":V051TutorOutput if (call.request_payload.get("audit") or {}).get("v051") else TutorProse,"ASSESSMENT_WRITER":MCQProse if call.request_payload.get("schema_name")=="MCQProse" else SubjectiveProse,"SEMANTIC_REVIEW":SemanticReview if call.request_payload.get("schema_name")=="SemanticReview" else SubjectiveReview,"JUDGE":SubjectiveJudgment,"CONVERSATION_JUDGE":ConversationJudgeOutput}
@@ -420,7 +420,7 @@ class AIExecutionRuntime:
         if previous and previous.status=="RECEIVED" and previous.error_class=="APPLICATION_FAILURE":
             return previous.id
         if previous and previous.error_class=="HISTORICAL_CONTRACT_INCOMPATIBLE":
-            raise ValueError("historical v0.5.1 operation is audit-only and cannot be retried")
+            raise ValueError("historical candidate operation is audit-only and cannot be retried")
         if not previous or not (previous.status in ("FAILED","INVALID_OUTPUT") or previous.error_class=="REVIEW_HOLD" or (authorized_requeue and previous.status=="TECHNICAL_HOLD")):
             raise ValueError("no recoverable operation")
         if previous.retry_number >= 3 and not authorized_requeue:

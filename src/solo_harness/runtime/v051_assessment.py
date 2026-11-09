@@ -1,4 +1,4 @@
-"""Candidate v0.5.1 four-item construction on the existing persisted LLM path.
+"""Candidate v0.5 four-item construction on the existing persisted LLM path.
 
 The source snapshot supplies every item contract.  This module only realizes a
 fresh, small oracle-checked instance, asks the normal writer/reviewer roles for
@@ -41,7 +41,7 @@ async def construct_v051_assessment(compiled, blueprint: dict, invoke, checkpoin
     """Construct/recover a source-contract-driven 3-MCQ + subjective package."""
     slots = blueprint.get("v051_item_contracts", [])
     if len(slots) != 4 or [item.get("type") for item in slots] != ["MCQ", "MCQ", "MCQ", "SUBJECTIVE"]:
-        raise ValueError("invalid v0.5.1 four-item blueprint")
+        raise ValueError("invalid v0.5 four-item blueprint")
     accepted = dict(completed or {})
     excluded = set(prior_instructional_fingerprints or ())
     # Recovered checkpoints count as already exposed assessment cases as well.

@@ -116,11 +116,11 @@ class SessionRuntime:
         sections = {item["id"]: item for item in source["curriculum.yaml"]["sections"]}
         children = {item["id"]: item for item in source["subsection_interventions.yaml"]["cells"]}
         section = sections.get(attempt.transition_id)
-        if section is None: raise ValueError("v0.5.1 transition is absent from persisted curriculum")
+        if section is None: raise ValueError("v0.5 transition is absent from persisted curriculum")
         result = []
         for order, subsection_id in enumerate(section["subsection_ids"], start=1):
             child = children.get(f"{subsection_id}-{attempt.pedagogy_id}")
-            if child is None: raise ValueError(f"v0.5.1 child context missing for {subsection_id}-{attempt.pedagogy_id}")
+            if child is None: raise ValueError(f"v0.5 child context missing for {subsection_id}-{attempt.pedagogy_id}")
             result.append((order, subsection_id, child))
         return result
 
@@ -130,7 +130,7 @@ class SessionRuntime:
         if session is None: raise ValueError("unknown session")
         attempt = db.get(Attempt, session.current_attempt_id)
         compiled = self._compiled(db, session)
-        if not attempt or not self._v051(compiled): raise ValueError("v0.5.1 subsection lifecycle is unavailable")
+        if not attempt or not self._v051(compiled): raise ValueError("v0.5 subsection lifecycle is unavailable")
         existing = db.scalars(select(SubsectionProgress).where(SubsectionProgress.attempt_id == attempt.id).order_by(SubsectionProgress.order_in_attempt)).all()
         if existing:
             return existing
@@ -178,7 +178,7 @@ class SessionRuntime:
     def v051_clarification_allowance(self, db: DbSession, session_id, subsection_id=None, approved_limit: int | None = None):
         """Report candidate limits without enforcing them until an approved limit is supplied."""
         session = db.get(Session, session_id)
-        if session is None or not self._v051(self._compiled(db, session)): raise ValueError("v0.5.1 subsection lifecycle is unavailable")
+        if session is None or not self._v051(self._compiled(db, session)): raise ValueError("v0.5 subsection lifecycle is unavailable")
         attempt, progress = self._active_v051_progress(db, session, subsection_id)
         child = next(child for _, subsection, child in self._v051_specs(self._compiled(db, session), attempt) if subsection == progress.subsection_id)
         proposed = child.get("candidate_exposure_envelope", {}).get("learner_requested_clarification_exchanges_max")
@@ -189,7 +189,7 @@ class SessionRuntime:
     def record_v051_subsection_evidence(self, db: DbSession, session_id, subsection_id, move_evidence: dict, content_evidence: dict, instructional_state: dict | None = None, clarification_evidence_ids: list | None = None, commit=True):
         """Record future-Judge-ready delivery evidence; this never advances on Tutor assertions."""
         session = db.scalar(select(Session).where(Session.id == session_id).with_for_update())
-        if session is None or not self._v051(self._compiled(db, session)): raise ValueError("v0.5.1 subsection lifecycle is unavailable")
+        if session is None or not self._v051(self._compiled(db, session)): raise ValueError("v0.5 subsection lifecycle is unavailable")
         attempt, progress = self._active_v051_progress(db, session, subsection_id)
         if not isinstance(move_evidence, dict) or not isinstance(content_evidence, dict): raise ValueError("evidence must be keyed by required move/content ids")
         if set(move_evidence) - set(progress.required_move_ids) or set(content_evidence) - set(progress.required_content_ids): raise ValueError("evidence references an unauthorized move or content item")
@@ -222,7 +222,7 @@ class SessionRuntime:
 
     def advance_v051_subsection(self, db: DbSession, session_id, subsection_id, commit=True, judge_decision_id=None):
         session = db.scalar(select(Session).where(Session.id == session_id).with_for_update())
-        if session is None or not self._v051(self._compiled(db, session)): raise ValueError("v0.5.1 subsection lifecycle is unavailable")
+        if session is None or not self._v051(self._compiled(db, session)): raise ValueError("v0.5 subsection lifecycle is unavailable")
         attempt, progress = self._active_v051_progress(db, session, subsection_id)
         if judge_decision_id is None:
             if set(progress.required_move_ids) - set(progress.move_evidence or {}) or set(progress.required_content_ids) - set(progress.content_evidence or {}):
@@ -248,7 +248,7 @@ class SessionRuntime:
     def apply_v051_conversation_judge(self, db: DbSession, session_id, call_id, output, commit=True):
         """Persist a semantic recommendation and apply the authoritative lifecycle."""
         session = db.scalar(select(Session).where(Session.id == session_id).with_for_update())
-        if session is None or not self._v051(self._compiled(db, session)): raise ValueError("v0.5.1 Conversation Judge is unavailable")
+        if session is None or not self._v051(self._compiled(db, session)): raise ValueError("v0.5 Conversation Judge is unavailable")
         call = db.scalar(select(LLMCall).where(LLMCall.id == call_id, LLMCall.session_id == session.id).with_for_update())
         if call is None or call.purpose != "CONVERSATION_JUDGE" or call.status != "RECEIVED": raise ConversationJudgeRejected("Conversation Judge call is not ready")
         existing = db.scalar(select(ConversationJudgeDecision).where(ConversationJudgeDecision.llm_call_id == call.id))
@@ -301,7 +301,7 @@ class SessionRuntime:
     def create_session(self, db: DbSession, study_version_id, build_id="test", runtime_config=None, institutional_id=None, capture_run_id=None, commit=True):
         compiled = self.catalog.load(db, study_version_id)
         if compiled.authored.get("v051", {}).get("candidate_only"):
-            raise ValueError("v0.5.1 candidate studies are not participant-executable")
+            raise ValueError("v0.5 candidate studies are not participant-executable")
         session = Session(study_version_id=study_version_id, institutional_id=institutional_id, capture_run_id=capture_run_id, status="ACTIVE", phase="TRANSITION_READY", formal_state_id=compiled.protocol["initial_state_id"], current_attempt_number=0, application_build_id=build_id, runtime_config_snapshot=runtime_config or {})
         db.add(session); db.flush(); self._event(db, session, "SESSION_CREATED", {"study_version_id": str(study_version_id), "capture_run_id": str(capture_run_id) if capture_run_id else None}); self._create_attempt(db, session, compiled, compiled.protocol["transition_ids"][0]);
         if commit: db.commit()
@@ -311,7 +311,7 @@ class SessionRuntime:
         """Create an explicitly marked candidate session; never used by participant enrollment."""
         compiled = self.catalog.load(db, study_version_id)
         if not self._v051(compiled):
-            raise ValueError("study is not the v0.5.1 candidate")
+            raise ValueError("study is not the v0.5 candidate")
         session = Session(study_version_id=study_version_id, status="ACTIVE", phase="TRANSITION_READY",
             formal_state_id=compiled.protocol["initial_state_id"], current_attempt_number=0,
             application_build_id=build_id, runtime_config_snapshot={"internal_v051_testing": True})
@@ -348,7 +348,7 @@ class SessionRuntime:
         if compiled is not None and self._v051(compiled):
             progress = self.inspect_v051_subsections(db, session.id, attempt.id)
             if not progress or any(item.status != "COMPLETED" for item in progress):
-                raise ValueError("all v0.5.1 subsections must complete before section completion")
+                raise ValueError("all v0.5 subsections must complete before section completion")
         attempt.status = "PAAS_PENDING"
         attempt.completion_reason = reason
         attempt.intervention_completed_at = datetime.now(timezone.utc)

@@ -16,7 +16,7 @@ from solo_harness.studies.v051_scenarios import (
     typed_policy, validate_v051_case,
 )
 
-ROOT = Path("studies/networks_error_detection_parity_f1/v0.5.1")
+ROOT = Path("studies/networks_error_detection_parity_f1/v0.5")
 
 
 def _compiled(): return compile_v051(load_scientific_v051(ROOT))

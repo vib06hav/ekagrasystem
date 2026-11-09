@@ -9,7 +9,7 @@ from solo_harness.studies.v04_types import CompiledStudy
 def activate(db: Session, compiled: CompiledStudy, source_bundle: dict | None = None, make_active: bool | None = None) -> StudyVersion:
     candidate = bool(compiled.authored.get("v051", {}).get("candidate_only"))
     if candidate and make_active:
-        raise ValueError("candidate v0.5.1 studies cannot be activated")
+        raise ValueError("candidate v0.5 studies cannot be activated")
     if make_active is None:
         make_active = not candidate
     canonical, content_hash = content_identity(compiled.authored)

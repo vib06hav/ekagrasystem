@@ -24,7 +24,7 @@ from solo_harness.studies.v051_native_compiler import compile_v051
 
 DATABASE_URL = os.environ.get("EKAGRA_STAGE3_DATABASE_URL")
 pytestmark = pytest.mark.skipif(not DATABASE_URL, reason="set EKAGRA_STAGE3_DATABASE_URL for PostgreSQL lifecycle integration")
-ROOT = Path("studies/networks_error_detection_parity_f1/v0.5.1")
+ROOT = Path("studies/networks_error_detection_parity_f1/v0.5")
 
 
 class _FirstSelector:
@@ -139,5 +139,5 @@ def test_v051_subsection_lifecycle_persists_order_evidence_recovery_and_retries(
         runtime.record_v051_delivery_exception(db, c2, active.subsection_id, {"reason": "controlled missing verified case"}, commit=False)
         db.commit()
         assert db.scalar(select(SubsectionProgress.status).where(SubsectionProgress.id == active.id)) == "DELIVERY_EXCEPTION"
-        with pytest.raises(ValueError, match="all v0.5.1 subsections"):
+        with pytest.raises(ValueError, match="all v0.5 subsections"):
             runtime.complete_intervention(db, c2, commit=False)

@@ -88,7 +88,7 @@ class Attempt(Base):
 
 
 class SubsectionProgress(Base):
-    """Durable candidate-v0.5.1 delivery ledger; formal assessment remains separate."""
+    """Durable candidate-v0.5 delivery ledger; formal assessment remains separate."""
     __tablename__ = "subsection_progress"
     id: Mapped[uuid.UUID] = uuid_pk()
     session_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("sessions.id", ondelete="RESTRICT"), nullable=False)

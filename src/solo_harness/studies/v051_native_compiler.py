@@ -1,4 +1,4 @@
-"""Compile candidate v0.5.1 into the existing immutable study snapshot shape."""
+"""Compile the v0.5 candidate into the existing immutable study snapshot shape."""
 from types import MappingProxyType
 
 from solo_harness.studies.scientific_v051 import ScientificV051Error
@@ -45,13 +45,13 @@ def compile_v051(study):
 def resolve_v051_tutor_context(compiled: CompiledStudy, subsection_id: str, pedagogy_id: str) -> dict:
     scientific = compiled.authored.get("v051", {}).get("scientific")
     if scientific is None:
-        raise ScientificV051Error("compiled study is not v0.5.1")
+        raise ScientificV051Error("compiled study is not v0.5")
     subsection = next((item for item in scientific["curriculum.yaml"]["subsections"] if item["id"] == subsection_id), None)
     child = next((item for item in scientific["subsection_interventions.yaml"]["cells"] if item["id"] == f"{subsection_id}-{pedagogy_id}"), None)
     parent = next((item for item in scientific["interventions.yaml"]["cells"] if child and item["id"] == child["parent_cell_id"]), None)
     pedagogy = next((item for item in scientific["interventions.yaml"]["pedagogies"] if item["id"] == pedagogy_id), None)
     if not all((subsection, child, parent, pedagogy)):
-        raise ScientificV051Error(f"unknown v0.5.1 compiled child context {subsection_id}-{pedagogy_id}")
+        raise ScientificV051Error(f"unknown v0.5 compiled child context {subsection_id}-{pedagogy_id}")
     return {"global_pedagogy": pedagogy, "parent_cell": parent, "child_cell": child, "subsection": subsection,
             "knowledge": scientific["knowledge.yaml"], "restrictions": [parent["scope_boundary"], *child["scope_boundaries"]],
             "tutor_prompt": compiled.authored["v051"]["prompts"]["TUTOR_PROMPT.md"]}

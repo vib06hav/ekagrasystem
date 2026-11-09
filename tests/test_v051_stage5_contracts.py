@@ -11,7 +11,7 @@ from solo_harness.runtime.v051_conversation import v051_tutor_prompt
 from solo_harness.studies.scientific_v051 import load_scientific_v051
 from solo_harness.studies.v051_native_compiler import compile_v051, resolve_v051_tutor_context
 
-ROOT = Path("studies/networks_error_detection_parity_f1/v0.5.1")
+ROOT = Path("studies/networks_error_detection_parity_f1/v0.5")
 
 
 def test_all_child_contexts_compile_the_real_three_pedagogy_layers():

@@ -1,4 +1,4 @@
-"""Minimal semantic contracts and prompt assembly for v0.5.1 conversation."""
+"""Minimal semantic contracts and prompt assembly for the v0.5 candidate."""
 from __future__ import annotations
 
 import json
