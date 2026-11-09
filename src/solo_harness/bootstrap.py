@@ -19,7 +19,7 @@ def bootstrap(settings: Settings) -> StudyCatalog:
     factory = make_session_factory(settings.database_url)
     with factory() as db:
         existing = db.get(ActiveStudyVersion, compiled.study_id)
-        if scientific.content_version == "v0.5.1":
+        if compiled.authored.get("v051", {}).get("candidate_only"):
             activate(db, compiled, bundle, make_active=False)
         elif existing is None or settings.activate_study_on_bootstrap:
             activate(db, compiled, bundle)

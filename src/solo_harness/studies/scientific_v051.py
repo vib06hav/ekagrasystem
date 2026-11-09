@@ -87,7 +87,9 @@ class ScientificStudyV051:
 
     @property
     def content_version(self) -> str:
-        return "v0.5.1"
+        # The locked curriculum remains v0.5.1.  This is a new immutable
+        # candidate snapshot because its executable LLM contract changed.
+        return "v0.5.2"
 
     @property
     def content_hash(self) -> str:

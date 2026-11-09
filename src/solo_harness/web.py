@@ -477,7 +477,7 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
         if not _internal_v051_access_enabled(application.settings, x_ekagra_internal_test_token):
             raise HTTPException(status_code=404)
         with application.factory() as db:
-            version = db.scalar(select(StudyVersion).where(StudyVersion.content_version == "v0.5.1").order_by(StudyVersion.created_at.desc()))
+            version = db.scalar(select(StudyVersion).where(StudyVersion.content_version.like("v0.5.%")).order_by(StudyVersion.created_at.desc()))
             if version is None:
                 raise HTTPException(status_code=404)
             session = application.execution.runtime.create_v051_internal_test_session(db, version.id)

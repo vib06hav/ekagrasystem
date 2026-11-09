@@ -118,8 +118,8 @@ class AIExecutionRuntime:
         messages=tutor_messages(self._science(),cell["id"],[{"role":"assistant" if m.role=="TUTOR" else "user","content":m.content_text} for m in dialogue],instructional); call=self._reserve(db,session,attempt,None,"TUTOR",messages,TutorProse,{"v04":True,"cell_id":cell["id"],"instructional_instance_id":instructional["instance_id"]})
         if commit: db.commit()
         return call
-    def reserve_conversation_judge(self,db,session_id,commit=True,checkpoint_tutor_message_id=None):
-        """Reserve the candidate semantic monitor for a learner turn or Tutor close checkpoint."""
+    def reserve_conversation_judge(self,db,session_id,commit=True):
+        """Reserve one semantic review after a real learner turn."""
         from solo_harness.runtime.v051_conversation import ConversationJudgeOutput, conversation_judge_prompt
         from solo_harness.studies.v051_native_compiler import resolve_v051_tutor_context
         session=db.scalar(select(Session).where(Session.id==session_id).with_for_update()); attempt=db.get(Attempt,session.current_attempt_id) if session else None
@@ -128,14 +128,13 @@ class AIExecutionRuntime:
         progress=db.scalar(select(SubsectionProgress).where(SubsectionProgress.attempt_id==attempt.id,SubsectionProgress.status=="ACTIVE").with_for_update())
         if progress is None: raise ValueError("no active v0.5.1 subsection")
         latest=db.scalar(select(Message).where(Message.attempt_id==attempt.id,Message.role=="LEARNER").order_by(Message.sequence_no.desc()))
-        if latest is None and checkpoint_tutor_message_id is None: raise ValueError("Conversation Judge requires a learner message or Tutor close checkpoint")
+        if latest is None: raise ValueError("Conversation Judge requires a learner message")
         active=db.scalar(select(LLMCall.id).where(LLMCall.attempt_id==attempt.id,LLMCall.purpose=="CONVERSATION_JUDGE",LLMCall.status.in_(("STARTED","SENDING","RECEIVED"))))
         if active: raise ValueError("a Conversation Judge operation is already active")
         dialogue=[{"id":str(message.id),"role":message.role,"content":message.content_text,"instructional_trace":message.instructional_trace} for message in db.scalars(select(Message).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no)).all()]
         context=resolve_v051_tutor_context(compiled,progress.subsection_id,attempt.pedagogy_id)
-        allowance=self.runtime.v051_clarification_allowance(db,session.id,progress.subsection_id)
-        prompt=conversation_judge_prompt(compiled,progress,context,dialogue,str(latest.id) if latest else None,allowance)
-        call=self._reserve(db,session,attempt,None,"CONVERSATION_JUDGE",(CanonicalMessage(role="system",content=prompt),),ConversationJudgeOutput,{"v051":True,"attempt_id":str(attempt.id),"subsection_id":progress.subsection_id,"latest_learner_message_id":str(latest.id) if latest else None,"checkpoint_tutor_message_id":str(checkpoint_tutor_message_id) if checkpoint_tutor_message_id else None})
+        prompt=conversation_judge_prompt(compiled,progress,context,dialogue,str(latest.id),(progress.instructional_state or {}).get("verified_instructional_instance"))
+        call=self._reserve(db,session,attempt,None,"CONVERSATION_JUDGE",(CanonicalMessage(role="system",content=prompt),),ConversationJudgeOutput,{"v051":True,"attempt_id":str(attempt.id),"subsection_id":progress.subsection_id,"latest_learner_message_id":str(latest.id)})
         if commit: db.commit()
         return call
     def reserve_assessment(self,db,session_id,assessment_id=None,commit=True):
@@ -254,10 +253,13 @@ class AIExecutionRuntime:
             # Clear the marker only inside the successful transaction.
             call.error_class=None; call.error_message=None
             if call.purpose=="CONVERSATION_JUDGE":
-                decision=self.runtime.apply_v051_conversation_judge(db,session.id,call.id,out,commit=False)
+                try:
+                    decision=self.runtime.apply_v051_conversation_judge(db,session.id,call.id,out,commit=False)
+                except ValueError as exc:
+                    call.parsed_response=out.model_dump(mode="json"); call.status="INVALID_OUTPUT"; call.error_class="SEMANTIC_VALIDATION_FAILURE"; call.error_message=str(exc)[:4000]; call.completed_at=datetime.now(timezone.utc); db.commit(); return
                 call.parsed_response=out.model_dump(mode="json"); call.status="SUCCEEDED"; call.completed_at=datetime.now(timezone.utc)
                 next_call = None
-                if decision.action != "DELIVERY_EXCEPTION" and session.phase == "INTERVENTION_ACTIVE":
+                if decision.action != "HOLD" and session.phase == "INTERVENTION_ACTIVE":
                     # The Judge is a real controller: its stored guidance is
                     # compiled into the next Tutor request, rather than merely
                     # being displayed or left for an external caller to use.
@@ -272,9 +274,7 @@ class AIExecutionRuntime:
                     seq=(db.scalar(select(Message.sequence_no).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no.desc())) or 0)+1
                     if self.runtime._v051(self.runtime._compiled(db,session)):
                         audit=(call.request_payload or {}).get("audit", {})
-                        trace={"subsection_id":audit["subsection_id"],"pedagogy_id":audit["pedagogy_id"],"fidelity_note":out.fidelity_note,
-                               "proposed_move_ids":out.proposed_move_ids,"proposed_content_ids":out.proposed_content_ids,
-                               "proposes_subsection_close":out.proposes_subsection_close}
+                        trace={"subsection_id":audit["subsection_id"],"pedagogy_id":audit["pedagogy_id"],"ready_for_judge":out.ready_for_judge}
                     else:
                         trace={"fidelity_note":out.fidelity_note}
                     message=Message(attempt_id=attempt.id,sequence_no=seq,role="TUTOR",content_text=out.learner_message,content_format="markdown",llm_call_id=call.id,instructional_trace=trace,material_ids=[],exposed_kc_ids=[],exposed_relation_ids=[])
@@ -283,13 +283,9 @@ class AIExecutionRuntime:
                     message=db.scalar(select(Message).where(Message.llm_call_id==call.id))
                 call.parsed_response=out.model_dump(mode="json"); call.status="SUCCEEDED"; call.completed_at=datetime.now(timezone.utc)
                 if self.runtime._v051(self.runtime._compiled(db,session)):
-                    # A closure proposal is a checkpoint, never a transition.
-                    # The Judge call is reserved from the same transaction and
-                    # must validate its own persisted evidence before advance.
-                    if out.proposes_subsection_close:
-                        next_call = self.reserve_conversation_judge(db,session.id,commit=False,checkpoint_tutor_message_id=message.id)
-                    else:
-                        next_call = None
+                    # Readiness is advisory.  A real learner turn starts one
+                    # Judge review, preventing unattended Tutor→Judge loops.
+                    next_call = None
                 elif out.teaching_complete and session.phase=="INTERVENTION_ACTIVE":
                     # End instruction, but do not select a blueprint or call the
                     # assessment writer until the learner records mental effort.
@@ -380,7 +376,10 @@ class AIExecutionRuntime:
             previous=db.scalar(select(LLMCall).where(LLMCall.session_id==session.id,LLMCall.attempt_id==attempt.id).order_by(LLMCall.started_at.desc()))
         if active: raise ValueError("an operation is already active")
         if previous and previous.status=="RECEIVED" and previous.error_class=="APPLICATION_FAILURE":
-            return previous.id
+            if previous.purpose == "CONVERSATION_JUDGE":
+                previous.status="INVALID_OUTPUT"; previous.error_class="SEMANTIC_VALIDATION_FAILURE"; previous.completed_at=datetime.now(timezone.utc)
+            else:
+                return previous.id
         if not previous or not (previous.status in ("FAILED","INVALID_OUTPUT") or previous.error_class=="REVIEW_HOLD" or (authorized_requeue and previous.status=="TECHNICAL_HOLD")):
             raise ValueError("no recoverable operation")
         if previous.retry_number >= 3 and not authorized_requeue:

@@ -21,7 +21,7 @@ def compile_v051(study):
     parents = study.source["interventions.yaml"]["cells"]
     children = study.source["subsection_interventions.yaml"]["cells"]
     for pedagogy in pedagogies:
-        recipes[pedagogy["id"]] = {"id": "v051-" + pedagogy["id"], "pedagogy_id": pedagogy["id"], "role_instruction": pedagogy["tutor_role"], "move_generation_instruction": study.prompts["TUTOR_PROMPT.md"], "learner_check_instruction": "Candidate-only; persisted Conversation Judge supervision is required before subsection advancement.", "completion_instruction": "Do not declare SOLO success; closure remains non-authoritative until the Conversation Judge and runtime gates accept obligation-level evidence.", "prohibited_behavior": pedagogy["prohibitions"]}
+        recipes[pedagogy["id"]] = {"id": "v051-" + pedagogy["id"], "pedagogy_id": pedagogy["id"], "role_instruction": pedagogy["tutor_role"], "move_generation_instruction": study.prompts["TUTOR_PROMPT.md"], "learner_check_instruction": "Candidate-only; persisted Conversation Judge supervision is required before subsection advancement.", "completion_instruction": "Do not declare SOLO success; Tutor readiness is non-authoritative until the Conversation Judge's semantic decision is applied by the runtime.", "prohibited_behavior": pedagogy["prohibitions"]}
     for parent in parents:
         key = f"{parent['transition_id']}:{parent['pedagogy_id']}"
         parent_children = [child for child in children if child["parent_cell_id"] == parent["id"]]

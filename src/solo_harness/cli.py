@@ -25,8 +25,9 @@ def main():
     elif args.command == "register-study":
         scientific = load_scientific(settings.study_dir); compiled = compile_scientific(scientific)
         with make_session_factory(settings.database_url)() as db:
-            version = activate(db, compiled, source_bundle(scientific), make_active=scientific.content_version != "v0.5.1")
-        print(json.dumps({"study_version_id": str(version.id), "study_id": version.study_id, "content_version": version.content_version, "active": scientific.content_version != "v0.5.1"}, sort_keys=True))
+            candidate = bool(compiled.authored.get("v051", {}).get("candidate_only"))
+            version = activate(db, compiled, source_bundle(scientific), make_active=not candidate)
+        print(json.dumps({"study_version_id": str(version.id), "study_id": version.study_id, "content_version": version.content_version, "active": not candidate}, sort_keys=True))
     elif args.command == "inspect-session":
         print(json.dumps(inspect_session(settings.database_url, uuid.UUID(args.session_id)), indent=2, sort_keys=True))
     else:

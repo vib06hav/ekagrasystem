@@ -17,7 +17,7 @@ def load_scientific(root: Path):
 
 
 def compile_scientific(scientific):
-    return compile_v051(scientific) if scientific.content_version == "v0.5.1" else compile_v04(scientific)
+    return compile_v051(scientific) if scientific.content_version.startswith("v0.5.") else compile_v04(scientific)
 
 
 def source_bundle(scientific) -> dict:
