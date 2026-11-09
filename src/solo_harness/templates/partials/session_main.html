@@ -13,6 +13,13 @@
     {% if view.transition_summary and view.is_current %}<li class="current">Transition summary</li>{% endif %}
     </ul>
   {% endif %}
+  {% if section.number == view.section_number and view.v051_subsections %}
+    <ul class="nav-sub" aria-label="Section {{ section.number }} subsections">
+    {% for subsection in view.v051_subsections %}
+      <li class="subsection {{ subsection.state|lower }}{% if subsection.state == 'ACTIVE' %} current{% endif %}"{% if subsection.state == 'ACTIVE' %} aria-current="step"{% endif %}>{{ subsection.id }} · {{ subsection.title }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
   </div>
 {% endfor %}
 </nav>
@@ -24,6 +31,8 @@
 {% for item in view.timeline %}
   {% if item.kind == 'message' %}
     <article class="message {{ item.role|lower }}"{% if item.role == 'TUTOR' %} data-tutor-message-sequence="{{ item.sequence_no }}"{% endif %}><div class="message-meta"><span>{% if item.role == 'TUTOR' %}Study assistant{% else %}You{% endif %}</span><time>{{ item.timestamp.strftime('%H:%M:%S') }}</time></div>{% if item.role == 'TUTOR' %}<div class="tutor-content" data-teaching-render="markdown-v1">{{ item.content | tutor_markdown }}</div>{% else %}{{ item.content }}{% endif %}</article>
+  {% elif item.kind == 'subsection' %}
+    <div class="timeline-marker subsection" data-subsection-marker="{{ item.subsection_id }}"><span>{{ item.label }}</span></div>
   {% else %}
     <div class="timeline-marker {{ item.kind }}"{% if item.kind == 'assessment' %} data-assessment-completed-marker{% endif %}{% if item.kind == 'activity' %} data-teaching-activity-number="{{ item.activity_number }}"{% endif %}><span>{{ item.label }}</span>{% if item.timestamp %}<time title="Time of day, not a duration">{% if item.kind == 'activity' %}Assigned at {% endif %}{{ item.timestamp.strftime('%H:%M:%S') }}</time>{% endif %}</div>
   {% endif %}
@@ -31,7 +40,7 @@
 </div>
 {% endmacro %}
 
-<div id="session-main" data-started-at="{{ view.started_at.isoformat() if view.started_at else '' }}" data-ended-at="{{ view.ended_at.isoformat() if view.ended_at else '' }}">
+<div id="session-main" data-started-at="{{ view.started_at.isoformat() if view.started_at else '' }}" data-ended-at="{{ view.ended_at.isoformat() if view.ended_at else '' }}" data-active-subsection-id="{{ view.active_subsection.id if view.active_subsection else '' }}">
 {% if view.phase == 'TERMINAL' and view.is_current %}
   {{ section_nav(view) }}
   <section class="panel completion" data-study-complete><div class="phase-badge">{% if view.status == 'UNRESOLVED' %}Study ended{% else %}Study completed{% endif %}</div><h1>Thank you</h1><p>{% if view.status == 'UNRESOLVED' %}Study ended — some transitions unresolved; your responses were saved.{% else %}Your study responses have been saved.{% endif %}</p>
@@ -41,12 +50,14 @@
 {% else %}
   {{ section_nav(view) }}
   <section class="panel" data-section-number="{{ view.section_number }}" data-telemetry-mode="{% if not view.is_current %}review{% else %}{{ view.phase|lower }}{% endif %}">
-    <header class="panel-head"><h1>Section {{ view.section_number }}</h1><span class="phase-badge">{% if not view.is_current %}Review{% elif view.phase == 'PAAS_PENDING' %}Mental effort{% elif view.phase == 'ASSESSMENT_ACTIVE' or view.phase == 'JUDGING' or view.phase == 'ASSESSMENT_GENERATING' or view.phase == 'ASSESSMENT_AWAITING_EVALUATION' %}Assessment{% elif view.phase == 'SECTION_COMPLETE' %}{% if view.transition_summary %}Summary{% else %}Complete{% endif %}{% else %}Teaching{% endif %}</span></header>
+    <header class="panel-head"><div><h1>Section {{ view.section_number }}</h1>{% if view.section_title %}<p>{{ view.section_title }}</p>{% endif %}{% if view.active_subsection %}<p class="subsection-context" data-active-subsection>Part {{ view.active_subsection.order }} of {{ view.v051_subsections|length }} · {{ view.active_subsection.id }} — {{ view.active_subsection.title }}</p>{% endif %}</div><span class="phase-badge">{% if not view.is_current %}Review{% elif view.phase == 'PAAS_PENDING' %}Mental effort{% elif view.phase == 'ASSESSMENT_ACTIVE' or view.phase == 'JUDGING' or view.phase == 'ASSESSMENT_GENERATING' or view.phase == 'ASSESSMENT_AWAITING_EVALUATION' %}Assessment{% elif view.phase == 'SECTION_COMPLETE' %}{% if view.transition_summary %}Summary{% else %}Complete{% endif %}{% else %}Teaching{% endif %}</span></header>
 
     {% if not view.is_current %}
       {{ timeline(view) }}<div class="composer read-only" data-completed-section-review>This completed section is available for review. Its assessment remains stored with the study record.</div>
     {% elif view.pending and (view.phase == 'ASSESSMENT_GENERATING' or view.phase == 'JUDGING' or view.phase == 'ASSESSMENT_AWAITING_EVALUATION') %}
       <div class="action-card" data-processing-kind="{% if view.phase == 'ASSESSMENT_GENERATING' %}assessment_generation{% else %}judging{% endif %}"><h2>{% if view.phase == 'ASSESSMENT_GENERATING' %}Preparing your assessment{% else %}Evaluating your assessment{% endif %}</h2><div class="processing"><span>Please wait. You cannot make other changes while this step is running.</span><span class="dots" aria-label="Processing"><i></i><i></i><i></i></span></div><button disabled>Retry</button></div><div data-operation-poll hx-get="/session/operation" hx-trigger="every 1s" hx-target="#session-main" hx-swap="outerHTML"></div>
+    {% elif view.delivery_exception %}
+      {{ timeline(view) }}<div class="action-card" data-delivery-exception><h2>Teaching is paused</h2><p>This teaching step needs study staff review before it can continue. Your completed work remains saved.</p></div>
     {% elif view.pending %}
       {{ timeline(view) }}{% include "partials/tutor_composer.html" %}
     {% elif view.retryable %}

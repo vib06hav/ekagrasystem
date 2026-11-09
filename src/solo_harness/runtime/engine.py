@@ -326,6 +326,20 @@ class SessionRuntime:
         db.add(session); db.flush(); self._event(db, session, "SESSION_CREATED", {"study_version_id": str(study_version_id), "capture_run_id": str(capture_run_id) if capture_run_id else None}); self._create_attempt(db, session, compiled, compiled.protocol["transition_ids"][0]);
         if commit: db.commit()
         return session
+
+    def create_v051_internal_test_session(self, db: DbSession, study_version_id, build_id="internal-v051-test", commit=True):
+        """Create an explicitly marked candidate session; never used by participant enrollment."""
+        compiled = self.catalog.load(db, study_version_id)
+        if not self._v051(compiled):
+            raise ValueError("study is not the v0.5.1 candidate")
+        session = Session(study_version_id=study_version_id, status="ACTIVE", phase="TRANSITION_READY",
+            formal_state_id=compiled.protocol["initial_state_id"], current_attempt_number=0,
+            application_build_id=build_id, runtime_config_snapshot={"internal_v051_testing": True})
+        db.add(session); db.flush()
+        self._event(db, session, "V051_INTERNAL_TEST_SESSION_CREATED", {"study_version_id": str(study_version_id)})
+        self._create_attempt(db, session, compiled, compiled.protocol["transition_ids"][0])
+        if commit: db.commit()
+        return session
     def _create_attempt(self, db, session, compiled, transition_id):
         used = db.scalars(select(Attempt.pedagogy_id).where(Attempt.session_id == session.id, Attempt.transition_id == transition_id)).all()
         decision = self.selector.choose([p for p in compiled.protocol["pedagogy_ids"] if p not in used], used)

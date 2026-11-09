@@ -37,6 +37,8 @@ class Settings(BaseSettings):
     require_active_capture: bool = False
     required_capture_streams: Literal["screen", "screen_and_webcam"] = "screen_and_webcam"
     enable_f1_v04_development: bool = False
+    enable_v051_internal_testing: bool = False
+    v051_internal_testing_token: SecretStr | None = None
     f1_v04_study_dir: Path = Path("/app/studies/networks_error_detection_parity_f1/v0.4")
     active_capture_max_age_seconds: int = Field(default=15, gt=0)  # recorder heartbeat age
     participant_study_title: str = "Learning study"

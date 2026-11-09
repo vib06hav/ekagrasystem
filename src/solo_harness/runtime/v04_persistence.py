@@ -8,9 +8,12 @@ from solo_harness.db.models import AssessmentInstance, AssessmentResponse, Attem
 V04_RESPONSE_SCHEMA = "v04.1"
 DEVELOPMENT_ONLY = "DEVELOPMENT_ONLY"
 
-def is_f1_study(compiled): return bool(compiled.authored.get("v04"))
+def is_f1_study(compiled): return bool(compiled.authored.get("v04") or compiled.authored.get("v051"))
 def is_f1_frozen(item): return bool(item and item.frozen_public_snapshot and item.frozen_private_snapshot)
-def is_deliverable_f1(item, settings): return is_f1_frozen(item) and bool(getattr(settings, "enable_f1_v04_development", False))
+def is_deliverable_f1(item, settings, candidate_only=False):
+    enabled = (getattr(settings, "enable_v051_internal_testing", False) if candidate_only
+               else getattr(settings, "enable_f1_v04_development", False))
+    return is_f1_frozen(item) and bool(enabled)
 def public_projection(item):
     if not is_f1_frozen(item): raise ValueError("assessment is not frozen")
     return item.frozen_public_snapshot

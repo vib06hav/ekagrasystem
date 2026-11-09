@@ -28,6 +28,8 @@ from solo_harness.db.models import (
     Message,
     ProtocolEvent,
     Session,
+    StudyVersion,
+    SubsectionProgress,
 )
 from solo_harness.runtime.ai import AIExecutionRuntime, OpenAICompatibleClient
 from solo_harness.runtime.engine import SessionRuntime
@@ -42,6 +44,27 @@ logger = logging.getLogger(__name__)
 
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 templates.env.filters["tutor_markdown"] = render_tutor_markdown
+
+
+def _v051_subsection_projection(compiled, attempt, progress_rows):
+    """Participant-safe subsection labels from the persisted attempt ledger."""
+    if not attempt or not SessionRuntime._v051(compiled):
+        return []
+    curriculum = compiled.authored["v051"]["scientific"]["curriculum.yaml"]
+    titles = {item["id"]: item["title"] for item in curriculum["subsections"]}
+    return [{"id": row.subsection_id, "title": titles[row.subsection_id],
+             "order": row.order_in_attempt, "state": row.status}
+            for row in sorted(progress_rows, key=lambda row: row.order_in_attempt)]
+
+
+def _operation_refresh_required(pending, client_subsection_id, active_subsection_id):
+    return not pending or client_subsection_id != active_subsection_id
+
+
+def _internal_v051_access_enabled(settings, presented_token):
+    configured = getattr(settings, "v051_internal_testing_token", None)
+    return bool(getattr(settings, "enable_v051_internal_testing", False) and configured and presented_token
+                and secrets.compare_digest(configured.get_secret_value(), presented_token))
 
 
 class ParticipantApplication:
@@ -140,6 +163,7 @@ class ParticipantApplication:
             compiled = self.execution.runtime._compiled(db, session)
             transition_ids = list(compiled.protocol["transition_ids"])
             f1_study = is_f1_study(compiled)
+            v051_candidate = self.execution.runtime._v051(compiled)
             attempts = db.scalars(
                 select(Attempt).where(Attempt.session_id == session.id).order_by(Attempt.assigned_at, Attempt.sequence_in_transition)
             ).all()
@@ -151,6 +175,10 @@ class ParticipantApplication:
             ).all()
             assessments_by_attempt = {item.attempt_id: item for item in assessments}
             attempt_ids = [attempt.id for attempt in attempts]
+            progress_by_attempt: dict[uuid.UUID, list[SubsectionProgress]] = defaultdict(list)
+            if attempt_ids and v051_candidate:
+                for progress in db.scalars(select(SubsectionProgress).where(SubsectionProgress.attempt_id.in_(attempt_ids))).all():
+                    progress_by_attempt[progress.attempt_id].append(progress)
             messages = db.scalars(
                 select(Message).where(Message.attempt_id.in_(attempt_ids)).order_by(Message.created_at, Message.sequence_no)
             ).all() if attempt_ids else []
@@ -194,6 +222,9 @@ class ParticipantApplication:
                     state = "locked"
                 sections.append({"number": index + 1, "state": state, "enabled": index <= current_index})
 
+            current_attempt = db.get(Attempt, session.current_attempt_id) if session.current_attempt_id else None
+            section_titles = {item["id"]: item["title"] for item in compiled.authored.get("v051", {}).get("scientific", {}).get("curriculum.yaml", {}).get("sections", [])}
+            subsection_titles = {item["id"]: item["title"] for item in compiled.authored.get("v051", {}).get("scientific", {}).get("curriculum.yaml", {}).get("subsections", [])}
             timeline = []
             for attempt in attempts_by_transition[selected_transition_id]:
                 timeline.append({
@@ -202,7 +233,13 @@ class ParticipantApplication:
                     "activity_number": attempt.sequence_in_transition,
                     "timestamp": in_research_timezone(attempt.assigned_at),
                 })
+                marked_subsection = None
                 for message in messages_by_attempt[attempt.id]:
+                    subsection_id = (message.instructional_trace or {}).get("subsection_id") if v051_candidate else None
+                    if subsection_id and subsection_id != marked_subsection:
+                        timeline.append({"kind": "subsection", "label": f"{subsection_id} — {subsection_titles[subsection_id]}",
+                                         "subsection_id": subsection_id})
+                        marked_subsection = subsection_id
                     timeline.append({
                         "kind": "message",
                         "role": message.role,
@@ -221,8 +258,12 @@ class ParticipantApplication:
                 outcome = completed_event.payload.get("scientific_outcome")
                 timeline.append({"kind": "section", "label": "Section ended — transition unresolved" if outcome == "UNRESOLVED" else "Section completed", "timestamp": in_research_timezone(completed_event.occurred_at)})
 
-            current_attempt = db.get(Attempt, session.current_attempt_id) if session.current_attempt_id else None
             current_assessment = assessments_by_attempt.get(current_attempt.id) if current_attempt else None
+            v051_subsections = _v051_subsection_projection(
+                compiled, current_attempt, progress_by_attempt.get(current_attempt.id, []) if current_attempt and is_current else []
+            )
+            active_subsection = next((item for item in v051_subsections if item["state"] == "ACTIVE"), None)
+            delivery_exception = any(item["state"] == "DELIVERY_EXCEPTION" for item in v051_subsections)
             latest = db.scalar(
                 select(LLMCall).where(LLMCall.session_id == session.id).order_by(LLMCall.started_at.desc())
             )
@@ -253,6 +294,7 @@ class ParticipantApplication:
                 "status": session.status,
                 "section_number": requested_index + 1,
                 "section_count": len(transition_ids),
+                "section_title": section_titles.get(selected_transition_id),
                 "sections": sections,
                 "is_current": is_current,
                 "is_read_only": not is_current or session.phase == "TERMINAL",
@@ -269,20 +311,23 @@ class ParticipantApplication:
                 "attempt_status": current_attempt.status if current_attempt and is_current else None,
                 "paas_instrument": instrument_snapshot() if is_current and session.phase == "PAAS_PENDING" else None,
                 "activity_number": current_attempt.sequence_in_transition if current_attempt and is_current else None,
+                "v051_subsections": v051_subsections,
+                "active_subsection": active_subsection,
+                "delivery_exception": delivery_exception,
                 "assessment_prompt": (
                     current_assessment.prompt_snapshot
                     if current_assessment and current_assessment.status == "ACTIVE" and is_current else None
                 ),
                 "f1_public_assessment": (
                     public_projection(current_assessment)
-                    if f1_study and current_assessment and current_assessment.status == "ACTIVE" and is_current and is_deliverable_f1(current_assessment, self.settings) else None
+                    if f1_study and current_assessment and current_assessment.status == "ACTIVE" and is_current and is_deliverable_f1(current_assessment, self.settings, v051_candidate) else None
                 ),
                 "f1_assessment_submitted": bool(
                     f1_study and current_assessment and current_assessment.status == "AWAITING_EVALUATION" and is_f1_frozen(current_assessment) and is_current
                 ),
                 "f1_assessment_unavailable": bool(
                     f1_study and current_assessment and current_assessment.status == "ACTIVE" and is_current
-                    and not is_deliverable_f1(current_assessment, self.settings)
+                    and not is_deliverable_f1(current_assessment, self.settings, v051_candidate)
                 ),
                 "pending": pending,
                 "pending_status": operation.status if pending else None,
@@ -426,6 +471,19 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
         request.session["participant_session_id"] = str(session_id)
         return RedirectResponse("/session", status_code=303)
 
+    @router.post("/internal/v051/session")
+    async def internal_v051_session(request: Request, x_ekagra_internal_test_token: str | None = Header(None)):
+        """Opt-in staff-only candidate entry point; ordinary enrollment never calls it."""
+        if not _internal_v051_access_enabled(application.settings, x_ekagra_internal_test_token):
+            raise HTTPException(status_code=404)
+        with application.factory() as db:
+            version = db.scalar(select(StudyVersion).where(StudyVersion.content_version == "v0.5.1").order_by(StudyVersion.created_at.desc()))
+            if version is None:
+                raise HTTPException(status_code=404)
+            session = application.execution.runtime.create_v051_internal_test_session(db, version.id)
+        request.session["participant_session_id"] = str(session.id)
+        return RedirectResponse("/session", status_code=303)
+
     @router.post("/leave")
     async def leave(request: Request):
         application.deactivate(request.session)
@@ -451,13 +509,16 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
         return render_session(request, session_id, None if current and current["pending"] else section_number)
 
     @router.get("/session/operation", response_class=HTMLResponse)
-    async def operation(request: Request):
+    async def operation(request: Request, x_ekagra_subsection: str | None = Header(None)):
         session_id = application.require(request.session)
         if not session_id:
             return RedirectResponse("/join", status_code=303)
         # A pending operation has no participant-visible change. Returning 204
         # preserves the existing chat DOM and its user-selected scroll position.
-        if (view := application.view(session_id)) and view["pending"]:
+        if (view := application.view(session_id)) and not _operation_refresh_required(
+            view["pending"], x_ekagra_subsection,
+            view["active_subsection"]["id"] if view["active_subsection"] else None,
+        ):
             return Response(status_code=204)
         return application.render_main(request, session_id)
 
@@ -568,8 +629,9 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
                 assessment = db.scalar(select(AssessmentInstance).where(AssessmentInstance.attempt_id == attempt.id)) if attempt else None
                 compiled = application.execution.runtime._compiled(db, session)
                 f1_request = is_f1_study(compiled)
+                v051_candidate = application.execution.runtime._v051(compiled)
                 if f1_request:
-                    if not is_deliverable_f1(assessment, application.settings):
+                    if not is_deliverable_f1(assessment, application.settings, v051_candidate):
                         raise ValueError("F1 assessment package is unavailable for learner delivery")
                     answers = {"MCQ1": mcq1_answer or "", "MCQ2": mcq2_answer or "", "MCQ3": mcq3_answer or ""}
                     payload = {"answers": answers, "subjective_response": text}
