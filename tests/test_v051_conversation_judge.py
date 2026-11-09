@@ -12,12 +12,13 @@ import pytest
 from sqlalchemy import func, select
 
 from solo_harness.db.engine import make_session_factory
-from solo_harness.db.models import AssessmentInstance, Attempt, ConversationJudgeDecision, LLMCall, Message, Session, V04Evaluation
+from solo_harness.db.models import AssessmentInstance, Attempt, ConversationJudgeDecision, LLMCall, Message, Session, StudyVersion, V04Evaluation
 from solo_harness.runtime.ai import AIExecutionRuntime, PreparedLLMRequest, RawLLMResponse
 from solo_harness.runtime.engine import RandomSelector, SessionRuntime
 from solo_harness.studies.activation import activate
 from solo_harness.studies.scientific_v051 import load_scientific_v051
 from solo_harness.studies.v051_native_compiler import compile_v051
+from solo_harness.web import _internal_v051_candidate
 
 
 DATABASE_URL = os.environ.get("EKAGRA_STAGE3_DATABASE_URL")
@@ -90,6 +91,25 @@ def _setup(db):
     return runtime, session.id, progress, tutor.id
 
 
+def _historical_version(db, current):
+    """A legacy immutable row only used to exercise the audit-only policy."""
+    existing = db.scalar(select(StudyVersion).where(
+        StudyVersion.study_id == current.study_id,
+        StudyVersion.content_version == "v0.5.1",
+    ))
+    if existing is not None:
+        return existing
+    version = StudyVersion(
+        study_id=current.study_id, content_version="v0.5.1", study_schema_version=current.study_schema_version,
+        content_canonicalization_version=current.content_canonicalization_version, content_hash="1" * 64,
+        canonical_authored_definition=b"{}", source_bundle={"status": "historical-test"}, source_provenance={},
+        compiler_contract_version=current.compiler_contract_version, snapshot_schema_version=current.snapshot_schema_version,
+        snapshot_hash=uuid.uuid4().hex * 2, compiled_snapshot=current.compiled_snapshot,
+    )
+    db.add(version); db.flush()
+    return version
+
+
 @pytest.mark.parametrize("action", ["CONTINUE", "ADVANCE", "HOLD"])
 def test_conversation_judge_minimal_decisions_persist_and_apply(action):
     factory = make_session_factory(DATABASE_URL)
@@ -126,9 +146,66 @@ def test_invalid_or_stale_judge_output_is_audited_and_freshly_retryable():
         db.add(Message(attempt_id=attempt.id, sequence_no=3, role="LEARNER", content_text="A newer real learner turn.", content_format="plain", material_ids=[], exposed_kc_ids=[], exposed_relation_ids=[])); db.commit()
         asyncio.run(ai.execute(db, stale))
         stale_call = db.get(LLMCall, stale)
-        assert stale_call.status == "INVALID_OUTPUT" and stale_call.error_class == "SEMANTIC_VALIDATION_FAILURE"
+        assert stale_call.status == "INVALID_OUTPUT" and stale_call.error_class == "STALE_CONTEXT"
         retry = ai.reserve_manual_retry(db, session_id, commit=True)
         assert retry != stale and db.get(LLMCall, retry).request_payload["retry_of"] == str(stale)
+
+
+def test_failed_advance_application_rolls_back_before_marking_a_transient_failure(monkeypatch):
+    factory = make_session_factory(DATABASE_URL)
+    with factory() as db:
+        runtime, session_id, _, _ = _setup(db)
+        ai = AIExecutionRuntime(runtime, _Client(_output("ADVANCE")), _settings())
+        call_id = ai.reserve_conversation_judge(db, session_id, commit=True)
+        original = runtime.advance_v051_subsection
+
+        def fail_after_decision(*args, **kwargs):
+            raise RuntimeError("controlled database interruption after decision persistence")
+
+        monkeypatch.setattr(runtime, "advance_v051_subsection", fail_after_decision)
+        asyncio.run(ai.execute(db, call_id))
+        failed = db.get(LLMCall, call_id)
+        assert failed.status == "RECEIVED" and failed.error_class == "APPLICATION_FAILURE"
+        assert db.scalar(select(func.count()).select_from(ConversationJudgeDecision).where(ConversationJudgeDecision.llm_call_id == call_id)) == 0
+        rows = runtime.inspect_v051_subsections(db, session_id)
+        assert rows[0].status == "ACTIVE" and rows[1].status == "PENDING"
+        assert "last_action" not in (rows[0].instructional_state or {})
+
+        monkeypatch.setattr(runtime, "advance_v051_subsection", original)
+        assert ai.reserve_manual_retry(db, session_id, commit=True) == call_id
+        asyncio.run(ai.execute(db, call_id))
+        assert db.get(LLMCall, call_id).status == "SUCCEEDED"
+        assert db.scalar(select(ConversationJudgeDecision).where(ConversationJudgeDecision.llm_call_id == call_id)).application_status == "APPLIED"
+        assert runtime.inspect_v051_subsections(db, session_id)[1].status == "ACTIVE"
+
+
+def test_historical_v051_judge_response_is_held_for_audit_without_reinterpretation():
+    factory = make_session_factory(DATABASE_URL)
+    with factory() as db:
+        runtime, session_id, _, _ = _setup(db)
+        session = db.get(Session, session_id)
+        historical = _historical_version(db, db.get(StudyVersion, session.study_version_id))
+        session.study_version_id = historical.id; db.commit()
+        legacy = {"decision": "ADVANCE_SUBSECTION", "active_subsection_id": "C1.1"}
+        ai = AIExecutionRuntime(runtime, _Client(legacy), _settings())
+        call_id = ai.reserve_conversation_judge(db, session_id, commit=True)
+        asyncio.run(ai.execute(db, call_id))
+        call = db.get(LLMCall, call_id)
+        assert call.status == "TECHNICAL_HOLD" and call.error_class == "HISTORICAL_CONTRACT_INCOMPATIBLE"
+        assert "ADVANCE_SUBSECTION" in call.raw_response_text
+        assert db.scalar(select(func.count()).select_from(ConversationJudgeDecision).where(ConversationJudgeDecision.llm_call_id == call_id)) == 0
+        with pytest.raises(ValueError, match="audit-only"):
+            ai.reserve_manual_retry(db, session_id, commit=True, authorized_requeue=True)
+
+
+def test_internal_candidate_selection_uses_configured_v052_not_registration_order():
+    factory = make_session_factory(DATABASE_URL)
+    with factory() as db:
+        runtime, session_id, _, _ = _setup(db)
+        current = db.get(StudyVersion, db.get(Session, session_id).study_version_id)
+        _historical_version(db, current)
+        selected = _internal_v051_candidate(db, SimpleNamespace(v051_internal_candidate_version="v0.5.2"))
+        assert selected.id == current.id and selected.content_version == "v0.5.2"
 
 
 def test_real_persisted_tutor_judge_flow_progresses_once_per_learner_turn_to_paas_and_assessment():

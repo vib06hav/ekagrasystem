@@ -67,6 +67,13 @@ def _internal_v051_access_enabled(settings, presented_token):
                 and secrets.compare_digest(configured.get_secret_value(), presented_token))
 
 
+def _internal_v051_candidate(db, settings):
+    """Select only the explicitly configured immutable candidate revision."""
+    return db.scalar(select(StudyVersion).where(
+        StudyVersion.content_version == settings.v051_internal_candidate_version
+    ))
+
+
 class ParticipantApplication:
     """One browser-facing participant bound to one trusted app process at a time."""
 
@@ -477,7 +484,7 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
         if not _internal_v051_access_enabled(application.settings, x_ekagra_internal_test_token):
             raise HTTPException(status_code=404)
         with application.factory() as db:
-            version = db.scalar(select(StudyVersion).where(StudyVersion.content_version.like("v0.5.%")).order_by(StudyVersion.created_at.desc()))
+            version = _internal_v051_candidate(db, application.settings)
             if version is None:
                 raise HTTPException(status_code=404)
             session = application.execution.runtime.create_v051_internal_test_session(db, version.id)

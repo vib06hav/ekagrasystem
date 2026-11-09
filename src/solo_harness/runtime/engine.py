@@ -12,6 +12,16 @@ from solo_harness.db.models import AssessmentInstance, AssessmentResponse, Attem
 from solo_harness.studies.catalog import StudyCatalog
 
 
+class ConversationJudgeRejected(ValueError):
+    """A validly parsed Judge response cannot be applied to this lifecycle."""
+    error_class = "SEMANTIC_VALIDATION_FAILURE"
+
+
+class StaleConversationJudgeContext(ConversationJudgeRejected):
+    """The transcript or active subsection changed after the Judge was reserved."""
+    error_class = "STALE_CONTEXT"
+
+
 @dataclass(frozen=True)
 class SelectionDecision:
     eligible_candidate_ids: tuple[str, ...]
@@ -210,18 +220,28 @@ class SessionRuntime:
         if commit: db.commit()
         return progress
 
-    def advance_v051_subsection(self, db: DbSession, session_id, subsection_id, commit=True, authorized_by_judge=False):
+    def advance_v051_subsection(self, db: DbSession, session_id, subsection_id, commit=True, judge_decision_id=None):
         session = db.scalar(select(Session).where(Session.id == session_id).with_for_update())
         if session is None or not self._v051(self._compiled(db, session)): raise ValueError("v0.5.1 subsection lifecycle is unavailable")
         attempt, progress = self._active_v051_progress(db, session, subsection_id)
-        if not authorized_by_judge and (set(progress.required_move_ids) - set(progress.move_evidence or {}) or set(progress.required_content_ids) - set(progress.content_evidence or {})):
-            raise ValueError("required instructional evidence is incomplete")
+        if judge_decision_id is None:
+            if set(progress.required_move_ids) - set(progress.move_evidence or {}) or set(progress.required_content_ids) - set(progress.content_evidence or {}):
+                raise ValueError("required instructional evidence is incomplete")
+        else:
+            decision = db.scalar(select(ConversationJudgeDecision).where(
+                ConversationJudgeDecision.id == judge_decision_id,
+                ConversationJudgeDecision.session_id == session.id,
+                ConversationJudgeDecision.attempt_id == attempt.id,
+                ConversationJudgeDecision.subsection_progress_id == progress.id,
+            ))
+            if decision is None or decision.action != "ADVANCE" or decision.application_status != "RECORDED":
+                raise ConversationJudgeRejected("subsection advancement requires its recorded ADVANCE decision")
         now = datetime.now(timezone.utc); progress.status, progress.core_delivered_at, progress.completed_at = "COMPLETED", now, now
         next_progress = db.scalar(select(SubsectionProgress).where(SubsectionProgress.attempt_id == attempt.id, SubsectionProgress.order_in_attempt == progress.order_in_attempt + 1).with_for_update())
         if next_progress is not None:
             if next_progress.status != "PENDING": raise ValueError("next subsection is not pending")
             next_progress.status, next_progress.opened_at = "ACTIVE", now
-        self._event(db, session, "V051_SUBSECTION_ADVANCED", {"completed_subsection_id": progress.subsection_id, "next_subsection_id": next_progress.subsection_id if next_progress else None, "authorized_by_judge": authorized_by_judge}, attempt.id)
+        self._event(db, session, "V051_SUBSECTION_ADVANCED", {"completed_subsection_id": progress.subsection_id, "next_subsection_id": next_progress.subsection_id if next_progress else None, "judge_decision_id": str(judge_decision_id) if judge_decision_id else None}, attempt.id)
         if commit: db.commit()
         return next_progress
 
@@ -230,17 +250,24 @@ class SessionRuntime:
         session = db.scalar(select(Session).where(Session.id == session_id).with_for_update())
         if session is None or not self._v051(self._compiled(db, session)): raise ValueError("v0.5.1 Conversation Judge is unavailable")
         call = db.scalar(select(LLMCall).where(LLMCall.id == call_id, LLMCall.session_id == session.id).with_for_update())
-        if call is None or call.purpose != "CONVERSATION_JUDGE" or call.status != "RECEIVED": raise ValueError("Conversation Judge call is not ready")
+        if call is None or call.purpose != "CONVERSATION_JUDGE" or call.status != "RECEIVED": raise ConversationJudgeRejected("Conversation Judge call is not ready")
         existing = db.scalar(select(ConversationJudgeDecision).where(ConversationJudgeDecision.llm_call_id == call.id))
         if existing is not None: return existing
         attempt, progress = self._active_v051_progress(db, session)
         audit = (call.request_payload or {}).get("audit", {})
-        if audit.get("subsection_id") != progress.subsection_id or audit.get("attempt_id") != str(attempt.id): raise ValueError("stale Conversation Judge subsection")
+        if audit.get("subsection_id") != progress.subsection_id or audit.get("attempt_id") != str(attempt.id): raise StaleConversationJudgeContext("stale Conversation Judge subsection")
         latest = db.scalar(select(Message).where(Message.attempt_id == attempt.id, Message.role == "LEARNER").order_by(Message.sequence_no.desc()))
-        if latest is None or audit.get("latest_learner_message_id") != str(latest.id): raise ValueError("stale Conversation Judge learner context")
+        if latest is None or audit.get("latest_learner_message_id") != str(latest.id): raise StaleConversationJudgeContext("stale Conversation Judge learner context")
         payload = output.model_dump(mode="json")
         tutor_message_ids = [str(message.id) for message in db.scalars(select(Message).where(Message.attempt_id == attempt.id, Message.role == "TUTOR").order_by(Message.sequence_no)).all() if isinstance(message.instructional_trace, dict) and message.instructional_trace.get("subsection_id") == progress.subsection_id]
-        if output.decision == "ADVANCE" and not tutor_message_ids: raise ValueError("Conversation Judge cannot advance without active-subsection instruction")
+        if output.decision == "ADVANCE":
+            if not tutor_message_ids: raise ConversationJudgeRejected("Conversation Judge cannot advance without active-subsection instruction")
+            next_progress = db.scalar(select(SubsectionProgress).where(
+                SubsectionProgress.attempt_id == attempt.id,
+                SubsectionProgress.order_in_attempt == progress.order_in_attempt + 1,
+            ).with_for_update())
+            if next_progress is not None and next_progress.status != "PENDING":
+                raise StaleConversationJudgeContext("next subsection is not pending")
         decision = ConversationJudgeDecision(session_id=session.id, attempt_id=attempt.id, subsection_progress_id=progress.id,
             llm_call_id=call.id, latest_learner_message_id=latest.id if latest else None, action=output.decision,
             confidence="SEMANTIC", payload=payload, application_status="RECORDED", application_reason=None)
@@ -248,9 +275,9 @@ class SessionRuntime:
         state = {**(progress.instructional_state or {}), "conversation_judge_call_id": str(call.id), "last_action": output.decision, "next_allowed_instruction": output.guidance, "judge_reviewed_tutor_message_ids": tutor_message_ids}
         if output.decision == "ADVANCE":
             progress.instructional_state = state
-            next_progress = self.advance_v051_subsection(db, session.id, progress.subsection_id, commit=False, authorized_by_judge=True)
+            next_progress = self.advance_v051_subsection(db, session.id, progress.subsection_id, commit=False, judge_decision_id=decision.id)
             if next_progress is None:
-                # Only the semantic, evidence-backed final transition may end
+                # Only the semantic Judge-authorized final transition may end
                 # teaching.  The generic lifecycle helper remains usable for
                 # recovery and does not itself bypass the Paas gate.
                 self.complete_intervention(db, session.id, "V051_CONVERSATION_JUDGE_COMPLETE", commit=False)

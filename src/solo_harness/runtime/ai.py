@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict
 from sqlalchemy import and_, or_, select
 from solo_harness.config import Settings
 from solo_harness.db.models import AssessmentInstance, AssessmentResponse, Attempt, LLMCall, Message, Session, StudyVersion, SubsectionProgress, V04Evaluation
-from solo_harness.runtime.engine import SessionRuntime
+from solo_harness.runtime.engine import ConversationJudgeRejected, SessionRuntime
 
 class CanonicalMessage(BaseModel):
     model_config=ConfigDict(frozen=True,extra="forbid")
@@ -233,12 +233,39 @@ class AIExecutionRuntime:
             call.error_class="APPLICATION_FAILURE"; call.error_message=str(exc)[:4000]; call.completed_at=None
             db.commit()
 
+    def _reject_conversation_judge(self, db, call_id, output, exc):
+        """Rollback every attempted lifecycle mutation before recording rejection."""
+        db.rollback()
+        call=db.scalar(select(LLMCall).where(LLMCall.id==call_id).with_for_update())
+        if call and call.status=="RECEIVED":
+            call.parsed_response=output.model_dump(mode="json")
+            call.status="INVALID_OUTPUT"
+            call.error_class=getattr(exc, "error_class", "SEMANTIC_VALIDATION_FAILURE")
+            call.error_message=str(exc)[:4000]
+            call.completed_at=datetime.now(timezone.utc)
+            db.commit()
+
+    def _hold_historical_v051_call(self, db, call, version_label):
+        """Keep incompatible candidate calls auditable without reinterpreting them."""
+        call.status="TECHNICAL_HOLD"
+        call.error_class="HISTORICAL_CONTRACT_INCOMPATIBLE"
+        call.error_message=(f"v0.5.1 Tutor/Conversation Judge response is retained for audit only; "
+                            f"it cannot be parsed using the v0.5.2 contract (study version {version_label}).")
+        call.completed_at=datetime.now(timezone.utc)
+        db.commit()
+
     async def _finalize_received(self, db, call_id):
         """Apply one saved provider response exactly once; never call the provider."""
         from solo_harness.runtime.v04_native import MCQProse, SemanticReview, SubjectiveJudgment, SubjectiveProse, SubjectiveReview, TutorProse
         from solo_harness.runtime.v051_conversation import ConversationJudgeOutput, V051TutorOutput
         call=db.scalar(select(LLMCall).where(LLMCall.id==call_id).with_for_update())
         if not call or call.status!="RECEIVED": return
+        session=db.get(Session,call.session_id)
+        version=db.get(StudyVersion,session.study_version_id) if session else None
+        audit=call.request_payload.get("audit") or {}
+        if audit.get("v051") and call.purpose in ("TUTOR","CONVERSATION_JUDGE") and (version is None or version.content_version != "v0.5.2"):
+            self._hold_historical_v051_call(db,call,version.content_version if version else "unknown")
+            return
         schemas={"TUTOR":V051TutorOutput if (call.request_payload.get("audit") or {}).get("v051") else TutorProse,"ASSESSMENT_WRITER":MCQProse if call.request_payload.get("schema_name")=="MCQProse" else SubjectiveProse,"SEMANTIC_REVIEW":SemanticReview if call.request_payload.get("schema_name")=="SemanticReview" else SubjectiveReview,"JUDGE":SubjectiveJudgment,"CONVERSATION_JUDGE":ConversationJudgeOutput}
         schema=schemas.get(call.purpose)
         if schema is None:
@@ -248,15 +275,15 @@ class AIExecutionRuntime:
         except Exception as exc:
             call.status="INVALID_OUTPUT"; call.error_class="VALIDATION_FAILURE"; call.error_message=str(exc)[:4000]; call.completed_at=datetime.now(timezone.utc); db.commit(); return
         try:
-            session=db.get(Session,call.session_id); attempt=db.get(Attempt,call.attempt_id)
+            attempt=db.get(Attempt,call.attempt_id)
             # A previously failed local application is now being re-applied.
             # Clear the marker only inside the successful transaction.
             call.error_class=None; call.error_message=None
             if call.purpose=="CONVERSATION_JUDGE":
                 try:
                     decision=self.runtime.apply_v051_conversation_judge(db,session.id,call.id,out,commit=False)
-                except ValueError as exc:
-                    call.parsed_response=out.model_dump(mode="json"); call.status="INVALID_OUTPUT"; call.error_class="SEMANTIC_VALIDATION_FAILURE"; call.error_message=str(exc)[:4000]; call.completed_at=datetime.now(timezone.utc); db.commit(); return
+                except ConversationJudgeRejected as exc:
+                    self._reject_conversation_judge(db,call.id,out,exc); return
                 call.parsed_response=out.model_dump(mode="json"); call.status="SUCCEEDED"; call.completed_at=datetime.now(timezone.utc)
                 next_call = None
                 if decision.action != "HOLD" and session.phase == "INTERVENTION_ACTIVE":
@@ -376,10 +403,9 @@ class AIExecutionRuntime:
             previous=db.scalar(select(LLMCall).where(LLMCall.session_id==session.id,LLMCall.attempt_id==attempt.id).order_by(LLMCall.started_at.desc()))
         if active: raise ValueError("an operation is already active")
         if previous and previous.status=="RECEIVED" and previous.error_class=="APPLICATION_FAILURE":
-            if previous.purpose == "CONVERSATION_JUDGE":
-                previous.status="INVALID_OUTPUT"; previous.error_class="SEMANTIC_VALIDATION_FAILURE"; previous.completed_at=datetime.now(timezone.utc)
-            else:
-                return previous.id
+            return previous.id
+        if previous and previous.error_class=="HISTORICAL_CONTRACT_INCOMPATIBLE":
+            raise ValueError("historical v0.5.1 operation is audit-only and cannot be retried")
         if not previous or not (previous.status in ("FAILED","INVALID_OUTPUT") or previous.error_class=="REVIEW_HOLD" or (authorized_requeue and previous.status=="TECHNICAL_HOLD")):
             raise ValueError("no recoverable operation")
         if previous.retry_number >= 3 and not authorized_requeue:

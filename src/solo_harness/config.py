@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     enable_f1_v04_development: bool = False
     enable_v051_internal_testing: bool = False
     v051_internal_testing_token: SecretStr | None = None
+    v051_internal_candidate_version: str = "v0.5.2"
     f1_v04_study_dir: Path = Path("/app/studies/networks_error_detection_parity_f1/v0.4")
     active_capture_max_age_seconds: int = Field(default=15, gt=0)  # recorder heartbeat age
     participant_study_title: str = "Learning study"
