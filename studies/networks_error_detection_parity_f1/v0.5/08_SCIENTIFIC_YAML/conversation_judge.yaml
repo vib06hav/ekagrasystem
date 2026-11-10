@@ -5,9 +5,8 @@ role: LLM semantic instructional supervisor; sees treatment, section, subsection
 inputs_required:
 - Active section and subsection IDs; locked required_content refs and relevant goals/boundaries
 - Global pedagogy rules plus parent section×pedagogy and child subsection×pedagogy rules
-- Recent dialogue AND accumulated move-by-move evidence ledger (with previous-turn excerpts), so truncated context cannot
-  erase earlier teaching
-- Latest learner response, if any; Tutor proposed next action and any candidate completion flag
+- Learner-visible dialogue and any earlier Judge guidance needed to assess the active subsection
+- Latest learner response, if any; Tutor's non-authoritative readiness to be reviewed
 - Verified instructional instance facts including stated assumptions/coordinates/convention
 - Current candidate exposure usage and approved operational limits, if active
 never_inputs:
@@ -31,54 +30,39 @@ semantic_criteria:
   question: Has the Tutor addressed the learner signal through the active pedagogy without requiring correctness and
     without an unproductive repeated prompt?
 - id: BOUNDARY
-  question: Is there an outstanding relevant learner doubt and/or final clarification opportunity; were exposures within
-    approved limits?
+  question: Has the Tutor answered any relevant learner doubt, and stayed within approved instructional scope and limits?
+    Do not demand a separate subsection-end clarification opportunity.
 - id: EVIDENCE
-  question: Can each completed move be supported by precise learner-visible transcript excerpts and verified case IDs?
-    Missing evidence means not completed.
+  question: Does the actual learner-visible dialogue substantively demonstrate required concepts and pedagogy moves?
+    Judge the meaning; do not demand literal quotations or database message IDs in the output.
 decisions:
-- action: CONTINUE_TEACHING
-  precondition: Required content/move missing and a permitted core instruction remains.
-  output_guidance: Identify next move(s) and missing facts; do not reteach completed material gratuitously.
-- action: CLARIFY_OR_SCAFFOLD
-  precondition: Relevant learner doubt or mistaken premise needs a pedagogy-appropriate answer.
-  output_guidance: Specify the doubt and the permitted next hint/case/explanation.
-- action: CONSOLIDATE
-  precondition: Guidance has stalled or substantive content needs explicit accurate synthesis before a possible close.
-  output_guidance: Identify exactly which required conclusion must be provided; avoid new compulsory checks.
-- action: ADVANCE_SUBSECTION
-  precondition: All required facts + moves substantively delivered, serious science errors repaired, permitted clarifications
-    handled, final doubt opportunity satisfied, and runtime approves.
-  output_guidance: No learner mastery inference; move to next subsection or end teaching after last.
-- action: DELIVERY_EXCEPTION
-  precondition: Important instructional obligation cannot be completed or scientific defect cannot be repaired within
-    approved boundary.
-  output_guidance: Technical quality hold; no learner fail, no skipping to assessment.
+- action: CONTINUE
+  precondition: Required teaching remains incomplete, a relevant learner doubt needs a Tutor answer, or a scientific
+    explanation can still be repaired through permitted instruction.
+  output_guidance: Briefly identify the missing or incorrect instruction and what the Tutor should do next.
+- action: ADVANCE
+  precondition: All required facts and pedagogy moves have been substantively delivered, any relevant learner doubt
+    addressed, and serious scientific errors corrected. No learner mastery test or extra confirmation is required.
+  output_guidance: State why the subsection instruction is complete; the backend handles ordering and transition.
+- action: HOLD
+  precondition: A serious science or instructional-delivery defect cannot be safely resolved through permitted
+    continuation. Ordinary learner mistakes, confusion and incomplete teaching are NOT grounds for HOLD.
+  output_guidance: Identify the concrete blocker requiring staff review; do not score the learner as failed.
 output_contract:
-  active_subsection_id: string
-  decision: enum of decisions.action
-  completed_move_ids: array of move IDs backed by evidence
-  required_content_status: array of {ref, status:DELIVERED|MISSING|INVALID, supporting_excerpt_or_reason}
-  pedagogy_fidelity: SATISFIED|DEVIATION|UNCERTAIN
-  learner_signal: specific short semantic interpretation, not a score
-  open_doubts: array of distinct relevant clarifications
-  evidence_refs: array of source transcript turn IDs or excerpts
-  next_allowed_instruction: a concrete, pedagogy-compliant, remaining move/fallback; never a subject assessment
-  delivery_exception_reason: null or explicit technical/instructional issue
-  confidence: HIGH|MEDIUM|LOW; LOW must not authorize progression
+  decision: CONTINUE|ADVANCE|HOLD
+  guidance: Brief natural-language instruction for CONTINUE, completion justification for ADVANCE, or specific blocker
+    for HOLD. Do not emit move IDs, content IDs, message UUIDs, confidence labels, quotation excerpts or evidence arrays.
 invocation_candidate:
   status: PROVISIONAL_REQUIRES_LATENCY_AND_RELIABILITY_PILOT
-  on_each_meaningful_learner_turn: true
-  on_tutor_subsection_close_proposal: true
-  on_detected_repetition_or_boundary_exhaustion: true
-  on_runtime_transition: true
+  on_tutor_ready_for_judge: true
+  on_unanswered_learner_turn_before_tutor_reply: false
+  automatic_progression_after_valid_advance: true
 authority:
-  semantic_model: Recommends action based on learner text and evidenced delivery; does not determine formal SOLO or section
-    pass/fail.
-  runtime: Enforces legal subsection/section order, approved exposure limits and PAAS/assessment gate; rejects advance
-    with incomplete evidence.
-  tutor: Produces learner-visible pedagogy-constrained explanation and optional non-authoritative move progress notes.
-  no_infinite_loop: Repeated judge disagreements or missing delivery at exhaustion produce DELIVERY_EXCEPTION / technical
-    hold, not automatic assessment.
+  semantic_model: Judges instructional completeness and treatment fidelity against the actual dialogue; does not assess
+    learner SOLO mastery or decide formal section pass/fail.
+  runtime: Owns transcript provenance, legal subsection order, permitted transitions and Paas/assessment gate.
+  tutor: Produces learner-visible pedagogy-constrained instruction and non-authoritative review readiness.
+  no_infinite_loop: Unattended Tutor/Judge review cycles must be bounded, without requiring a compulsory learner
+    acknowledgement at every subsection boundary.
 independence: Formal assessment and formal Subjective Judge remain treatment-blind and never take this Judge output as
   learner SOLO evidence.

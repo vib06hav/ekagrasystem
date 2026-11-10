@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from solo_harness.runtime.v04_native import SubjectiveJudgment, validate_judge_quotes
+from solo_harness.runtime.v051_judge import V05SubjectiveJudgment
 
 
 @dataclass(frozen=True)
@@ -25,11 +26,15 @@ def evaluate_f1_response(
     frozen_private: dict,
     mcq_answers: dict[str, str],
     exact_subjective_answer: str,
-    judgment: SubjectiveJudgment,
+    judgment: SubjectiveJudgment | V05SubjectiveJudgment,
 ) -> F1Score:
-    if judgment.gradable_status != "GRADABLE":
-        raise ValueError("REVIEW_REQUIRED: no learner score or failure may be recorded")
-    validate_judge_quotes(judgment, exact_subjective_answer)
+    if isinstance(judgment, V05SubjectiveJudgment):
+        if judgment.subjective_points is None:
+            raise ValueError("REVIEW_REQUIRED: no learner score or failure may be recorded")
+    else:
+        if judgment.gradable_status != "GRADABLE":
+            raise ValueError("REVIEW_REQUIRED: no learner score or failure may be recorded")
+        validate_judge_quotes(judgment, exact_subjective_answer)
     public_items = frozen_public.get("mcqs", [])
     private_items = frozen_private.get("mcqs", [])
     if [x.get("id") for x in public_items] != ["MCQ1", "MCQ2", "MCQ3"]:

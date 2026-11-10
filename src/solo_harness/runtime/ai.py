@@ -170,6 +170,7 @@ class AIExecutionRuntime:
         return call.id
     def reserve_f1_judge(self,db,session_id,response,commit=True):
         from solo_harness.runtime.v04_native import SubjectiveJudgment,judge_messages
+        from solo_harness.runtime.v051_judge import V05SubjectiveJudgment
         session=db.scalar(select(Session).where(Session.id==session_id).with_for_update())
         attempt=db.get(Attempt,session.current_attempt_id) if session else None; item=db.get(AssessmentInstance,response.assessment_instance_id)
         if session.phase!="ASSESSMENT_AWAITING_EVALUATION": raise ValueError("judge unavailable")
@@ -184,11 +185,13 @@ class AIExecutionRuntime:
         if self.runtime._v051(compiled):
             from solo_harness.runtime.v051_assessment import v051_judge_messages
             messages=v051_judge_messages(compiled,resolved,item.frozen_public_snapshot["subjective"]["prompt"],response.response_text)
+            schema=V05SubjectiveJudgment
             audit={"v051_blind":True,"isolation":"no_tutor_or_assessment_mcq_inputs"}
         else:
+            schema=SubjectiveJudgment
             messages=judge_messages(self._science(),resolved,item.frozen_public_snapshot["subjective"]["prompt"],response.response_text)
             audit={"v04_blind":True}
-        call=self._reserve(db,session,attempt,item,"JUDGE",messages,SubjectiveJudgment,audit)
+        call=self._reserve(db,session,attempt,item,"JUDGE",messages,schema,audit)
         if commit: db.commit()
         return call
     async def _call(self,role,messages,schema):
@@ -270,6 +273,7 @@ class AIExecutionRuntime:
         """Apply one saved provider response exactly once; never call the provider."""
         from solo_harness.runtime.v04_native import MCQProse, SemanticReview, SubjectiveJudgment, SubjectiveProse, SubjectiveReview, TutorProse
         from solo_harness.runtime.v051_conversation import ConversationJudgeOutput, V051TutorOutput
+        from solo_harness.runtime.v051_judge import V05SubjectiveJudgment
         call=db.scalar(select(LLMCall).where(LLMCall.id==call_id).with_for_update())
         if not call or call.status!="RECEIVED": return
         session=db.get(Session,call.session_id)
@@ -278,7 +282,7 @@ class AIExecutionRuntime:
         if audit.get("v051") and call.purpose in ("TUTOR","CONVERSATION_JUDGE") and (version is None or version.content_version != "v0.5"):
             self._hold_historical_v051_call(db,call,version.content_version if version else "unknown")
             return
-        schemas={"TUTOR":V051TutorOutput if (call.request_payload.get("audit") or {}).get("v051") else TutorProse,"ASSESSMENT_WRITER":MCQProse if call.request_payload.get("schema_name")=="MCQProse" else SubjectiveProse,"SEMANTIC_REVIEW":SemanticReview if call.request_payload.get("schema_name")=="SemanticReview" else SubjectiveReview,"JUDGE":SubjectiveJudgment,"CONVERSATION_JUDGE":ConversationJudgeOutput}
+        schemas={"TUTOR":V051TutorOutput if (call.request_payload.get("audit") or {}).get("v051") else TutorProse,"ASSESSMENT_WRITER":MCQProse if call.request_payload.get("schema_name")=="MCQProse" else SubjectiveProse,"SEMANTIC_REVIEW":SemanticReview if call.request_payload.get("schema_name")=="SemanticReview" else SubjectiveReview,"JUDGE":V05SubjectiveJudgment if call.request_payload.get("schema_name")=="V05SubjectiveJudgment" else SubjectiveJudgment,"CONVERSATION_JUDGE":ConversationJudgeOutput}
         schema=schemas.get(call.purpose)
         if schema is None:
             return
@@ -335,29 +339,30 @@ class AIExecutionRuntime:
                 db.commit()
                 return next_call if self.runtime._v051(self.runtime._compiled(db,session)) else None
             call.parsed_response=out.model_dump(mode="json"); call.status="SUCCEEDED"; call.completed_at=datetime.now(timezone.utc)
-            if out.gradable_status=="GRADABLE" and out.subjective_points is not None and not out.review_reason:
-                # A syntactically valid Judge result can still be unusable: its
-                # quoted evidence must occur literally in the learner's saved
-                # response.  This is a Judge review hold, not an application
-                # failure.  Persist the original output for audit, then allow a
-                # retry to reserve a *new* blind Judge call against the exact
-                # same frozen package and learner response.
-                from solo_harness.runtime.v04_native import validate_judge_quotes
-                response = db.scalar(select(AssessmentResponse).where(
-                    AssessmentResponse.assessment_instance_id == call.assessment_instance_id
-                ))
-                try:
-                    validate_judge_quotes(out, response.response_text if response else "")
-                except ValueError as exc:
-                    call.error_class="REVIEW_HOLD"; call.error_message=str(exc)[:4000]
-                    db.commit()
-                    return
+            # v0.5: null means an honest technical/scientific review hold; 0
+            # means a gradable incorrect answer. V0.4 retains its exact-quote
+            # provenance contract without imposing it on v0.5.
+            v05_judgment = isinstance(out, V05SubjectiveJudgment)
+            gradable = (out.subjective_points is not None if v05_judgment else
+                        out.gradable_status == "GRADABLE" and out.subjective_points is not None and not out.review_reason)
+            if gradable:
+                if not v05_judgment:
+                    from solo_harness.runtime.v04_native import validate_judge_quotes
+                    response = db.scalar(select(AssessmentResponse).where(
+                        AssessmentResponse.assessment_instance_id == call.assessment_instance_id
+                    ))
+                    try:
+                        validate_judge_quotes(out, response.response_text if response else "")
+                    except ValueError as exc:
+                        call.error_class="REVIEW_HOLD"; call.error_message=str(exc)[:4000]
+                        db.commit()
+                        return
                 from solo_harness.runtime.v04_execution import finalize_v04_evaluation
                 if not db.scalar(select(V04Evaluation.id).join(AssessmentResponse, V04Evaluation.assessment_response_id==AssessmentResponse.id).where(AssessmentResponse.assessment_instance_id==call.assessment_instance_id)):
                     finalize_v04_evaluation(db,self.runtime,session.id,out,call.id)
                 else: db.commit()
             else:
-                call.error_class="REVIEW_HOLD"; call.error_message=out.review_reason; db.commit()
+                call.error_class="REVIEW_HOLD"; call.error_message=out.reason if v05_judgment else out.review_reason; db.commit()
         except Exception as exc:
             self._application_failure(db,call_id,exc)
     async def execute(self,db,call_id):

@@ -41,23 +41,11 @@ scores:
 not_gradable_policy: Only technical context/key/provider issues are NOT_GRADABLE; blank/off-topic responses are scientifically
   gradable at zero. Ambiguous but technically valid natural-language answers are REVIEW_REQUIRED with reasons, not a
   manufactured zero.
-evidence_statuses:
-- DEMONSTRATED
-- PARTIAL
-- ABSENT
-- CONTRADICTED
 output_fields:
-- gradable_status
 - subjective_points
-- observed_solo_structure
-- material_correctness
-- criterion_evidence
-- misconception_evidence
-- verbatim_quotes
-- alternative_reasoning_used
-- unverified_claims
-- review_reason
-- score_justification
+- reason
+output_contract: Subjective points are 0, 1, 2 or null (review required); reason gives a concise semantic justification
+  for the score or the specific impediment to grading. No generated quotations, learner IDs or evidence arrays.
 transition_anchors:
 - transition_id: C1
   min_1: At least one clearly usable and correct sender-parity or complete-frame receiver-check aspect for the posed
@@ -96,7 +84,7 @@ runtime_instance_policy:
   exact_frozen_subjective_question_required: true
   verified_case_facts_from_actual_instance_required: true
   no_reference_answer_string_matching: true
-  material_truth_and_solo_structure_separately_reported: true
+  material_truth_and_solo_structure_both_considered_in_reason: true
   item_specific_criteria_from_resolved_subjective_contract: true
   uncertainty_means_review_not_learner_failure: true
 curriculum_alignment:

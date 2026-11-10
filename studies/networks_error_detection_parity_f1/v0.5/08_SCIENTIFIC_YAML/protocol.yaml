@@ -27,8 +27,8 @@ quality_gates:
 - No unreviewed semantically drifted options can be treated as correct
 - Technical or REVIEW_REQUIRED outcome does not consume scientific learner failure
 - No real-participant activation prior to human scientific review
-runtime: Isolated development and synthetic/live LLM testing allowed under explicit dev/test safeguards, followed promptly
-  by actual Docker browser/database integration.
+runtime: Controlled internal development and live testing use authorized candidate access and protected test data.
+  No real-participant activation before the required scientific approvals.
 randomization: Preserve randomized initial pedagogy and without-replacement fallback where already specified in original
   single-topic implementation; do not implement three-topic professor design; do not invent new repeated-cycle policy.
 fidelity: Matched locked content obligations, bounded opportunity and documented treatment-specific dialogue/disclosure.
@@ -54,12 +54,15 @@ instructional_lifecycle:
     - C4.2
     - C4.3
   subsection_mastery_gate: false
-  conversation_judge: LLM semantic instructional supervisor; decisions reviewed against content and pedagogy requirements.
-  tutor_completion_flag: Non-authoritative; requires Conversation Judge evidence and legal runtime transition.
-  final_optional_doubt_window: After core subsection delivery, offer one explicit optional opportunity to clarify or
-    continue; do not demand a comprehension answer.
-  at_subsection_advance: Persist completed move/content evidence and open doubt resolution; activate next subsection
-    under unchanged pedagogy.
+  conversation_judge: Semantic instructional supervisor; the two-field decision and guidance must consider actual
+    learner-visible delivery against every required content and pedagogy obligation.
+  tutor_completion_flag: Tutor readiness only invites Judge review; it never independently authorizes progression.
+    Review can happen immediately after Tutor instruction, with no compulsory learner acknowledgement.
+  final_optional_doubt_window: false
+  learner_clarification: Relevant learner doubts are answered by the Tutor during normal dialogue before any
+    Judge-approved subsection advance. No separate confirmation, forced doubt prompt or mastery check.
+  at_subsection_advance: Persist the accepted Judge decision and backend-owned transcript provenance, then
+    automatically activate the next subsection under the same pedagogy. No model-generated move/content evidence ledger.
   at_section_completion: Only after all child subsections delivered, collect Paas once, then allocate independent formal
     3-MCQ+subjective assessment.
   repeat_study: On formal section assessment failure, retry the SAME major section from its first subsection under next

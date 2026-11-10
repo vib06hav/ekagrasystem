@@ -62,10 +62,8 @@ class _WorkflowClient:
             payload = ({"verdict": "ACCEPT", "stem_matches_contract": True, "assumptions_visible": True, "exactly_one_defensible_option": True,
                         "option_assessments": [{"truth_status": "TRUE", "matches_intended_meaning": True, "scientific_reason": "Verified."}, *[{"truth_status": "FALSE", "matches_intended_meaning": True, "scientific_reason": "Unsupported."} for _ in range(3)]], "rationale": "Verified contract."}
                        if request.response_schema_name == "SemanticReview" else {"verdict": "ACCEPT", "elicits_slot_evidence": True, "assumes_only_visible_facts": True, "scientifically_consistent": True, "does_not_reveal_answer": True, "rationale": "Verified contract."})
-        else:  # Formal blind Subjective Judge is intentionally unchanged.
-            context = self._context(request.messages[0], "[V051_BLIND_SUBJECTIVE_JUDGE_CONTEXT]\n")
-            quote = context["learner_response"]
-            payload = {"gradable_status": "GRADABLE", "subjective_points": 1, "observed_solo_structure": "controlled", "material_correctness": "CORRECT", "criterion_evidence": [{"criterion": "controlled", "learner_quote": quote, "interpretation": "controlled valid response"}], "misconception_evidence": [], "verbatim_quotes": [quote], "alternative_reasoning_used": False, "unverified_claims": [], "review_reason": None, "score_justification": "Controlled valid response."}
+        else:  # The v0.5 formal Judge scores meaning without copying learner text.
+            payload = {"subjective_points": 1, "reason": "Controlled response meets a minimum rubric anchor."}
         return RawLLMResponse(None, 200, json.dumps(payload), {"choices": [{"message": {"parsed": payload}}]}, payload, "stop", False, {}, 1)
 
 

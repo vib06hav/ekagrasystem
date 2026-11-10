@@ -5,9 +5,10 @@ from sqlalchemy import select
 from solo_harness.db.models import AssessmentInstance, AssessmentResponse, Attempt, V04Evaluation, Session
 from solo_harness.runtime.v04_grading import evaluate_f1_response
 from solo_harness.runtime.v04_native import SubjectiveJudgment
+from solo_harness.runtime.v051_judge import V05SubjectiveJudgment
 
 
-def finalize_v04_evaluation(db, runtime, session_id, result: SubjectiveJudgment, judge_call_id):
+def finalize_v04_evaluation(db, runtime, session_id, result: SubjectiveJudgment | V05SubjectiveJudgment, judge_call_id):
     session = db.scalar(select(Session).where(Session.id == session_id).with_for_update()); attempt = db.get(Attempt, session.current_attempt_id)
     assessment = db.scalar(select(AssessmentInstance).where(AssessmentInstance.attempt_id == attempt.id).with_for_update())
     response = db.scalar(select(AssessmentResponse).where(AssessmentResponse.assessment_instance_id == assessment.id).with_for_update())

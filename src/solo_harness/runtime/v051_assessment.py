@@ -16,6 +16,7 @@ from solo_harness.runtime.v04_assessment import (
     RecordedResult, ScientificReviewHold, validate_mcq, validate_subjective,
 )
 from solo_harness.runtime.v04_native import MCQProse, SemanticReview, SubjectiveProse, SubjectiveReview
+from solo_harness.runtime.v051_judge import V05SubjectiveJudgment
 from solo_harness.studies.v051_scenarios import resolve_v051_typed_case, scientific_case_fingerprints
 
 
@@ -93,4 +94,6 @@ async def construct_v051_assessment(compiled, blueprint: dict, invoke, checkpoin
 def v051_judge_messages(compiled, resolved: dict, frozen_question: str, learner_response: str):
     source = compiled.authored["v051"]
     payload = {"subjective_item": {"prompt": frozen_question, "contract": resolved["contract"]}, "verified_scenario": resolved["case"], "learner_response": learner_response, "judge_contract": source["scientific"]["judge.yaml"]}
-    return (CanonicalMessage(role="system", content=source["prompts"]["SUBJECTIVE_JUDGE_PROMPT.md"] + "\n\n[V051_BLIND_SUBJECTIVE_JUDGE_CONTEXT]\n" + _compact(payload)),)
+    return (CanonicalMessage(role="system", content=source["prompts"]["SUBJECTIVE_JUDGE_PROMPT.md"]
+                             + "\n\n[V051_BLIND_SUBJECTIVE_JUDGE_CONTEXT]\n" + _compact(payload)
+                             + "\n\n[OUTPUT_SCHEMA]\n" + _compact(V05SubjectiveJudgment.model_json_schema())),)

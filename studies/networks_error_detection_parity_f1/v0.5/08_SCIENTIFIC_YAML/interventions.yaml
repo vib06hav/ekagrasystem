@@ -10,8 +10,8 @@ shared_rules:
 - Learner doubts may interrupt instruction and must be handled within treatment-specific bounded allowance.
 - A Tutor self-reported teaching_complete is advisory only; Conversation Judge reviews semantic evidence and runtime
   enforces transitions.
-- No Cn assessment until all required Cn subsections are instructionally completed and an optional final doubt opportunity
-  has been addressed.
+- No Cn assessment until all required Cn subsections are instructionally completed and relevant learner doubts
+  have been addressed during normal teaching. Do not impose an additional subsection-end confirmation.
 - Instructional exceptions are technical/data-quality events, not scientific learner failures.
 pedagogies:
 - id: P1
