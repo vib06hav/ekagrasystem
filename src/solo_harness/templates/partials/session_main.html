@@ -30,7 +30,7 @@
 {% if not view.timeline %}<div class="empty">This section is ready to begin.</div>{% endif %}
 {% for item in view.timeline %}
   {% if item.kind == 'message' %}
-    <article class="message {{ item.role|lower }}"{% if item.role == 'TUTOR' %} data-tutor-message-sequence="{{ item.sequence_no }}"{% endif %}><div class="message-meta"><span>{% if item.role == 'TUTOR' %}Study assistant{% else %}You{% endif %}</span><time>{{ item.timestamp.strftime('%H:%M:%S') }}</time></div>{% if item.role == 'TUTOR' %}<div class="tutor-content" data-teaching-render="markdown-v1">{{ item.content | tutor_markdown }}</div>{% else %}{{ item.content }}{% endif %}</article>
+    <article class="message {{ item.role|lower }}"{% if item.role == 'TUTOR' %} data-tutor-message-sequence="{{ item.sequence_no }}"{% endif %}><div class="message-meta"><span>{% if item.role == 'TUTOR' %}Study assistant{% else %}You{% endif %}</span><time>{{ item.timestamp.strftime('%H:%M:%S') }}</time></div>{% if item.role == 'TUTOR' %}<div class="tutor-content" data-teaching-render="markdown-v1">{{ item.content | tutor_markdown }}</div>{% if item.visual %}{% include "partials/session/controlled_c11_visual.html" %}{% endif %}{% else %}{{ item.content }}{% endif %}</article>
   {% elif item.kind == 'subsection' %}
     <div class="timeline-marker subsection" data-subsection-marker="{{ item.subsection_id }}"><span>{{ item.label }}</span></div>
   {% else %}

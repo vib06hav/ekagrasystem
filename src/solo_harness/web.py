@@ -253,6 +253,9 @@ class ParticipantApplication:
                         "content": message.content_text,
                         "sequence_no": message.sequence_no,
                         "timestamp": in_research_timezone(message.created_at),
+                        "visual": ((message.instructional_trace or {}).get("pilot_visual")
+                            if message.role == "TUTOR" and v051_candidate and
+                            (session.runtime_config_snapshot or {}).get("controlled_c11_pilot") else None),
                     })
                 assessment = assessments_by_attempt.get(attempt.id)
                 if assessment and assessment.status == "CLOSED":
@@ -487,7 +490,8 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
             version = _internal_v051_candidate(db, application.settings)
             if version is None:
                 raise HTTPException(status_code=404)
-            session = application.execution.runtime.create_v051_internal_test_session(db, version.id)
+            session = application.execution.runtime.create_v051_internal_test_session(
+                db, version.id, controlled_c11_pilot=getattr(application.settings, "enable_controlled_c11_pilot", False))
         request.session["participant_session_id"] = str(session.id)
         return RedirectResponse("/session", status_code=303)
 

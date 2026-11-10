@@ -1,5 +1,6 @@
 from pathlib import Path
 from types import SimpleNamespace
+from datetime import datetime, timezone
 
 from jinja2 import Environment, FileSystemLoader
 from pydantic import SecretStr
@@ -102,3 +103,21 @@ def test_internal_candidate_entry_is_disabled_without_both_settings():
     assert not _internal_v051_access_enabled(enabled, None)
     assert not _internal_v051_access_enabled(enabled, "wrong")
     assert _internal_v051_access_enabled(enabled, "staff-secret")
+
+
+def test_controlled_c11_visual_is_passive_and_comes_from_server_descriptor():
+    visual = {
+        "component": "mapping", "mode": "guided_mapping", "stage": "complete",
+        "rule": {"Yes": "1", "No": "0"},
+        "cases": [{"name": "primary", "answers": ["Yes", "Yes", "No"], "bit_sequence": "110", "number_of_ones": 2}],
+    }
+    environment = Environment(loader=FileSystemLoader("src/solo_harness/templates"))
+    environment.filters["tutor_markdown"] = lambda value: value
+    html = environment.get_template("partials/session_main.html").render(
+        view=_view(timeline=[{"kind": "message", "role": "TUTOR", "content": "Fixed explanation.",
+                              "sequence_no": 1, "timestamp": datetime.now(timezone.utc), "visual": visual}]),
+        settings=SimpleNamespace(enable_f1_v04_development=False, enable_v051_internal_testing=False), new_key="key"
+    )
+    assert 'data-controlled-c11-visual="mapping"' in html
+    assert "Yes = 1, No = 0" in html and "Ordered sequence: <code>110</code>" in html
+    assert "<script" not in html

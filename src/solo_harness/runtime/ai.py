@@ -107,14 +107,31 @@ class AIExecutionRuntime:
             context=resolve_v051_tutor_context(compiled,progress.subsection_id,attempt.pedagogy_id)
             state=progress.instructional_state or {}
             instructional = state.get("verified_instructional_instance")
+            from solo_harness.studies.controlled_c1 import is_controlled_c11, active_move, c11_instance, contract_hash
+            pilot = is_controlled_c11(progress)
             if instructional is None:
-                from solo_harness.studies.v051_scenarios import resolve_v051_instructional_instance
-                instructional = resolve_v051_instructional_instance(compiled, progress.subsection_id, attempt.pedagogy_id)
+                if pilot:
+                    instructional = c11_instance(attempt.pedagogy_id)
+                else:
+                    from solo_harness.studies.v051_scenarios import resolve_v051_instructional_instance
+                    instructional = resolve_v051_instructional_instance(compiled, progress.subsection_id, attempt.pedagogy_id)
                 progress.instructional_state = {**state, "verified_instructional_instance": instructional}
                 state = progress.instructional_state
             guidance={key: state[key] for key in ("last_action","next_allowed_instruction","conversation_judge_call_id") if key in state} or None
-            messages=(CanonicalMessage(role="system",content=v051_tutor_prompt(compiled,progress,context,dialogue,guidance,instructional)),)
-            call=self._reserve(db,session,attempt,None,"TUTOR",messages,V051TutorOutput,{"v051":True,"attempt_id":str(attempt.id),"subsection_id":progress.subsection_id,"pedagogy_id":attempt.pedagogy_id,"judge_guidance":guidance,"auto_reviews_since_learner":auto_reviews_since_learner})
+            audit={"v051":True,"attempt_id":str(attempt.id),"subsection_id":progress.subsection_id,
+                   "pedagogy_id":attempt.pedagogy_id,"judge_guidance":guidance,"auto_reviews_since_learner":auto_reviews_since_learner}
+            if pilot:
+                from solo_harness.runtime.v051_conversation import controlled_c11_tutor_prompt
+                move, position = active_move(compiled, progress)
+                from solo_harness.studies.controlled_c1 import unambiguous_reply_feedback
+                verified_reply = unambiguous_reply_feedback(move, learner_text, instructional)
+                prompt = controlled_c11_tutor_prompt(compiled, context, dialogue, guidance, instructional, move, position, verified_reply)
+                audit.update({"pilot_move_id":move["id"], "pilot_move_index":position,
+                              "pilot_contract_sha256":contract_hash()})
+            else:
+                prompt = v051_tutor_prompt(compiled,progress,context,dialogue,guidance,instructional)
+            messages=(CanonicalMessage(role="system",content=prompt),)
+            call=self._reserve(db,session,attempt,None,"TUTOR",messages,V051TutorOutput,audit)
             if commit: db.commit()
             return call
         cell=compiled.cells[f"{attempt.transition_id}:{attempt.pedagogy_id}"]; dialogue=db.scalars(select(Message).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no)).all()
@@ -145,8 +162,25 @@ class AIExecutionRuntime:
         if active: raise ValueError("a Conversation Judge operation is already active")
         dialogue=[{"id":str(message.id),"role":message.role,"content":message.content_text,"instructional_trace":message.instructional_trace} for message in dialogue_rows]
         context=resolve_v051_tutor_context(compiled,progress.subsection_id,attempt.pedagogy_id)
-        prompt=conversation_judge_prompt(compiled,progress,context,dialogue,(progress.instructional_state or {}).get("verified_instructional_instance"))
-        call=self._reserve(db,session,attempt,None,"CONVERSATION_JUDGE",(CanonicalMessage(role="system",content=prompt),),ConversationJudgeOutput,{"v051":True,"attempt_id":str(attempt.id),"subsection_id":progress.subsection_id,"latest_learner_message_id":str(latest.id) if latest else None,"reviewed_tutor_message_id":str(reviewed_tutor.id),"auto_reviews_since_learner":auto_reviews_since_learner})
+        from solo_harness.studies.controlled_c1 import is_controlled_c11, active_move, contract, contract_hash
+        pilot=is_controlled_c11(progress)
+        audit={"v051":True,"attempt_id":str(attempt.id),"subsection_id":progress.subsection_id,
+               "latest_learner_message_id":str(latest.id) if latest else None,
+               "reviewed_tutor_message_id":str(reviewed_tutor.id),"auto_reviews_since_learner":auto_reviews_since_learner}
+        if pilot:
+            from solo_harness.runtime.v051_conversation import controlled_c11_judge_prompt
+            move, position = active_move(compiled, progress)
+            if (reviewed_tutor.instructional_trace or {}).get("pilot_move_id") != move["id"]:
+                raise ValueError("latest Tutor response is not from the active controlled move")
+            all_moves=contract()["subsections"]["C1.1"]["moves_by_pedagogy"][attempt.pedagogy_id]
+            prompt=controlled_c11_judge_prompt(compiled, context, dialogue,
+                (progress.instructional_state or {}).get("verified_instructional_instance"),
+                move, position, position == len(all_moves)-1, progress.move_evidence or {})
+            audit.update({"pilot_move_id":move["id"],"pilot_move_index":position,
+                          "pilot_contract_sha256":contract_hash()})
+        else:
+            prompt=conversation_judge_prompt(compiled,progress,context,dialogue,(progress.instructional_state or {}).get("verified_instructional_instance"))
+        call=self._reserve(db,session,attempt,None,"CONVERSATION_JUDGE",(CanonicalMessage(role="system",content=prompt),),ConversationJudgeOutput,audit)
         if commit: db.commit()
         return call
     def reserve_assessment(self,db,session_id,assessment_id=None,commit=True):
@@ -320,6 +354,30 @@ class AIExecutionRuntime:
                     seq=(db.scalar(select(Message.sequence_no).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no.desc())) or 0)+1
                     if self.runtime._v051(self.runtime._compiled(db,session)):
                         trace={"subsection_id":audit["subsection_id"],"pedagogy_id":audit["pedagogy_id"],"ready_for_judge":out.ready_for_judge}
+                        if audit.get("pilot_move_id"):
+                            from solo_harness.studies.controlled_c1 import active_move, visual_descriptor
+                            _, pilot_progress = self.runtime._active_v051_progress(db, session)
+                            move, position = active_move(self.runtime._compiled(db,session), pilot_progress)
+                            if (move["id"] != audit["pilot_move_id"] or position != audit["pilot_move_index"]
+                                    or audit.get("pilot_contract_sha256") != (pilot_progress.instructional_state or {})["controlled_c11"]["contract_sha256"]):
+                                raise ValueError("stale controlled C1.1 Tutor response")
+                            trace.update({"pilot_move_id":move["id"], "pilot_contract_sha256":audit["pilot_contract_sha256"]})
+                            earlier=db.scalars(select(Message).where(Message.attempt_id==attempt.id, Message.role=="TUTOR").order_by(Message.sequence_no)).all()
+                            prior_current=[m for m in earlier if (m.instructional_trace or {}).get("pilot_move_id")==move["id"]]
+                            # A visual appears once at the first message, with an optional
+                            # verified resolution after the actual guided response.
+                            visual=None
+                            if not prior_current:
+                                visual=visual_descriptor(move, pilot_progress.instructional_state["verified_instructional_instance"], "prompt" if move["visual"] and move["visual"]["mode"].startswith("guided") else "complete")
+                            elif (out.ready_for_judge and move["visual"]
+                                  and move["visual"]["mode"].startswith("guided")):
+                                first=prior_current[0]
+                                had_reply=db.scalar(select(Message.id).where(Message.attempt_id==attempt.id,
+                                    Message.role=="LEARNER",Message.sequence_no>first.sequence_no)) is not None
+                                if had_reply:
+                                    visual=visual_descriptor(move, pilot_progress.instructional_state["verified_instructional_instance"], "complete")
+                            if visual:
+                                trace["pilot_visual"] = visual
                     else:
                         trace={"fidelity_note":out.fidelity_note}
                     message=Message(attempt_id=attempt.id,sequence_no=seq,role="TUTOR",content_text=out.learner_message,content_format="markdown",llm_call_id=call.id,instructional_trace=trace,material_ids=[],exposed_kc_ids=[],exposed_relation_ids=[])
@@ -329,9 +387,22 @@ class AIExecutionRuntime:
                 call.parsed_response=out.model_dump(mode="json"); call.status="SUCCEEDED"; call.completed_at=datetime.now(timezone.utc)
                 if self.runtime._v051(self.runtime._compiled(db,session)):
                     reviewed=int(audit.get("auto_reviews_since_learner", 0))
-                    next_call = (self.reserve_conversation_judge(db, session.id, commit=False,
-                        auto_reviews_since_learner=reviewed + 1)
-                        if out.ready_for_judge and reviewed < _MAX_AUTONOMOUS_REVIEWS else None)
+                    wants_review = out.ready_for_judge and reviewed < _MAX_AUTONOMOUS_REVIEWS
+                    if wants_review and audit.get("pilot_move_id"):
+                        from solo_harness.studies.controlled_c1 import active_move
+                        _, pilot_progress=self.runtime._active_v051_progress(db,session)
+                        current, _=active_move(self.runtime._compiled(db,session),pilot_progress)
+                        if current["learner_response_policy"] == "guided":
+                            # Wait for a real learner reply following the first prompt.
+                            # A premature Tutor readiness flag cannot trigger a Judge
+                            # rejection or turn a guided move into a monologue.
+                            all_rows=db.scalars(select(Message).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no)).all()
+                            first=next((row for row in all_rows if row.role=="TUTOR" and
+                                (row.instructional_trace or {}).get("pilot_move_id")==current["id"]),None)
+                            wants_review=bool(first and any(row.role=="LEARNER" and
+                                first.sequence_no < row.sequence_no < message.sequence_no for row in all_rows))
+                    next_call=(self.reserve_conversation_judge(db, session.id, commit=False,
+                        auto_reviews_since_learner=reviewed + 1) if wants_review else None)
                 elif out.teaching_complete and session.phase=="INTERVENTION_ACTIVE":
                     # End instruction, but do not select a blueprint or call the
                     # assessment writer until the learner records mental effort.

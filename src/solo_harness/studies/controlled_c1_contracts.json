@@ -1,0 +1,824 @@
+{
+  "contract_id": "EKAGRAAI_CONTROLLED_C1_V1",
+  "status": "DESIGN_LOCKED_C1_1_TO_C1_4__RUNTIME_PILOT_ONLY_C1_1",
+  "provenance": "Derived from v0.5 subsection_interventions.yaml source-ordered core_moves and agreed design; does not overwrite the immutable scientific study package.",
+  "control_boundary": {
+    "backend": "active move, verified material, completion ledger and progression",
+    "frontend": "optional passive visuals; never model generated",
+    "tutor": "natural explanation, learner contingencies and doubts within authored move",
+    "judge": "learner-visible delivery evidence and pedagogy fidelity, never mastery"
+  },
+  "shared_guards": [
+    "No mastery or correctness gate",
+    "No assessment content",
+    "No unverified numeric examples",
+    "No cross-subsection instruction",
+    "Visual display alone is not delivery evidence",
+    "A learner doubt can interrupt a move without changing its position"
+  ],
+  "fixed_cases": {
+    "C1.1": {
+      "rule": {
+        "Yes": "1",
+        "No": "0"
+      },
+      "primary_answers": [
+        "Yes",
+        "Yes",
+        "No"
+      ],
+      "primary_bits": "110",
+      "contrast_answers": [
+        "Yes",
+        "No",
+        "No"
+      ],
+      "contrast_bits": "100",
+      "positions": [
+        1,
+        2,
+        3
+      ],
+      "one_counts": {
+        "110": 2,
+        "100": 1
+      }
+    },
+    "C1.2": {
+      "sent": "10110",
+      "intact_received": "10110",
+      "corrupted_received": "10010",
+      "flip_position_1_based": 3,
+      "flip": "1_to_0",
+      "receiver_has_original": false
+    },
+    "C1.3": {
+      "payload_bits": "10110",
+      "checking_position": "p",
+      "p_is_placeholder_only": true,
+      "numeric_value_defined": false
+    },
+    "C1.4": {
+      "payload_bits": "10110",
+      "data_ones": 3,
+      "even_frame": "101101",
+      "even_parity_bit": "1",
+      "even_complete_ones": 4,
+      "odd_frame": "101100",
+      "odd_parity_bit": "0",
+      "odd_complete_ones": 3,
+      "even_pass_received": "101101",
+      "even_fail_received": "100101",
+      "odd_pass_received": "101100"
+    }
+  },
+  "subsections": {
+    "C1.1": {
+      "moves_by_pedagogy": {
+        "P1": [
+          {
+            "id": "C1.1-P1-M01",
+            "required_content_refs": [
+              "C1.1.O01",
+              "C1.1.O02",
+              "C1.1.O03"
+            ],
+            "source_instructional_action": "Introduce information as meaningful content and data as its representation for communication; explain that digital systems exchange such data as individual bits with the two possible binary values labeled 0 and 1 (a bit is one binary-valued unit).",
+            "exact_delivery": "Define information as meaningful content and data as its representation in communication. Digital systems represent communicated information with bits; each bit is one binary-valued unit, 0 or 1.",
+            "visual": null,
+            "learner_response_policy": "explain",
+            "completion_evidence": "Accurate definitions of information, data, bit and both values are stated before the example."
+          },
+          {
+            "id": "C1.1-P1-M02",
+            "required_content_refs": [
+              "C1.1.O04",
+              "C1.1.O05"
+            ],
+            "source_instructional_action": "Model a short 0/1 sequence as transmitted digital data, distinguish a bit from the sequence, and explicitly name the bit positions.",
+            "exact_delivery": "Work the agreed Yes=1, No=0 representation for Yes/Yes/No to produce 110 in order; explain each mapping, distinguish each bit from the ordered sequence, and name positions 1-3.",
+            "visual": {
+              "component": "mapping",
+              "mode": "worked"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "All three mappings, order, individual bit/sequence distinction, and positions are explained."
+          },
+          {
+            "id": "C1.1-P1-M03",
+            "required_content_refs": [
+              "C1.1.O05"
+            ],
+            "source_instructional_action": "Demonstrate counting the 1s in that same short sequence, clearly distinguishing number of 1s from sequence length; briefly motivate later checking.",
+            "exact_delivery": "Show that sequence 110 has length three and exactly two 1s. Explicitly distinguish the count of 1s from the number of positions, briefly connecting the skill to later checking.",
+            "visual": {
+              "component": "sequence",
+              "mode": "counted"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Tutor demonstrates the correct count and length distinction."
+          },
+          {
+            "id": "C1.1-P1-M04",
+            "required_content_refs": [
+              "C1.1.O01",
+              "C1.1.O02",
+              "C1.1.O03",
+              "C1.1.O04"
+            ],
+            "source_instructional_action": "Consolidate the relationship information → bits (0/1) → ordered sequence; reinforce position and counting only as prerequisites, with no binary arithmetic or encoding.",
+            "exact_delivery": "Consolidate information -> digital data -> binary bits -> ordered bit sequence; explain the Yes/No mapping is one example convention and bits can represent other information without going into encoding.",
+            "visual": null,
+            "learner_response_policy": "explain",
+            "completion_evidence": "Full relationship and broader digital representation explained, without forbidden topics."
+          }
+        ],
+        "P2": [
+          {
+            "id": "C1.1-P2-M01",
+            "required_content_refs": [
+              "C1.1.O01",
+              "C1.1.O02",
+              "C1.1.O03"
+            ],
+            "source_instructional_action": "Directly supply the novice prerequisites: information/data to be communicated, digital representation as bits, and the meaning of a bit as one two-valued (binary) unit labeled 0 or 1; do not make the learner guess unfamiliar terms.",
+            "exact_delivery": "Supply novice definitions of information, data, digital representation, bit, 0 and 1. Introduce the agreed Yes=1, No=0 rule; do not ask learners to guess definitions.",
+            "visual": null,
+            "learner_response_policy": "explain",
+            "completion_evidence": "All prerequisites explicitly explained before questioning."
+          },
+          {
+            "id": "C1.1-P2-M02",
+            "required_content_refs": [
+              "C1.1.O04"
+            ],
+            "source_instructional_action": "Use a small guided prompt to distinguish one bit from an ordered sequence representing digital data; then state the correct distinction regardless of the response.",
+            "exact_delivery": "Ask a small guided question distinguishing one binary-valued bit from a sequence of bits; give the accurate distinction after learner input, including an IDK response.",
+            "visual": {
+              "component": "sequence",
+              "mode": "single_vs_sequence"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One genuine learner-contingent question and correct bit/sequence distinction are present."
+          },
+          {
+            "id": "C1.1-P2-M03",
+            "required_content_refs": [
+              "C1.1.O05"
+            ],
+            "source_instructional_action": "Guide identification of individual bit positions and their 0/1 values in a short sequence; explicitly confirm the correct positions.",
+            "exact_delivery": "Guide constructing and reading Yes/Yes/No -> 110, preserving the positions in order. Ask a focused question about bit values or positions, offer a relevant hint if needed, and explicitly confirm the complete correct mapping.",
+            "visual": {
+              "component": "mapping",
+              "mode": "guided"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "Learner-contingent question and correct construction with positions are explained; correct learner answer not required."
+          },
+          {
+            "id": "C1.1-P2-M04",
+            "required_content_refs": [
+              "C1.1.O05"
+            ],
+            "source_instructional_action": "Guide counting 1s with a bounded, hintable prompt and explicitly show the correct count if the learner is blocked.",
+            "exact_delivery": "Guide a bounded count of 1s in 110: 2 ones versus 3 positions; explain it after a hint or IDK, never require correct learner response.",
+            "visual": {
+              "component": "sequence",
+              "mode": "guided_count"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "Guided prompt and verified count/length distinction have been explained."
+          },
+          {
+            "id": "C1.1-P2-M05",
+            "required_content_refs": [
+              "C1.1.O01",
+              "C1.1.O02",
+              "C1.1.O03",
+              "C1.1.O04"
+            ],
+            "source_instructional_action": "Consolidate information/data, binary-valued bits, and sequences as the digital representation; do not infer mastery from answers.",
+            "exact_delivery": "Consolidate all of information/data, digital bits 0/1, ordered sequences, and their broader use beyond Yes/No. Do not infer learner mastery.",
+            "visual": null,
+            "learner_response_policy": "explain",
+            "completion_evidence": "All C1.1 content accurately consolidated without correctness gate."
+          }
+        ],
+        "P3": [
+          {
+            "id": "C1.1-P3-M01",
+            "required_content_refs": [
+              "C1.1.O01",
+              "C1.1.O02",
+              "C1.1.O03",
+              "C1.1.O04"
+            ],
+            "source_instructional_action": "Establish that digital information is represented as bits, each one binary-valued unit taking exactly one of two symbols, 0 or 1; contrast one bit with a short multi-bit sequence to make data representation and the bit/sequence distinction explicit.",
+            "exact_delivery": "Establish information/data, binary-valued bits 0/1, and contrast an individual bit with an ordered sequence. Introduce the shared Yes=1, No=0 example convention.",
+            "visual": {
+              "component": "sequence",
+              "mode": "single_vs_sequence"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "The relation and distinction between a single bit and an ordered sequence are explicitly drawn."
+          },
+          {
+            "id": "C1.1-P3-M02",
+            "required_content_refs": [
+              "C1.1.O04",
+              "C1.1.O05"
+            ],
+            "source_instructional_action": "Compare two equal-length 0/1 sequences differing at one named position to show how individual bits form ordered data sequences and how positions are recognized.",
+            "exact_delivery": "Compare Yes/Yes/No -> 110 with Yes/No/No -> 100: identical length and mapping convention, but only the second answer and second bit differ. Label positions 1-3.",
+            "visual": {
+              "component": "mapping",
+              "mode": "matched"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Tutor states invariant features, one changed position, and why ordered bits reflect information."
+          },
+          {
+            "id": "C1.1-P3-M03",
+            "required_content_refs": [
+              "C1.1.O05"
+            ],
+            "source_instructional_action": "Contrast two short sequences with different numbers of 1s, explicitly counting them without introducing binary number conversion.",
+            "exact_delivery": "Compare 110 (two 1s) with 100 (one 1), both length three, without binary arithmetic. Keep the comparison incidental to the core data-representation idea.",
+            "visual": {
+              "component": "sequence",
+              "mode": "matched_count"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Both correct one-counts and equal sequence lengths are distinguished."
+          },
+          {
+            "id": "C1.1-P3-M04",
+            "required_content_refs": [
+              "C1.1.O01",
+              "C1.1.O02",
+              "C1.1.O03",
+              "C1.1.O04"
+            ],
+            "source_instructional_action": "Explain what the matched cases establish about information represented through binary-valued bits and ordered sequences; consolidate the correct definitions.",
+            "exact_delivery": "Consolidate what the contrasts show about information, data, binary bits and the order of sequences; distinguish the illustration from a universal Yes/No convention.",
+            "visual": null,
+            "learner_response_policy": "explain",
+            "completion_evidence": "Correct definitions and explicit inference from compared cases are delivered."
+          }
+        ]
+      },
+      "visual_component_cap": 2,
+      "visual_interactive": false,
+      "implementation": "enabled_in_pilot"
+    },
+    "C1.2": {
+      "moves_by_pedagogy": {
+        "P1": [
+          {
+            "id": "C1.2-P1-M01",
+            "required_content_refs": [
+              "C1.2.O01",
+              "C1.2.O02"
+            ],
+            "source_instructional_action": "Define sender, receiver and transmission channel/medium, and model a data sequence traveling from sender to receiver.",
+            "exact_delivery": "Explain sender, receiver and channel/medium and show a bit sequence being transmitted.",
+            "visual": null,
+            "learner_response_policy": "model",
+            "completion_evidence": "Transmission roles and sent/received sequence explained."
+          },
+          {
+            "id": "C1.2-P1-M02",
+            "required_content_refs": [
+              "C1.2.O03",
+              "C1.2.O04",
+              "C1.2.O05"
+            ],
+            "source_instructional_action": "Show sent and received bit sequences side by side, with a specific 0→1 or 1→0 change occurring during transmission; identify that mismatch as the corruption model.",
+            "exact_delivery": "Demonstrate sent 10110 and received 10010: bit 3 changed 1 to 0 during transmission; explain 0 to 1 is also possible.",
+            "visual": {
+              "component": "transmission",
+              "mode": "corrupted"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Correct bit-flip, position and during-transmission scope explained."
+          },
+          {
+            "id": "C1.2-P1-M03",
+            "required_content_refs": [
+              "C1.2.O06"
+            ],
+            "source_instructional_action": "Explain that the instructor can display both original and received strings for learning but the actual receiver normally possesses only its received string, so it cannot directly compare with the original.",
+            "exact_delivery": "Explain instructor view of both sequences versus real receiver ordinarily knowing only 10010.",
+            "visual": null,
+            "learner_response_policy": "model",
+            "completion_evidence": "Receiver-original-copy limitation made explicit."
+          },
+          {
+            "id": "C1.2-P1-M04",
+            "required_content_refs": [
+              "C1.2.O07"
+            ],
+            "source_instructional_action": "Conclude why that receiver needs a means to detect possible transmission corruption even when the original sequence is unavailable.",
+            "exact_delivery": "Explain why receiver needs a method for detecting possible corruption.",
+            "visual": null,
+            "learner_response_policy": "model",
+            "completion_evidence": "Need for detection follows from receiver limitation."
+          }
+        ],
+        "P2": [
+          {
+            "id": "C1.2-P2-M01",
+            "required_content_refs": [
+              "C1.2.O01",
+              "C1.2.O02"
+            ],
+            "source_instructional_action": "Supply sender, channel/medium and receiver vocabulary with one simple sequence-sending diagram, rather than assuming networking knowledge.",
+            "exact_delivery": "Supply sender, receiver and channel vocabulary and ordinary bit sequence transmission.",
+            "visual": {
+              "component": "transmission",
+              "mode": "basic"
+            },
+            "learner_response_policy": "explain",
+            "completion_evidence": "Prerequisite communication terms supplied."
+          },
+          {
+            "id": "C1.2-P2-M02",
+            "required_content_refs": [
+              "C1.2.O03",
+              "C1.2.O04",
+              "C1.2.O05"
+            ],
+            "source_instructional_action": "Guide attention to the sent and received sequences, then establish that a changed 0→1 or 1→0 bit at a named position is a mismatch caused during transmission.",
+            "exact_delivery": "Guide identification of mismatch 10110 sent, 10010 received and name bit 3 change as a transmission bit flip; state both flip directions.",
+            "visual": {
+              "component": "transmission",
+              "mode": "corrupted"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "Guided mismatch explained with verified position."
+          },
+          {
+            "id": "C1.2-P2-M03",
+            "required_content_refs": [
+              "C1.2.O06"
+            ],
+            "source_instructional_action": "Ask which sequence the receiver can inspect and explicitly clarify that only the outside instructor can ordinarily display the pristine original beside it.",
+            "exact_delivery": "Guide reasoning about what sequence receiver can inspect; distinguish instructor from receiver perspective.",
+            "visual": null,
+            "learner_response_policy": "guided",
+            "completion_evidence": "Learner-contingent response and correct receiver perspective explained."
+          },
+          {
+            "id": "C1.2-P2-M04",
+            "required_content_refs": [
+              "C1.2.O06"
+            ],
+            "source_instructional_action": "If the learner assumes that the receiver has the original, give a narrowed cue then explicitly state why it cannot simply compare against a clean copy.",
+            "exact_delivery": "If the learner mistakenly assumes the receiver has pristine original, give cue and correction; otherwise briefly reaffirm without extra question cycle.",
+            "visual": null,
+            "learner_response_policy": "conditional",
+            "completion_evidence": "Misconception corrected if present; no invented additional question if absent."
+          },
+          {
+            "id": "C1.2-P2-M05",
+            "required_content_refs": [
+              "C1.2.O03",
+              "C1.2.O05",
+              "C1.2.O07"
+            ],
+            "source_instructional_action": "Consolidate the during-transmission bit-flip/mismatch model and why an error-detection method is needed; state the conclusion even if prompts were not answered.",
+            "exact_delivery": "Consolidate sender-channel-receiver, during-transmission bit flips, receiver limitation and need for detection.",
+            "visual": null,
+            "learner_response_policy": "explain",
+            "completion_evidence": "All requirements accurately consolidated."
+          }
+        ],
+        "P3": [
+          {
+            "id": "C1.2-P3-M01",
+            "required_content_refs": [
+              "C1.2.O02",
+              "C1.2.O03",
+              "C1.2.O04",
+              "C1.2.O05"
+            ],
+            "source_instructional_action": "Contrast an intact sent/received bit-sequence pair with a pair differing by exactly one 0↔1 flip during transmission; identify the mismatch as corruption.",
+            "exact_delivery": "Contrast intact 10110 -> 10110 with corrupted 10110 -> 10010 transmission; name mismatch as transmission corruption.",
+            "visual": {
+              "component": "transmission",
+              "mode": "matched"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Intact and corrupted matched cases explicitly compared."
+          },
+          {
+            "id": "C1.2-P3-M02",
+            "required_content_refs": [
+              "C1.2.O01",
+              "C1.2.O02",
+              "C1.2.O03"
+            ],
+            "source_instructional_action": "Hold the sender, channel and transmitted bit positions fixed across the matched cases, explicitly explaining the roles and what is sent versus received.",
+            "exact_delivery": "Hold sender, channel and original bits fixed while explaining what differs at receiver and both possible flip directions.",
+            "visual": null,
+            "learner_response_policy": "compare",
+            "completion_evidence": "Diagnostic difference and invariant roles stated."
+          },
+          {
+            "id": "C1.2-P3-M03",
+            "required_content_refs": [
+              "C1.2.O06"
+            ],
+            "source_instructional_action": "Contrast the instructor view (original and received strings) with the receiver view (received string only); explain why the receiver cannot directly detect mismatch by comparing the original.",
+            "exact_delivery": "Contrast outside instructor seeing both sequences with receiver seeing only received frame.",
+            "visual": null,
+            "learner_response_policy": "compare",
+            "completion_evidence": "Instructor versus receiver information asymmetry explicit."
+          },
+          {
+            "id": "C1.2-P3-M04",
+            "required_content_refs": [
+              "C1.2.O07"
+            ],
+            "source_instructional_action": "Use the comparison to explain why a checking method is needed to detect possible corruption.",
+            "exact_delivery": "Draw need for error-detection from receiver information limitation.",
+            "visual": null,
+            "learner_response_policy": "explain",
+            "completion_evidence": "Meaningful conclusion from comparison stated."
+          }
+        ]
+      },
+      "visual_component_cap": 1,
+      "visual_interactive": false,
+      "implementation": "design_only"
+    },
+    "C1.3": {
+      "moves_by_pedagogy": {
+        "P1": [
+          {
+            "id": "C1.3-P1-M01",
+            "required_content_refs": [
+              "C1.3.O01"
+            ],
+            "source_instructional_action": "Explain why a receiver without the original data benefits from additional transmitted checking information.",
+            "exact_delivery": "Recall receiver lacks original and motivate transmitting checking information.",
+            "visual": null,
+            "learner_response_policy": "model",
+            "completion_evidence": "Need for checking information accurately connected to C1.2."
+          },
+          {
+            "id": "C1.3-P1-M02",
+            "required_content_refs": [
+              "C1.3.O02",
+              "C1.3.O03"
+            ],
+            "source_instructional_action": "Demonstrate a labeled payload alongside one separate extra transmitted checking position; define this extra information as redundancy and introduce the position as a parity bit whose value depends on the data, without calculating it yet.",
+            "exact_delivery": "Show original payload 10110 with extra checking position p (symbolic placeholder, not transmitted character); define redundancy and one data-dependent parity bit.",
+            "visual": {
+              "component": "checking",
+              "mode": "payload_plus_p"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Payload/redundancy distinction and parity-bit definition explained; no concrete bit value."
+          },
+          {
+            "id": "C1.3-P1-M03",
+            "required_content_refs": [
+              "C1.3.O02",
+              "C1.3.O03",
+              "C1.3.O04"
+            ],
+            "source_instructional_action": "Explain that redundancy is not payload data and that a parity bit is selected from the original data by an agreed deterministic checking rule, not arbitrary choice.",
+            "exact_delivery": "Clarify p is not original payload and its actual 0/1 value follows shared deterministic rule, not arbitrary choice.",
+            "visual": null,
+            "learner_response_policy": "model",
+            "completion_evidence": "Data dependence and nonarbitrary convention explained."
+          },
+          {
+            "id": "C1.3-P1-M04",
+            "required_content_refs": [
+              "C1.3.O04",
+              "C1.3.O05"
+            ],
+            "source_instructional_action": "Explain why sender and receiver must use the same checking convention to make a received test meaningful; defer even/odd calculations to C1.4.",
+            "exact_delivery": "Explain both sender and receiver must follow same rule; defer even/odd value calculations.",
+            "visual": null,
+            "learner_response_policy": "model",
+            "completion_evidence": "Shared-convention principle stated without parity computation."
+          }
+        ],
+        "P2": [
+          {
+            "id": "C1.3-P2-M01",
+            "required_content_refs": [
+              "C1.3.O01"
+            ],
+            "source_instructional_action": "Reconnect to why a receiver without a pristine original needs additional checking information; explicitly supply the motivation.",
+            "exact_delivery": "Supply motivation for checking without original.",
+            "visual": null,
+            "learner_response_policy": "explain",
+            "completion_evidence": "Need for redundancy explained."
+          },
+          {
+            "id": "C1.3-P2-M02",
+            "required_content_refs": [
+              "C1.3.O02"
+            ],
+            "source_instructional_action": "Guide identification of payload bits versus transmitted redundancy that is added for checking, then explicitly distinguish the two.",
+            "exact_delivery": "Guide distinction of original 10110 payload versus extra checking position p.",
+            "visual": {
+              "component": "checking",
+              "mode": "payload_plus_p"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "Guided distinction followed by correct explanation."
+          },
+          {
+            "id": "C1.3-P2-M03",
+            "required_content_refs": [
+              "C1.3.O03"
+            ],
+            "source_instructional_action": "Introduce a parity bit as one extra checking bit and guide why its value must depend on the original payload; state the relation even if the learner cannot infer it.",
+            "exact_delivery": "Define a parity bit and guide explanation of why its value depends on original data.",
+            "visual": null,
+            "learner_response_policy": "guided",
+            "completion_evidence": "Correct relationship given regardless of learner answer."
+          },
+          {
+            "id": "C1.3-P2-M04",
+            "required_content_refs": [
+              "C1.3.O04"
+            ],
+            "source_instructional_action": "Guide why choosing the extra bit arbitrarily would not establish a shared checking rule; clarify that an agreed rule determines the parity bit.",
+            "exact_delivery": "Guide arbitrary choice versus a shared agreed rule; clarify why arbitrary extra bit is not a checking convention.",
+            "visual": null,
+            "learner_response_policy": "guided",
+            "completion_evidence": "Nonarbitrariness and shared-rule reasoning explained."
+          },
+          {
+            "id": "C1.3-P2-M05",
+            "required_content_refs": [
+              "C1.3.O04",
+              "C1.3.O05"
+            ],
+            "source_instructional_action": "Consolidate that both sender and receiver must agree on and use the same checking convention; do not ask for parity-bit computation before C1.4.",
+            "exact_delivery": "Explain sender/receiver use same convention and consolidate without numeric value.",
+            "visual": null,
+            "learner_response_policy": "explain",
+            "completion_evidence": "Five requirements consolidated; no premature calculation."
+          }
+        ],
+        "P3": [
+          {
+            "id": "C1.3-P3-M01",
+            "required_content_refs": [
+              "C1.3.O01",
+              "C1.3.O02",
+              "C1.3.O03"
+            ],
+            "source_instructional_action": "Contrast a payload alone with the same payload plus a separately labeled extra transmitted parity-bit position; explain that redundancy is checking information and the parity-bit value depends on the payload.",
+            "exact_delivery": "Compare 10110 alone against 10110 plus symbolic p; distinguish payload from rule-dependent redundancy.",
+            "visual": {
+              "component": "checking",
+              "mode": "payload_contrast"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Matched cases and distinction between payload and added information explained."
+          },
+          {
+            "id": "C1.3-P3-M02",
+            "required_content_refs": [
+              "C1.3.O03",
+              "C1.3.O04"
+            ],
+            "source_instructional_action": "Compare a claimed random check-bit choice with a choice governed by an agreed data-dependent checking rule; show why only the latter supplies a meaningful common convention.",
+            "exact_delivery": "Contrast a random extra bit against a data-dependent shared-rule bit, without assigning a concrete p value.",
+            "visual": null,
+            "learner_response_policy": "compare",
+            "completion_evidence": "Rule-determined versus arbitrary choice distinguished."
+          },
+          {
+            "id": "C1.3-P3-M03",
+            "required_content_refs": [
+              "C1.3.O02",
+              "C1.3.O04",
+              "C1.3.O05"
+            ],
+            "source_instructional_action": "Highlight why sender and receiver must share the rule and how this additional information differs from the original payload.",
+            "exact_delivery": "Compare shared versus mismatched rule between sender and receiver; explain checking consequence.",
+            "visual": null,
+            "learner_response_policy": "compare",
+            "completion_evidence": "Need for consistent convention established."
+          },
+          {
+            "id": "C1.3-P3-M04",
+            "required_content_refs": [
+              "C1.3.O01",
+              "C1.3.O03",
+              "C1.3.O04",
+              "C1.3.O05"
+            ],
+            "source_instructional_action": "Consolidate the purpose of redundancy, the data-dependent parity-bit definition and the agreed-rule requirement, without calculating a particular even/odd check bit yet.",
+            "exact_delivery": "Consolidate redundancy, parity-bit definition and shared-rule need; defer even/odd.",
+            "visual": null,
+            "learner_response_policy": "explain",
+            "completion_evidence": "Full conceptual inference without parity computation."
+          }
+        ]
+      },
+      "visual_component_cap": 1,
+      "visual_interactive": false,
+      "implementation": "design_only"
+    },
+    "C1.4": {
+      "moves_by_pedagogy": {
+        "P1": [
+          {
+            "id": "C1.4-P1-M01",
+            "required_content_refs": [
+              "C1.4.O01",
+              "C1.4.O02"
+            ],
+            "source_instructional_action": "State the EVEN and ODD conventions explicitly: the full transmitted frame, including its parity bit, must have respectively an even or odd count of 1s.",
+            "exact_delivery": "Define even and odd on COMPLETE transmitted sequence including appended parity bit.",
+            "visual": null,
+            "learner_response_policy": "model",
+            "completion_evidence": "Both full-frame conventions accurately stated."
+          },
+          {
+            "id": "C1.4-P1-M02",
+            "required_content_refs": [
+              "C1.4.O01",
+              "C1.4.O02",
+              "C1.4.O03"
+            ],
+            "source_instructional_action": "Work sender calculations for the SAME short payload under both conventions: count original 1s, select and append the correct check bit, and verify each complete frame.",
+            "exact_delivery": "Work payload 10110 with three 1s: even append 1 -> 101101 (four 1s); odd append 0 -> 101100 (three 1s).",
+            "visual": {
+              "component": "parity",
+              "mode": "sender_both"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Both sender calculations and complete-frame counts demonstrated."
+          },
+          {
+            "id": "C1.4-P1-M03",
+            "required_content_refs": [
+              "C1.4.O04"
+            ],
+            "source_instructional_action": "Work a receiver check using full received bit sequences including the check bit, showing a passing and a failing instance under the specified convention.",
+            "exact_delivery": "Check complete even received 101101 -> four ones PASS and 100101 -> three ones FAIL. Briefly confirm odd receiver 101100 -> three ones PASS; receiver counts appended bit.",
+            "visual": {
+              "component": "parity",
+              "mode": "receiver_examples"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Complete receiver checks under both conventions including parity position."
+          },
+          {
+            "id": "C1.4-P1-M04",
+            "required_content_refs": [
+              "C1.4.O05",
+              "C1.4.O06"
+            ],
+            "source_instructional_action": "Explain fail as detected violation and pass as satisfied rule rather than proof of an uncorrupted message; distinguish detecting, locating and correcting without teaching C2 multi-flip laws.",
+            "exact_delivery": "Explain failed rule vs passed rule, no guarantee on pass, and detection versus locating versus correcting; no flip-count theorem.",
+            "visual": null,
+            "learner_response_policy": "model",
+            "completion_evidence": "Correct bounded interpretations and three actions distinguished."
+          }
+        ],
+        "P2": [
+          {
+            "id": "C1.4-P2-M01",
+            "required_content_refs": [
+              "C1.4.O01",
+              "C1.4.O02"
+            ],
+            "source_instructional_action": "Supply the even- and odd-parity definitions on the COMPLETE transmitted frame, explicitly including the parity bit before asking the learner to calculate.",
+            "exact_delivery": "Supply complete-frame even/odd rules before questions.",
+            "visual": null,
+            "learner_response_policy": "explain",
+            "completion_evidence": "Both definitions including parity bit delivered."
+          },
+          {
+            "id": "C1.4-P2-M02",
+            "required_content_refs": [
+              "C1.4.O01",
+              "C1.4.O03"
+            ],
+            "source_instructional_action": "Guide a sender through counting data 1s and selecting/appending an EVEN check bit; use a hint then reveal a checked answer if necessary.",
+            "exact_delivery": "Guide even sender calculation: payload 10110 has three 1s, add 1 -> 101101 with four. Hint and reveal if blocked.",
+            "visual": {
+              "component": "parity",
+              "mode": "sender_even_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "Correct verified even construction after meaningful guided interaction."
+          },
+          {
+            "id": "C1.4-P2-M03",
+            "required_content_refs": [
+              "C1.4.O02",
+              "C1.4.O03"
+            ],
+            "source_instructional_action": "Guide the same operation under ODD parity, comparing the target number-of-1s condition; supply a verified completed frame if the learner cannot derive it.",
+            "exact_delivery": "Guide odd sender calculation of SAME payload: add 0 -> 101100, three 1s. Explain convention difference.",
+            "visual": {
+              "component": "parity",
+              "mode": "sender_odd_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "Correct verified odd construction after meaningful guided interaction."
+          },
+          {
+            "id": "C1.4-P2-M04",
+            "required_content_refs": [
+              "C1.4.O04"
+            ],
+            "source_instructional_action": "Guide receiver verification by counting every received bit including the parity bit, and explicitly establish the pass/fail outcome for a verified received frame.",
+            "exact_delivery": "Guide check of even received 100101 (three 1s => FAIL), contrasting with passing even 101101; briefly confirm odd 101100 passes its own rule without a further full question cycle.",
+            "visual": {
+              "component": "parity",
+              "mode": "receiver_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "Receiver checks include parity bit, correct results and one concise odd check."
+          },
+          {
+            "id": "C1.4-P2-M05",
+            "required_content_refs": [
+              "C1.4.O05",
+              "C1.4.O06"
+            ],
+            "source_instructional_action": "Consolidate what passing and failing checks mean (pass is not proof of no error) and distinguish detecting, locating and correcting, without teaching C2 flip-count laws.",
+            "exact_delivery": "Consolidate pass/fail interpretation, and detecting vs locating vs correcting; no C2 flip-count law.",
+            "visual": null,
+            "learner_response_policy": "explain",
+            "completion_evidence": "Bounded interpretation and three actions correctly distinguished."
+          }
+        ],
+        "P3": [
+          {
+            "id": "C1.4-P3-M01",
+            "required_content_refs": [
+              "C1.4.O01",
+              "C1.4.O02"
+            ],
+            "source_instructional_action": "Present matched sender cases using the same original data under clearly stated EVEN and ODD conventions, both requiring the whole frame including the parity position to meet their respective count rules.",
+            "exact_delivery": "Present same payload 10110 under even and odd rules, stated for complete frame.",
+            "visual": {
+              "component": "parity",
+              "mode": "sender_both"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Matched sender inputs and both conventions established."
+          },
+          {
+            "id": "C1.4-P3-M02",
+            "required_content_refs": [
+              "C1.4.O01",
+              "C1.4.O02",
+              "C1.4.O03"
+            ],
+            "source_instructional_action": "Compare the two checked sender constructions explicitly: count payload 1s, determine and append each different check bit as required, and verify both complete frames.",
+            "exact_delivery": "Compare sender outcomes: even 101101 four ones, odd 101100 three ones, both correct rule-selected bits.",
+            "visual": null,
+            "learner_response_policy": "compare",
+            "completion_evidence": "Both sender calculations and role of convention distinguished."
+          },
+          {
+            "id": "C1.4-P3-M03",
+            "required_content_refs": [
+              "C1.4.O04",
+              "C1.4.O05"
+            ],
+            "source_instructional_action": "Contrast complete received frames that pass versus fail their stated rule, recounting 1s INCLUDING the received parity bit and noting why a pass does not prove error-free receipt.",
+            "exact_delivery": "Contrast complete even received 101101 PASS versus 100101 FAIL, and explain pass is not guarantee; briefly generalize checking to odd.",
+            "visual": {
+              "component": "parity",
+              "mode": "receiver_examples"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Matched receiver outcomes and correct interpretations explained."
+          },
+          {
+            "id": "C1.4-P3-M04",
+            "required_content_refs": [
+              "C1.4.O05",
+              "C1.4.O06"
+            ],
+            "source_instructional_action": "Explain the matched sender/receiver mechanism and distinguish detection from location and correction; do not introduce C2 multi-flip detection theorems.",
+            "exact_delivery": "Consolidate sender and receiver process, detection versus locating versus correcting without C2 theorem.",
+            "visual": null,
+            "learner_response_policy": "explain",
+            "completion_evidence": "Both sides, three actions, and C2 boundary respected."
+          }
+        ]
+      },
+      "visual_component_cap": 1,
+      "visual_interactive": false,
+      "implementation": "design_only"
+    }
+  }
+}

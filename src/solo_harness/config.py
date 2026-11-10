@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     required_capture_streams: Literal["screen", "screen_and_webcam"] = "screen_and_webcam"
     enable_f1_v04_development: bool = False
     enable_v051_internal_testing: bool = False
+    enable_controlled_c11_pilot: bool = False  # internal v0.5 sessions only; default off
     v051_internal_testing_token: SecretStr | None = None
     # The implementation retains its v051 module names, but there is one
     # executable experimental study candidate: v0.5.

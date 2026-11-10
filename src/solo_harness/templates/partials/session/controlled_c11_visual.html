@@ -1,0 +1,52 @@
+{# Passive, frontend-owned C1.1 materials. Facts come only from the persisted
+   server-generated instructional trace, never from model HTML/Markdown. #}
+{% set visual = item.visual %}
+{% if visual and visual.component in ('mapping', 'sequence') %}
+<figure class="controlled-c11-visual" data-controlled-c11-visual="{{ visual.component }}" data-visual-mode="{{ visual.mode }}" data-visual-stage="{{ visual.stage }}">
+  {% if visual.component == 'mapping' %}
+    <figcaption>Representing information with bits · Yes = {{ visual.rule.Yes }}, No = {{ visual.rule.No }}</figcaption>
+    <div class="c11-mapping-cases">
+    {% for case in visual.cases %}
+      <div class="c11-case" aria-label="{{ case.name }} representation">
+        {% if visual.cases|length > 1 %}<strong>Case {{ loop.index }}</strong>{% endif %}
+        <div class="c11-bit-row">
+        {% for answer in case.answers %}
+          <div class="c11-bit-cell">
+            <span class="c11-position">Position {{ loop.index }}</span>
+            <span>{{ answer }}</span>
+            <span class="c11-value">{% if visual.stage == 'prompt' %}?{% else %}{{ case.bit_sequence[loop.index0] }}{% endif %}</span>
+          </div>
+        {% endfor %}
+        </div>
+        {% if visual.stage != 'prompt' %}<div class="c11-sequence-label">Ordered sequence: <code>{{ case.bit_sequence }}</code></div>{% endif %}
+      </div>
+    {% endfor %}
+    </div>
+  {% elif visual.component == 'sequence' %}
+    {% if visual.mode == 'single_vs_sequence' %}
+      <figcaption>One value compared with several values in order</figcaption>
+      <div class="c11-unit-contrast">
+        <div><span class="c11-label">Example A</span><code>{{ visual.cases[0].bit_sequence[0] }}</code></div>
+        <div><span class="c11-label">Example B</span><code>{{ visual.cases[0].bit_sequence }}</code></div>
+      </div>
+    {% else %}
+      <figcaption>Bit values and their positions</figcaption>
+      <div class="c11-mapping-cases">
+      {% for case in visual.cases %}
+        <div class="c11-case">
+          {% if visual.cases|length > 1 %}<strong>Case {{ loop.index }}</strong>{% endif %}
+          <div class="c11-bit-row">
+          {% for bit in case.bit_sequence %}
+            <div class="c11-bit-cell"><span class="c11-position">{{ loop.index }}</span><span class="c11-value">{{ bit }}</span></div>
+          {% endfor %}
+          </div>
+          {% if visual.stage != 'prompt' %}
+            <div class="c11-sequence-label">{{ case.bit_sequence|length }} bits · {{ case.number_of_ones }} value{{ 's' if case.number_of_ones != 1 else '' }} of 1</div>
+          {% endif %}
+        </div>
+      {% endfor %}
+      </div>
+    {% endif %}
+  {% endif %}
+</figure>
+{% endif %}

@@ -150,6 +150,17 @@
     /* Teaching UI v1: bounded reading width; all styles scoped to Tutor content. */
     .conversation .message.tutor{white-space:normal}
     .tutor-content{font-size:.985rem;line-height:1.78;overflow-wrap:anywhere;word-break:normal}
+    /* Controlled C1.1 pilot: passive, frontend-owned illustration; no JS. */
+    .controlled-c11-visual{max-width:38rem;margin:1rem 0 0;padding:1rem;border:1px solid var(--line);border-radius:12px;background:var(--soft)}
+    .controlled-c11-visual figcaption{font-size:.82rem;font-weight:620;color:var(--muted);margin-bottom:.75rem}
+    .c11-mapping-cases{display:flex;gap:.8rem;flex-wrap:wrap}.c11-case{flex:1;min-width:min(100%,12rem)}
+    .c11-case>strong{display:block;font-size:.79rem;margin-bottom:.4rem}
+    .c11-bit-row{display:flex;gap:.35rem;flex-wrap:wrap}
+    .c11-bit-cell{display:flex;flex-direction:column;align-items:center;gap:.25rem;min-width:3.75rem;padding:.45rem;border:1px solid var(--line);border-radius:8px;background:var(--panel,#fff);font-size:.82rem}
+    .c11-position{font-size:.67rem;color:var(--muted)}.c11-value{font-size:1.2rem;font-weight:700;font-variant-numeric:tabular-nums}
+    .c11-sequence-label{font-size:.8rem;margin-top:.6rem;color:var(--muted)}.c11-sequence-label code{font-weight:700;color:var(--ink)}
+    .c11-unit-contrast{display:flex;gap:.65rem;flex-wrap:wrap}.c11-unit-contrast>div{display:flex;align-items:center;gap:.6rem;background:#fff;border:1px solid var(--line);border-radius:8px;padding:.65rem 1rem}
+    .c11-label{font-size:.73rem;color:var(--muted)}.c11-unit-contrast code{font-size:1.1rem;font-weight:700;color:var(--ink)}
     .tutor-content > :first-child{margin-top:0}
     .tutor-content > :last-child{margin-bottom:0}
     .tutor-content p{margin:.65rem 0 1rem;line-height:inherit}
