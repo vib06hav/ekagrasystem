@@ -13,12 +13,9 @@ import json
 import random
 import secrets
 from functools import lru_cache
-from pathlib import Path
-
-from solo_harness.studies.scientific_v04 import _oracle
-from solo_harness.studies.scientific_v04_policy import (
+from solo_harness.studies.native_policy import (
     GROUPED, ONE_D, TWO_D, _make_grouped, _make_one_d, _make_two_d,
-    _shared_context, _validate_spec, load_policy,
+    _shared_context, _validate_spec, load_policy, load_reference_oracle,
 )
 
 
@@ -33,12 +30,8 @@ def _require(ok, message):
 def _compact(value): return json.dumps(value, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
 
 
-def _v04_root() -> Path:
-    return Path(__file__).resolve().parents[3] / "studies" / "networks_error_detection_parity_f1" / "v0.4"
-
-
 @lru_cache(maxsize=1)
-def _base_policies(): return load_policy(_v04_root())
+def _base_policies(): return load_policy()
 
 
 # These are explicit replacements for the seven source contracts corrected
@@ -187,7 +180,7 @@ def _validate(slot_id, slot, policy, cases, oracle):
 def resolve_v051_typed_case(compiled, slot_id: str, seed: int | None = None) -> dict:
     policy = typed_policy(compiled, slot_id)
     slots = {item["id"]: item for blueprint in compiled.authored["v051"]["scientific"]["assessment_families.yaml"]["blueprints"] for item in blueprint["items"]}; slot = slots[slot_id]
-    rng = random.Random(seed if seed is not None else secrets.randbits(64)); oracle = _oracle(_v04_root())
+    rng = random.Random(seed if seed is not None else secrets.randbits(64)); oracle = load_reference_oracle()
     for _ in range(96):
         if policy.get("case_relation") == "three_flip_mimic": cases = _mimic_case(oracle, rng)
         elif policy.get("case_relation") == "receiver_evidence_candidates": cases = _evidence_case(oracle, rng)
@@ -401,7 +394,7 @@ def resolve_v051_instructional_instance(compiled, subsection_id: str, pedagogy_i
     _require(subsection_id in subsections, f"unknown curriculum subsection: {subsection_id}")
     _require(pedagogy_id in {"P1", "P2", "P3"}, f"unknown pedagogy: {pedagogy_id}")
     rng = random.Random(seed if seed is not None else secrets.randbits(64))
-    oracle = _oracle(_v04_root())
+    oracle = load_reference_oracle()
     cases = _verified_teaching_cases(oracle, subsection_id, rng, pedagogy_id == "P3")
     if subsection_id in {"C1.1", "C1.2", "C1.3"}:
         _verify_conceptual_cases(cases, subsection_id)
@@ -422,4 +415,4 @@ def validate_v051_case(compiled, slot_id: str, candidate: dict) -> None:
     policy = typed_policy(compiled, slot_id)
     slots = {item["id"]: item for blueprint in compiled.authored["v051"]["scientific"]["assessment_families.yaml"]["blueprints"] for item in blueprint["items"]}
     _require(slot_id in slots and isinstance(candidate.get("cases"), list), "invalid candidate or unknown contract")
-    _validate(slot_id, slots[slot_id], policy, candidate["cases"], _oracle(_v04_root()))
+    _validate(slot_id, slots[slot_id], policy, candidate["cases"], load_reference_oracle())

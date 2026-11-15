@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session as DbSession
 
 from solo_harness.db.models import AssessmentInstance, AssessmentResponse, Attempt, ConversationJudgeDecision, Judgment, LearnerHistorySnapshot, LLMCall, Message, ProtocolEvent, RubricEvaluation, Session, SubsectionProgress
 from solo_harness.studies.catalog import StudyCatalog
+from solo_harness.runtime import controlled_executor as _controlled  # CHANGED
 
 
 class ConversationJudgeRejected(ValueError):
@@ -126,10 +127,15 @@ class SessionRuntime:
 
     @staticmethod
     def _initial_v051_instructional_state(compiled, session, subsection_id):
-        if subsection_id != "C1.1" or not (session.runtime_config_snapshot or {}).get("controlled_c11_pilot"):
+        config = session.runtime_config_snapshot or {}
+        # CHANGED: retain C1's original pilot toggle; unified sessions use
+        # contract-ledger state for every subsection of all four sections.
+        unified = bool(config.get("unified_controlled_study"))
+        if not unified and not config.get("controlled_c11_pilot"):
             return {}
-        from solo_harness.studies.controlled_c1 import new_c11_state
-        return {"controlled_c11": new_c11_state()}
+        if not unified and subsection_id != "C1.1" and not config.get("controlled_c1_full_pilot"):
+            return {}
+        return _controlled.initial_state(subsection_id, bool(config.get("controlled_c1_full_pilot") or unified), unified)
 
     def initialize_v051_subsections(self, db: DbSession, session_id, commit=True):
         """Create the ordered, immutable-in-scope delivery ledger for one attempt."""
@@ -144,9 +150,19 @@ class SessionRuntime:
         now = datetime.now(timezone.utc)
         records = []
         for order, subsection_id, child in self._v051_specs(compiled, attempt):
+            # CHANGED: full reviewed contracts have five C2-C4 moves per
+            # pedagogy; old candidate YAML still has four for P1/P3.
+            unified = bool((session.runtime_config_snapshot or {}).get("unified_controlled_study"))
+            if unified:
+                authored_moves = _controlled.contract(subsection_id.split(".")[0])["subsections"][subsection_id]["moves_by_pedagogy"][attempt.pedagogy_id]
+                required_moves = [move["id"] for move in authored_moves]
+                required_contents = list(dict.fromkeys(ref for move in authored_moves for ref in move["required_content_refs"]))
+            else:
+                required_moves = [move["id"] for move in child["core_moves"]]
+                required_contents = list(child["required_content_refs"])
             record = SubsectionProgress(session_id=session.id, attempt_id=attempt.id, subsection_id=subsection_id,
                 order_in_attempt=order, pedagogy_id=attempt.pedagogy_id, status="ACTIVE" if order == 1 else "PENDING",
-                required_move_ids=[move["id"] for move in child["core_moves"]], required_content_ids=list(child["required_content_refs"]),
+                required_move_ids=required_moves, required_content_ids=required_contents,
                 move_evidence={}, content_evidence={}, clarification_evidence_ids=[],
                 instructional_state=self._initial_v051_instructional_state(compiled, session, subsection_id), delivery_exception=None,
                 opened_at=now if order == 1 else None)
@@ -229,11 +245,14 @@ class SessionRuntime:
         return progress
 
     def advance_v051_subsection(self, db: DbSession, session_id, subsection_id, commit=True, judge_decision_id=None):
+        # CHANGED: persisted JSON stores UUID as text; normalize before SQL UUID comparison.
+        if isinstance(judge_decision_id, str):
+            judge_decision_id = uuid.UUID(judge_decision_id)
         session = db.scalar(select(Session).where(Session.id == session_id).with_for_update())
         if session is None or not self._v051(self._compiled(db, session)): raise ValueError("v0.5 subsection lifecycle is unavailable")
         attempt, progress = self._active_v051_progress(db, session, subsection_id)
-        from solo_harness.studies.controlled_c1 import is_controlled_c11
-        if is_controlled_c11(progress):
+        from solo_harness.studies.controlled_c1 import is_controlled_c1
+        if _controlled.is_controlled(progress):
             if judge_decision_id is None:
                 raise ConversationJudgeRejected("controlled C1.1 requires move-level Judge authorization")
             if (set(progress.required_move_ids) - set(progress.move_evidence or {})
@@ -249,17 +268,17 @@ class SessionRuntime:
                 ConversationJudgeDecision.attempt_id == attempt.id,
                 ConversationJudgeDecision.subsection_progress_id == progress.id,
             ))
-            if decision is None or decision.action != "ADVANCE" or decision.application_status != "RECORDED":
+            if decision is None or decision.action != "ADVANCE" or decision.application_status not in ("RECORDED", "APPLIED"):
                 raise ConversationJudgeRejected("subsection advancement requires its recorded ADVANCE decision")
-            if is_controlled_c11(progress):
+            if _controlled.is_controlled(progress):
                 from solo_harness.studies.controlled_c1 import active_move, contract_hash
-                move, index = active_move(self._compiled(db, session), progress)
+                move, index = _controlled.active_move(self._compiled(db, session), progress)
                 source_moves = progress.required_move_ids
                 reviewed_call = db.get(LLMCall, decision.llm_call_id)
                 recorded_audit = (reviewed_call.request_payload or {}).get("audit", {}) if reviewed_call else {}
                 if (index != len(source_moves) - 1 or move["id"] != source_moves[-1]
                         or recorded_audit.get("pilot_move_id") != source_moves[-1]
-                        or recorded_audit.get("pilot_contract_sha256") != contract_hash()):
+                        or recorded_audit.get("pilot_contract_sha256") != _controlled.contract_hash(progress)):
                     raise ConversationJudgeRejected("controlled C1.1 requires final-move Judge authorization")
         now = datetime.now(timezone.utc); progress.status, progress.core_delivered_at, progress.completed_at = "COMPLETED", now, now
         next_progress = db.scalar(select(SubsectionProgress).where(SubsectionProgress.attempt_id == attempt.id, SubsectionProgress.order_in_attempt == progress.order_in_attempt + 1).with_for_update())
@@ -290,25 +309,86 @@ class SessionRuntime:
                        message.sequence_no > active_tutors[0].sequence_no), None)
         if audit.get("latest_learner_message_id") != (str(latest.id) if latest else None):
             raise StaleConversationJudgeContext("stale Conversation Judge learner context")
-        from solo_harness.studies.controlled_c1 import is_controlled_c11, active_move, contract_hash
-        pilot = is_controlled_c11(progress)
+        from solo_harness.studies.controlled_c1 import is_controlled_c1, active_move, contract_hash  # C1 legacy imports retained
+        pilot = _controlled.is_controlled(progress)
         active_pilot_move = None
         if pilot:
             try:
-                active_pilot_move, position = active_move(self._compiled(db, session), progress)
+                active_pilot_move, position = _controlled.active_move(self._compiled(db, session), progress)
             except ValueError as exc:
                 raise ConversationJudgeRejected(str(exc)) from exc
             if (audit.get("pilot_move_id") != active_pilot_move["id"]
                     or audit.get("pilot_move_index") != position
-                    or audit.get("pilot_contract_sha256") != contract_hash()
+                    or audit.get("pilot_contract_sha256") != _controlled.contract_hash(progress)
                     or active_tutors[-1].instructional_trace.get("pilot_move_id") != active_pilot_move["id"]):
                 raise StaleConversationJudgeContext("stale controlled C1.1 move review")
-            # P2's core guided moves must have at least one actual learner reply
-            # following their first prompt; a model readiness claim cannot bypass it.
-            if output.decision == "ADVANCE" and active_pilot_move["learner_response_policy"] == "guided":
+            review_mode = audit.get("pilot_review_mode", "MOVE_REVIEW")
+            controlled = _controlled.state(progress)
+            expected_status = "REVIEWING_DOUBT" if review_mode == "DOUBT_REVIEW" else "REVIEWING_MOVE"
+            if review_mode not in ("MOVE_REVIEW", "DOUBT_REVIEW") or controlled.get("status") != expected_status:
+                raise StaleConversationJudgeContext("stale controlled C1.1 review mode")
+            pending_doubt = controlled.get("pending_doubt")
+            if review_mode == "DOUBT_REVIEW":
+                if (not isinstance(pending_doubt, dict) or latest is None
+                        or pending_doubt.get("learner_message_id") != str(latest.id)
+                        or audit.get("pending_doubt_message_id") != str(latest.id)):
+                    raise StaleConversationJudgeContext("stale controlled C1.1 doubt review")
+            elif output.decision == "ADVANCE" and active_pilot_move["learner_response_policy"] == "guided":
+                # P2's core guided moves need an actual learner reply following
+                # the first prompt; Tutor readiness alone cannot bypass it.
                 first = next((msg for msg in active_tutors if (msg.instructional_trace or {}).get("pilot_move_id") == active_pilot_move["id"]), None)
                 if first is None or not any(msg.role == "LEARNER" and first.sequence_no < msg.sequence_no < active_tutors[-1].sequence_no for msg in transcript):
                     raise ConversationJudgeRejected("guided move needs a learner reply and resolved Tutor explanation")
+
+            # C1.1's Judge authorizes a continuation; it never changes the move
+            # index.  The separate learner action below is the only transition.
+            payload = {**output.model_dump(mode="json"), "review_mode": review_mode}
+            decision = ConversationJudgeDecision(session_id=session.id, attempt_id=attempt.id, subsection_progress_id=progress.id,
+                llm_call_id=call.id, latest_learner_message_id=latest.id if latest else None, action=output.decision,
+                confidence="SEMANTIC", payload=payload, application_status="RECORDED", application_reason=None)
+            db.add(decision); db.flush()
+            state = {**(progress.instructional_state or {}), "conversation_judge_call_id": str(call.id),
+                     "last_action": output.decision, "next_allowed_instruction": output.guidance,
+                     "judge_reviewed_tutor_message_ids": [str(message.id) for message in active_tutors]}
+            next_controlled = dict(controlled)
+            if output.decision == "ADVANCE":
+                if review_mode == "MOVE_REVIEW":
+                    reviewed = [msg for msg in active_tutors if (msg.instructional_trace or {}).get("pilot_move_id") == active_pilot_move["id"]]
+                    ids = [str(msg.id) for msg in reviewed]
+                    if not ids:
+                        raise ConversationJudgeRejected("controlled C1.1 move has no reviewed Tutor evidence")
+                    if active_pilot_move["id"] in (progress.move_evidence or {}):
+                        raise StaleConversationJudgeContext("controlled C1.1 move evidence already recorded")
+                    progress.move_evidence = {**(progress.move_evidence or {}), active_pilot_move["id"]: ids}
+                    content = dict(progress.content_evidence or {})
+                    for ref in active_pilot_move["required_content_refs"]:
+                        content[ref] = list(dict.fromkeys([*(content.get(ref) or []), *ids]))
+                    progress.content_evidence = content
+                    next_controlled.update({"status": "APPROVED_AWAITING_NEXT", "approved_move_id": active_pilot_move["id"],
+                                            "approved_judge_decision_id": str(decision.id), "pending_doubt": None,
+                                            "approval_version": int(next_controlled.get("approval_version", 0)) + 1})
+                    self._event(db, session, "CONTROLLED_C11_MOVE_APPROVED", {"move_id": active_pilot_move["id"],
+                        "judge_call_id": str(call.id), "tutor_message_ids": ids}, attempt.id)
+                else:
+                    # A doubt review does not re-credit the move or alter the
+                    # original entitlement/evidence.
+                    next_controlled.update({"status": "APPROVED_AWAITING_NEXT", "pending_doubt": None})
+                    self._event(db, session, "CONTROLLED_C11_DOUBT_APPROVED", {"move_id": active_pilot_move["id"],
+                        "judge_call_id": str(call.id), "learner_message_id": str(latest.id)}, attempt.id)
+                decision.application_status, decision.applied_at = "APPLIED", datetime.now(timezone.utc)
+            elif output.decision == "CONTINUE":
+                next_controlled["status"] = "RESPONDING_TO_DOUBT" if review_mode == "DOUBT_REVIEW" else "TEACHING"
+                decision.application_status, decision.applied_at = "APPLIED", datetime.now(timezone.utc)
+            else:
+                self.record_v051_delivery_exception(db, session.id, progress.subsection_id,
+                    {"conversation_judge_call_id": str(call.id), "reason": output.guidance}, commit=False)
+                decision.application_status, decision.applied_at = "APPLIED", datetime.now(timezone.utc)
+            progress.instructional_state = {**state, _controlled.state_key(progress): next_controlled}
+            self._event(db, session, "V051_CONVERSATION_JUDGE_APPLIED", {"call_id": str(call.id),
+                "subsection_id": progress.subsection_id, "action": output.decision,
+                "review_mode": review_mode, "application_status": decision.application_status}, attempt.id)
+            if commit: db.commit()
+            return decision
         payload = output.model_dump(mode="json")
         tutor_message_ids = [str(message.id) for message in active_tutors]
         if output.decision == "ADVANCE":
@@ -340,10 +420,10 @@ class SessionRuntime:
                     content[ref] = list(dict.fromkeys([*(content.get(ref) or []), *ids]))
                 progress.content_evidence = content
                 from solo_harness.studies.controlled_c1 import contract
-                moves = contract()["subsections"]["C1.1"]["moves_by_pedagogy"][progress.pedagogy_id]
+                moves = _controlled.moves(progress)
                 last_pilot_move = position == len(moves) - 1
                 if not last_pilot_move:
-                    state = {**state, "controlled_c11": {**state["controlled_c11"], "move_index": position + 1},
+                    state = {**state, _controlled.state_key(progress): {**state[_controlled.state_key(progress)], "move_index": position + 1},
                              "next_allowed_instruction": None, "last_action": "MOVE_ADVANCE"}
                     progress.instructional_state = state
                 self._event(db, session, "CONTROLLED_C11_MOVE_REVIEWED", {"move_id": active_pilot_move["id"],
@@ -364,31 +444,121 @@ class SessionRuntime:
         self._event(db, session, "V051_CONVERSATION_JUDGE_APPLIED", {"call_id": str(call.id), "subsection_id": progress.subsection_id, "action": output.decision, "application_status": decision.application_status}, attempt.id)
         if commit: db.commit()
         return decision
+
+    def continue_controlled_c11_move(self, db: DbSession, session_id, approval_version: int, commit=True):
+        """Consume one persisted controlled-C1 continuation entitlement under the session lock."""
+        session = db.scalar(select(Session).where(Session.id == session_id).with_for_update())
+        if session is None or session.phase != "INTERVENTION_ACTIVE":
+            raise ValueError("controlled C1.1 continuation is unavailable")
+        attempt, progress = self._active_v051_progress(db, session)
+        from solo_harness.studies.controlled_c1 import is_controlled_c1, active_move, contract
+        if not _controlled.is_controlled(progress):
+            raise ValueError("controlled move continuation is unavailable")
+        move, index = _controlled.active_move(self._compiled(db, session), progress)
+        controlled = _controlled.state(progress)
+        if (controlled.get("status") != "APPROVED_AWAITING_NEXT"
+                or controlled.get("approved_move_id") != move["id"]
+                or controlled.get("approval_version") != approval_version):
+            raise ValueError("controlled C1.1 continuation is stale or not approved")
+        moves = _controlled.moves(progress)
+        if index == len(moves) - 1:
+            # Subsection boundaries remain learner-controlled.  A full-C1 run
+            # opens exactly the next authored ledger; C1.4 stops at assessment.
+            if ((session.runtime_config_snapshot or {}).get("unified_controlled_study") and
+                    progress.subsection_id != list(_controlled.contract(_controlled.section_of(progress))["subsections"])[-1]) or ((session.runtime_config_snapshot or {}).get("controlled_c1_full_pilot") and _controlled.section_of(progress) == "C1" and progress.subsection_id != "C1.4"):
+                # CHANGED: explicit Next crosses subsection boundaries only.
+                next_progress = self.advance_v051_subsection(
+                    db, session.id, progress.subsection_id, commit=False,
+                    judge_decision_id=controlled.get("approved_judge_decision_id"),
+                )
+                if next_progress is None:
+                    raise ValueError("controlled C1 next subsection is unavailable")
+                self._event(db, session, "CONTROLLED_C1_SUBSECTION_CONTINUED", {
+                    "completed_subsection_id": progress.subsection_id,
+                    "next_subsection_id": next_progress.subsection_id,
+                    "approval_version": approval_version,
+                }, attempt.id)
+                if commit: db.commit()
+                return _controlled.moves(next_progress)[0]
+            if (((session.runtime_config_snapshot or {}).get("unified_controlled_study") and
+                    progress.subsection_id == list(_controlled.contract(_controlled.section_of(progress))["subsections"])[-1])
+                    or ((session.runtime_config_snapshot or {}).get("controlled_c1_full_pilot") and _controlled.section_of(progress) == "C1" and progress.subsection_id == "C1.4")):
+                # CHANGED: PAAS once at the final subsection of each section.
+                self.advance_v051_subsection(db, session.id, progress.subsection_id, commit=False,
+                                              judge_decision_id=controlled.get("approved_judge_decision_id"))
+                self.complete_intervention(db, session.id, "UNIFIED_CONTROLLED_SECTION_COMPLETE" if (session.runtime_config_snapshot or {}).get("unified_controlled_study") else "CONTROLLED_C1_SECTION_COMPLETE", commit=False)
+                self._event(db, session, "CONTROLLED_C1_ASSESSMENT_HANDOFF", {
+                    "completed_subsection_id": progress.subsection_id, "approval_version": approval_version,
+                }, attempt.id)
+                if commit: db.commit()
+                return None
+            progress.instructional_state = {**progress.instructional_state, _controlled.state_key(progress): {
+                **controlled, "status": "PILOT_BOUNDARY_HANDOFF", "handoff_at": datetime.now(timezone.utc).isoformat(),
+            }}
+            self._event(db, session, "CONTROLLED_C11_PILOT_BOUNDARY_HANDOFF", {"move_id": move["id"],
+                "approval_version": approval_version, "next_subsection_id": "C1.2"}, attempt.id)
+            if commit: db.commit()
+            return None
+        next_controlled = {**controlled, "move_index": index + 1, "status": "TEACHING",
+                           "approved_move_id": None, "approved_judge_decision_id": None}
+        progress.instructional_state = {**progress.instructional_state, _controlled.state_key(progress): next_controlled}
+        self._event(db, session, "CONTROLLED_C11_MOVE_CONTINUED", {"completed_move_id": move["id"],
+            "next_move_id": moves[index + 1]["id"], "approval_version": approval_version}, attempt.id)
+        if commit: db.commit()
+        return moves[index + 1]
     def create_session(self, db: DbSession, study_version_id, build_id="test", runtime_config=None, institutional_id=None, capture_run_id=None, commit=True):
         compiled = self.catalog.load(db, study_version_id)
-        if compiled.authored.get("v051", {}).get("candidate_only"):
-            raise ValueError("v0.5 candidate studies are not participant-executable")
+        # CHANGED: explicit feature-gated unified study, never implicit candidate enrollment.
+        if compiled.authored.get("v051", {}).get("candidate_only") and not (runtime_config or {}).get("unified_controlled_study"):
+            raise ValueError("v0.5 candidate studies are not participant-executable without explicit unified-study activation")
         session = Session(study_version_id=study_version_id, institutional_id=institutional_id, capture_run_id=capture_run_id, status="ACTIVE", phase="TRANSITION_READY", formal_state_id=compiled.protocol["initial_state_id"], current_attempt_number=0, application_build_id=build_id, runtime_config_snapshot=runtime_config or {})
         db.add(session); db.flush(); self._event(db, session, "SESSION_CREATED", {"study_version_id": str(study_version_id), "capture_run_id": str(capture_run_id) if capture_run_id else None}); self._create_attempt(db, session, compiled, compiled.protocol["transition_ids"][0]);
         if commit: db.commit()
         return session
 
-    def create_v051_internal_test_session(self, db: DbSession, study_version_id, build_id="internal-v051-test", commit=True, controlled_c11_pilot=False):
+    def create_v051_internal_test_session(self, db: DbSession, study_version_id, build_id="internal-v051-test", commit=True,
+                                          controlled_c11_pilot=False, controlled_c1_full_pilot=False,
+                                          initial_pedagogy_id: str | None = None, unified_controlled_study=False):  # CHANGED
         """Create an explicitly marked candidate session; never used by participant enrollment."""
         compiled = self.catalog.load(db, study_version_id)
         if not self._v051(compiled):
             raise ValueError("study is not the v0.5 candidate")
+        allowed_pedagogies = tuple(compiled.protocol["pedagogy_ids"])
+        if initial_pedagogy_id is not None and initial_pedagogy_id not in allowed_pedagogies:
+            raise ValueError("internal test pedagogy is not configured for this study")
         session = Session(study_version_id=study_version_id, status="ACTIVE", phase="TRANSITION_READY",
             formal_state_id=compiled.protocol["initial_state_id"], current_attempt_number=0,
-            application_build_id=build_id, runtime_config_snapshot={"internal_v051_testing": True, "controlled_c11_pilot": bool(controlled_c11_pilot)})
+            application_build_id=build_id, runtime_config_snapshot={
+                "internal_v051_testing": True,
+                "controlled_c11_pilot": bool(controlled_c11_pilot or unified_controlled_study),
+                "controlled_c1_full_pilot": bool(controlled_c1_full_pilot or unified_controlled_study),
+                "unified_controlled_study": bool(unified_controlled_study),  # CHANGED
+                "internal_test_initial_pedagogy_override": initial_pedagogy_id,
+            })
         db.add(session); db.flush()
         self._event(db, session, "V051_INTERNAL_TEST_SESSION_CREATED", {"study_version_id": str(study_version_id)})
-        self._create_attempt(db, session, compiled, compiled.protocol["transition_ids"][0])
+        self._create_attempt(db, session, compiled, compiled.protocol["transition_ids"][0],
+                             forced_pedagogy_id=initial_pedagogy_id)
         if commit: db.commit()
         return session
-    def _create_attempt(self, db, session, compiled, transition_id):
+    def _create_attempt(self, db, session, compiled, transition_id, forced_pedagogy_id: str | None = None):
         used = db.scalars(select(Attempt.pedagogy_id).where(Attempt.session_id == session.id, Attempt.transition_id == transition_id)).all()
-        decision = self.selector.choose([p for p in compiled.protocol["pedagogy_ids"] if p not in used], used)
+        eligible = [p for p in compiled.protocol["pedagogy_ids"] if p not in used]
+        # CHANGED: preserve the initially assigned pedagogy across C1--C4.
+        # Scientific assessment retries may still use the existing alternate-pedagogy policy.
+        config = dict(session.runtime_config_snapshot or {})
+        assigned = config.get("unified_assigned_pedagogy") if config.get("unified_controlled_study") else None
+        if forced_pedagogy_id is None and assigned in eligible:
+            forced_pedagogy_id = assigned
+        if forced_pedagogy_id is None:
+            decision = self.selector.choose(eligible, used)
+        else:
+            if forced_pedagogy_id not in eligible:
+                raise ValueError("requested internal-test pedagogy is unavailable")
+            decision = SelectionDecision(tuple(sorted(eligible)), tuple(sorted(used)), forced_pedagogy_id,
+                                         "internal_test_explicit_pedagogy", datetime.now(timezone.utc), None)
+        if config.get("unified_controlled_study") and not config.get("unified_assigned_pedagogy"):
+            session.runtime_config_snapshot = {**config, "unified_assigned_pedagogy": decision.selected_id}  # CHANGED
         ordinal = len(used) + 1
         attempt = Attempt(session_id=session.id, transition_id=transition_id, sequence_in_transition=ordinal, pedagogy_id=decision.selected_id, status="ASSIGNED", formal_state_before_id=session.formal_state_id)
         db.add(attempt); db.flush(); session.current_transition_id=transition_id; session.current_attempt_id=attempt.id; session.current_attempt_number=ordinal; session.phase="INTERVENTION_ACTIVE"

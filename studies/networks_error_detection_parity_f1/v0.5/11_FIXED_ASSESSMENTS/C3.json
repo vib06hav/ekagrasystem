@@ -1,0 +1,1321 @@
+{
+  "schema_version": "ekagra.c3.fixed_assessment_bank.v1",
+  "status": "CONTENT_CANDIDATE__NOT_YET_WIRED_TO_RUNTIME",
+  "study_id": "EkagraAI",
+  "transition_id": "C3",
+  "solo_from": "Multistructural",
+  "solo_to": "Relational",
+  "authorities": {
+    "curriculum": "EkagraAI_C1_C4_Final_Course_Content_Ground_Truth.md",
+    "teaching_contracts": "EKAGRAAI_C3_ALL_MOVE_CONTRACTS_V1_1.json",
+    "assessment_design_reference": [
+      "EKAGRAAI_C1_ASSESSMENT_BANK_A_B_C_V1.json",
+      "EKAGRAAI_C2_ASSESSMENT_BANK_A_B_C_V1.json"
+    ],
+    "assessment_judge_sources": [
+      "v0.5/07_PROMPT_CONTRACTS/SUBJECTIVE_JUDGE_PROMPT.md",
+      "v0.5/08_SCIENTIFIC_YAML/judge.yaml",
+      "src/solo_harness/runtime/v051_assessment.py",
+      "src/solo_harness/runtime/assessment_grading.py"
+    ]
+  },
+  "blueprint": {
+    "questions_per_set": {
+      "mcq": 3,
+      "subjective": 1
+    },
+    "slots": [
+      {
+        "slot": "MCQ1",
+        "role": "flip_count_to_group_outcome",
+        "subsections": [
+          "C3.1"
+        ],
+        "content_refs": [
+          "C3.1.O01",
+          "C3.1.O02",
+          "C3.1.O03",
+          "C3.1.O04"
+        ],
+        "evidence": "Reason from a stated two-flip pattern that includes a checking-bit cell to which complete rows and columns fail, using the number of flips inside each group."
+      },
+      {
+        "slot": "MCQ2",
+        "role": "justified_inference_from_checking_results",
+        "subsections": [
+          "C3.2"
+        ],
+        "content_refs": [
+          "C3.2.O01",
+          "C3.2.O02",
+          "C3.2.O03",
+          "C3.2.O05"
+        ],
+        "evidence": "From one failed row and one failed column seen by a receiver without the original, choose the conclusion the results alone justify (candidate position, but single-error assumption required)."
+      },
+      {
+        "slot": "MCQ3",
+        "role": "undetected_four_corner_pattern_interpretation",
+        "subsections": [
+          "C3.2"
+        ],
+        "content_refs": [
+          "C3.2.O04"
+        ],
+        "evidence": "Recognize that four flips at the corners of a data rectangle leave every check passing, and that a pass does not prove an error-free transmission."
+      },
+      {
+        "slot": "SUB1",
+        "role": "integrated_causal_explanation_both_directions",
+        "subsections": [
+          "C3.1",
+          "C3.2"
+        ],
+        "content_refs": [
+          "C3.1.O06",
+          "C3.2.O06"
+        ],
+        "evidence": "Explain from changed positions to check outcomes via per-group flip counts, and from the observed outcomes to what the receiver can and cannot justifiably conclude."
+      }
+    ],
+    "c3_structural_anchor": "Minimum R evidence is an integrated causal explanation, not recalled outcomes. For SUB1, 1 point needs at least one clearly correct causal account (per-group flip counts explaining the outcomes, or why the results do not establish exactly one error). A bare list of failed checks or locating the intersection, which is C2 content, earns 0. 2 points need both directions.",
+    "scope_exclusions": [
+      "unfamiliar_non_grid_checking_arrangements",
+      "general_non_detection_rule_for_arbitrary_overlapping_groups_reserved_for_C4",
+      "formal_coding_theory_hamming_distance_or_syndrome_decoding",
+      "exhaustive_enumeration_of_error_patterns",
+      "crc_or_checksum_methods",
+      "optimal_code_design"
+    ],
+    "form_equivalence": "Sets A/B/C use parallel operations on the same 3 x 4 even-parity grid: MCQ1 pairs one data cell with one checking-bit cell inside a shared group; MCQ2 uses a single failed row and column; MCQ3 flips the four corners of a data rectangle; SUB1 flips three corners of a data rectangle. Empirical psychometric equivalence has NOT been established.",
+    "form_assignment": "Allocate sets A/B/C independently of pedagogy; balance assignment across treatments and record chosen set and frozen delivered order.",
+    "known_design_choices": [
+      "Even parity only, matching the C3 teaching contract; odd parity is not assessed in C3.",
+      "public.notation must be shown above the items: R1C2 notation was not defined in learner-facing teaching moves.",
+      "MCQ items carry a separate `grid` field that the frontend must render; SUB1 embeds the received grid in the prompt.",
+      "No assessment grid (valid, received or corrected) equals any complete grid in the C2 teaching contract, the C2 assessment bank or the C3 teaching contract.",
+      "Within a set, MCQ3 and SUB1 use different data rectangles so one item does not reveal the other.",
+      "Existing v0.5 scoring gate is inherited unchanged; because SUB1 1 point requires a causal reason, the gate is stricter in effect than in C1 and C2 and should be confirmed."
+    ]
+  },
+  "scoring": {
+    "mcqs": {
+      "points_per_correct": 1,
+      "total_possible": 3,
+      "grade_against": "private.mcqs[].correct_option_id"
+    },
+    "subjective": {
+      "possible_points": [
+        0,
+        1,
+        2,
+        null
+      ],
+      "grade_using": "private.subjective_resolved.contract + private.subjective_resolved.case + exact public.subjective.prompt + exact raw learner response",
+      "assessment_judge_output_shape": {
+        "subjective_points": "0|1|2|null",
+        "reason": "nonempty string"
+      },
+      "meaning_of_null": "technical/scientific grading ambiguity; review hold, NOT zero",
+      "judge_blinding": "Do not pass pedagogy, Tutor history, MCQs, MCQ score, prior attempts, or learner identity to Assessment Judge."
+    },
+    "existing_v05_scoring_gate_reference": {
+      "mcq_correct_minimum": 2,
+      "subjective_points_minimum": 1,
+      "use": "Existing backend scoring rule; not a declaration of validated SOLO state."
+    }
+  },
+  "randomization": {
+    "authored_option_order": "Correct positions vary across sets and across items: MCQ1 B/D/A, MCQ2 C/A/D, MCQ3 D/B/C for sets A/B/C. Options A-D are the frozen authored positions in this file.",
+    "runtime_rule": "Optional: shuffle all four options independently per learner, assign display IDs A-D anew, atomically update matching private correct_option_id, and freeze both public and private versions for that attempt. Never reshuffle after the learner sees a question.",
+    "audit": "Record set ID, displayed options and the mapped correct option privately; do not leak private keys to frontend."
+  },
+  "exposure_and_isolation": {
+    "learner_receives": "sets[set_id].public only (notation, mcqs including grid fields, subjective)",
+    "assessment_judge_receives": "Exact frozen public subjective prompt, private subjective contract and verified case, learner response, official v0.5 judge rubric; not the MCQ key or pedagogy.",
+    "backend_receives": "Frozen public and private snapshots for scoring; only backend calculates pass/fail and progression.",
+    "avoid_frozen_teaching_examples": "Assessment grids are deliberately different from every complete grid in the C2 and C3 teaching contracts and the C2 assessment bank (verified programmatically).",
+    "implementation_notice": "This three-set fixed bank is a content candidate and is not automatically loaded by the existing runtime. Requires a deliberate adapter and policy decision without bypassing frozen-item provenance or recorded assessment lifecycle."
+  },
+  "sets": {
+    "A": {
+      "set_id": "C3-SET-A",
+      "intended_difficulty": "introductory_C3_M_to_R",
+      "public": {
+        "notation": "Cells are named RrCc: row r, column c, counted from 1 (R1C2 is row 1, column 2). R3 is the bottom row and C4 is the rightmost column; R3 and C4 hold checking bits. A row or column check passes when that complete row or column has an even number of 1s.",
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "stem": "A valid even-parity grid is sent (shown below). An instructor then flips the cells R2C4 and R2C1 during transmission. The receiver checks every complete row and column of the received grid. Which statement is correct?",
+            "grid": [
+              "1100",
+              "0110",
+              "1010"
+            ],
+            "options": [
+              {
+                "id": "A",
+                "text": "R2 fails but C1 and C4 pass, because R2 contains both flips."
+              },
+              {
+                "id": "B",
+                "text": "R2 passes but C1 and C4 fail, because R2 contains both flips."
+              },
+              {
+                "id": "C",
+                "text": "R2, C1 and C4 all fail, because each of them contains a flipped cell."
+              },
+              {
+                "id": "D",
+                "text": "All seven checks pass, because the two flips cancel each other out."
+              }
+            ]
+          },
+          {
+            "id": "MCQ2",
+            "stem": "The receiver gets the grid below and applies the even-parity rule to every complete row and column. Only R2 and C3 fail; the other five checks pass. The receiver does not have the grid that was sent. Which statement is justified by these results alone?",
+            "grid": [
+              "0011",
+              "1000",
+              "1001"
+            ],
+            "options": [
+              {
+                "id": "A",
+                "text": "Exactly one bit changed, at R2C3, so reversing it is certain to restore the data that was sent."
+              },
+              {
+                "id": "B",
+                "text": "The failed checks give no clue about where a changed bit could be, so no position can be suggested."
+              },
+              {
+                "id": "C",
+                "text": "Reversing R2C3 would make every check pass, but the results alone cannot show that only one bit changed."
+              },
+              {
+                "id": "D",
+                "text": "Two bits changed, one somewhere in R2 and one somewhere in C3, so the grid cannot be corrected at all."
+              }
+            ]
+          },
+          {
+            "id": "MCQ3",
+            "stem": "A valid even-parity grid is sent (shown below). An instructor flips four data cells during transmission: R1C1, R1C3, R2C1 and R2C3. The receiver checks every complete row and column of the received grid. Which statement is correct?",
+            "grid": [
+              "1100",
+              "0110",
+              "1010"
+            ],
+            "options": [
+              {
+                "id": "A",
+                "text": "R1, R2, C1 and C3 fail, because each of them contains flipped cells and so its parity is broken."
+              },
+              {
+                "id": "B",
+                "text": "Exactly two checks fail, so the corruption is detected, although the changed cells cannot be located."
+              },
+              {
+                "id": "C",
+                "text": "All seven checks pass, so the receiver can be sure the grid is exactly the one that was sent."
+              },
+              {
+                "id": "D",
+                "text": "All seven checks pass, because each affected row and column holds two flips; that does not prove nothing changed."
+              }
+            ]
+          }
+        ],
+        "subjective": {
+          "id": "SUB1",
+          "prompt": "A system uses full two-dimensional even parity on a 3 × 4 grid. An instructor starts from a valid grid and flips exactly three cells: R1C3, R2C2 and R2C3. The receiver gets this grid:\n\n0 0 0 1\n1 1 0 0\n1 0 0 1\n\n(a) Explain why exactly the checks you identify fail and the rest pass, by counting the flips in each affected row and column.\n(b) The receiver sees only this grid and its check results. If it assumed exactly one bit had changed, what would it do? Is that conclusion justified by the results alone? Say what the results do and do not establish."
+        }
+      },
+      "private": {
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "role": "flip_count_to_group_outcome",
+            "subsection_refs": [
+              "C3.1"
+            ],
+            "correct_option_id": "B",
+            "correct_answer": "R2 passes but C1 and C4 fail, because R2 contains both flips.",
+            "oracle": {
+              "valid_grid": [
+                "1100",
+                "0110",
+                "1010"
+              ],
+              "flipped_positions": [
+                "R2C4",
+                "R2C1"
+              ],
+              "cell_roles": {
+                "R2C4": "row_checking_bit",
+                "R2C1": "data"
+              },
+              "flips_per_group": {
+                "R1": 0,
+                "R2": 2,
+                "R3": 0,
+                "C1": 1,
+                "C2": 0,
+                "C3": 0,
+                "C4": 1
+              },
+              "received_grid": [
+                "1100",
+                "1111",
+                "1010"
+              ],
+              "row_results": {
+                "R1": "PASS",
+                "R2": "PASS",
+                "R3": "PASS"
+              },
+              "column_results": {
+                "C1": "FAIL",
+                "C2": "PASS",
+                "C3": "PASS",
+                "C4": "FAIL"
+              },
+              "failed_groups": [
+                "C1",
+                "C4"
+              ],
+              "shared_group_with_two_flips": "R2",
+              "instructor_view_only": true
+            },
+            "option_feedback": {
+              "A": "Reverses the outcomes: a group holding two flips keeps its original (passing) result, and a group holding one flip fails.",
+              "B": "R2 contains both flips, so its parity result is unchanged; each of C1 and C4 contains one flip, so its result reverses.",
+              "C": "Containing a flipped cell does not make a group fail; the number of flips inside the group matters, and R2 contains two.",
+              "D": "Two flips cancel only inside a group that contains both of them (here R2); the other groups still contain one flip each."
+            }
+          },
+          {
+            "id": "MCQ2",
+            "role": "justified_inference_from_checking_results",
+            "subsection_refs": [
+              "C3.2"
+            ],
+            "correct_option_id": "C",
+            "correct_answer": "Reversing R2C3 would make every check pass, but the results alone cannot show that only one bit changed.",
+            "oracle": {
+              "received_grid": [
+                "0011",
+                "1000",
+                "1001"
+              ],
+              "failed_groups": [
+                "C3",
+                "R2"
+              ],
+              "single_error_candidate": "R2C3",
+              "receiver_has_original": false,
+              "one_flip_history": {
+                "original_for_instructor": [
+                  "0011",
+                  "1010",
+                  "1001"
+                ],
+                "flipped_positions": [
+                  "R2C3"
+                ]
+              },
+              "three_flip_history": {
+                "original_for_instructor": [
+                  "1001",
+                  "0000",
+                  "1001"
+                ],
+                "flipped_positions": [
+                  "R2C1",
+                  "R1C3",
+                  "R1C1"
+                ]
+              },
+              "both_histories_give_same_received_grid_and_checks": true,
+              "principle": "A single failed row and column are consistent with one flip at their intersection, but do not prove exactly one error; localization/correction needs an error-count assumption."
+            },
+            "option_feedback": {
+              "A": "Overclaims: the intersection identifies the changed cell only if exactly one bit changed, and the results cannot establish that.",
+              "B": "Too cautious: the failed row and column do point to R2C3 as the position that would explain a single error.",
+              "C": "One flip at R2C3 fits the results, but a different pattern with more flips can give identical results, so a single-error assumption is needed.",
+              "D": "Unsupported: the results do not show that exactly two bits changed, and they do not rule out a single changed bit."
+            }
+          },
+          {
+            "id": "MCQ3",
+            "role": "undetected_four_corner_pattern_interpretation",
+            "subsection_refs": [
+              "C3.2"
+            ],
+            "correct_option_id": "D",
+            "correct_answer": "All seven checks pass, because each affected row and column holds two flips; that does not prove nothing changed.",
+            "oracle": {
+              "valid_grid": [
+                "1100",
+                "0110",
+                "1010"
+              ],
+              "flipped_positions": [
+                "R1C1",
+                "R1C3",
+                "R2C1",
+                "R2C3"
+              ],
+              "received_grid": [
+                "0110",
+                "1100",
+                "1010"
+              ],
+              "flips_per_group": {
+                "R1": 2,
+                "R2": 2,
+                "R3": 0,
+                "C1": 2,
+                "C2": 0,
+                "C3": 2,
+                "C4": 0
+              },
+              "failed_groups": [],
+              "all_seven_groups": "PASS",
+              "interpretation": "A passing result means the checking rules are satisfied; it does not prove an error-free transmission."
+            },
+            "option_feedback": {
+              "A": "Containing flips does not make a group fail; a group with two flips keeps its passing result.",
+              "B": "No check fails here, and failure counts do not follow the total number of flips.",
+              "C": "Overclaims: passing every check means the rules are satisfied, not that nothing changed.",
+              "D": "Each affected row (R1 and R2) and column (C1 and C3) contains exactly two flips, so every result is unchanged."
+            }
+          }
+        ],
+        "subjective_resolved": {
+          "contract": {
+            "id": "C3-SET-A-SUB1",
+            "type": "SUBJECTIVE",
+            "transition_id": "C3",
+            "shared_role": "integrated causal explanation: from changed positions to check outcomes, and from observed outcomes to warranted receiver conclusions",
+            "mapped_locked_subsections": [
+              "C3.1",
+              "C3.2"
+            ],
+            "solo_target": "M_to_R",
+            "target_structural_evidence": "The learner links flipped positions to the checks that contain them and to the per-group number of flips, AND links the observed pass/fail pattern to what the receiver can and cannot justifiably conclude. Reciting results or locating an intersection is not the defining evidence.",
+            "score_anchor": {
+              "0": "No causal reason is given (bare list of failed checks, or only locating the intersection), or the central mechanism is materially wrong (for example, every group containing a flip fails; failed row plus failed column prove exactly one error and correction restores the original).",
+              "1": "Gives at least one clearly correct causal account with an identifiable reason: either (a) explains the failing and passing checks through the number of flips inside each affected row and column, or (b) explains why the observed checks do not establish that exactly one bit changed (other patterns give the same results, so correction at the intersection is unjustified). The other direction may be missing or incomplete.",
+              "2": "Correct causal accounts in both directions: (a) per-group flip counts explain why R1 and C2 fail while R2 and C3 pass although they contain flips, and all other groups pass; and (b) the one-error assumption would point to R1C2, is not justified by the results alone because a different history (including the actual three flips) gives the same results, and detection, localization and correction are kept distinct. Noting that correcting R1C2 would leave a grid that passes every check but still differs from the one sent is a strength, not a requirement."
+            },
+            "evidence_elements": {
+              "pattern_to_results": "Counts flips per affected group: R1: 1, R2: 2, C2: 1, C3: 2; odd counts reverse a result, even counts leave it unchanged.",
+              "results_to_inference": "One failed row and one failed column are consistent with one flip at R1C2, but also with other patterns; the receiver does not have the original grid.",
+              "correction_consequence": "Correction based on an assumed single error is unjustified without that assumption.",
+              "detection_vs_localization_vs_correction": "A failed check detects a rule violation; locating or correcting needs additional assumptions."
+            },
+            "legitimate_alternative_explanations": [
+              "Equivalent parity language: a group's parity changes / stays even / becomes odd, or a check passes / fails / is violated.",
+              "Reasoning group by group without naming every passing group, provided the two-flip groups are explained as unchanged.",
+              "Describing the alternative history in words (for example, 'more than one error could produce this') without reproducing the exact flipped cells.",
+              "Equivalent coordinates or labels, if consistently interpreted."
+            ],
+            "material_invalidators": [
+              "Claims that a group fails because it contains any flipped cell, regardless of how many.",
+              "Claims that the receiver has, or can directly compare with, the original grid.",
+              "Claims that one failed row and one failed column prove exactly one bit changed.",
+              "Claims that passing every check proves nothing changed."
+            ],
+            "full_credit_blockers": [
+              "Only one direction (pattern to results, or results to inference) is correctly explained.",
+              "Claims that reversing the intersection cell is certain to restore the data that was sent.",
+              "Correct check outcomes with no parity-based reason."
+            ],
+            "contradiction_handling": "A material contradiction of the central mechanism is 0 even if an isolated correct-looking result also appears. An incorrect extra claim blocks 2 and may warrant 0 if it overwhelms or negates otherwise correct reasoning; use an evidence-grounded judgment, not keyword triggers.",
+            "judge_instruction": "Grade ONLY the frozen public subjective prompt, this verified case and the exact raw learner response. Do not use pedagogy, Tutor history, MCQs, MCQ score, prior attempts, or learner identity. Accept equivalent reasoning, not exact-match text. Return only subjective_points (0/1/2 or null) and a nonempty reason. Null is for a true grading ambiguity or technical/scientific review hold, not for a wrong or blank answer.",
+            "calibration_status": "illustrative_synthetic_examples_not_human_validated",
+            "calibration_examples": [
+              {
+                "response": "R1 contains one flipped cell (R1C3), so its parity result reverses and it fails; R2 contains two flipped cells, so it stays even and passes. In the same way C2 has one flip (R2C2) and fails, while C3 has two flips and passes. The receiver sees one failed row and one failed column, so a one-error assumption points to R1C2. But the real change was three bits, and one flip or three can give the same results, so the receiver cannot tell which happened. Reversing R1C2 would make every check pass without restoring what was sent.",
+                "expected_points": 2,
+                "why": "Both directions are correctly explained with per-group flip counts and a justified limit on the one-error assumption."
+              },
+              {
+                "response": "R1 has one flipped bit so it fails, and R2 has two so it stays passing. C2 has one flip and fails, while C3 has two and passes. All other groups contain no flips, so they pass.",
+                "expected_points": 1,
+                "why": "Correct causal account of pattern to results; the receiver-inference direction is missing."
+              },
+              {
+                "response": "The receiver only sees R1 and C2 failing. If just one bit had changed it would be R1C2, but different error patterns can give the same results, so it cannot be sure only one bit changed, and reversing R1C2 might not repair the grid.",
+                "expected_points": 1,
+                "why": "Correct account of why the results do not establish a single error; the per-group flip-count explanation is missing."
+              },
+              {
+                "response": "R1 and C2 fail, so the error is at R1C2 and the receiver can fix it by reversing that bit.",
+                "expected_points": 0,
+                "why": "Treats the intersection as proof of one error and offers no causal reason."
+              },
+              {
+                "response": "Every row and column that contains a flipped cell fails, so R1, R2, C2 and C3 all fail.",
+                "expected_points": 0,
+                "why": "Materially wrong mechanism: groups with two flips do not fail."
+              }
+            ],
+            "assessment_mode": "fixed_c3_relational_causal"
+          },
+          "case": {
+            "scenario_kind": "two_dimensional_parity_three_flip_pattern_mimicking_single_error",
+            "parity_convention": "even",
+            "grid_dimensions": "3 rows x 4 columns including checking-bit row and column",
+            "valid_original_grid_for_instructor_explanation": [
+              "0011",
+              "1010",
+              "1001"
+            ],
+            "flipped_positions": [
+              "R1C3",
+              "R2C2",
+              "R2C3"
+            ],
+            "flips": [
+              "R1C3:1_to_0",
+              "R2C2:0_to_1",
+              "R2C3:1_to_0"
+            ],
+            "received_grid": [
+              "0001",
+              "1100",
+              "1001"
+            ],
+            "flips_per_group": {
+              "R1": 1,
+              "R2": 2,
+              "R3": 0,
+              "C1": 0,
+              "C2": 1,
+              "C3": 2,
+              "C4": 0
+            },
+            "failed_groups": [
+              "C2",
+              "R1"
+            ],
+            "passing_groups_containing_two_flips": [
+              "R2",
+              "C3"
+            ],
+            "single_error_candidate_cell": "R1C2",
+            "receiver_has_original": false,
+            "grid_after_assumed_single_error_correction": [
+              "0101",
+              "1100",
+              "1001"
+            ],
+            "checks_after_assumed_correction": "all seven PASS",
+            "cells_where_corrected_grid_still_differs_from_original": [
+              "R1C2",
+              "R1C3",
+              "R2C2",
+              "R2C3"
+            ],
+            "evidence_interpretation": "A failed row and a failed column fit one flip at their intersection but do not prove exactly one error; correction needs an error-count assumption.",
+            "reference_answer_for_calibration_only": "R1 has one flip (R1C3) so its result reverses and it fails; R2 has two flips (R2C2 and R2C3) so its result is unchanged and it passes; C2 has one flip (R2C2) and fails; C3 has two flips (R1C3 and R2C3) and passes; all other groups have no flips and pass. A receiver assuming exactly one error would reverse R1C2, the intersection of the failed row and column. That assumption is not justified by the results alone: the instructor's three-flip pattern and a one-flip pattern at R1C2 give identical check results. After reversing R1C2 every check would pass, yet the grid would still differ from the grid that was sent in four cells (R1C2, R1C3, R2C2 and R2C3). The failed checks establish that a parity rule was violated and point to a candidate position; a passing grid would establish only that the rules are satisfied. Localization and correction need an error-count assumption."
+          }
+        }
+      },
+      "scientific_review": {
+        "scope": "C3_only",
+        "status": "authored_and_programmatically_checked_requires_independent_human_approval",
+        "no_instructional_frozen_grids": true,
+        "notes": "All grids, per-group flip counts, failed-check sets, alternative histories and post-correction grids were programmatically recomputed. The instructor-only valid grids are not presumed available to the receiver. Human review is still required for content validity, SOLO alignment and judge calibration."
+      }
+    },
+    "B": {
+      "set_id": "C3-SET-B",
+      "intended_difficulty": "introductory_C3_M_to_R",
+      "public": {
+        "notation": "Cells are named RrCc: row r, column c, counted from 1 (R1C2 is row 1, column 2). R3 is the bottom row and C4 is the rightmost column; R3 and C4 hold checking bits. A row or column check passes when that complete row or column has an even number of 1s.",
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "stem": "A valid even-parity grid is sent (shown below). An instructor then flips the cells R3C2 and R1C2 during transmission. The receiver checks every complete row and column of the received grid. Which statement is correct?",
+            "grid": [
+              "0110",
+              "1010",
+              "1100"
+            ],
+            "options": [
+              {
+                "id": "A",
+                "text": "C2, R1 and R3 all fail, because each of them contains a flipped cell."
+              },
+              {
+                "id": "B",
+                "text": "All seven checks pass, because the two flips cancel each other out."
+              },
+              {
+                "id": "C",
+                "text": "C2 fails but R1 and R3 pass, because C2 contains both flips."
+              },
+              {
+                "id": "D",
+                "text": "C2 passes but R1 and R3 fail, because C2 contains both flips."
+              }
+            ]
+          },
+          {
+            "id": "MCQ2",
+            "stem": "The receiver gets the grid below and applies the even-parity rule to every complete row and column. Only R1 and C1 fail; the other five checks pass. The receiver does not have the grid that was sent. Which statement is justified by these results alone?",
+            "grid": [
+              "0001",
+              "1111",
+              "0110"
+            ],
+            "options": [
+              {
+                "id": "A",
+                "text": "Reversing R1C1 would make every check pass, but the results alone cannot show that only one bit changed."
+              },
+              {
+                "id": "B",
+                "text": "Two bits changed, one somewhere in R1 and one somewhere in C1, so the grid cannot be corrected at all."
+              },
+              {
+                "id": "C",
+                "text": "Exactly one bit changed, at R1C1, so reversing it is certain to restore the data that was sent."
+              },
+              {
+                "id": "D",
+                "text": "The failed checks give no clue about where a changed bit could be, so no position can be suggested."
+              }
+            ]
+          },
+          {
+            "id": "MCQ3",
+            "stem": "A valid even-parity grid is sent (shown below). An instructor flips four data cells during transmission: R1C2, R1C3, R2C2 and R2C3. The receiver checks every complete row and column of the received grid. Which statement is correct?",
+            "grid": [
+              "0110",
+              "1010",
+              "1100"
+            ],
+            "options": [
+              {
+                "id": "A",
+                "text": "All seven checks pass, so the receiver can be sure the grid is exactly the one that was sent."
+              },
+              {
+                "id": "B",
+                "text": "All seven checks pass, because each affected row and column holds two flips; that does not prove nothing changed."
+              },
+              {
+                "id": "C",
+                "text": "R1, R2, C2 and C3 fail, because each of them contains flipped cells and so its parity is broken."
+              },
+              {
+                "id": "D",
+                "text": "Exactly two checks fail, so the corruption is detected, although the changed cells cannot be located."
+              }
+            ]
+          }
+        ],
+        "subjective": {
+          "id": "SUB1",
+          "prompt": "A system uses full two-dimensional even parity on a 3 × 4 grid. An instructor starts from a valid grid and flips exactly three cells: R1C1, R2C1 and R2C3. The receiver gets this grid:\n\n0 0 0 1\n0 1 0 1\n0 1 1 0\n\n(a) Explain why exactly the checks you identify fail and the rest pass, by counting the flips in each affected row and column.\n(b) The receiver sees only this grid and its check results. If it assumed exactly one bit had changed, what would it do? Is that conclusion justified by the results alone? Say what the results do and do not establish."
+        }
+      },
+      "private": {
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "role": "flip_count_to_group_outcome",
+            "subsection_refs": [
+              "C3.1"
+            ],
+            "correct_option_id": "D",
+            "correct_answer": "C2 passes but R1 and R3 fail, because C2 contains both flips.",
+            "oracle": {
+              "valid_grid": [
+                "0110",
+                "1010",
+                "1100"
+              ],
+              "flipped_positions": [
+                "R3C2",
+                "R1C2"
+              ],
+              "cell_roles": {
+                "R3C2": "column_checking_bit",
+                "R1C2": "data"
+              },
+              "flips_per_group": {
+                "R1": 1,
+                "R2": 0,
+                "R3": 1,
+                "C1": 0,
+                "C2": 2,
+                "C3": 0,
+                "C4": 0
+              },
+              "received_grid": [
+                "0010",
+                "1010",
+                "1000"
+              ],
+              "row_results": {
+                "R1": "FAIL",
+                "R2": "PASS",
+                "R3": "FAIL"
+              },
+              "column_results": {
+                "C1": "PASS",
+                "C2": "PASS",
+                "C3": "PASS",
+                "C4": "PASS"
+              },
+              "failed_groups": [
+                "R1",
+                "R3"
+              ],
+              "shared_group_with_two_flips": "C2",
+              "instructor_view_only": true
+            },
+            "option_feedback": {
+              "A": "Containing a flipped cell does not make a group fail; the number of flips inside the group matters, and C2 contains two.",
+              "B": "Two flips cancel only inside a group that contains both of them (here C2); the other groups still contain one flip each.",
+              "C": "Reverses the outcomes: a group holding two flips keeps its original (passing) result, and a group holding one flip fails.",
+              "D": "C2 contains both flips, so its parity result is unchanged; each of R1 and R3 contains one flip, so its result reverses."
+            }
+          },
+          {
+            "id": "MCQ2",
+            "role": "justified_inference_from_checking_results",
+            "subsection_refs": [
+              "C3.2"
+            ],
+            "correct_option_id": "A",
+            "correct_answer": "Reversing R1C1 would make every check pass, but the results alone cannot show that only one bit changed.",
+            "oracle": {
+              "received_grid": [
+                "0001",
+                "1111",
+                "0110"
+              ],
+              "failed_groups": [
+                "C1",
+                "R1"
+              ],
+              "single_error_candidate": "R1C1",
+              "receiver_has_original": false,
+              "one_flip_history": {
+                "original_for_instructor": [
+                  "1001",
+                  "1111",
+                  "0110"
+                ],
+                "flipped_positions": [
+                  "R1C1"
+                ]
+              },
+              "three_flip_history": {
+                "original_for_instructor": [
+                  "0101",
+                  "0011",
+                  "0110"
+                ],
+                "flipped_positions": [
+                  "R1C2",
+                  "R2C1",
+                  "R2C2"
+                ]
+              },
+              "both_histories_give_same_received_grid_and_checks": true,
+              "principle": "A single failed row and column are consistent with one flip at their intersection, but do not prove exactly one error; localization/correction needs an error-count assumption."
+            },
+            "option_feedback": {
+              "A": "One flip at R1C1 fits the results, but a different pattern with more flips can give identical results, so a single-error assumption is needed.",
+              "B": "Unsupported: the results do not show that exactly two bits changed, and they do not rule out a single changed bit.",
+              "C": "Overclaims: the intersection identifies the changed cell only if exactly one bit changed, and the results cannot establish that.",
+              "D": "Too cautious: the failed row and column do point to R1C1 as the position that would explain a single error."
+            }
+          },
+          {
+            "id": "MCQ3",
+            "role": "undetected_four_corner_pattern_interpretation",
+            "subsection_refs": [
+              "C3.2"
+            ],
+            "correct_option_id": "B",
+            "correct_answer": "All seven checks pass, because each affected row and column holds two flips; that does not prove nothing changed.",
+            "oracle": {
+              "valid_grid": [
+                "0110",
+                "1010",
+                "1100"
+              ],
+              "flipped_positions": [
+                "R1C2",
+                "R1C3",
+                "R2C2",
+                "R2C3"
+              ],
+              "received_grid": [
+                "0000",
+                "1100",
+                "1100"
+              ],
+              "flips_per_group": {
+                "R1": 2,
+                "R2": 2,
+                "R3": 0,
+                "C1": 0,
+                "C2": 2,
+                "C3": 2,
+                "C4": 0
+              },
+              "failed_groups": [],
+              "all_seven_groups": "PASS",
+              "interpretation": "A passing result means the checking rules are satisfied; it does not prove an error-free transmission."
+            },
+            "option_feedback": {
+              "A": "Overclaims: passing every check means the rules are satisfied, not that nothing changed.",
+              "B": "Each affected row (R1 and R2) and column (C2 and C3) contains exactly two flips, so every result is unchanged.",
+              "C": "Containing flips does not make a group fail; a group with two flips keeps its passing result.",
+              "D": "No check fails here, and failure counts do not follow the total number of flips."
+            }
+          }
+        ],
+        "subjective_resolved": {
+          "contract": {
+            "id": "C3-SET-B-SUB1",
+            "type": "SUBJECTIVE",
+            "transition_id": "C3",
+            "shared_role": "integrated causal explanation: from changed positions to check outcomes, and from observed outcomes to warranted receiver conclusions",
+            "mapped_locked_subsections": [
+              "C3.1",
+              "C3.2"
+            ],
+            "solo_target": "M_to_R",
+            "target_structural_evidence": "The learner links flipped positions to the checks that contain them and to the per-group number of flips, AND links the observed pass/fail pattern to what the receiver can and cannot justifiably conclude. Reciting results or locating an intersection is not the defining evidence.",
+            "score_anchor": {
+              "0": "No causal reason is given (bare list of failed checks, or only locating the intersection), or the central mechanism is materially wrong (for example, every group containing a flip fails; failed row plus failed column prove exactly one error and correction restores the original).",
+              "1": "Gives at least one clearly correct causal account with an identifiable reason: either (a) explains the failing and passing checks through the number of flips inside each affected row and column, or (b) explains why the observed checks do not establish that exactly one bit changed (other patterns give the same results, so correction at the intersection is unjustified). The other direction may be missing or incomplete.",
+              "2": "Correct causal accounts in both directions: (a) per-group flip counts explain why R1 and C3 fail while R2 and C1 pass although they contain flips, and all other groups pass; and (b) the one-error assumption would point to R1C3, is not justified by the results alone because a different history (including the actual three flips) gives the same results, and detection, localization and correction are kept distinct. Noting that correcting R1C3 would leave a grid that passes every check but still differs from the one sent is a strength, not a requirement."
+            },
+            "evidence_elements": {
+              "pattern_to_results": "Counts flips per affected group: R1: 1, R2: 2, C3: 1, C1: 2; odd counts reverse a result, even counts leave it unchanged.",
+              "results_to_inference": "One failed row and one failed column are consistent with one flip at R1C3, but also with other patterns; the receiver does not have the original grid.",
+              "correction_consequence": "Correction based on an assumed single error is unjustified without that assumption.",
+              "detection_vs_localization_vs_correction": "A failed check detects a rule violation; locating or correcting needs additional assumptions."
+            },
+            "legitimate_alternative_explanations": [
+              "Equivalent parity language: a group's parity changes / stays even / becomes odd, or a check passes / fails / is violated.",
+              "Reasoning group by group without naming every passing group, provided the two-flip groups are explained as unchanged.",
+              "Describing the alternative history in words (for example, 'more than one error could produce this') without reproducing the exact flipped cells.",
+              "Equivalent coordinates or labels, if consistently interpreted."
+            ],
+            "material_invalidators": [
+              "Claims that a group fails because it contains any flipped cell, regardless of how many.",
+              "Claims that the receiver has, or can directly compare with, the original grid.",
+              "Claims that one failed row and one failed column prove exactly one bit changed.",
+              "Claims that passing every check proves nothing changed."
+            ],
+            "full_credit_blockers": [
+              "Only one direction (pattern to results, or results to inference) is correctly explained.",
+              "Claims that reversing the intersection cell is certain to restore the data that was sent.",
+              "Correct check outcomes with no parity-based reason."
+            ],
+            "contradiction_handling": "A material contradiction of the central mechanism is 0 even if an isolated correct-looking result also appears. An incorrect extra claim blocks 2 and may warrant 0 if it overwhelms or negates otherwise correct reasoning; use an evidence-grounded judgment, not keyword triggers.",
+            "judge_instruction": "Grade ONLY the frozen public subjective prompt, this verified case and the exact raw learner response. Do not use pedagogy, Tutor history, MCQs, MCQ score, prior attempts, or learner identity. Accept equivalent reasoning, not exact-match text. Return only subjective_points (0/1/2 or null) and a nonempty reason. Null is for a true grading ambiguity or technical/scientific review hold, not for a wrong or blank answer.",
+            "calibration_status": "illustrative_synthetic_examples_not_human_validated",
+            "calibration_examples": [
+              {
+                "response": "R1 contains one flipped cell (R1C1), so its parity result reverses and it fails; R2 contains two flipped cells, so it stays even and passes. In the same way C3 has one flip (R2C3) and fails, while C1 has two flips and passes. The receiver sees one failed row and one failed column, so a one-error assumption points to R1C3. But the real change was three bits, and one flip or three can give the same results, so the receiver cannot tell which happened. Reversing R1C3 would make every check pass without restoring what was sent.",
+                "expected_points": 2,
+                "why": "Both directions are correctly explained with per-group flip counts and a justified limit on the one-error assumption."
+              },
+              {
+                "response": "R1 has one flipped bit so it fails, and R2 has two so it stays passing. C3 has one flip and fails, while C1 has two and passes. All other groups contain no flips, so they pass.",
+                "expected_points": 1,
+                "why": "Correct causal account of pattern to results; the receiver-inference direction is missing."
+              },
+              {
+                "response": "The receiver only sees R1 and C3 failing. If just one bit had changed it would be R1C3, but different error patterns can give the same results, so it cannot be sure only one bit changed, and reversing R1C3 might not repair the grid.",
+                "expected_points": 1,
+                "why": "Correct account of why the results do not establish a single error; the per-group flip-count explanation is missing."
+              },
+              {
+                "response": "R1 and C3 fail, so the error is at R1C3 and the receiver can fix it by reversing that bit.",
+                "expected_points": 0,
+                "why": "Treats the intersection as proof of one error and offers no causal reason."
+              },
+              {
+                "response": "Every row and column that contains a flipped cell fails, so R1, R2, C1 and C3 all fail.",
+                "expected_points": 0,
+                "why": "Materially wrong mechanism: groups with two flips do not fail."
+              }
+            ],
+            "assessment_mode": "fixed_c3_relational_causal"
+          },
+          "case": {
+            "scenario_kind": "two_dimensional_parity_three_flip_pattern_mimicking_single_error",
+            "parity_convention": "even",
+            "grid_dimensions": "3 rows x 4 columns including checking-bit row and column",
+            "valid_original_grid_for_instructor_explanation": [
+              "1001",
+              "1111",
+              "0110"
+            ],
+            "flipped_positions": [
+              "R1C1",
+              "R2C1",
+              "R2C3"
+            ],
+            "flips": [
+              "R1C1:1_to_0",
+              "R2C1:1_to_0",
+              "R2C3:1_to_0"
+            ],
+            "received_grid": [
+              "0001",
+              "0101",
+              "0110"
+            ],
+            "flips_per_group": {
+              "R1": 1,
+              "R2": 2,
+              "R3": 0,
+              "C1": 2,
+              "C2": 0,
+              "C3": 1,
+              "C4": 0
+            },
+            "failed_groups": [
+              "C3",
+              "R1"
+            ],
+            "passing_groups_containing_two_flips": [
+              "R2",
+              "C1"
+            ],
+            "single_error_candidate_cell": "R1C3",
+            "receiver_has_original": false,
+            "grid_after_assumed_single_error_correction": [
+              "0011",
+              "0101",
+              "0110"
+            ],
+            "checks_after_assumed_correction": "all seven PASS",
+            "cells_where_corrected_grid_still_differs_from_original": [
+              "R1C1",
+              "R1C3",
+              "R2C1",
+              "R2C3"
+            ],
+            "evidence_interpretation": "A failed row and a failed column fit one flip at their intersection but do not prove exactly one error; correction needs an error-count assumption.",
+            "reference_answer_for_calibration_only": "R1 has one flip (R1C1) so its result reverses and it fails; R2 has two flips (R2C1 and R2C3) so its result is unchanged and it passes; C3 has one flip (R2C3) and fails; C1 has two flips (R1C1 and R2C1) and passes; all other groups have no flips and pass. A receiver assuming exactly one error would reverse R1C3, the intersection of the failed row and column. That assumption is not justified by the results alone: the instructor's three-flip pattern and a one-flip pattern at R1C3 give identical check results. After reversing R1C3 every check would pass, yet the grid would still differ from the grid that was sent in four cells (R1C1, R1C3, R2C1 and R2C3). The failed checks establish that a parity rule was violated and point to a candidate position; a passing grid would establish only that the rules are satisfied. Localization and correction need an error-count assumption."
+          }
+        }
+      },
+      "scientific_review": {
+        "scope": "C3_only",
+        "status": "authored_and_programmatically_checked_requires_independent_human_approval",
+        "no_instructional_frozen_grids": true,
+        "notes": "All grids, per-group flip counts, failed-check sets, alternative histories and post-correction grids were programmatically recomputed. The instructor-only valid grids are not presumed available to the receiver. Human review is still required for content validity, SOLO alignment and judge calibration."
+      }
+    },
+    "C": {
+      "set_id": "C3-SET-C",
+      "intended_difficulty": "introductory_C3_M_to_R",
+      "public": {
+        "notation": "Cells are named RrCc: row r, column c, counted from 1 (R1C2 is row 1, column 2). R3 is the bottom row and C4 is the rightmost column; R3 and C4 hold checking bits. A row or column check passes when that complete row or column has an even number of 1s.",
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "stem": "A valid even-parity grid is sent (shown below). An instructor then flips the cells R1C4 and R1C3 during transmission. The receiver checks every complete row and column of the received grid. Which statement is correct?",
+            "grid": [
+              "1010",
+              "1100",
+              "0110"
+            ],
+            "options": [
+              {
+                "id": "A",
+                "text": "R1 passes but C3 and C4 fail, because R1 contains both flips."
+              },
+              {
+                "id": "B",
+                "text": "R1 fails but C3 and C4 pass, because R1 contains both flips."
+              },
+              {
+                "id": "C",
+                "text": "All seven checks pass, because the two flips cancel each other out."
+              },
+              {
+                "id": "D",
+                "text": "R1, C3 and C4 all fail, because each of them contains a flipped cell."
+              }
+            ]
+          },
+          {
+            "id": "MCQ2",
+            "stem": "The receiver gets the grid below and applies the even-parity rule to every complete row and column. Only R2 and C2 fail; the other five checks pass. The receiver does not have the grid that was sent. Which statement is justified by these results alone?",
+            "grid": [
+              "0101",
+              "0010",
+              "0011"
+            ],
+            "options": [
+              {
+                "id": "A",
+                "text": "The failed checks give no clue about where a changed bit could be, so no position can be suggested."
+              },
+              {
+                "id": "B",
+                "text": "Two bits changed, one somewhere in R2 and one somewhere in C2, so the grid cannot be corrected at all."
+              },
+              {
+                "id": "C",
+                "text": "Exactly one bit changed, at R2C2, so reversing it is certain to restore the data that was sent."
+              },
+              {
+                "id": "D",
+                "text": "Reversing R2C2 would make every check pass, but the results alone cannot show that only one bit changed."
+              }
+            ]
+          },
+          {
+            "id": "MCQ3",
+            "stem": "A valid even-parity grid is sent (shown below). An instructor flips four data cells during transmission: R1C1, R1C3, R2C1 and R2C3. The receiver checks every complete row and column of the received grid. Which statement is correct?",
+            "grid": [
+              "1010",
+              "1100",
+              "0110"
+            ],
+            "options": [
+              {
+                "id": "A",
+                "text": "Exactly two checks fail, so the corruption is detected, although the changed cells cannot be located."
+              },
+              {
+                "id": "B",
+                "text": "R1, R2, C1 and C3 fail, because each of them contains flipped cells and so its parity is broken."
+              },
+              {
+                "id": "C",
+                "text": "All seven checks pass, because each affected row and column holds two flips; that does not prove nothing changed."
+              },
+              {
+                "id": "D",
+                "text": "All seven checks pass, so the receiver can be sure the grid is exactly the one that was sent."
+              }
+            ]
+          }
+        ],
+        "subjective": {
+          "id": "SUB1",
+          "prompt": "A system uses full two-dimensional even parity on a 3 × 4 grid. An instructor starts from a valid grid and flips exactly three cells: R1C2, R1C3 and R2C2. The receiver gets this grid:\n\n0 0 1 1\n0 0 1 0\n0 0 1 1\n\n(a) Explain why exactly the checks you identify fail and the rest pass, by counting the flips in each affected row and column.\n(b) The receiver sees only this grid and its check results. If it assumed exactly one bit had changed, what would it do? Is that conclusion justified by the results alone? Say what the results do and do not establish."
+        }
+      },
+      "private": {
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "role": "flip_count_to_group_outcome",
+            "subsection_refs": [
+              "C3.1"
+            ],
+            "correct_option_id": "A",
+            "correct_answer": "R1 passes but C3 and C4 fail, because R1 contains both flips.",
+            "oracle": {
+              "valid_grid": [
+                "1010",
+                "1100",
+                "0110"
+              ],
+              "flipped_positions": [
+                "R1C4",
+                "R1C3"
+              ],
+              "cell_roles": {
+                "R1C4": "row_checking_bit",
+                "R1C3": "data"
+              },
+              "flips_per_group": {
+                "R1": 2,
+                "R2": 0,
+                "R3": 0,
+                "C1": 0,
+                "C2": 0,
+                "C3": 1,
+                "C4": 1
+              },
+              "received_grid": [
+                "1001",
+                "1100",
+                "0110"
+              ],
+              "row_results": {
+                "R1": "PASS",
+                "R2": "PASS",
+                "R3": "PASS"
+              },
+              "column_results": {
+                "C1": "PASS",
+                "C2": "PASS",
+                "C3": "FAIL",
+                "C4": "FAIL"
+              },
+              "failed_groups": [
+                "C3",
+                "C4"
+              ],
+              "shared_group_with_two_flips": "R1",
+              "instructor_view_only": true
+            },
+            "option_feedback": {
+              "A": "R1 contains both flips, so its parity result is unchanged; each of C3 and C4 contains one flip, so its result reverses.",
+              "B": "Reverses the outcomes: a group holding two flips keeps its original (passing) result, and a group holding one flip fails.",
+              "C": "Two flips cancel only inside a group that contains both of them (here R1); the other groups still contain one flip each.",
+              "D": "Containing a flipped cell does not make a group fail; the number of flips inside the group matters, and R1 contains two."
+            }
+          },
+          {
+            "id": "MCQ2",
+            "role": "justified_inference_from_checking_results",
+            "subsection_refs": [
+              "C3.2"
+            ],
+            "correct_option_id": "D",
+            "correct_answer": "Reversing R2C2 would make every check pass, but the results alone cannot show that only one bit changed.",
+            "oracle": {
+              "received_grid": [
+                "0101",
+                "0010",
+                "0011"
+              ],
+              "failed_groups": [
+                "C2",
+                "R2"
+              ],
+              "single_error_candidate": "R2C2",
+              "receiver_has_original": false,
+              "one_flip_history": {
+                "original_for_instructor": [
+                  "0101",
+                  "0110",
+                  "0011"
+                ],
+                "flipped_positions": [
+                  "R2C2"
+                ]
+              },
+              "three_flip_history": {
+                "original_for_instructor": [
+                  "1001",
+                  "1010",
+                  "0011"
+                ],
+                "flipped_positions": [
+                  "R2C1",
+                  "R1C2",
+                  "R1C1"
+                ]
+              },
+              "both_histories_give_same_received_grid_and_checks": true,
+              "principle": "A single failed row and column are consistent with one flip at their intersection, but do not prove exactly one error; localization/correction needs an error-count assumption."
+            },
+            "option_feedback": {
+              "A": "Too cautious: the failed row and column do point to R2C2 as the position that would explain a single error.",
+              "B": "Unsupported: the results do not show that exactly two bits changed, and they do not rule out a single changed bit.",
+              "C": "Overclaims: the intersection identifies the changed cell only if exactly one bit changed, and the results cannot establish that.",
+              "D": "One flip at R2C2 fits the results, but a different pattern with more flips can give identical results, so a single-error assumption is needed."
+            }
+          },
+          {
+            "id": "MCQ3",
+            "role": "undetected_four_corner_pattern_interpretation",
+            "subsection_refs": [
+              "C3.2"
+            ],
+            "correct_option_id": "C",
+            "correct_answer": "All seven checks pass, because each affected row and column holds two flips; that does not prove nothing changed.",
+            "oracle": {
+              "valid_grid": [
+                "1010",
+                "1100",
+                "0110"
+              ],
+              "flipped_positions": [
+                "R1C1",
+                "R1C3",
+                "R2C1",
+                "R2C3"
+              ],
+              "received_grid": [
+                "0000",
+                "0110",
+                "0110"
+              ],
+              "flips_per_group": {
+                "R1": 2,
+                "R2": 2,
+                "R3": 0,
+                "C1": 2,
+                "C2": 0,
+                "C3": 2,
+                "C4": 0
+              },
+              "failed_groups": [],
+              "all_seven_groups": "PASS",
+              "interpretation": "A passing result means the checking rules are satisfied; it does not prove an error-free transmission."
+            },
+            "option_feedback": {
+              "A": "No check fails here, and failure counts do not follow the total number of flips.",
+              "B": "Containing flips does not make a group fail; a group with two flips keeps its passing result.",
+              "C": "Each affected row (R1 and R2) and column (C1 and C3) contains exactly two flips, so every result is unchanged.",
+              "D": "Overclaims: passing every check means the rules are satisfied, not that nothing changed."
+            }
+          }
+        ],
+        "subjective_resolved": {
+          "contract": {
+            "id": "C3-SET-C-SUB1",
+            "type": "SUBJECTIVE",
+            "transition_id": "C3",
+            "shared_role": "integrated causal explanation: from changed positions to check outcomes, and from observed outcomes to warranted receiver conclusions",
+            "mapped_locked_subsections": [
+              "C3.1",
+              "C3.2"
+            ],
+            "solo_target": "M_to_R",
+            "target_structural_evidence": "The learner links flipped positions to the checks that contain them and to the per-group number of flips, AND links the observed pass/fail pattern to what the receiver can and cannot justifiably conclude. Reciting results or locating an intersection is not the defining evidence.",
+            "score_anchor": {
+              "0": "No causal reason is given (bare list of failed checks, or only locating the intersection), or the central mechanism is materially wrong (for example, every group containing a flip fails; failed row plus failed column prove exactly one error and correction restores the original).",
+              "1": "Gives at least one clearly correct causal account with an identifiable reason: either (a) explains the failing and passing checks through the number of flips inside each affected row and column, or (b) explains why the observed checks do not establish that exactly one bit changed (other patterns give the same results, so correction at the intersection is unjustified). The other direction may be missing or incomplete.",
+              "2": "Correct causal accounts in both directions: (a) per-group flip counts explain why R2 and C3 fail while R1 and C2 pass although they contain flips, and all other groups pass; and (b) the one-error assumption would point to R2C3, is not justified by the results alone because a different history (including the actual three flips) gives the same results, and detection, localization and correction are kept distinct. Noting that correcting R2C3 would leave a grid that passes every check but still differs from the one sent is a strength, not a requirement."
+            },
+            "evidence_elements": {
+              "pattern_to_results": "Counts flips per affected group: R2: 1, R1: 2, C3: 1, C2: 2; odd counts reverse a result, even counts leave it unchanged.",
+              "results_to_inference": "One failed row and one failed column are consistent with one flip at R2C3, but also with other patterns; the receiver does not have the original grid.",
+              "correction_consequence": "Correction based on an assumed single error is unjustified without that assumption.",
+              "detection_vs_localization_vs_correction": "A failed check detects a rule violation; locating or correcting needs additional assumptions."
+            },
+            "legitimate_alternative_explanations": [
+              "Equivalent parity language: a group's parity changes / stays even / becomes odd, or a check passes / fails / is violated.",
+              "Reasoning group by group without naming every passing group, provided the two-flip groups are explained as unchanged.",
+              "Describing the alternative history in words (for example, 'more than one error could produce this') without reproducing the exact flipped cells.",
+              "Equivalent coordinates or labels, if consistently interpreted."
+            ],
+            "material_invalidators": [
+              "Claims that a group fails because it contains any flipped cell, regardless of how many.",
+              "Claims that the receiver has, or can directly compare with, the original grid.",
+              "Claims that one failed row and one failed column prove exactly one bit changed.",
+              "Claims that passing every check proves nothing changed."
+            ],
+            "full_credit_blockers": [
+              "Only one direction (pattern to results, or results to inference) is correctly explained.",
+              "Claims that reversing the intersection cell is certain to restore the data that was sent.",
+              "Correct check outcomes with no parity-based reason."
+            ],
+            "contradiction_handling": "A material contradiction of the central mechanism is 0 even if an isolated correct-looking result also appears. An incorrect extra claim blocks 2 and may warrant 0 if it overwhelms or negates otherwise correct reasoning; use an evidence-grounded judgment, not keyword triggers.",
+            "judge_instruction": "Grade ONLY the frozen public subjective prompt, this verified case and the exact raw learner response. Do not use pedagogy, Tutor history, MCQs, MCQ score, prior attempts, or learner identity. Accept equivalent reasoning, not exact-match text. Return only subjective_points (0/1/2 or null) and a nonempty reason. Null is for a true grading ambiguity or technical/scientific review hold, not for a wrong or blank answer.",
+            "calibration_status": "illustrative_synthetic_examples_not_human_validated",
+            "calibration_examples": [
+              {
+                "response": "R2 contains one flipped cell (R2C2), so its parity result reverses and it fails; R1 contains two flipped cells, so it stays even and passes. In the same way C3 has one flip (R1C3) and fails, while C2 has two flips and passes. The receiver sees one failed row and one failed column, so a one-error assumption points to R2C3. But the real change was three bits, and one flip or three can give the same results, so the receiver cannot tell which happened. Reversing R2C3 would make every check pass without restoring what was sent.",
+                "expected_points": 2,
+                "why": "Both directions are correctly explained with per-group flip counts and a justified limit on the one-error assumption."
+              },
+              {
+                "response": "R2 has one flipped bit so it fails, and R1 has two so it stays passing. C3 has one flip and fails, while C2 has two and passes. All other groups contain no flips, so they pass.",
+                "expected_points": 1,
+                "why": "Correct causal account of pattern to results; the receiver-inference direction is missing."
+              },
+              {
+                "response": "The receiver only sees R2 and C3 failing. If just one bit had changed it would be R2C3, but different error patterns can give the same results, so it cannot be sure only one bit changed, and reversing R2C3 might not repair the grid.",
+                "expected_points": 1,
+                "why": "Correct account of why the results do not establish a single error; the per-group flip-count explanation is missing."
+              },
+              {
+                "response": "R2 and C3 fail, so the error is at R2C3 and the receiver can fix it by reversing that bit.",
+                "expected_points": 0,
+                "why": "Treats the intersection as proof of one error and offers no causal reason."
+              },
+              {
+                "response": "Every row and column that contains a flipped cell fails, so R1, R2, C2 and C3 all fail.",
+                "expected_points": 0,
+                "why": "Materially wrong mechanism: groups with two flips do not fail."
+              }
+            ],
+            "assessment_mode": "fixed_c3_relational_causal"
+          },
+          "case": {
+            "scenario_kind": "two_dimensional_parity_three_flip_pattern_mimicking_single_error",
+            "parity_convention": "even",
+            "grid_dimensions": "3 rows x 4 columns including checking-bit row and column",
+            "valid_original_grid_for_instructor_explanation": [
+              "0101",
+              "0110",
+              "0011"
+            ],
+            "flipped_positions": [
+              "R1C2",
+              "R1C3",
+              "R2C2"
+            ],
+            "flips": [
+              "R1C2:1_to_0",
+              "R1C3:0_to_1",
+              "R2C2:1_to_0"
+            ],
+            "received_grid": [
+              "0011",
+              "0010",
+              "0011"
+            ],
+            "flips_per_group": {
+              "R1": 2,
+              "R2": 1,
+              "R3": 0,
+              "C1": 0,
+              "C2": 2,
+              "C3": 1,
+              "C4": 0
+            },
+            "failed_groups": [
+              "C3",
+              "R2"
+            ],
+            "passing_groups_containing_two_flips": [
+              "R1",
+              "C2"
+            ],
+            "single_error_candidate_cell": "R2C3",
+            "receiver_has_original": false,
+            "grid_after_assumed_single_error_correction": [
+              "0011",
+              "0000",
+              "0011"
+            ],
+            "checks_after_assumed_correction": "all seven PASS",
+            "cells_where_corrected_grid_still_differs_from_original": [
+              "R1C2",
+              "R1C3",
+              "R2C2",
+              "R2C3"
+            ],
+            "evidence_interpretation": "A failed row and a failed column fit one flip at their intersection but do not prove exactly one error; correction needs an error-count assumption.",
+            "reference_answer_for_calibration_only": "R2 has one flip (R2C2) so its result reverses and it fails; R1 has two flips (R1C2 and R1C3) so its result is unchanged and it passes; C3 has one flip (R1C3) and fails; C2 has two flips (R1C2 and R2C2) and passes; all other groups have no flips and pass. A receiver assuming exactly one error would reverse R2C3, the intersection of the failed row and column. That assumption is not justified by the results alone: the instructor's three-flip pattern and a one-flip pattern at R2C3 give identical check results. After reversing R2C3 every check would pass, yet the grid would still differ from the grid that was sent in four cells (R1C2, R1C3, R2C2 and R2C3). The failed checks establish that a parity rule was violated and point to a candidate position; a passing grid would establish only that the rules are satisfied. Localization and correction need an error-count assumption."
+          }
+        }
+      },
+      "scientific_review": {
+        "scope": "C3_only",
+        "status": "authored_and_programmatically_checked_requires_independent_human_approval",
+        "no_instructional_frozen_grids": true,
+        "notes": "All grids, per-group flip counts, failed-check sets, alternative histories and post-correction grids were programmatically recomputed. The instructor-only valid grids are not presumed available to the receiver. Human review is still required for content validity, SOLO alignment and judge calibration."
+      }
+    }
+  }
+}

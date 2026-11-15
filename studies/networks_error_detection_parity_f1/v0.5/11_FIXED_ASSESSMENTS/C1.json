@@ -1,0 +1,734 @@
+{
+  "schema_version": "ekagra.c1.fixed_assessment_bank.v2",
+  "status": "CONTENT_CANDIDATE_VERIFIED_STATIC_NOT_HUMAN_APPROVED",
+  "study_id": "EkagraAI",
+  "transition_id": "C1",
+  "solo_from": "Prestructural",
+  "solo_to": "Unistructural",
+  "authorities": {
+    "curriculum": "EkagraAI_C1_C4_Final_Course_Content_Ground_Truth.md",
+    "teaching_contracts": "EKAGRAAI_C1_ALL_52_MOVE_CONTRACTS.json",
+    "assessment_judge_sources": [
+      "v0.5/07_PROMPT_CONTRACTS/SUBJECTIVE_JUDGE_PROMPT.md",
+      "v0.5/08_SCIENTIFIC_YAML/judge.yaml",
+      "src/solo_harness/runtime/v051_assessment.py",
+      "src/solo_harness/runtime/assessment_grading.py"
+    ]
+  },
+  "blueprint": {
+    "questions_per_set": {
+      "mcq": 3,
+      "subjective": 1
+    },
+    "slots": [
+      {
+        "slot": "MCQ1",
+        "role": "transmission_error_recognition",
+        "subsections": [
+          "C1.1",
+          "C1.2"
+        ],
+        "evidence": "Recognize a specific bit mismatch between instructor-labelled sent and received sequences."
+      },
+      {
+        "slot": "MCQ2",
+        "role": "checking_information_purpose",
+        "subsections": [
+          "C1.3"
+        ],
+        "evidence": "Recognize a rule-derived parity bit as extra checking information shared by sender and receiver."
+      },
+      {
+        "slot": "MCQ3",
+        "role": "sender_parity_application",
+        "subsections": [
+          "C1.4"
+        ],
+        "evidence": "Apply a stated even/odd rule to a complete transmitted sequence including the appended bit."
+      },
+      {
+        "slot": "SUB1",
+        "role": "receiver_parity_verification",
+        "subsections": [
+          "C1.4"
+        ],
+        "evidence": "Apply the agreed parity rule to a complete received frame and interpret the pass/fail observation."
+      }
+    ],
+    "c1_structural_anchor": "At least one correct, meaningful and usable parity construction or receiver check aspect constitutes minimum U evidence; integrated account is not required for 1 point.",
+    "scope_exclusions": [
+      "odd_even_flipped_bit_count_theorem",
+      "2d_parity",
+      "generalized_checking_groups",
+      "multi_bit_error_analysis",
+      "error_location_or_correction_procedure"
+    ],
+    "form_equivalence": "Parallel four-item C1 roles, equal-length six-bit subjective frames; empirical equivalence not established.",
+    "form_assignment": "Allocate sets A/B/C independently of pedagogy; balance assignment across treatments and record chosen set and frozen delivered order."
+  },
+  "scoring": {
+    "mcqs": {
+      "points_per_correct": 1,
+      "total_possible": 3,
+      "grade_against": "private.mcqs[].correct_option_id"
+    },
+    "subjective": {
+      "possible_points": [
+        0,
+        1,
+        2,
+        null
+      ],
+      "grade_using": "private.subjective_resolved.contract + private.subjective_resolved.case (verified receiver fact fields only) + exact public.subjective.prompt + raw learner response",
+      "assessment_judge_output_shape": {
+        "subjective_points": "0|1|2|null",
+        "reason": "nonempty string"
+      },
+      "meaning_of_null": "technical/scientific grading ambiguity; review hold, NOT zero",
+      "judge_blinding": "Do not pass pedagogy, Tutor history, MCQs, MCQ score, prior attempts, or learner identity to Assessment Judge."
+    },
+    "existing_v05_scoring_gate_reference": {
+      "mcq_correct_minimum": 2,
+      "subjective_points_minimum": 1,
+      "use": "Existing backend scoring rule; not a declaration of validated SOLO state."
+    }
+  },
+  "randomization": {
+    "authored_option_order": "Authored keys vary across the three sets; delivery reshuffles and records frozen public order and private key.",
+    "runtime_rule": "Shuffle four MCQ options once per learner during atomic freeze; reassign displayed IDs A-D and recompute the private correct-option ID.",
+    "audit": "Record set ID, displayed options and the mapped correct option privately; do not leak private keys to frontend."
+  },
+  "exposure_and_isolation": {
+    "learner_receives": "sets[set_id].public only",
+    "assessment_judge_receives": "Exact frozen public subjective prompt, private subjective contract and verified case, learner response, official v0.5 judge rubric; not the MCQ key or pedagogy.",
+    "backend_receives": "Frozen public and private snapshots for scoring; only backend calculates pass/fail and progression.",
+    "avoid_frozen_teaching_examples": "All numerical strings have been chosen to differ from fixed authored C1 lesson examples.",
+    "implementation_notice": "C1 fixed-form adapter; existing C2-C4 dynamic generation remains temporarily available."
+  },
+  "sets": {
+    "A": {
+      "set_id": "C1-SET-A",
+      "intended_difficulty": "introductory_C1_P_to_U",
+      "public": {
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "stem": "An instructor compares the five bits actually sent (11001) with the five bits received (10001), reading positions from left to right starting at 1. Which statement accurately describes the difference?",
+            "options": [
+              {
+                "id": "A",
+                "text": "Position 3 changed from 0 to 1."
+              },
+              {
+                "id": "B",
+                "text": "No bit changed because both sequences contain five bits."
+              },
+              {
+                "id": "C",
+                "text": "Position 2 changed from 1 to 0."
+              },
+              {
+                "id": "D",
+                "text": "Position 2 changed from 0 to 1."
+              }
+            ]
+          },
+          {
+            "id": "MCQ2",
+            "stem": "Why does a sender append a parity bit to the original data?",
+            "options": [
+              {
+                "id": "A",
+                "text": "It adds checking information calculated from the data using a rule that sender and receiver share."
+              },
+              {
+                "id": "B",
+                "text": "It stores an extra full copy of each original data bit."
+              },
+              {
+                "id": "C",
+                "text": "It always tells the receiver exactly which bit changed."
+              },
+              {
+                "id": "D",
+                "text": "It is chosen randomly because its value does not affect the check."
+              }
+            ]
+          },
+          {
+            "id": "MCQ3",
+            "stem": "A sender has the payload 10100 and appends one bit on the right using odd parity. Which statement is correct?",
+            "options": [
+              {
+                "id": "A",
+                "text": "Append 0: 101000 contains two 1s and therefore meets odd parity."
+              },
+              {
+                "id": "B",
+                "text": "Append 1: 101001 contains four 1s and therefore meets odd parity."
+              },
+              {
+                "id": "C",
+                "text": "Append 0 because an appended parity bit is excluded from the parity check."
+              },
+              {
+                "id": "D",
+                "text": "Append 1: 101001 contains three 1s and therefore meets odd parity."
+              }
+            ]
+          }
+        ],
+        "subjective": {
+          "id": "SUB1",
+          "prompt": "The receiver gets the six-bit sequence 010101, including the rightmost parity bit. Using even parity, does the check pass or fail? Explain your check and what the result tells the receiver."
+        }
+      },
+      "private": {
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "role": "transmission_error_recognition",
+            "subsection_refs": [
+              "C1.1",
+              "C1.2"
+            ],
+            "correct_option_id": "C",
+            "correct_answer": "Position 2 changed from 1 to 0.",
+            "oracle": {
+              "sent": "11001",
+              "received": "10001",
+              "changed_positions_1_based": [
+                2
+              ],
+              "change": "1_to_0",
+              "instructor_comparison_only": true
+            },
+            "option_feedback": {
+              "A": "Position 3 remains 0.",
+              "B": "Equal sequence length does not imply equal bit values.",
+              "C": "Position 2 is 1 in sent and 0 in received.",
+              "D": "Reverses the direction of the actual position-2 flip."
+            }
+          },
+          {
+            "id": "MCQ2",
+            "role": "checking_information_purpose",
+            "subsection_refs": [
+              "C1.3"
+            ],
+            "correct_option_id": "A",
+            "correct_answer": "It adds checking information calculated from the data using a rule that sender and receiver share.",
+            "oracle": {
+              "principle": "Parity bit is added redundancy fixed by original data and an agreed parity convention."
+            },
+            "option_feedback": {
+              "A": "Correct redundancy and agreement mechanism.",
+              "B": "One appended bit is not a full copy of the payload.",
+              "C": "Single parity failure does not identify a changed position.",
+              "D": "An arbitrary bit would not reliably satisfy the agreed parity rule."
+            }
+          },
+          {
+            "id": "MCQ3",
+            "role": "sender_parity_application",
+            "subsection_refs": [
+              "C1.4"
+            ],
+            "correct_option_id": "D",
+            "correct_answer": "Append 1: 101001 contains three 1s and therefore meets odd parity.",
+            "oracle": {
+              "payload": "10100",
+              "convention": "odd",
+              "payload_ones": 2,
+              "correct_check_bit": "1",
+              "complete_frame": "101001",
+              "complete_ones": 3
+            },
+            "option_feedback": {
+              "A": "Two ones is even, not odd.",
+              "B": "101001 has three ones, not four.",
+              "C": "The appended check bit is included in the complete parity check.",
+              "D": "Correct: adding 1 makes the full sequence have three ones."
+            }
+          }
+        ],
+        "subjective_resolved": {
+          "contract": {
+            "id": "C1-SET-A-SUB1",
+            "type": "SUBJECTIVE",
+            "transition_id": "C1",
+            "assessment_mode": "fixed_c1_receiver_only",
+            "shared_role": "receiver_parity_verification",
+            "mapped_locked_subsections": [
+              "C1.4"
+            ],
+            "solo_target": "P_to_U",
+            "target_structural_evidence": "Basic, usable receiver parity checking is sufficient for minimum U evidence; sender reconstruction is not required.",
+            "score_anchor": {
+              "0": "No usable correct parity-checking evidence, or a central contradiction that undermines the attempted check.",
+              "1": "At least one meaningful correct receiver-check aspect with a recognizable rule-based reason (for example, correctly counting the ones or applying the specified parity convention), but an incomplete or incorrectly concluded check.",
+              "2": "Correctly evaluates the complete six-bit received sequence including the check bit, gives the correct pass/fail result with a clear parity-based reason, and interprets what the receiver can conclude without an unsupported guarantee."
+            },
+            "evidence_elements": {
+              "complete_group": "Count all six received bits in 010101, including the rightmost checking bit.",
+              "ones_count": "The complete received sequence has 3 ones.",
+              "criterion": "An even number of ones is required.",
+              "result": "The even-parity check fails.",
+              "interpretation": "FAIL detects a violation of the agreed parity rule; it does not reveal which bit changed or repair it."
+            },
+            "legitimate_alternative_explanations": [
+              "Accept correct odd/even reasoning without the numeric count when the logic is explicit.",
+              "Accept plain-language terms such as matches, satisfies, broken, violates, consistent, detected error.",
+              "Do not require a sender payload, sender-side derivation, original transmission, or a particular example sentence."
+            ],
+            "material_invalidators": [
+              "Excluding the received parity bit from the complete check.",
+              "Reversing the agreed even/odd convention as a matter of principle.",
+              "Claiming a passing check guarantees no error or that a failed check identifies/corrects the changed bit."
+            ],
+            "full_credit_blockers": [
+              "A wrong final result despite otherwise correct numerical work.",
+              "A correct PASS/FAIL guess with no recognizable parity-rule explanation.",
+              "A material false conclusion about detection, guarantee, localization, or correction."
+            ],
+            "contradiction_handling": "Score demonstrated usable reasoning, not isolated labels. An essential contradiction that negates the central mechanism scores 0; a minor unrelated overclaim blocks 2. Borderline internally inconsistent answers may require review.",
+            "judge_instruction": "For this FIXED C1 receiver-only item, the item-specific 0/1/2 anchors override any generic C1 requirement to explain sender AND receiver. Judge only the frozen prompt, verified receiver case and raw response. Do not require exact wording; do not infer tutoring history or MCQ answers.",
+            "calibration_status": "no_human_validated_examples; no calibration responses provided to runtime judge"
+          },
+          "case": {
+            "scenario_kind": "receiver_only_single_parity",
+            "convention": "even",
+            "complete_received_frame": "010101",
+            "received_frame_ones": 3,
+            "parity_bit_position_1_based": 6,
+            "receiver_check_result": "FAIL",
+            "receiver_has_pristine_original": false,
+            "evidence_interpretation": "FAIL detects a violation of the agreed parity rule; it does not reveal which bit changed or repair it."
+          }
+        }
+      },
+      "scientific_review": {
+        "scope": "C1_only",
+        "status": "programmatically_verifiable_needs_independent_human_review",
+        "no_instructional_frozen_bit_strings": true,
+        "notes": "Receiver-only verification on an unfamiliar complete six-bit frame; no pristine original supplied."
+      }
+    },
+    "B": {
+      "set_id": "C1-SET-B",
+      "intended_difficulty": "introductory_C1_P_to_U",
+      "public": {
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "stem": "An instructor compares the five bits sent (00110) with the five bits received (00111), numbering positions from the left starting at 1. What happened?",
+            "options": [
+              {
+                "id": "A",
+                "text": "Position 4 changed from 1 to 0."
+              },
+              {
+                "id": "B",
+                "text": "Position 5 changed from 0 to 1."
+              },
+              {
+                "id": "C",
+                "text": "No transmission bit changed."
+              },
+              {
+                "id": "D",
+                "text": "Position 5 changed from 1 to 0."
+              }
+            ]
+          },
+          {
+            "id": "MCQ2",
+            "stem": "What must be true for a parity bit to serve as meaningful checking information at the receiver?",
+            "options": [
+              {
+                "id": "A",
+                "text": "The sender may choose 0 or 1 arbitrarily after sending the data."
+              },
+              {
+                "id": "B",
+                "text": "The receiver must possess a pristine copy of the original data."
+              },
+              {
+                "id": "C",
+                "text": "The appended parity bit must always be 1."
+              },
+              {
+                "id": "D",
+                "text": "The sender determines the extra bit from the data using a parity convention also known to the receiver."
+              }
+            ]
+          },
+          {
+            "id": "MCQ3",
+            "stem": "A sender has the payload 11010 and appends one bit on the right using even parity. Which statement is correct?",
+            "options": [
+              {
+                "id": "A",
+                "text": "Append 1: 110101 contains four 1s and meets even parity."
+              },
+              {
+                "id": "B",
+                "text": "Append 0: 110100 contains four 1s and meets even parity."
+              },
+              {
+                "id": "C",
+                "text": "Append 1, but check only the original five data bits to decide whether the full sequence is even."
+              },
+              {
+                "id": "D",
+                "text": "Append 0 because an even-parity full sequence must have an odd number of 1s."
+              }
+            ]
+          }
+        ],
+        "subjective": {
+          "id": "SUB1",
+          "prompt": "The receiver gets the six-bit sequence 101010, including the rightmost parity bit. Using odd parity, does the check pass or fail? Explain your check and what the result tells the receiver."
+        }
+      },
+      "private": {
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "role": "transmission_error_recognition",
+            "subsection_refs": [
+              "C1.1",
+              "C1.2"
+            ],
+            "correct_option_id": "B",
+            "correct_answer": "Position 5 changed from 0 to 1.",
+            "oracle": {
+              "sent": "00110",
+              "received": "00111",
+              "changed_positions_1_based": [
+                5
+              ],
+              "change": "0_to_1",
+              "instructor_comparison_only": true
+            },
+            "option_feedback": {
+              "A": "Position 4 remains 1.",
+              "B": "Position 5 was 0 in sent bits and is 1 in received bits.",
+              "C": "The last bit differs.",
+              "D": "Reverses the flip direction."
+            }
+          },
+          {
+            "id": "MCQ2",
+            "role": "checking_information_purpose",
+            "subsection_refs": [
+              "C1.3"
+            ],
+            "correct_option_id": "D",
+            "correct_answer": "The sender determines the extra bit from the data using a parity convention also known to the receiver.",
+            "oracle": {
+              "principle": "Checking information is derived under a shared rule; received message itself is checked."
+            },
+            "option_feedback": {
+              "A": "An arbitrary bit may violate the intended parity convention.",
+              "B": "Receiver does not ordinarily require an uncorrupted original copy.",
+              "C": "The correct check bit depends on payload and convention.",
+              "D": "Correct role of deterministic agreed checking information."
+            }
+          },
+          {
+            "id": "MCQ3",
+            "role": "sender_parity_application",
+            "subsection_refs": [
+              "C1.4"
+            ],
+            "correct_option_id": "A",
+            "correct_answer": "Append 1: 110101 contains four 1s and meets even parity.",
+            "oracle": {
+              "payload": "11010",
+              "convention": "even",
+              "payload_ones": 3,
+              "correct_check_bit": "1",
+              "complete_frame": "110101",
+              "complete_ones": 4
+            },
+            "option_feedback": {
+              "A": "Correct: four ones in the complete frame.",
+              "B": "110100 has three ones, not four; it fails even parity.",
+              "C": "The appended bit must be included in the full-frame parity check.",
+              "D": "Even parity requires an even number of ones."
+            }
+          }
+        ],
+        "subjective_resolved": {
+          "contract": {
+            "id": "C1-SET-B-SUB1",
+            "type": "SUBJECTIVE",
+            "transition_id": "C1",
+            "assessment_mode": "fixed_c1_receiver_only",
+            "shared_role": "receiver_parity_verification",
+            "mapped_locked_subsections": [
+              "C1.4"
+            ],
+            "solo_target": "P_to_U",
+            "target_structural_evidence": "Basic, usable receiver parity checking is sufficient for minimum U evidence; sender reconstruction is not required.",
+            "score_anchor": {
+              "0": "No usable correct parity-checking evidence, or a central contradiction that undermines the attempted check.",
+              "1": "At least one meaningful correct receiver-check aspect with a recognizable rule-based reason (for example, correctly counting the ones or applying the specified parity convention), but an incomplete or incorrectly concluded check.",
+              "2": "Correctly evaluates the complete six-bit received sequence including the check bit, gives the correct pass/fail result with a clear parity-based reason, and interprets what the receiver can conclude without an unsupported guarantee."
+            },
+            "evidence_elements": {
+              "complete_group": "Count all six received bits in 101010, including the rightmost checking bit.",
+              "ones_count": "The complete received sequence has 3 ones.",
+              "criterion": "An odd number of ones is required.",
+              "result": "The odd-parity check passes.",
+              "interpretation": "PASS means the received frame satisfies the agreed parity rule; this does NOT prove no transmission error occurred."
+            },
+            "legitimate_alternative_explanations": [
+              "Accept correct odd/even reasoning without the numeric count when the logic is explicit.",
+              "Accept plain-language terms such as matches, satisfies, broken, violates, consistent, detected error.",
+              "Do not require a sender payload, sender-side derivation, original transmission, or a particular example sentence."
+            ],
+            "material_invalidators": [
+              "Excluding the received parity bit from the complete check.",
+              "Reversing the agreed even/odd convention as a matter of principle.",
+              "Claiming a passing check guarantees no error or that a failed check identifies/corrects the changed bit."
+            ],
+            "full_credit_blockers": [
+              "A wrong final result despite otherwise correct numerical work.",
+              "A correct PASS/FAIL guess with no recognizable parity-rule explanation.",
+              "A material false conclusion about detection, guarantee, localization, or correction."
+            ],
+            "contradiction_handling": "Score demonstrated usable reasoning, not isolated labels. An essential contradiction that negates the central mechanism scores 0; a minor unrelated overclaim blocks 2. Borderline internally inconsistent answers may require review.",
+            "judge_instruction": "For this FIXED C1 receiver-only item, the item-specific 0/1/2 anchors override any generic C1 requirement to explain sender AND receiver. Judge only the frozen prompt, verified receiver case and raw response. Do not require exact wording; do not infer tutoring history or MCQ answers.",
+            "calibration_status": "no_human_validated_examples; no calibration responses provided to runtime judge"
+          },
+          "case": {
+            "scenario_kind": "receiver_only_single_parity",
+            "convention": "odd",
+            "complete_received_frame": "101010",
+            "received_frame_ones": 3,
+            "parity_bit_position_1_based": 6,
+            "receiver_check_result": "PASS",
+            "receiver_has_pristine_original": false,
+            "evidence_interpretation": "PASS means the received frame satisfies the agreed parity rule; this does NOT prove no transmission error occurred."
+          }
+        }
+      },
+      "scientific_review": {
+        "scope": "C1_only",
+        "status": "programmatically_verifiable_needs_independent_human_review",
+        "no_instructional_frozen_bit_strings": true,
+        "notes": "Receiver-only verification on an unfamiliar complete six-bit frame; no pristine original supplied."
+      }
+    },
+    "C": {
+      "set_id": "C1-SET-C",
+      "intended_difficulty": "introductory_C1_P_to_U",
+      "public": {
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "stem": "An instructor shows a five-bit sequence sent as 10001 and received as 10011. Positions are numbered left to right from 1. Which comparison is correct?",
+            "options": [
+              {
+                "id": "A",
+                "text": "Position 3 changed from 0 to 1."
+              },
+              {
+                "id": "B",
+                "text": "Position 5 changed from 1 to 0."
+              },
+              {
+                "id": "C",
+                "text": "Both sequences are identical."
+              },
+              {
+                "id": "D",
+                "text": "Position 4 changed from 0 to 1."
+              }
+            ]
+          },
+          {
+            "id": "MCQ2",
+            "stem": "Which description of a parity bit is correct?",
+            "options": [
+              {
+                "id": "A",
+                "text": "It replaces one original data bit to shorten the message."
+              },
+              {
+                "id": "B",
+                "text": "It is a random extra bit that the receiver ignores."
+              },
+              {
+                "id": "C",
+                "text": "It is extra transmitted checking information whose value depends on the data and a parity rule shared by both ends."
+              },
+              {
+                "id": "D",
+                "text": "It guarantees that the receiver can restore the original message after any error."
+              }
+            ]
+          },
+          {
+            "id": "MCQ3",
+            "stem": "A sender has the payload 00111 and appends one bit on the right using odd parity. Which statement is correct?",
+            "options": [
+              {
+                "id": "A",
+                "text": "Append 1: 001111 has four 1s and meets odd parity."
+              },
+              {
+                "id": "B",
+                "text": "Append 0: 001110 has three 1s and meets odd parity."
+              },
+              {
+                "id": "C",
+                "text": "Append 0: 001110 has two 1s and meets odd parity."
+              },
+              {
+                "id": "D",
+                "text": "Append 1 because an odd-parity check bit is always 1."
+              }
+            ]
+          }
+        ],
+        "subjective": {
+          "id": "SUB1",
+          "prompt": "The receiver gets the six-bit sequence 111000, including the rightmost parity bit. Using even parity, does the check pass or fail? Explain your check and what the result tells the receiver."
+        }
+      },
+      "private": {
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "role": "transmission_error_recognition",
+            "subsection_refs": [
+              "C1.1",
+              "C1.2"
+            ],
+            "correct_option_id": "D",
+            "correct_answer": "Position 4 changed from 0 to 1.",
+            "oracle": {
+              "sent": "10001",
+              "received": "10011",
+              "changed_positions_1_based": [
+                4
+              ],
+              "change": "0_to_1",
+              "instructor_comparison_only": true
+            },
+            "option_feedback": {
+              "A": "Position 3 remains 0.",
+              "B": "Position 5 remains 1.",
+              "C": "Position 4 differs.",
+              "D": "Position 4 is 0 sent and 1 received."
+            }
+          },
+          {
+            "id": "MCQ2",
+            "role": "checking_information_purpose",
+            "subsection_refs": [
+              "C1.3"
+            ],
+            "correct_option_id": "C",
+            "correct_answer": "It is extra transmitted checking information whose value depends on the data and a parity rule shared by both ends.",
+            "oracle": {
+              "principle": "Parity bit is rule-derived redundancy and supports checking, not arbitrary correction."
+            },
+            "option_feedback": {
+              "A": "Parity adds a bit instead of replacing original payload data.",
+              "B": "The check bit is rule-derived and included in checking.",
+              "C": "Correct definition and purpose.",
+              "D": "Single parity does not guarantee error correction."
+            }
+          },
+          {
+            "id": "MCQ3",
+            "role": "sender_parity_application",
+            "subsection_refs": [
+              "C1.4"
+            ],
+            "correct_option_id": "B",
+            "correct_answer": "Append 0: 001110 has three 1s and meets odd parity.",
+            "oracle": {
+              "payload": "00111",
+              "convention": "odd",
+              "payload_ones": 3,
+              "correct_check_bit": "0",
+              "complete_frame": "001110",
+              "complete_ones": 3
+            },
+            "option_feedback": {
+              "A": "Four ones is even, not odd.",
+              "B": "Correct: three ones in the complete frame.",
+              "C": "001110 actually has three ones; the stated count is incorrect.",
+              "D": "Check-bit value depends on the existing payload."
+            }
+          }
+        ],
+        "subjective_resolved": {
+          "contract": {
+            "id": "C1-SET-C-SUB1",
+            "type": "SUBJECTIVE",
+            "transition_id": "C1",
+            "assessment_mode": "fixed_c1_receiver_only",
+            "shared_role": "receiver_parity_verification",
+            "mapped_locked_subsections": [
+              "C1.4"
+            ],
+            "solo_target": "P_to_U",
+            "target_structural_evidence": "Basic, usable receiver parity checking is sufficient for minimum U evidence; sender reconstruction is not required.",
+            "score_anchor": {
+              "0": "No usable correct parity-checking evidence, or a central contradiction that undermines the attempted check.",
+              "1": "At least one meaningful correct receiver-check aspect with a recognizable rule-based reason (for example, correctly counting the ones or applying the specified parity convention), but an incomplete or incorrectly concluded check.",
+              "2": "Correctly evaluates the complete six-bit received sequence including the check bit, gives the correct pass/fail result with a clear parity-based reason, and interprets what the receiver can conclude without an unsupported guarantee."
+            },
+            "evidence_elements": {
+              "complete_group": "Count all six received bits in 111000, including the rightmost checking bit.",
+              "ones_count": "The complete received sequence has 3 ones.",
+              "criterion": "An even number of ones is required.",
+              "result": "The even-parity check fails.",
+              "interpretation": "FAIL detects a violation of the agreed parity rule; it does not reveal which bit changed or repair it."
+            },
+            "legitimate_alternative_explanations": [
+              "Accept correct odd/even reasoning without the numeric count when the logic is explicit.",
+              "Accept plain-language terms such as matches, satisfies, broken, violates, consistent, detected error.",
+              "Do not require a sender payload, sender-side derivation, original transmission, or a particular example sentence."
+            ],
+            "material_invalidators": [
+              "Excluding the received parity bit from the complete check.",
+              "Reversing the agreed even/odd convention as a matter of principle.",
+              "Claiming a passing check guarantees no error or that a failed check identifies/corrects the changed bit."
+            ],
+            "full_credit_blockers": [
+              "A wrong final result despite otherwise correct numerical work.",
+              "A correct PASS/FAIL guess with no recognizable parity-rule explanation.",
+              "A material false conclusion about detection, guarantee, localization, or correction."
+            ],
+            "contradiction_handling": "Score demonstrated usable reasoning, not isolated labels. An essential contradiction that negates the central mechanism scores 0; a minor unrelated overclaim blocks 2. Borderline internally inconsistent answers may require review.",
+            "judge_instruction": "For this FIXED C1 receiver-only item, the item-specific 0/1/2 anchors override any generic C1 requirement to explain sender AND receiver. Judge only the frozen prompt, verified receiver case and raw response. Do not require exact wording; do not infer tutoring history or MCQ answers.",
+            "calibration_status": "no_human_validated_examples; no calibration responses provided to runtime judge"
+          },
+          "case": {
+            "scenario_kind": "receiver_only_single_parity",
+            "convention": "even",
+            "complete_received_frame": "111000",
+            "received_frame_ones": 3,
+            "parity_bit_position_1_based": 6,
+            "receiver_check_result": "FAIL",
+            "receiver_has_pristine_original": false,
+            "evidence_interpretation": "FAIL detects a violation of the agreed parity rule; it does not reveal which bit changed or repair it."
+          }
+        }
+      },
+      "scientific_review": {
+        "scope": "C1_only",
+        "status": "programmatically_verifiable_needs_independent_human_review",
+        "no_instructional_frozen_bit_strings": true,
+        "notes": "Receiver-only verification on an unfamiliar complete six-bit frame; no pristine original supplied."
+      }
+    }
+  }
+}

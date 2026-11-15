@@ -6,8 +6,8 @@ from pathlib import Path
 
 import pytest
 
-from solo_harness.runtime.v04_assessment import RecordedResult
-from solo_harness.runtime.v04_native import MCQProse, SemanticReview, SubjectiveProse, SubjectiveReview
+from solo_harness.runtime.native_assessment import RecordedResult
+from solo_harness.runtime.native_contracts import MCQProse, SemanticReview, SubjectiveProse, SubjectiveReview
 from solo_harness.runtime.v051_assessment import construct_v051_assessment
 from solo_harness.studies.scientific_v051 import load_scientific_v051
 from solo_harness.studies.v051_native_compiler import compile_v051
@@ -71,13 +71,14 @@ def test_all_sixteen_blueprints_construct_through_writer_reviewer_and_freeze_int
         elif schema is SemanticReview: value = SemanticReview(verdict="ACCEPT", stem_matches_contract=True, assumptions_visible=True, exactly_one_defensible_option=True, option_assessments=[{"truth_status":"TRUE","matches_intended_meaning":True,"scientific_reason":"verified"}, *[{"truth_status":"FALSE","matches_intended_meaning":True,"scientific_reason":"unsupported"} for _ in range(3)]], rationale="verified")
         else: value = SubjectiveReview(verdict="ACCEPT", elicits_slot_evidence=True, assumes_only_visible_facts=True, scientifically_consistent=True, does_not_reveal_answer=True, rationale="verified")
         return RecordedResult(call_id=f"{role}-{audit['slot_id']}", parsed=value)
-    for family in compiled.assessment_families.values():
-        for blueprint in family["forms"]:
-            accepted = {}
-            async def checkpoint(label, record): accepted[label] = record
-            operation = construct_v051_assessment(compiled, blueprint, invoke, checkpoint)
-            try: operation.send(None)
-            except StopIteration as done: package = done.value
-            else: raise AssertionError("controlled construction unexpectedly suspended")
-            assert list(accepted) == ["MCQ1", "MCQ2", "MCQ3", "SUB1"]
-            assert len(package["public"]["mcqs"]) == 3 and package["private"]["subjective_resolved"]["case"]["verified"] is not False
+    historical = compiled.authored["v051"]["scientific"]["assessment_families.yaml"]["blueprints"]
+    assert len(historical) == 16
+    for blueprint in historical:
+        accepted = {}
+        async def checkpoint(label, record): accepted[label] = record
+        operation = construct_v051_assessment(compiled, {"id": blueprint["id"], "v051_item_contracts": blueprint["items"]}, invoke, checkpoint)
+        try: operation.send(None)
+        except StopIteration as done: package = done.value
+        else: raise AssertionError("controlled construction unexpectedly suspended")
+        assert list(accepted) == ["MCQ1", "MCQ2", "MCQ3", "SUB1"]
+        assert len(package["public"]["mcqs"]) == 3 and package["private"]["subjective_resolved"]["case"]["verified"] is not False

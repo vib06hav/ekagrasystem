@@ -21,10 +21,11 @@ services:
         required: false
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://solo_harness:change-me@postgres:5432/solo_harness}
-      STUDY_DIR: /app/studies/networks_error_detection_parity_f1/v0.4
+      STUDY_DIR: /app/studies/networks_error_detection_parity_f1/v0.5  # CHANGED: unified C1-C4
       ACTIVATE_STUDY_ON_BOOTSTRAP: "true"
-      APP_BUILD_ID: f1-v04-consolidated-dev
-      ENABLE_F1_V04_DEVELOPMENT: "true"
+      APP_BUILD_ID: ekagraai-unified-c1-c4-v1  # CHANGED
+      ENABLE_F1_V04_DEVELOPMENT: "false"  # CHANGED: no v0.4 participant activation
+      ENABLE_V051_UNIFIED_STUDY: ${ENABLE_V051_UNIFIED_STUDY:-true}  # CHANGED: opt-in compose image
       REQUIRE_ACTIVE_CAPTURE: ${REQUIRE_ACTIVE_CAPTURE:-false}
       REQUIRED_CAPTURE_STREAMS: ${REQUIRED_CAPTURE_STREAMS:-screen_and_webcam}
       ACTIVE_CAPTURE_MAX_AGE_SECONDS: ${ACTIVE_CAPTURE_MAX_AGE_SECONDS:-15}

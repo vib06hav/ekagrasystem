@@ -16,7 +16,7 @@
   {% if section.number == view.section_number and view.v051_subsections %}
     <ul class="nav-sub" aria-label="Section {{ section.number }} subsections">
     {% for subsection in view.v051_subsections %}
-      <li class="subsection {{ subsection.state|lower }}{% if subsection.state == 'ACTIVE' %} current{% endif %}"{% if subsection.state == 'ACTIVE' %} aria-current="step"{% endif %}>{{ subsection.id }} · {{ subsection.title }}</li>
+      <li class="subsection {{ subsection.state|lower }}{% if subsection.state == 'ACTIVE' %} current{% endif %}"{% if subsection.state == 'ACTIVE' %} aria-current="step"{% endif %}>{{ subsection.title }}</li>
     {% endfor %}
     </ul>
   {% endif %}
@@ -32,11 +32,38 @@
   {% if item.kind == 'message' %}
     <article class="message {{ item.role|lower }}"{% if item.role == 'TUTOR' %} data-tutor-message-sequence="{{ item.sequence_no }}"{% endif %}><div class="message-meta"><span>{% if item.role == 'TUTOR' %}Study assistant{% else %}You{% endif %}</span><time>{{ item.timestamp.strftime('%H:%M:%S') }}</time></div>{% if item.role == 'TUTOR' %}<div class="tutor-content" data-teaching-render="markdown-v1">{{ item.content | tutor_markdown }}</div>{% if item.visual %}{% include "partials/session/controlled_c11_visual.html" %}{% endif %}{% else %}{{ item.content }}{% endif %}</article>
   {% elif item.kind == 'subsection' %}
-    <div class="timeline-marker subsection" data-subsection-marker="{{ item.subsection_id }}"><span>{{ item.label }}</span></div>
+    <div class="timeline-marker subsection" data-subsection-marker="{{ item.subsection_id }}"><span>{{ item.title|default(item.label, true) }}</span></div>
   {% else %}
     <div class="timeline-marker {{ item.kind }}"{% if item.kind == 'assessment' %} data-assessment-completed-marker{% endif %}{% if item.kind == 'activity' %} data-teaching-activity-number="{{ item.activity_number }}"{% endif %}><span>{{ item.label }}</span>{% if item.timestamp %}<time title="Time of day, not a duration">{% if item.kind == 'activity' %}Assigned at {% endif %}{{ item.timestamp.strftime('%H:%M:%S') }}</time>{% endif %}</div>
   {% endif %}
 {% endfor %}
+  {% if view.controlled_c11 and view.controlled_c11.status != 'PILOT_BOUNDARY_HANDOFF' %}
+    {% if view.controlled_c11.status == 'APPROVED_AWAITING_NEXT' %}
+      <form class="move-continuation" hx-post="/session/actions/c11-next" hx-target="#session-main" hx-swap="outerHTML" method="post">
+        <input type="hidden" name="idempotency_key" value="{{ new_key }}">
+        <input type="hidden" name="approval_version" value="{{ view.controlled_c11.approval_version }}">
+        <button>{% if view.controlled_c11.is_section_final_move %}Continue to effort rating{% elif view.controlled_c11.is_final_move %}Next subsection{% else %}Next{% endif %}</button>
+      </form>
+    {% else %}
+      <div class="move-continuation"><button disabled>{% if view.controlled_c11.is_section_final_move %}Continue to effort rating{% elif view.controlled_c11.is_final_move %}Next subsection{% else %}Next{% endif %}</button></div>
+    {% endif %}
+  {% endif %}
+</div>
+{% endmacro %}
+
+{% macro assessment_arrangement(arrangement) %}
+<div class="assessment-arrangement" aria-label="{{ arrangement.label }}">
+  <strong class="assessment-arrangement-title">{{ arrangement.label }}</strong>
+  <div class="assessment-arrangement-scroll">
+    <table class="assessment-position-table" aria-label="Transmitted position values">
+      <caption>Original transmitted sequence (instructor's example)</caption>
+      <thead><tr>{% for position in arrangement.positions %}<th scope="col">{{ position }}</th>{% endfor %}</tr></thead>
+      <tbody><tr>{% for position in arrangement.positions %}<td>{{ arrangement.sent_sequence[loop.index0] }}</td>{% endfor %}</tr></tbody>
+    </table>
+  </div>
+  <div class="assessment-group-membership" aria-label="Parity-check groups">
+    {% for group, members in arrangement.groups.items() %}<div><strong>{{ group }}</strong> = { {{ members|join(', ') }} }</div>{% endfor %}
+  </div>
 </div>
 {% endmacro %}
 
@@ -50,7 +77,7 @@
 {% else %}
   {{ section_nav(view) }}
   <section class="panel" data-section-number="{{ view.section_number }}" data-telemetry-mode="{% if not view.is_current %}review{% else %}{{ view.phase|lower }}{% endif %}">
-    <header class="panel-head"><div><h1>Section {{ view.section_number }}</h1>{% if view.section_title %}<p>{{ view.section_title }}</p>{% endif %}{% if view.active_subsection %}<p class="subsection-context" data-active-subsection>Part {{ view.active_subsection.order }} of {{ view.v051_subsections|length }} · {{ view.active_subsection.id }} — {{ view.active_subsection.title }}</p>{% endif %}</div><span class="phase-badge">{% if not view.is_current %}Review{% elif view.phase == 'PAAS_PENDING' %}Mental effort{% elif view.phase == 'ASSESSMENT_ACTIVE' or view.phase == 'JUDGING' or view.phase == 'ASSESSMENT_GENERATING' or view.phase == 'ASSESSMENT_AWAITING_EVALUATION' %}Assessment{% elif view.phase == 'SECTION_COMPLETE' %}{% if view.transition_summary %}Summary{% else %}Complete{% endif %}{% else %}Teaching{% endif %}</span></header>
+    <header class="panel-head"><div><h1>Section {{ view.section_number }}</h1>{% if view.section_title %}<p>{{ view.section_title }}</p>{% endif %}{% if view.active_subsection %}<p class="subsection-context" data-active-subsection>Part {{ view.active_subsection.order }} of {{ view.v051_subsections|length }} — {{ view.active_subsection.title }}</p>{% endif %}</div><span class="phase-badge">{% if not view.is_current %}Review{% elif view.phase == 'PAAS_PENDING' %}Mental effort{% elif view.phase == 'ASSESSMENT_ACTIVE' or view.phase == 'JUDGING' or view.phase == 'ASSESSMENT_GENERATING' or view.phase == 'ASSESSMENT_AWAITING_EVALUATION' %}Assessment{% elif view.phase == 'SECTION_COMPLETE' %}{% if view.transition_summary %}Summary{% else %}Complete{% endif %}{% else %}Teaching{% endif %}</span></header>
 
     {% if not view.is_current %}
       {{ timeline(view) }}<div class="composer read-only" data-completed-section-review>This completed section is available for review. Its assessment remains stored with the study record.</div>
@@ -99,11 +126,14 @@
       </section>
     {% elif view.phase == 'INTERVENTION_ACTIVE' %}
       {{ timeline(view) }}
-      {% if view.attempt_status == 'ASSIGNED' %}{% include "partials/section_overview.html" %}{% else %}{% include "partials/tutor_composer.html" %}{% endif %}
+      {% if view.controlled_c11 and view.controlled_c11.status == 'PILOT_BOUNDARY_HANDOFF' %}
+        <div class="composer read-only" data-controlled-c11-boundary>This subsection is complete.</div>
+      {% elif view.attempt_status == 'ASSIGNED' %}{% include "partials/section_overview.html" %}{% else %}{% include "partials/tutor_composer.html" %}{% endif %}
     {% elif view.f1_assessment_submitted %}
       <section class="assessment" data-telemetry-surface="assessment"><div class="phase-badge">Independent assessment</div><h2>Assessment submitted</h2><p>Assessment submitted. Your responses have been saved.</p></section>
     {% elif view.phase == 'ASSESSMENT_ACTIVE' and view.f1_public_assessment %}
-      <section class="assessment" data-telemetry-surface="assessment"><div class="phase-badge">Independent assessment</div><h2>Answer all four questions</h2><p>Answer all four questions. Select one option for each multiple-choice question, then explain your reasoning in your own words.</p><form hx-post="/session/actions/assessment-response" hx-target="#session-main" hx-swap="outerHTML" method="post"><input type="hidden" name="idempotency_key" value="{{ new_key }}">{% for question in view.f1_public_assessment.mcqs %}<fieldset class="mcq"><legend>{{ loop.index }}. {{ question.stem }}</legend>{% for option in question.options %}<label class="mcq-option"><input type="radio" name="{{ question.id|lower }}_answer" value="{{ option.id }}" required> <span><strong>{{ option.id }}.</strong> {{ option.text }}</span></label>{% endfor %}</fieldset>{% endfor %}<label for="assessment-response">4. {{ view.f1_public_assessment.subjective.prompt }}</label><textarea id="assessment-response" name="response_text" required maxlength="12000"></textarea><button>Submit assessment</button></form></section>
+      <section class="assessment" data-telemetry-surface="assessment"><div class="phase-badge">Independent assessment</div><h2>Answer all four questions</h2><p>Select one option for each multiple-choice question, then explain your reasoning in your own words.</p>{% if view.f1_public_assessment.notation %}<p class="assessment-notation">{{ view.f1_public_assessment.notation }}</p>{% endif %}<form hx-post="/session/actions/assessment-response" hx-target="#session-main" hx-swap="outerHTML" method="post"><input type="hidden" name="idempotency_key" value="{{ new_key }}">{% for question in view.f1_public_assessment.mcqs %}<fieldset class="mcq"><legend>{{ loop.index }}. {{ question.stem }}</legend>{% if question.grid %}<pre class="assessment-bit-grid" aria-label="Received or transmitted parity grid">{% for row in question.grid %}{{ row|join(' ') }}{% if not loop.last %}
+{% endif %}{% endfor %}</pre>{% endif %}{% if question.arrangement %}{{ assessment_arrangement(question.arrangement) }}{% endif %}{% for option in question.options %}<label class="mcq-option"><input type="radio" name="{{ question.id|lower }}_answer" value="{{ option.id }}" required> <span><strong>{{ option.id }}.</strong> {{ option.text }}</span></label>{% endfor %}</fieldset>{% endfor %}<label for="assessment-response">4. Explain your reasoning</label><div class="assessment-subjective-prompt">{{ view.f1_public_assessment.subjective.prompt }}</div>{% if view.f1_public_assessment.subjective.arrangement %}{{ assessment_arrangement(view.f1_public_assessment.subjective.arrangement) }}{% endif %}<textarea id="assessment-response" name="response_text" required maxlength="12000"></textarea><button>Submit assessment</button></form></section>
     {% elif view.phase == 'ASSESSMENT_ACTIVE' and view.f1_assessment_unavailable %}
       <section class="assessment" aria-live="polite"><div class="phase-badge">Independent assessment</div><h2>Assessment preparing</h2><p>Your assessment is not yet available. Please wait for the study team to make it available.</p></section>
     {% elif view.phase == 'ASSESSMENT_ACTIVE' %}

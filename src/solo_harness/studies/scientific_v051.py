@@ -39,9 +39,10 @@ SOURCE_FILES = (
     *(f"08_SCIENTIFIC_YAML/{name}" for name in YAML_FILES),
     *(f"07_PROMPT_CONTRACTS/{name}" for name in PROMPT_FILES),
     "CURRICULUM_SOURCE_LOCKED.md",
-    "09_REFERENCE_AND_VALIDATION/v04_reference_parity_oracle.py",
-    "09_REFERENCE_AND_VALIDATION/MOVE_CONTENT_ALIGNMENT_AUDIT.csv",
-    "09_REFERENCE_AND_VALIDATION/ASSESSMENT_ALIGNMENT_INDEX.csv",
+    "10_NATIVE_RUNTIME/typed_policy_mapping.yaml",
+    "10_NATIVE_RUNTIME/reference_parity_oracle.py",
+    "10_NATIVE_RUNTIME/README.md",
+    *(f"11_FIXED_ASSESSMENTS/{section}.json" for section in ("C1", "C2", "C3", "C4")),
 )
 
 
@@ -80,6 +81,7 @@ class ScientificStudyV051:
     source: dict[str, dict[str, Any]]
     prompts: dict[str, str]
     locked_curriculum: str
+    fixed_assessment_banks: dict[str, dict[str, Any]]
 
     @property
     def study_id(self) -> str:
@@ -87,7 +89,9 @@ class ScientificStudyV051:
 
     @property
     def content_version(self) -> str:
-        return "v0.5"
+        # Native assessment support is part of the immutable source bundle.
+        # A new version preserves every prior StudyVersion and session snapshot.
+        return "v0.5.5"
 
     @property
     def content_hash(self) -> str:
@@ -139,9 +143,19 @@ def load_scientific_v051(root: Path) -> ScientificStudyV051:
     for name, schema in EXPECTED_SCHEMAS.items():
         _require(source[name].get("schema") == schema, f"unsupported v0.5 schema in {name}")
         _require(str(source[name].get("status", "")).startswith("CANDIDATE_UNAPPROVED"), f"{name} is not candidate-only")
+    from solo_harness.runtime.fixed_assessment import FixedAssessmentError, validate_fixed_bank
+    try:
+        banks = {
+            section: json.loads((root / f"11_FIXED_ASSESSMENTS/{section}.json").read_text(encoding="utf-8"))
+            for section in ("C1", "C2", "C3", "C4")
+        }
+        for section, bank in banks.items():
+            validate_fixed_bank(bank, section)
+    except (ValueError, TypeError, KeyError, FixedAssessmentError) as exc:
+        raise ScientificV051Error(f"invalid fixed assessment bank: {exc}") from exc
     study = ScientificStudyV051(root, {name: hashlib.sha256((root / name).read_bytes()).hexdigest() for name in SOURCE_FILES}, source,
                                 {name: (prompt_root / name).read_text(encoding="utf-8") for name in PROMPT_FILES},
-                                (root / "CURRICULUM_SOURCE_LOCKED.md").read_text(encoding="utf-8"))
+                                (root / "CURRICULUM_SOURCE_LOCKED.md").read_text(encoding="utf-8"), banks)
     _validate(study)
     return study
 

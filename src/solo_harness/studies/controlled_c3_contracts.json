@@ -1,0 +1,903 @@
+{
+  "contract_id": "EKAGRAAI_CONTROLLED_C3_V1",
+  "status": "DESIGN_REVIEWED_C3_1_AND_C3_2_V1_2__RUNTIME_NOT_IMPLEMENTED",
+  "provenance": "Authored from EkagraAI Final Course Content Ground Truth (C1–C4), version 1.0, and the approved C3.1 and C3.2 design discussions. C3.x.Oxx identifiers are locally assigned references mapped to the ordered content requirements of the corresponding Ground Truth subsection; they are not official identifiers from the source document. This contract records instructional design only; it does not certify implementation or experimental effectiveness. V1.2 is a targeted pedagogy/guard/causal-integration revision; locked scientific content and authored move IDs remain unchanged.",
+  "control_boundary": {
+    "backend": "active move, verified material, completion ledger and progression",
+    "frontend": "optional passive visuals; never model generated",
+    "tutor": "natural explanation, learner contingencies and doubts within authored move",
+    "judge": "learner-visible delivery evidence and pedagogy fidelity, never mastery"
+  },
+  "shared_guards": [
+    "No mastery or correctness gate",
+    "No assessment content",
+    "No unverified numeric examples",
+    "No cross-subsection instruction",
+    "Visual display alone is not delivery evidence",
+    "A learner doubt can interrupt a move without changing its position",
+    "The receiver is not presumed to possess the uncorrupted original frame",
+    "Distinguish original data cells from transmitted checking-bit cells whenever positions are discussed",
+    "Parity checks apply to complete checked groups, including checking-bit cells and the bottom-right corner bit",
+    "A passing check is not proof that transmission was error-free",
+    "For an initially valid checking group, an odd number of flips reverses its parity result and an even number leaves it unchanged",
+    "Apply the odd/even flip relationship independently to each complete row and column",
+    "Distinguish the instructor's knowledge of a constructed transmission history from the receiver's available evidence",
+    "Do not claim that one failed row and one failed column prove exactly one bit changed",
+    "Do not claim unique localization or successful correction without the required error-count assumption",
+    "P2 requires one genuine learner response opportunity per guided move and accurate Tutor follow-through; hints are contingent on need, a wrong or uncertain response never creates a mastery gate, and an extra confirmation answer is never mandatory",
+    "Do not infer mastery or SOLO level from move completion or a correct response",
+    "C3.1 explains how changed positions produce checking outcomes; C3.2 interprets what observed outcomes do and do not establish",
+    "Do not introduce unfamiliar non-grid checking arrangements or formal coding theory; those are outside C3"
+  ],
+  "fixed_cases": {
+    "C3.1": {
+      "parity_convention": "even",
+      "initial_valid_grid": [
+        "1010",
+        "0101",
+        "1111"
+      ],
+      "grid_dimensions": "3 rows × 4 columns",
+      "checking_groups": [
+        "R1",
+        "R2",
+        "R3",
+        "C1",
+        "C2",
+        "C3",
+        "C4"
+      ],
+      "position_notation": "RrCc, with rows and columns numbered from 1",
+      "corner_checking_bit": "R3C4",
+      "initial_state": "All seven complete checking groups pass even parity.",
+      "receiver_has_original": false,
+      "case_A": {
+        "name": "one_data_bit_flip",
+        "flipped_positions": [
+          "R1C2"
+        ],
+        "received_grid": [
+          "1110",
+          "0101",
+          "1111"
+        ],
+        "failed_rows": [
+          "R1"
+        ],
+        "failed_columns": [
+          "C2"
+        ],
+        "all_other_groups": "PASS"
+      },
+      "case_B": {
+        "name": "one_corner_checking_bit_flip",
+        "flipped_positions": [
+          "R3C4"
+        ],
+        "received_grid": [
+          "1010",
+          "0101",
+          "1110"
+        ],
+        "failed_rows": [
+          "R3"
+        ],
+        "failed_columns": [
+          "C4"
+        ],
+        "all_other_groups": "PASS"
+      },
+      "case_C": {
+        "name": "two_flips_same_row",
+        "flipped_positions": [
+          "R1C1",
+          "R1C2"
+        ],
+        "received_grid": [
+          "0110",
+          "0101",
+          "1111"
+        ],
+        "failed_rows": [],
+        "passing_affected_row": "R1",
+        "failed_columns": [
+          "C1",
+          "C2"
+        ],
+        "all_other_groups": "PASS"
+      },
+      "case_D": {
+        "name": "two_flips_same_column",
+        "flipped_positions": [
+          "R1C1",
+          "R2C1"
+        ],
+        "received_grid": [
+          "0010",
+          "1101",
+          "1111"
+        ],
+        "failed_rows": [
+          "R1",
+          "R2"
+        ],
+        "failed_columns": [],
+        "passing_affected_column": "C1",
+        "all_other_groups": "PASS"
+      },
+      "case_E": {
+        "name": "two_flips_different_rows_and_columns",
+        "flipped_positions": [
+          "R1C1",
+          "R2C2"
+        ],
+        "received_grid": [
+          "0010",
+          "0001",
+          "1111"
+        ],
+        "failed_rows": [
+          "R1",
+          "R2"
+        ],
+        "failed_columns": [
+          "C1",
+          "C2"
+        ],
+        "all_other_groups": "PASS"
+      },
+      "general_relationship": "For an initially valid checking group, an odd number of flips within that group reverses its original parity result; an even number leaves its original result unchanged. Apply this independently to each complete row and column.",
+      "position_roles": {
+        "coordinate_rule": "RrCc is 1-based; R1–R2 are the original two data rows and C1–C3 are the original three data columns.",
+        "original_data_cells": [
+          "R1C1",
+          "R1C2",
+          "R1C3",
+          "R2C1",
+          "R2C2",
+          "R2C3"
+        ],
+        "row_parity_cells": [
+          "R1C4",
+          "R2C4"
+        ],
+        "column_parity_cells": [
+          "R3C1",
+          "R3C2",
+          "R3C3"
+        ],
+        "shared_corner_parity_cell": "R3C4",
+        "complete_checking_groups": [
+          "R1",
+          "R2",
+          "R3",
+          "C1",
+          "C2",
+          "C3",
+          "C4"
+        ],
+        "transmitted_cells": "All 12 positions are transmitted and subject to possible bit flips; every position belongs to exactly one complete row and one complete column."
+      }
+    },
+    "C3.2": {
+      "parity_convention": "even",
+      "initial_valid_grid": [
+        "1010",
+        "0101",
+        "1111"
+      ],
+      "grid_dimensions": "3 rows × 4 columns",
+      "checking_groups": [
+        "R1",
+        "R2",
+        "R3",
+        "C1",
+        "C2",
+        "C3",
+        "C4"
+      ],
+      "position_notation": "RrCc, with rows and columns numbered from 1",
+      "receiver_has_original": false,
+      "receiver_evidence": "The received complete grid and the agreed even-parity checking rules/results; the uncorrupted original transmission is not presumed available.",
+      "case_B_same_row_two_bit": {
+        "name": "two_flips_in_same_row",
+        "flipped_positions": [
+          "R1C1",
+          "R1C2"
+        ],
+        "received_grid": [
+          "0110",
+          "0101",
+          "1111"
+        ],
+        "failed_rows": [],
+        "passing_affected_row": "R1",
+        "failed_columns": [
+          "C1",
+          "C2"
+        ],
+        "all_other_groups": "PASS",
+        "learner_facing_label": "same-row two-flip explanation"
+      },
+      "case_C_different_rows_and_columns_two_bit": {
+        "name": "two_flips_in_different_rows_and_columns",
+        "flipped_positions": [
+          "R1C1",
+          "R2C2"
+        ],
+        "received_grid": [
+          "0010",
+          "0001",
+          "1111"
+        ],
+        "failed_rows": [
+          "R1",
+          "R2"
+        ],
+        "failed_columns": [
+          "C1",
+          "C2"
+        ],
+        "all_other_groups": "PASS",
+        "learner_facing_label": "different-row-and-column two-flip explanation"
+      },
+      "case_D_same_received_grid_one_flip_history": {
+        "name": "one_flip_history_for_ambiguous_received_grid",
+        "original_grid_for_instructor_explanation": [
+          "0110",
+          "1001",
+          "1111"
+        ],
+        "original_grid_validity": "All seven complete row and column groups pass even parity.",
+        "flipped_positions": [
+          "R2C1"
+        ],
+        "flip": "1_to_0",
+        "received_grid": [
+          "0110",
+          "0001",
+          "1111"
+        ],
+        "failed_rows": [
+          "R2"
+        ],
+        "failed_columns": [
+          "C1"
+        ],
+        "all_other_groups": "PASS",
+        "learner_facing_label": "one-flip history for the ambiguous received grid"
+      },
+      "case_E_same_received_grid_three_flip_history": {
+        "name": "three_flip_history_for_same_ambiguous_received_grid",
+        "original_grid_for_instructor_explanation": [
+          "1010",
+          "0101",
+          "1111"
+        ],
+        "original_grid_validity": "All seven complete row and column groups pass even parity.",
+        "flipped_positions": [
+          "R1C1",
+          "R1C2",
+          "R2C2"
+        ],
+        "flips": [
+          "R1C1:1_to_0",
+          "R1C2:0_to_1",
+          "R2C2:1_to_0"
+        ],
+        "received_grid": [
+          "0110",
+          "0001",
+          "1111"
+        ],
+        "failed_rows": [
+          "R2"
+        ],
+        "failed_columns": [
+          "C1"
+        ],
+        "all_other_groups": "PASS",
+        "same_observation_as": "case_D_same_received_grid_one_flip_history",
+        "receiver_inference": "The receiver observes the same complete received grid and the same seven check results under either history; the actual history and error count cannot be distinguished from these observations alone.",
+        "learner_facing_label": "three-flip history for the same received grid"
+      },
+      "case_F_four_corner_rectangle": {
+        "name": "four_flipped_data_bits_at_rectangle_corners",
+        "original_grid_for_instructor_explanation": [
+          "1010",
+          "0101",
+          "1111"
+        ],
+        "flipped_positions": [
+          "R1C1",
+          "R1C2",
+          "R2C1",
+          "R2C2"
+        ],
+        "received_grid": [
+          "0110",
+          "1001",
+          "1111"
+        ],
+        "failed_rows": [],
+        "failed_columns": [],
+        "all_seven_groups": "PASS",
+        "affected_group_flip_counts": {
+          "R1": 2,
+          "R2": 2,
+          "C1": 2,
+          "C2": 2
+        },
+        "receiver_inference": "No parity violation is detected; this does not establish that no transmitted bits changed.",
+        "learner_facing_label": "undetected four-corner rectangle"
+      },
+      "interpretive_rules": [
+        "Different valid original grids and different transmission histories can produce the same received grid and identical checking results.",
+        "A one-failed-row/one-failed-column pattern is consistent with a single flipped bit at the intersection, but does not prove the exactly-one-error assumption.",
+        "A multi-bit pattern can imitate the checking result of a one-bit pattern; correction under an assumed one-error case may therefore be unjustified.",
+        "A four-corner rectangle can contain two flips in each affected row and column, leaving all seven checks passing.",
+        "A failed check detects a violated rule; a passing check means that rule is satisfied. Passing all checks does not prove an error-free transmission."
+      ],
+      "position_roles": {
+        "coordinate_rule": "RrCc is 1-based; R1–R2 are the original two data rows and C1–C3 are the original three data columns.",
+        "original_data_cells": [
+          "R1C1",
+          "R1C2",
+          "R1C3",
+          "R2C1",
+          "R2C2",
+          "R2C3"
+        ],
+        "row_parity_cells": [
+          "R1C4",
+          "R2C4"
+        ],
+        "column_parity_cells": [
+          "R3C1",
+          "R3C2",
+          "R3C3"
+        ],
+        "shared_corner_parity_cell": "R3C4",
+        "complete_checking_groups": [
+          "R1",
+          "R2",
+          "R3",
+          "C1",
+          "C2",
+          "C3",
+          "C4"
+        ],
+        "transmitted_cells": "All 12 positions are transmitted and subject to possible bit flips; every position belongs to exactly one complete row and one complete column."
+      }
+    }
+  },
+  "subsections": {
+    "C3.1": {
+      "title": "Understanding the Relationships Behind Checking Results",
+      "solo_target": "M_to_R",
+      "section_objective": "Develop an integrated causal explanation of how changed bit positions, checking-group membership and combined flip effects produce observed row and column pass/fail results.",
+      "content_reference_legend": {
+        "C3.1.O01": "How changing one transmitted bit affects every check that includes that bit.",
+        "C3.1.O02": "How multiple flipped bits combine within a given check.",
+        "C3.1.O03": "Why an odd number of flips reverses a check result while an even number leaves it unchanged, relative to an initially valid group.",
+        "C3.1.O04": "How positions and combinations of changes determine which familiar row and column checks pass or fail.",
+        "C3.1.O05": "Connect these causal relationships to the single- and two-dimensional parity properties learned in C2.",
+        "C3.1.O06": "Reason from an error pattern to checking results, explaining why observations arise rather than memorizing outcomes."
+      },
+      "moves_by_pedagogy": {
+        "P1": [
+          {
+            "id": "C3.1-P1-M01",
+            "required_content_refs": [
+              "C3.1.O01",
+              "C3.1.O05"
+            ],
+            "source_instructional_action": "Establish the complete valid grid and demonstrate that every transmitted cell participates in one row check and one column check.",
+            "exact_delivery": "Let's use the complete 2D even-parity grid from C2: 1010 / 0101 / 1111. Every complete row and column initially passes its even-parity check. Focus on an individual cell. R1C2 belongs to row R1 and column C2, so a change at R1C2 can affect both checks. This applies to every cell, including checking-bit cells. The corner bit R3C4 belongs to both the bottom row R3 and the rightmost column C4. Before asking which checks fail, establish which checks contain the changed position. In this familiar grid, the six top-left positions are original data; the rightmost and bottom checking cells and the shared corner also belong to complete row/column checks.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "group_membership"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Complete valid grid, all seven checking groups, and row/column membership of data and checking-bit cells explained."
+          },
+          {
+            "id": "C3.1-P1-M02",
+            "required_content_refs": [
+              "C3.1.O01",
+              "C3.1.O04",
+              "C3.1.O06"
+            ],
+            "source_instructional_action": "Demonstrate how a single changed cell affects both checking groups containing it, then contrast a data cell with the shared corner checking bit.",
+            "exact_delivery": "First, flip R1C2 from 0 to 1. The received grid becomes 1110 / 0101 / 1111. Row R1 and column C2 fail; the other five checks pass. R1C2 belongs to R1 and C2, so the flip changes the parity of both groups. Now consider the corner cell R3C4. If it changes from 1 to 0, the grid becomes 1010 / 0101 / 1110. This time, the bottom row R3 and rightmost column C4 fail. The same relationship applies even though the changed cell is a checking bit rather than an original data bit. A changed cell affects every checking group containing it.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "single_flip_comparison"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Both received grids, their failed checks, and the relationship between changed position and affected groups accurately explained."
+          },
+          {
+            "id": "C3.1-P1-M03",
+            "required_content_refs": [
+              "C3.1.O02",
+              "C3.1.O03",
+              "C3.1.O06"
+            ],
+            "source_instructional_action": "Work through two flips in the same row and show how their effects combine differently across the row and the two columns.",
+            "exact_delivery": "Now flip two cells in the same row: R1C1 and R1C2. The received grid becomes 0110 / 0101 / 1111. Row R1 contains both flips. Its parity result remains unchanged, so it passes. Column C1 contains one flip, so it fails. Column C2 also contains one flip, so it fails. The other groups pass. The two changes combine within each group separately. In R1, the two changes leave the original parity result unchanged. In each affected column, there is only one change, so the original result is reversed.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "same_row_combined_flips"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "The two-flip grid is accurately shown, and the different outcomes for the affected row and columns are explained."
+          },
+          {
+            "id": "C3.1-P1-M04",
+            "required_content_refs": [
+              "C3.1.O02",
+              "C3.1.O04",
+              "C3.1.O06"
+            ],
+            "source_instructional_action": "Contrast two flips in the same column with two flips in different rows and columns.",
+            "exact_delivery": "Compare two arrangements with two flips. Case D: flip R1C1 and R2C1. The grid becomes 0010 / 1101 / 1111. Column C1 contains both flips and passes. Rows R1 and R2 each contain one flip, so both fail. Case E: flip R1C1 and R2C2. The grid becomes 0010 / 0001 / 1111. Each affected row and each affected column contains one flip. Therefore, R1, R2, C1 and C2 fail; the other three groups pass. Both cases contain two flipped bits, but their checking results differ because the positions determine how the flips are distributed across the rows and columns.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "two_position_patterns"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Both grids and their failed/passing checking groups are accurately explained, with the role of bit positions made explicit."
+          },
+          {
+            "id": "C3.1-P1-M05",
+            "required_content_refs": [
+              "C3.1.O01",
+              "C3.1.O02",
+              "C3.1.O03",
+              "C3.1.O04",
+              "C3.1.O05",
+              "C3.1.O06"
+            ],
+            "source_instructional_action": "Consolidate representative one- and two-flip cases into one causal account; derive the odd/even effect from repeated parity toggles and connect single parity to familiar row/column parity, without re-listing every grid.",
+            "exact_delivery": "The single-flip examples show that a changed position affects its row and column. The two-flip examples show that effects combine within each checked group: one flip toggles its parity result, while a second flip in that same group toggles it back. Starting from an initially valid group, an odd number of flips makes it fail and an even number leaves it passing. Single parity checks one complete transmitted group; full 2D parity applies the same principle independently to several overlapping complete rows and columns, including checking-bit cells. Thus changed positions determine group membership, the number of flips within each group, and finally the observed PASS/FAIL results.",
+            "visual": null,
+            "learner_response_policy": "model",
+            "completion_evidence": "Integrated causal chain, parity-toggling explanation, initially-valid condition, odd/even-within-each-group rule and explicit single-parity to familiar 2D-parity connection are explained without enumerating all five grids."
+          }
+        ],
+        "P2": [
+          {
+            "id": "C3.1-P2-M01",
+            "required_content_refs": [
+              "C3.1.O01",
+              "C3.1.O05"
+            ],
+            "source_instructional_action": "Guide the learner to identify the checking groups containing a particular transmitted cell, including the corner checking bit.",
+            "exact_delivery": "Look at the complete 2D even-parity grid: 1010 / 0101 / 1111. Suppose the bit at R1C2 changes. ASK: Which checking groups contain this bit, and therefore could be affected by its change? HINT: Look at the row and column that intersect at R1C2. FALLBACK: R1C2 belongs to row R1 and column C2. Therefore, a change at this position affects both checking groups. Every transmitted cell belongs to one row and one column, including checking-bit cells. For example, the corner bit R3C4 belongs to R3 and C4. Identify group membership before explaining which checks pass or fail. CONTINUE: Move to the next move regardless of the response. The original data cells are R1–R2/C1–C3; R1C4/R2C4 and R3C1–R3C3 are checking cells, and R3C4 is the shared corner.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "group_membership_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One learner response opportunity and correct Tutor explanation of complete row/column membership, including checking-bit and corner cells; hint only if needed."
+          },
+          {
+            "id": "C3.1-P2-M02",
+            "required_content_refs": [
+              "C3.1.O01",
+              "C3.1.O04",
+              "C3.1.O06"
+            ],
+            "source_instructional_action": "Guide predictions about the checking results caused by a single data-bit flip and a corner checking-bit flip.",
+            "exact_delivery": "Case A: R1C2 changes from 0 to 1; received grid 1110 / 0101 / 1111. ASK: Which two checking groups will fail, and why? HINT: Identify the row and column containing R1C2. FALLBACK: R1 and C2 fail because each contains the flipped bit; the other five groups pass. Case B: R3C4 changes from 1 to 0; received grid 1010 / 0101 / 1110. The bottom row R3 and rightmost column C4 fail because both contain the changed corner bit. A single flip changes the parity result of every checking group containing that bit, including groups involving checking bits. CONTINUE: Move to the next move regardless of the response.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "single_flip_prediction"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One genuine single-flip prediction opportunity; accurate Tutor explanation of both data-bit and corner-bit cases, grids and affected checking groups; hint only if needed."
+          },
+          {
+            "id": "C3.1-P2-M03",
+            "required_content_refs": [
+              "C3.1.O02",
+              "C3.1.O03",
+              "C3.1.O06"
+            ],
+            "source_instructional_action": "Guide the learner to compare the effect of two flips within the same row and within their respective columns.",
+            "exact_delivery": "Suppose R1C1 and R1C2 both flip in the same row; received grid: 0110 / 0101 / 1111. ASK ONCE: Which of the complete checks R1, C1 and C2 pass or fail, and why? HINT IF NEEDED: Count flipped positions separately inside each checking group, not the number of 1s. FOLLOW THROUGH: R1 contains both flips and passes, while C1 and C2 each contain one flip and fail. All other groups pass. The same two flips combine differently in each group because group membership differs. Continue regardless of learner correctness.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "same_row_prediction"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One two-flip prediction opportunity and correct Tutor explanation that R1 passes while C1 and C2 fail because each complete group has a different flip count; hint only if needed."
+          },
+          {
+            "id": "C3.1-P2-M04",
+            "required_content_refs": [
+              "C3.1.O02",
+              "C3.1.O04",
+              "C3.1.O06"
+            ],
+            "source_instructional_action": "Guide one prediction for the same-column two-flip case, then explain and contrast the different-row-and-column case without adding another compulsory learner response.",
+            "exact_delivery": "Case D: R1C1 and R2C1 change; received grid 0010 / 1101 / 1111. ASK ONCE: Which complete checking group contains both flips, and which rows have one flip each? HINT IF NEEDED: Look at C1, R1 and R2 separately. FOLLOW THROUGH: C1 contains both flips and passes; R1 and R2 contain one flip each and fail. Then explain the contrast without another question: Case E flips R1C1 and R2C2, giving 0010 / 0001 / 1111. R1, R2, C1 and C2 each contain one flip and all four fail; the other three groups pass. The same total of two flips produces different outcomes because group membership differs. Continue regardless of learner correctness.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "position_comparison_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One genuine prediction opportunity, complete correct explanations of both arrangements and their failed/passing groups, and a clear contrast; hint only if needed, no extra learner confirmation."
+          },
+          {
+            "id": "C3.1-P2-M05",
+            "required_content_refs": [
+              "C3.1.O01",
+              "C3.1.O02",
+              "C3.1.O03",
+              "C3.1.O04",
+              "C3.1.O05",
+              "C3.1.O06"
+            ],
+            "source_instructional_action": "Ask for one integrated causal explanation; then provide the parity-toggle rationale and bridge from single parity to multiple familiar row/column checks without another required answer.",
+            "exact_delivery": "ASK ONCE: What determines whether a particular complete row or column passes after one or more transmitted bits flip? HINT IF NEEDED: Identify which changed positions belong to that group, then count flips within the group rather than counting 1s. FOLLOW THROUGH: Each flip toggles the parity result of every group containing that position; a second flip in the same group toggles it back. Starting from a valid group, odd flips make it fail and even flips leave it passing. Single parity checks one complete group; familiar 2D parity checks several overlapping complete rows and columns by that same rule, including checking-bit cells. Positions → group membership → group flip counts → check outcomes. Continue whether the learner is correct or not.",
+            "visual": null,
+            "learner_response_policy": "guided",
+            "completion_evidence": "One causal-reasoning response opportunity plus correct Tutor follow-through explaining toggling, initial validity, odd/even within-group effects and the single-to-2D parity bridge; hint only when needed."
+          }
+        ],
+        "P3": [
+          {
+            "id": "C3.1-P3-M01",
+            "required_content_refs": [
+              "C3.1.O01",
+              "C3.1.O04",
+              "C3.1.O05"
+            ],
+            "source_instructional_action": "Contrast the initially valid grid with a grid containing one changed data bit, highlighting the checking groups that respond.",
+            "exact_delivery": "Compare the initially valid grid 1010 / 0101 / 1111, where all seven complete checking groups pass, with Case A, where R1C2 changes from 0 to 1 and the grid becomes 1110 / 0101 / 1111. R1 and C2 fail while the other five groups pass. The bit at R1C2 belongs to both R1 and C2. A changed bit affects the groups containing that position, not every checking group. A changed cell participates in its complete row and column regardless of whether it is an original data bit or a checking bit.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "baseline_vs_single_flip"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Both grids and their checking outcomes are compared, with the membership relationship explained."
+          },
+          {
+            "id": "C3.1-P3-M02",
+            "required_content_refs": [
+              "C3.1.O01",
+              "C3.1.O04",
+              "C3.1.O06"
+            ],
+            "source_instructional_action": "Compare two single-bit changes at different positions to demonstrate how their locations determine the affected checking groups.",
+            "exact_delivery": "Compare Case A, where R1C2 changes from 0 to 1 and R1 and C2 fail, with Case B, where corner checking bit R3C4 changes from 1 to 0 and R3 and C4 fail. Both situations involve one flipped bit and produce two failed checks, but the identities of the failed checks differ because the changed positions differ. Checking-bit cells are not excluded: the corner bit participates in both its row and column.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "data_vs_corner_flip"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Both single-flip cases and their respective failed checking groups are compared accurately."
+          },
+          {
+            "id": "C3.1-P3-M03",
+            "required_content_refs": [
+              "C3.1.O02",
+              "C3.1.O03",
+              "C3.1.O04"
+            ],
+            "source_instructional_action": "Compare two arrangements with two flipped bits, showing how the shared checking group changes depending on whether the positions share a row or column.",
+            "exact_delivery": "Compare Case C, where R1C1 and R1C2 change: R1 passes because it contains both flips, while C1 and C2 fail because each contains one. Then compare Case D, where R1C1 and R2C1 change: C1 passes because it contains both flips, while R1 and R2 fail because each contains one. In both cases, the checking group containing both flips retains its original parity result. The shared group is a row in Case C and a column in Case D. The same relationship applies independently to rows and columns.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "same_row_vs_same_column"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Both arrangements are contrasted, including the passing shared group and failing perpendicular groups."
+          },
+          {
+            "id": "C3.1-P3-M04",
+            "required_content_refs": [
+              "C3.1.O02",
+              "C3.1.O03",
+              "C3.1.O04",
+              "C3.1.O06"
+            ],
+            "source_instructional_action": "Compare Case C with Case E to demonstrate how distributing the same number of flips across different checking groups changes the observed pattern.",
+            "exact_delivery": "Compare Case C, where R1C1 and R1C2 change and only C1 and C2 fail, with Case E, where R1C1 and R2C2 change and R1, R2, C1 and C2 fail. Both arrangements contain exactly two flips. In Case C, both flips share R1, so that row passes. In Case E, each affected row and column contains one flip, so all four affected groups fail. The difference is not the total number of flipped bits; it is how those flips are distributed across checking groups.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "same_group_vs_distributed_flips"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Both cases and their different failed-check patterns are compared, with the distribution of flips explained."
+          },
+          {
+            "id": "C3.1-P3-M05",
+            "required_content_refs": [
+              "C3.1.O01",
+              "C3.1.O02",
+              "C3.1.O03",
+              "C3.1.O04",
+              "C3.1.O05",
+              "C3.1.O06"
+            ],
+            "source_instructional_action": "Use the cases to contrast membership and cancellation, and consolidate the causal rule and the connection to single versus full 2D parity without merely repeating five outcomes.",
+            "exact_delivery": "Compare single-flip cases A/B: the position selects which row and column fail, even for the corner checking bit. Compare two-flip cases C/D with E: flips sharing a row or column can cancel within that shared check, while flips spread across different rows and columns can leave four groups failing. Each flip toggles its containing groups; a second within one group toggles it back. Starting from valid checks, odd flips within a group make it fail and even flips leave it passing. Single parity has one complete checked group; full 2D parity uses several overlapping complete rows and columns with that same rule. The position, membership and group-specific flip counts explain the outcomes—not the total number of flips alone.",
+            "visual": null,
+            "learner_response_policy": "compare",
+            "completion_evidence": "The contrasting cases support a causal explanation of membership, parity toggling, group-specific odd/even effects, initial-validity condition and a single-parity versus full 2D-parity connection."
+          }
+        ]
+      },
+      "visual_component_cap": 1,
+      "visual_interactive": false,
+      "implementation": "design_only"
+    },
+    "C3.2": {
+      "title": "Interpreting Checking Evidence and Its Limitations",
+      "solo_target": "M → R",
+      "section_objective": "Interpret checking evidence using the causal model developed in C3.1, explain why ambiguous or undetected outcomes arise, and distinguish justified receiver inference from unsupported assumptions.",
+      "content_reference_legend": {
+        "C3.2.O01": "Reason from observed checking results to possible error patterns without assuming the original data are directly available to the receiver.",
+        "C3.2.O02": "Understand that different actual error patterns can produce identical checking results.",
+        "C3.2.O03": "Explain how a multi-bit pattern can imitate the checking result of one changed bit and why correction based on a presumed one-error case may be unjustified.",
+        "C3.2.O04": "Explain how some multiple-error arrangements remain undetected, including the four-corner rectangle in a row/column parity grid.",
+        "C3.2.O05": "Understand how the number-of-errors assumption affects justified localization and correction claims.",
+        "C3.2.O06": "Integrate changed positions, affected rules, pass/fail patterns, ambiguity and limits of receiver inference into coherent explanations."
+      },
+      "moves_by_pedagogy": {
+        "P1": [
+          {
+            "id": "C3.2-P1-M01",
+            "required_content_refs": [
+              "C3.2.O01"
+            ],
+            "source_instructional_action": "Establish the receiver's evidence boundary by contrasting the received grid and agreed rules with the instructor's outside knowledge of the original transmission.",
+            "exact_delivery": "Use the complete 2D even-parity grid and its seven checking rules. The receiver can inspect the received grid and determine which complete rows and columns pass or fail. The receiver is not presumed to possess the uncorrupted original grid, so cannot directly compare the received bits with the original. In a teaching example, the instructor may know which positions were deliberately flipped; that outside knowledge is not automatically available to the receiver. A failed check indicates a violated rule. A passing check means that rule is satisfied, not that the transmission was certainly error-free. The receiver checks all seven complete groups, including the added checking-bit cells and the shared corner, but lacks the pristine original.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "receiver_evidence_boundary"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Receiver evidence, instructor-only knowledge and the meaning of pass/fail are distinguished."
+          },
+          {
+            "id": "C3.2-P1-M02",
+            "required_content_refs": [
+              "C3.2.O01",
+              "C3.2.O06"
+            ],
+            "source_instructional_action": "Begin with observed checking results and reason backward to possible same-row and different-row/column two-bit arrangements.",
+            "exact_delivery": "Start with the checking results rather than showing changed positions. First observation (same-row pattern): R1 passes while C1 and C2 fail; one possible history flips R1C1 and R1C2, leaving two flips in R1 but one in each affected column. Second observation (distributed pattern): R1, R2, C1 and C2 fail; one possible history flips R1C1 and R2C2, leaving one flip in each of those four groups. Both are possible explanations, not uniquely established positions or error counts. The receiver cannot compare with an assumed pristine original.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "two_bit_outcome_comparison"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Both two-bit cases and their correct checking outcomes are interpreted through group membership and flip distribution."
+          },
+          {
+            "id": "C3.2-P1-M03",
+            "required_content_refs": [
+              "C3.2.O01",
+              "C3.2.O02",
+              "C3.2.O03",
+              "C3.2.O05"
+            ],
+            "source_instructional_action": "Demonstrate two distinct valid transmission histories that produce the identical received grid and checking results.",
+            "exact_delivery": "Consider the received grid 0110 / 0001 / 1111. R2 and C1 fail; the other five checks pass. One possible history begins with the valid grid 0110 / 1001 / 1111 and flips R2C1 from 1 to 0. A different possible history begins with the valid grid 1010 / 0101 / 1111 and flips R1C1 from 1 to 0, R1C2 from 0 to 1, and R2C2 from 1 to 0. Both original grids satisfy all seven even-parity checks, and both histories produce exactly the same received grid 0110 / 0001 / 1111. The receiver therefore cannot distinguish these histories from the received grid and checking results alone. Reversing the R2C1 intersection as though exactly one error occurred is not necessarily a valid correction.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "same_received_grid_two_histories"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Both valid original grids, the one-flip and three-flip histories, identical received grid and conditional correction limitation are explained."
+          },
+          {
+            "id": "C3.2-P1-M04",
+            "required_content_refs": [
+              "C3.2.O04",
+              "C3.2.O06"
+            ],
+            "source_instructional_action": "Work through the four-corner rectangle and explain why corruption can remain undetected.",
+            "exact_delivery": "Start from 1010 / 0101 / 1111 and flip the four data positions R1C1, R1C2, R2C1 and R2C2. The received grid becomes 0110 / 1001 / 1111. R1 and R2 each contain two flips, and C1 and C2 each contain two flips. Their parity results therefore remain unchanged; the other three groups contain no flips and also pass. All seven checks pass even though four transmitted bits changed. The receiver has no detected parity violation, but cannot conclude from that passing result alone that the received grid is unchanged from the original.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "four_corner_rectangle"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Four flipped positions, affected group counts and all-seven-pass outcome are accurately explained."
+          },
+          {
+            "id": "C3.2-P1-M05",
+            "required_content_refs": [
+              "C3.2.O01",
+              "C3.2.O02",
+              "C3.2.O03",
+              "C3.2.O04",
+              "C3.2.O05",
+              "C3.2.O06"
+            ],
+            "source_instructional_action": "Integrate the meaning of receiving a check pattern, the existence of alternative histories, and justified versus unjustified localization/correction claims; do not require a catalogue of earlier grids.",
+            "exact_delivery": "Bring the cases together. Different two-bit arrangements produce different failed-check patterns because their changed positions belong to different checking groups. A one-flip history and a three-flip history can produce the same received grid and the same failed checks, so one failed row and one failed column do not prove that exactly one bit changed. A four-corner rectangle can leave all seven checks passing despite four changes. Therefore, a failed check establishes that a checking rule is violated; the pattern may suggest possible error locations but does not always uniquely identify the actual changes. A passing result establishes only that the checked rules are satisfied. Localization and correction claims require an appropriate error-count assumption and must not exceed what the evidence supports.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "evidence_and_inference_summary"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Integrated causal explanation distinguishes observations, possible histories, error-count assumptions, detection, localization and correction."
+          }
+        ],
+        "P2": [
+          {
+            "id": "C3.2-P2-M01",
+            "required_content_refs": [
+              "C3.2.O01"
+            ],
+            "source_instructional_action": "Invite the learner to distinguish receiver-visible information from the instructor's knowledge of the original transmission.",
+            "exact_delivery": "Ask: “The receiver gets a complete 3 × 4 grid and the agreed even-parity rules. Does the receiver automatically know what the original transmitted grid looked like?” Hint: “Think about the difference between the received bits and the bits originally sent.” Fallback: “The receiver has the received grid and the agreed checking rules, but is not presumed to have the original transmitted grid. The receiver can determine whether each rule passes or fails, but cannot directly compare the received bits with the original. The instructor may know the deliberately constructed error history; that is outside the receiver's evidence.” Continue to the next move regardless of the response. The receiver sees the entire 3×4 transmitted grid: six data cells, five edge-check cells and the shared corner; it is not given a clean original.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "receiver_evidence_question"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One learner response opportunity and correct Tutor explanation of receiver-visible grid/rules versus instructor-only transmission history; hint only if needed."
+          },
+          {
+            "id": "C3.2-P2-M02",
+            "required_content_refs": [
+              "C3.2.O01",
+              "C3.2.O06"
+            ],
+            "source_instructional_action": "Guide one inference from the observed same-row-style checking results, then explain and contrast a distributed pattern without demanding a second learner response.",
+            "exact_delivery": "Show checking results first, without showing flipped positions. ASK ONCE: R1 passes while C1 and C2 fail. What arrangement of two flipped positions could explain these observations? HINT IF NEEDED: Consider two positions in R1, one in each of C1 and C2. FOLLOW THROUGH: A possible explanation is flips at R1C1 and R1C2: R1 has two and passes while C1/C2 each have one and fail. Then contrast a second observation without another question: R1, R2, C1 and C2 all fail, consistent with flips at R1C1 and R2C2. These are possible histories, not uniquely established positions or counts; the receiver lacks the uncorrupted original. Continue regardless of response correctness.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "two_bit_outcome_question"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One genuine observation-to-candidate response opportunity and correct Tutor explanations of both observed patterns and their non-unique candidate histories; hint only if needed."
+          },
+          {
+            "id": "C3.2-P2-M03",
+            "required_content_refs": [
+              "C3.2.O01",
+              "C3.2.O02",
+              "C3.2.O03",
+              "C3.2.O05"
+            ],
+            "source_instructional_action": "Guide the learner to compare two possible histories for the same received grid.",
+            "exact_delivery": "ASK ONCE: Could this same received grid 0110 / 0001 / 1111, with R2 and C1 failing, have both a one-flip and a three-flip history? HINT IF NEEDED: Compare the two valid originals 0110 / 1001 / 1111 and 1010 / 0101 / 1111 with that one received grid. FOLLOW THROUGH: From the first valid original, flipping R2C1 once yields the received grid. From the second, flipping R1C1, R1C2 and R2C2 yields exactly the same received grid and checks. The receiver cannot know which error count or original history occurred from these observations alone. Reversing the R2C1 intersection under an unproved exactly-one-error assumption may therefore be an unjustified correction. Continue regardless of response.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "same_received_grid_guided_comparison"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One same-received-grid causal question and accurate Tutor explanation of both valid original grids, one- and three-flip histories, and the conditional correction limit; hint only if needed."
+          },
+          {
+            "id": "C3.2-P2-M04",
+            "required_content_refs": [
+              "C3.2.O04",
+              "C3.2.O06"
+            ],
+            "source_instructional_action": "Guide explanation of the undetected four-corner rectangle.",
+            "exact_delivery": "Ask: “Four positions change: R1C1, R1C2, R2C1 and R2C2. If all seven checks pass, can the receiver conclude that no transmission error occurred?” Hint: “Count the flips in each affected row and column. What happens when each contains two changes?” Fallback: “No. R1 and R2 each contain two flips, and C1 and C2 each contain two flips. Their parity results remain unchanged, and the other three groups contain no flips. All seven checks pass even though four transmitted bits changed. A passing result means the checking rules are satisfied; it does not prove that the received grid is identical to the original.” Continue to the next move regardless of the response.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "four_corner_rectangle_question"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One learner response opportunity and correct Tutor explanation of the four flipped corners, two flips per affected group, all seven checks passing and limited receiver inference; hint only if needed."
+          },
+          {
+            "id": "C3.2-P2-M05",
+            "required_content_refs": [
+              "C3.2.O01",
+              "C3.2.O02",
+              "C3.2.O03",
+              "C3.2.O04",
+              "C3.2.O05",
+              "C3.2.O06"
+            ],
+            "source_instructional_action": "Guide the learner to distinguish justified conclusions from conclusions that require an unsupported error-count assumption.",
+            "exact_delivery": "ASK ONCE: If one row and one column fail, what is justified to infer, and what still needs an assumption about the number of errors? HINT IF NEEDED: Distinguish detecting a violated check from identifying or correcting an actual flipped position. FOLLOW THROUGH: The intersection is a candidate under the exactly-one-error assumption; the observed failed checks alone cannot prove that assumption, since different histories can have the same received grid. Compare two other outcomes without further questions: all checks passing does not prove no corruption (four-corner rectangle), and several failures detect violated rules without necessarily identifying the actual pattern. Detection, localization and correction are different claims. Continue regardless of learner accuracy.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "justified_inference_question"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One inference question plus Tutor explanation of conditional intersection, all-pass and multiple-failure interpretations, and detection/localization/correction boundaries; hint only if needed."
+          }
+        ],
+        "P3": [
+          {
+            "id": "C3.2-P3-M01",
+            "required_content_refs": [
+              "C3.2.O01"
+            ],
+            "source_instructional_action": "Contrast instructor knowledge of a constructed transmission history with the evidence available to the receiver.",
+            "exact_delivery": "Contrast two perspectives on the same received grid. The instructor may know the original valid grid and the positions deliberately flipped to create the example. The receiver has the received grid and the agreed parity rules, but is not presumed to possess the uncorrupted original. The instructor can describe the actual constructed history; the receiver can identify passing and failing checks and reason about possible histories. A failed check indicates a violated rule, while passing checks do not prove that no corruption occurred. Knowing what changed is different from inferring what might have changed. Both views concern the same complete transmitted grid, including row-, column- and corner-checking bits.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "instructor_receiver_contrast"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Contrasting perspectives and their different information sets are explicitly explained."
+          },
+          {
+            "id": "C3.2-P3-M02",
+            "required_content_refs": [
+              "C3.2.O01",
+              "C3.2.O06"
+            ],
+            "source_instructional_action": "Contrast two observed pass/fail patterns first, then compare possible two-bit arrangements that could explain each pattern.",
+            "exact_delivery": "Start with two receiver observations, not changed positions. In the same-row-style observation, R1 passes but C1 and C2 fail. In the distributed observation, R1, R2, C1 and C2 fail. Compare possible explanations: R1C1/R1C2 flips fit the first; R1C1/R2C2 fit the second. Both contain two flips but distribute them differently among the complete row/column groups. These are illustrative possibilities, not uniquely established original histories.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "same_row_vs_different_rows"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Both cases, their check outcomes and the role of position distribution are contrasted."
+          },
+          {
+            "id": "C3.2-P3-M03",
+            "required_content_refs": [
+              "C3.2.O01",
+              "C3.2.O02",
+              "C3.2.O03",
+              "C3.2.O05"
+            ],
+            "source_instructional_action": "Contrast one-flip and three-flip histories that produce the identical received grid.",
+            "exact_delivery": "Compare two valid original grids and their histories. Original 0110 / 1001 / 1111 with one flip at R2C1, and original 1010 / 0101 / 1111 with three flips at R1C1, R1C2 and R2C2, both produce received grid 0110 / 0001 / 1111. In both cases R2 and C1 fail and all other checks pass. The receiver observes the same complete grid and the same checking results. Therefore, the observation does not establish whether one or three bits changed. A single-error correction based only on the failed-check intersection may be unjustified.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "one_vs_three_same_observation"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "One-flip and three-flip histories are correctly contrasted as producing identical complete receiver observations."
+          },
+          {
+            "id": "C3.2-P3-M04",
+            "required_content_refs": [
+              "C3.2.O04",
+              "C3.2.O06"
+            ],
+            "source_instructional_action": "Contrast a detected multi-bit pattern with the undetected four-corner rectangle.",
+            "exact_delivery": "Contrast the three-flip history that produces 0110 / 0001 / 1111, where R2 and C1 fail, with the four-corner rectangle produced by flips at R1C1, R1C2, R2C1 and R2C2, giving 0110 / 1001 / 1111. In the first case, at least one checking rule fails and corruption is detected. In the rectangle case, each affected row and column contains two flips, so all seven checks pass despite four changes. Parity checking detects some corruption patterns but does not detect every possible multiple-error arrangement.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "detected_vs_undetected"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Detected multi-bit corruption and undetected four-corner corruption are contrasted without implying all multi-bit errors behave alike."
+          },
+          {
+            "id": "C3.2-P3-M05",
+            "required_content_refs": [
+              "C3.2.O01",
+              "C3.2.O02",
+              "C3.2.O03",
+              "C3.2.O04",
+              "C3.2.O05",
+              "C3.2.O06"
+            ],
+            "source_instructional_action": "Contrast warranted and unwarranted receiver conclusions using representative cases to explain uncertainty, without requiring the learner to memorize case labels or recite every grid.",
+            "exact_delivery": "Bring the contrasts together. The receiver observes checking results, not the original transmission history. The same received grid and failed checks can arise from one flip or three flips, so a one-row/one-column intersection does not prove the exactly-one-error assumption. A four-corner rectangle can leave all checks passing despite corruption. A failed check establishes a violated rule; it does not always uniquely identify the changed positions. Passing all checks establishes that the rules are satisfied; it does not establish that no bit changed. Localization and correction require an appropriate error-count assumption. The justified conclusion must remain within what the observed evidence supports.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "warranted_vs_unwarranted_inference"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Integrated comparison distinguishes observed evidence, possible histories, detection, localization, correction and unsupported assumptions."
+          }
+        ]
+      },
+      "visual_component_cap": 1,
+      "visual_interactive": false,
+      "implementation": "design_only"
+    }
+  }
+}

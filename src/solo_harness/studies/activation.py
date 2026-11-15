@@ -6,9 +6,9 @@ from solo_harness.studies.canonicalization import COMPILER_CONTRACT_VERSION, CON
 from solo_harness.studies.v04_types import CompiledStudy
 
 
-def activate(db: Session, compiled: CompiledStudy, source_bundle: dict | None = None, make_active: bool | None = None) -> StudyVersion:
+def activate(db: Session, compiled: CompiledStudy, source_bundle: dict | None = None, make_active: bool | None = None, allow_unified_candidate: bool = False) -> StudyVersion:  # CHANGED
     candidate = bool(compiled.authored.get("v051", {}).get("candidate_only"))
-    if candidate and make_active:
+    if candidate and make_active and not allow_unified_candidate:  # CHANGED
         raise ValueError("candidate v0.5 studies cannot be activated")
     if make_active is None:
         make_active = not candidate

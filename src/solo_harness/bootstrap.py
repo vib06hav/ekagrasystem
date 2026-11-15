@@ -19,8 +19,8 @@ def bootstrap(settings: Settings) -> StudyCatalog:
     factory = make_session_factory(settings.database_url)
     with factory() as db:
         existing = db.get(ActiveStudyVersion, compiled.study_id)
-        if compiled.content_version == "v0.5":
-            activate(db, compiled, bundle, make_active=False)
+        if compiled.authored.get("v051", {}).get("candidate_only"):
+            activate(db, compiled, bundle, make_active=settings.enable_v051_unified_study, allow_unified_candidate=settings.enable_v051_unified_study)  # CHANGED
         elif existing is None or settings.activate_study_on_bootstrap:
             activate(db, compiled, bundle)
     return StudyCatalog()

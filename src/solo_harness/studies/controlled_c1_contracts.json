@@ -84,10 +84,15 @@
               "C1.1.O03"
             ],
             "source_instructional_action": "Introduce information as meaningful content and data as its representation for communication; explain that digital systems exchange such data as individual bits with the two possible binary values labeled 0 and 1 (a bit is one binary-valued unit).",
-            "exact_delivery": "Define information as meaningful content and data as its representation in communication. Digital systems represent communicated information with bits; each bit is one binary-valued unit, 0 or 1.",
+            "exact_delivery": "Information is what we want to share, and data is how we represent it. Digital systems use bits. Each bit can be `0` or `1`.",
             "visual": null,
             "learner_response_policy": "explain",
-            "completion_evidence": "Accurate definitions of information, data, bit and both values are stated before the example."
+            "completion_evidence": "The Tutor clearly distinguishes information from data and defines one bit as 0 or 1. No mapping demonstration or learner check yet.",
+            "delivery_controls": {
+              "focus": "Give the beginner definitions directly.",
+              "avoid": "Do not teach the Yes/No mapping, positions, counting or ask if the learner understands.",
+              "target_words": 32
+            }
           },
           {
             "id": "C1.1-P1-M02",
@@ -96,13 +101,18 @@
               "C1.1.O05"
             ],
             "source_instructional_action": "Model a short 0/1 sequence as transmitted digital data, distinguish a bit from the sequence, and explicitly name the bit positions.",
-            "exact_delivery": "Work the agreed Yes=1, No=0 representation for Yes/Yes/No to produce 110 in order; explain each mapping, distinguish each bit from the ordered sequence, and name positions 1-3.",
+            "exact_delivery": "Let’s use `1` for Yes and `0` for No. Yes, Yes, No becomes `110`. Each answer is one bit; together they form an ordered sequence with positions 1, 2 and 3.",
             "visual": {
               "component": "mapping",
               "mode": "worked"
             },
             "learner_response_policy": "model",
-            "completion_evidence": "All three mappings, order, individual bit/sequence distinction, and positions are explained."
+            "completion_evidence": "The agreed mapping is explicitly modeled in order, with the bit-versus-sequence distinction and the three positions. No count of 1s required in this move.",
+            "delivery_controls": {
+              "focus": "Model the fixed mapping step-by-step, briefly; the passive mapping visual supplies position labels.",
+              "avoid": "Do not count the 1s yet or ask a correctness question.",
+              "target_words": 38
+            }
           },
           {
             "id": "C1.1-P1-M03",
@@ -110,13 +120,19 @@
               "C1.1.O05"
             ],
             "source_instructional_action": "Demonstrate counting the 1s in that same short sequence, clearly distinguishing number of 1s from sequence length; briefly motivate later checking.",
-            "exact_delivery": "Show that sequence 110 has length three and exactly two 1s. Explicitly distinguish the count of 1s from the number of positions, briefly connecting the skill to later checking.",
+            "exact_delivery": "Now look at `110`. It has three bits, and two of them are `1`. We’ll use this count later.",
             "visual": {
               "component": "sequence",
               "mode": "counted"
             },
             "learner_response_policy": "model",
-            "completion_evidence": "Tutor demonstrates the correct count and length distinction."
+            "completion_evidence": "Correctly distinguishes length 3 from number of 1s 2 in one short explanation. No elaborate position-by-position recounting.",
+            "delivery_controls": {
+              "focus": "A brief prerequisite, not a new major concept.",
+              "avoid": "Do not recount every position already shown, repeat the mapping, or start parity rules.",
+              "target_words": 25,
+              "micro_move": true
+            }
           },
           {
             "id": "C1.1-P1-M04",
@@ -127,10 +143,16 @@
               "C1.1.O04"
             ],
             "source_instructional_action": "Consolidate the relationship information → bits (0/1) → ordered sequence; reinforce position and counting only as prerequisites, with no binary arithmetic or encoding.",
-            "exact_delivery": "Consolidate information -> digital data -> binary bits -> ordered bit sequence; explain the Yes/No mapping is one example convention and bits can represent other information without going into encoding.",
+            "exact_delivery": "So, information can be represented as data using bits in order. Each bit is `0` or `1`. Our Yes/No rule is just one possible way to represent answers.",
             "visual": null,
             "learner_response_policy": "explain",
-            "completion_evidence": "Full relationship and broader digital representation explained, without forbidden topics."
+            "completion_evidence": "One concise synthesis of information, data, bits, ordered sequences and the non-universal illustration. No new teaching or repeated counting.",
+            "delivery_controls": {
+              "focus": "One subsection-level synthesis; do not list every earlier step.",
+              "avoid": "Do not restate positions or 1-count, introduce encoding or begin the next subsection.",
+              "target_words": 30,
+              "final_consolidation": true
+            }
           }
         ],
         "P2": [
@@ -142,10 +164,15 @@
               "C1.1.O03"
             ],
             "source_instructional_action": "Directly supply the novice prerequisites: information/data to be communicated, digital representation as bits, and the meaning of a bit as one two-valued (binary) unit labeled 0 or 1; do not make the learner guess unfamiliar terms.",
-            "exact_delivery": "Supply novice definitions of information, data, digital representation, bit, 0 and 1. Introduce the agreed Yes=1, No=0 rule; do not ask learners to guess definitions.",
+            "exact_delivery": "Information is what we want to share, and data is how we represent it. A bit can be `0` or `1`. For our example, Yes = `1` and No = `0`.",
             "visual": null,
             "learner_response_policy": "explain",
-            "completion_evidence": "All prerequisites explicitly explained before questioning."
+            "completion_evidence": "Information/data distinction, bit definition and both values are clearly supplied; example convention introduced. No learner reply is needed for this explain-policy move.",
+            "delivery_controls": {
+              "focus": "Direct prerequisites so the learner can answer later questions.",
+              "avoid": "Never ask if the learner understands or has questions just to complete this move; do not reveal the full mapping result.",
+              "target_words": 36
+            }
           },
           {
             "id": "C1.1-P2-M02",
@@ -153,13 +180,20 @@
               "C1.1.O04"
             ],
             "source_instructional_action": "Use a small guided prompt to distinguish one bit from an ordered sequence representing digital data; then state the correct distinction regardless of the response.",
-            "exact_delivery": "Ask a small guided question distinguishing one binary-valued bit from a sequence of bits; give the accurate distinction after learner input, including an IDK response.",
+            "exact_delivery": "`110` is a sequence of three bits, while `1` is a single bit.",
             "visual": {
               "component": "sequence",
               "mode": "single_vs_sequence"
             },
             "learner_response_policy": "guided",
-            "completion_evidence": "One genuine learner-contingent question and correct bit/sequence distinction are present."
+            "completion_evidence": "The Tutor asks the specified bit-versus-sequence question, receives a real learner reply and then gives a contingent, correct distinction without a mastery gate.",
+            "delivery_controls": {
+              "focus": "Guide one direct observation; do not ask a vague question about understanding.",
+              "guided_question": "Which has several bits: 1 or 110?",
+              "after_reply": "Respond to the actual answer first. In the existing single-versus-sequence visual, Example A is 1 and Example B is 110. If the learner says \"Example B\", acknowledge that B is 110 and contains several bits. Then explain that 1 is one bit, while 110 is three bits in order. If the learner needs help, explain without a mastery gate.",
+              "avoid": "No “Do you understand?”, “Can you tell the difference?” or premature full explanation before the question.",
+              "target_words": 28
+            }
           },
           {
             "id": "C1.1-P2-M03",
@@ -167,13 +201,20 @@
               "C1.1.O05"
             ],
             "source_instructional_action": "Guide identification of individual bit positions and their 0/1 values in a short sequence; explicitly confirm the correct positions.",
-            "exact_delivery": "Guide constructing and reading Yes/Yes/No -> 110, preserving the positions in order. Ask a focused question about bit values or positions, offer a relevant hint if needed, and explicitly confirm the complete correct mapping.",
+            "exact_delivery": "Using our rule, Yes, Yes, No becomes `110`. The bits at positions 1, 2 and 3 are `1`, `1` and `0`.",
             "visual": {
               "component": "mapping",
               "mode": "guided"
             },
             "learner_response_policy": "guided",
-            "completion_evidence": "Learner-contingent question and correct construction with positions are explained; correct learner answer not required."
+            "completion_evidence": "A concrete mapping question comes before revealing 110; after a real learner reply the Tutor correctly explains the 110 mapping and its positions without requiring learner correctness.",
+            "delivery_controls": {
+              "focus": "Guide the mapping, not merely reading an answer already given.",
+              "guided_question": "Using Yes=1 and No=0, how would you write Yes, Yes, No as bits?",
+              "after_reply": "Confirm Yes→1, Yes→1, No→0, so the sequence is 110 at positions 1, 2 and 3. Handle mistakes or “I don’t know” with a short hint or explanation.",
+              "avoid": "Do not give the completed sequence 110 in the initial question or treat a yes/no acknowledgement as a completed mapping.",
+              "target_words": 35
+            }
           },
           {
             "id": "C1.1-P2-M04",
@@ -181,13 +222,21 @@
               "C1.1.O05"
             ],
             "source_instructional_action": "Guide counting 1s with a bounded, hintable prompt and explicitly show the correct count if the learner is blocked.",
-            "exact_delivery": "Guide a bounded count of 1s in 110: 2 ones versus 3 positions; explain it after a hint or IDK, never require correct learner response.",
+            "exact_delivery": "`110` has three bits altogether, and two of them are `1`.",
             "visual": {
               "component": "sequence",
               "mode": "guided_count"
             },
             "learner_response_policy": "guided",
-            "completion_evidence": "Guided prompt and verified count/length distinction have been explained."
+            "completion_evidence": "One bounded guided count and correct 2-ones versus 3-positions explanation; no broader subsection summary in this move.",
+            "delivery_controls": {
+              "focus": "Tiny checking prerequisite only.",
+              "guided_question": "How many 1s are in 110?",
+              "after_reply": "Answer in one sentence: 110 has two 1s and three bit positions. No additional quiz.",
+              "avoid": "No second question, no lengthy counting tutorial and NO subsection-level consolidation here.",
+              "target_words": 22,
+              "micro_move": true
+            }
           },
           {
             "id": "C1.1-P2-M05",
@@ -198,10 +247,16 @@
               "C1.1.O04"
             ],
             "source_instructional_action": "Consolidate information/data, binary-valued bits, and sequences as the digital representation; do not infer mastery from answers.",
-            "exact_delivery": "Consolidate all of information/data, digital bits 0/1, ordered sequences, and their broader use beyond Yes/No. Do not infer learner mastery.",
+            "exact_delivery": "So, information can be represented as data using bits in order. Each bit is `0` or `1`. Our Yes/No mapping is just one example of an agreed rule.",
             "visual": null,
             "learner_response_policy": "explain",
-            "completion_evidence": "All C1.1 content accurately consolidated without correctness gate."
+            "completion_evidence": "One concise, correct synthesis of information/data, bits, sequences and example-rule limits, with no mastery inference or repeated counting.",
+            "delivery_controls": {
+              "focus": "Only the formal subsection synthesis.",
+              "avoid": "Do not add another question, repeat the count exercise or start the next subsection.",
+              "target_words": 30,
+              "final_consolidation": true
+            }
           }
         ],
         "P3": [
@@ -214,13 +269,18 @@
               "C1.1.O04"
             ],
             "source_instructional_action": "Establish that digital information is represented as bits, each one binary-valued unit taking exactly one of two symbols, 0 or 1; contrast one bit with a short multi-bit sequence to make data representation and the bit/sequence distinction explicit.",
-            "exact_delivery": "Establish information/data, binary-valued bits 0/1, and contrast an individual bit with an ordered sequence. Introduce the shared Yes=1, No=0 example convention.",
+            "exact_delivery": "Information is what we want to share, and data is how we represent it. One bit can be `0` or `1`; `110` has three bits in order. Here, we use `1` for Yes and `0` for No.",
             "visual": {
               "component": "sequence",
               "mode": "single_vs_sequence"
             },
             "learner_response_policy": "compare",
-            "completion_evidence": "The relation and distinction between a single bit and an ordered sequence are explicitly drawn."
+            "completion_evidence": "The bit-versus-sequence distinction, correct 0/1 values, information/data relationship and example convention are explicit; the matched-pair comparison and counting are left to later moves.",
+            "delivery_controls": {
+              "focus": "First contrast: one bit versus several bits in order.",
+              "avoid": "Do not introduce the second matched case, compare two multi-bit cases, count 1s or require a learner response.",
+              "target_words": 38
+            }
           },
           {
             "id": "C1.1-P3-M02",
@@ -229,13 +289,18 @@
               "C1.1.O05"
             ],
             "source_instructional_action": "Compare two equal-length 0/1 sequences differing at one named position to show how individual bits form ordered data sequences and how positions are recognized.",
-            "exact_delivery": "Compare Yes/Yes/No -> 110 with Yes/No/No -> 100: identical length and mapping convention, but only the second answer and second bit differ. Label positions 1-3.",
+            "exact_delivery": "Both examples have three bits and use the same Yes/No rule. Yes, Yes, No gives `110`; Yes, No, No gives `100`. Only the second bit differs, so they represent different answers.",
             "visual": {
               "component": "mapping",
               "mode": "matched"
             },
             "learner_response_policy": "compare",
-            "completion_evidence": "Tutor states invariant features, one changed position, and why ordered bits reflect information."
+            "completion_evidence": "Both matched representations, same length/rule, changed position 2 and the meaning of order are explicitly compared. No counting comparison yet.",
+            "delivery_controls": {
+              "focus": "Keep the shared rule and length fixed; highlight the single changed position and its meaning.",
+              "avoid": "Do not compare numbers of 1s yet or imply that the two valid cases prove transmission corruption.",
+              "target_words": 36
+            }
           },
           {
             "id": "C1.1-P3-M03",
@@ -243,13 +308,19 @@
               "C1.1.O05"
             ],
             "source_instructional_action": "Contrast two short sequences with different numbers of 1s, explicitly counting them without introducing binary number conversion.",
-            "exact_delivery": "Compare 110 (two 1s) with 100 (one 1), both length three, without binary arithmetic. Keep the comparison incidental to the core data-representation idea.",
+            "exact_delivery": "Both sequences have three bits. But `110` has two `1`s, while `100` has only one.",
             "visual": {
               "component": "sequence",
               "mode": "matched_count"
             },
             "learner_response_policy": "compare",
-            "completion_evidence": "Both correct one-counts and equal sequence lengths are distinguished."
+            "completion_evidence": "Two correct 1-counts and equal lengths are stated briefly, without binary arithmetic or an extended lesson.",
+            "delivery_controls": {
+              "focus": "One brief contrast of counts, as a later prerequisite.",
+              "avoid": "Do not re-explain the entire mapping or again teach the changed-position concept at length.",
+              "target_words": 22,
+              "micro_move": true
+            }
           },
           {
             "id": "C1.1-P3-M04",
@@ -260,16 +331,23 @@
               "C1.1.O04"
             ],
             "source_instructional_action": "Explain what the matched cases establish about information represented through binary-valued bits and ordered sequences; consolidate the correct definitions.",
-            "exact_delivery": "Consolidate what the contrasts show about information, data, binary bits and the order of sequences; distinguish the illustration from a universal Yes/No convention.",
+            "exact_delivery": "A bit can be `0` or `1`. Bits placed in order can represent information, and changing one bit can change the answers represented. Our Yes/No rule is just one example.",
             "visual": null,
             "learner_response_policy": "explain",
-            "completion_evidence": "Correct definitions and explicit inference from compared cases are delivered."
+            "completion_evidence": "One concise inference from the contrast, correct bit and data definitions, and non-universal Yes/No convention. No repetition of both full cases.",
+            "delivery_controls": {
+              "focus": "One takeaway from the comparisons; distinguish an illustrative mapping from a universal rule.",
+              "avoid": "Do not enumerate every bit position, recount 1s, ask a new guided question or start transmission errors.",
+              "target_words": 32,
+              "final_consolidation": true
+            }
           }
         ]
       },
       "visual_component_cap": 2,
       "visual_interactive": false,
-      "implementation": "enabled_in_pilot"
+      "implementation": "enabled_in_pilot",
+      "delivery_revision": "C11_NATURAL_LANGUAGE_V2_1"
     },
     "C1.2": {
       "moves_by_pedagogy": {

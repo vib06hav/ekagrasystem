@@ -36,7 +36,8 @@ from solo_harness.runtime.engine import SessionRuntime
 from solo_harness.transition_summaries import post_pass_transition_summary
 from solo_harness.teaching_render import render_tutor_markdown
 from solo_harness.runtime.paas import instrument_snapshot
-from solo_harness.runtime.v04_persistence import is_deliverable_f1, is_f1_frozen, is_f1_study, public_projection, submit_f1_response
+from solo_harness.runtime import controlled_executor as _controlled  # CHANGED
+from solo_harness.runtime.assessment_persistence import is_deliverable_f1, is_f1_frozen, is_f1_study, public_projection, submit_f1_response
 from solo_harness.research_time import in_research_timezone
 from solo_harness.telemetry import append_keyboard_batch, append_rrweb_batch, ensure_browser_manifest, record_ui_events
 
@@ -112,7 +113,10 @@ class ParticipantApplication:
             active = db.scalar(select(ActiveStudyVersion).order_by(ActiveStudyVersion.activated_at.desc()))
             if active is None: return None
             compiled = self.execution.runtime.catalog.load(db, active.study_version_id)
-            if compiled.authored.get("v051", {}).get("candidate_only"):
+            # CHANGED: deploy the full reviewed course only by deliberate feature toggle.
+            unified = bool(compiled.authored.get("v051", {}).get("candidate_only")
+                           and getattr(self.settings, "enable_v051_unified_study", False))
+            if compiled.authored.get("v051", {}).get("candidate_only") and not unified:
                 return None
             # Candidate F1 v0.4 is development-only.  The source status is not
             # transformed by this switch; production startup fails closed.
@@ -126,6 +130,9 @@ class ParticipantApplication:
                     capture_run_id=capture_run_id,
                     runtime_config={
                         "f1_v04_development_enabled": self.settings.enable_f1_v04_development,
+                        "unified_controlled_study": unified,  # CHANGED
+                        "controlled_c11_pilot": unified,  # CHANGED
+                        "controlled_c1_full_pilot": unified,  # CHANGED
                         "capture_required_at_join": requires_capture,
                         "capture_required_streams": self.settings.required_capture_streams if requires_capture else "none",
                         "capture_heartbeat_max_age_seconds": self.settings.active_capture_max_age_seconds if requires_capture else None,
@@ -244,8 +251,8 @@ class ParticipantApplication:
                 for message in messages_by_attempt[attempt.id]:
                     subsection_id = (message.instructional_trace or {}).get("subsection_id") if v051_candidate else None
                     if subsection_id and subsection_id != marked_subsection:
-                        timeline.append({"kind": "subsection", "label": f"{subsection_id} — {subsection_titles[subsection_id]}",
-                                         "subsection_id": subsection_id})
+                        timeline.append({"kind": "subsection", "label": subsection_titles[subsection_id],
+                                         "title": subsection_titles[subsection_id], "subsection_id": subsection_id})
                         marked_subsection = subsection_id
                     timeline.append({
                         "kind": "message",
@@ -273,6 +280,19 @@ class ParticipantApplication:
                 compiled, current_attempt, progress_by_attempt.get(current_attempt.id, []) if current_attempt and is_current else []
             )
             active_subsection = next((item for item in v051_subsections if item["state"] == "ACTIVE"), None)
+            active_progress = next((row for row in progress_by_attempt.get(current_attempt.id, []) if row.status == "ACTIVE"), None) if current_attempt else None
+            # CHANGED: the frontend's existing Next button serves every C1--C4 move.
+            controlled_c11 = (_controlled.state(active_progress)
+                              if active_progress and _controlled.is_controlled(active_progress) else None)
+            if isinstance(controlled_c11, dict) and current_attempt:
+                controlled_c11 = {**controlled_c11, "is_final_move": (
+                    controlled_c11.get("move_index") == len(_controlled.moves(active_progress)) - 1
+                ), "is_section_final_move": (  # CHANGED: PAAS label on final subsection
+                    controlled_c11.get("move_index") == len(_controlled.moves(active_progress)) - 1
+                    and active_progress.subsection_id == list(
+                        _controlled.contract(_controlled.section_of(active_progress))["subsections"]
+                    )[-1]
+                )}
             delivery_exception = any(item["state"] == "DELIVERY_EXCEPTION" for item in v051_subsections)
             latest = db.scalar(
                 select(LLMCall).where(LLMCall.session_id == session.id).order_by(LLMCall.started_at.desc())
@@ -323,6 +343,7 @@ class ParticipantApplication:
                 "activity_number": current_attempt.sequence_in_transition if current_attempt and is_current else None,
                 "v051_subsections": v051_subsections,
                 "active_subsection": active_subsection,
+                "controlled_c11": controlled_c11,
                 "delivery_exception": delivery_exception,
                 "assessment_prompt": (
                     current_assessment.prompt_snapshot
@@ -482,7 +503,10 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
         return RedirectResponse("/session", status_code=303)
 
     @router.post("/internal/v051/session")
-    async def internal_v051_session(request: Request, x_ekagra_internal_test_token: str | None = Header(None)):
+    async def internal_v051_session(request: Request, x_ekagra_internal_test_token: str | None = Header(None),
+                                    x_ekagra_internal_pedagogy: str | None = Header(None),
+                                    x_ekagra_internal_full_c1: str | None = Header(None),
+                                    x_ekagra_internal_unified: str | None = Header(None)):  # CHANGED
         """Opt-in staff-only candidate entry point; ordinary enrollment never calls it."""
         if not _internal_v051_access_enabled(application.settings, x_ekagra_internal_test_token):
             raise HTTPException(status_code=404)
@@ -490,9 +514,55 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
             version = _internal_v051_candidate(db, application.settings)
             if version is None:
                 raise HTTPException(status_code=404)
+            unified = x_ekagra_internal_unified == "true"  # CHANGED
+            full_c1 = (getattr(application.settings, "enable_controlled_c1_full_pilot", False)
+                       or x_ekagra_internal_full_c1 == "true" or unified)
             session = application.execution.runtime.create_v051_internal_test_session(
-                db, version.id, controlled_c11_pilot=getattr(application.settings, "enable_controlled_c11_pilot", False))
+                db, version.id,
+                controlled_c11_pilot=(getattr(application.settings, "enable_controlled_c11_pilot", False) or full_c1),
+                controlled_c1_full_pilot=full_c1,
+                initial_pedagogy_id=x_ekagra_internal_pedagogy,
+                unified_controlled_study=unified,  # CHANGED
+            )
+            # The browser handoff is a one-use capability.  A session UUID alone
+            # is never enough to attach to a staff-created pilot session.
+            handoff_token = secrets.token_urlsafe(32)
+            session.runtime_config_snapshot = {**(session.runtime_config_snapshot or {}),
+                "internal_v051_browser_handoff_sha256": hashlib.sha256(handoff_token.encode("utf-8")).hexdigest()}
+            db.commit()
         request.session["participant_session_id"] = str(session.id)
+        response = RedirectResponse("/session", status_code=303)
+        response.headers["X-Ekagra-Internal-Open-Path"] = (
+            f"/internal/v051/session/{session.id}/open?handoff={handoff_token}")
+        return response
+
+    @router.get("/internal/v051/session/{session_id}/open")
+    async def open_internal_v051_session(request: Request, session_id: uuid.UUID,
+                                         x_ekagra_internal_test_token: str | None = Header(None), handoff: str | None = None):
+        """Attach a browser to an already-created internal candidate session only."""
+        staff_authorized = _internal_v051_access_enabled(application.settings, x_ekagra_internal_test_token)
+        if not staff_authorized and not handoff:
+            raise HTTPException(status_code=404)
+        # CHANGED: permit staff-created unified C1--C4 handoffs as well as old pilots.
+        if not (getattr(application.settings, "enable_controlled_c11_pilot", False)
+                or getattr(application.settings, "enable_controlled_c1_full_pilot", False)
+                or getattr(application.settings, "enable_v051_internal_testing", False)):
+            raise HTTPException(status_code=404)
+        with application.factory() as db:
+            session = db.get(Session, session_id)
+            snapshot = session.runtime_config_snapshot if session else None
+            if not (isinstance(snapshot, dict) and snapshot.get("internal_v051_testing")
+                    and snapshot.get("controlled_c11_pilot")):
+                raise HTTPException(status_code=404)
+            if not staff_authorized:
+                expected = snapshot.get("internal_v051_browser_handoff_sha256")
+                actual = hashlib.sha256(handoff.encode("utf-8")).hexdigest()
+                if not isinstance(expected, str) or not secrets.compare_digest(expected, actual):
+                    raise HTTPException(status_code=404)
+                session.runtime_config_snapshot = {key: value for key, value in snapshot.items()
+                                                   if key != "internal_v051_browser_handoff_sha256"}
+                db.commit()
+        request.session["participant_session_id"] = str(session_id)
         return RedirectResponse("/session", status_code=303)
 
     @router.post("/leave")
@@ -625,6 +695,27 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
         response.headers["HX-Retarget"] = "#session-main"
         response.headers["HX-Reswap"] = "outerHTML"
         return response
+
+    @router.post("/session/actions/c11-next", response_class=HTMLResponse)
+    async def c11_next(request: Request, background_tasks: BackgroundTasks,
+                       approval_version: int = Form(...), idempotency_key: str = Form(...)):
+        """CHANGED: Authoritative move-level Next for all four sections."""
+        session_id = application.require(request.session)
+        if not session_id:
+            return RedirectResponse("/join", status_code=303)
+        try:
+            def reserve(db):
+                next_move = application.execution.runtime.continue_controlled_c11_move(
+                    db, session_id, approval_version, commit=False)
+                return (application.execution.reserve_tutor(db, session_id, commit=False)
+                        if next_move is not None else None)
+            call_id, created = reserve_action(session_id, "CONTROLLED_C11_NEXT", idempotency_key,
+                                               {"approval_version": approval_version}, reserve)
+        except ValueError:
+            return rejected(request, session_id)
+        if created and call_id:
+            background_tasks.add_task(application.run_operation, call_id)
+        return application.render_main(request, session_id)
 
     @router.post("/session/actions/assessment-response", response_class=HTMLResponse)
     async def assessment_response(request: Request, background_tasks: BackgroundTasks, response_text: str = Form(..., max_length=12000), idempotency_key: str = Form(...), mcq1_answer: str | None = Form(None), mcq2_answer: str | None = Form(None), mcq3_answer: str | None = Form(None)):

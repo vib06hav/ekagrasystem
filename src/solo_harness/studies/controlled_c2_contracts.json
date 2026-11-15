@@ -1,0 +1,1300 @@
+{
+  "contract_id": "EKAGRAAI_CONTROLLED_C2_V2",
+  "status": "DESIGN_REVIEWED_C2_1_TO_C2_4_V2_2__RUNTIME_NOT_IMPLEMENTED",
+  "provenance": "Authored from EkagraAI Final Course Content Ground Truth (C1–C4), version 1.0, and the agreed C2 design review. C2.x.Oxx identifiers are locally assigned, stable references corresponding to the ordered content requirements of each named subsection in the Ground Truth; they are not official identifiers from the source document. This contract records instructional design only; it does not certify implementation or experimental effectiveness. V2.2 is a targeted pedagogy/guard/representation revision; locked scientific content and authored move IDs remain unchanged.",
+  "control_boundary": {
+    "backend": "active move, verified material, completion ledger and progression",
+    "frontend": "optional passive visuals; never model generated",
+    "tutor": "natural explanation, learner contingencies and doubts within authored move",
+    "judge": "learner-visible delivery evidence and pedagogy fidelity, never mastery"
+  },
+  "shared_guards": [
+    "No mastery or correctness gate",
+    "No assessment content",
+    "No unverified numeric examples",
+    "No cross-subsection instruction",
+    "Visual display alone is not delivery evidence",
+    "A learner doubt can interrupt a move without changing its position",
+    "The receiver is not presumed to possess the uncorrupted original frame",
+    "Distinguish data cells from transmitted checking-bit cells whenever positions are discussed",
+    "Parity checks apply to complete checked groups, including checking-bit cells",
+    "A passing check is not proof that transmission was error-free",
+    "Do not turn C2 examples into the integrated causal derivation reserved for C3",
+    "Do not infer mastery or SOLO level from move completion or a correct response",
+    "P2 requires one genuine learner response opportunity per guided move and accurate Tutor follow-through; hints are contingent on need, a wrong or uncertain response never creates a mastery gate, and an extra confirmation answer is never mandatory"
+  ],
+  "fixed_cases": {
+    "C2.1": {
+      "parity_convention": "even",
+      "initial_valid_complete_transmitted_frame": "101101",
+      "initial_ones_count": 4,
+      "position_numbering": "1-based, left to right",
+      "receiver_has_original": false,
+      "cases": [
+        {
+          "name": "one_flip_position_3",
+          "flipped_positions": [
+            3
+          ],
+          "flip": "1_to_0",
+          "received_frame": "100101",
+          "ones_count": 3,
+          "result": "FAIL"
+        },
+        {
+          "name": "two_flips_positions_2_and_5",
+          "flipped_positions": [
+            2,
+            5
+          ],
+          "flip": "both_0_to_1",
+          "received_frame": "111111",
+          "ones_count": 6,
+          "result": "PASS"
+        },
+        {
+          "name": "three_flips_positions_1_2_and_5",
+          "flipped_positions": [
+            1,
+            2,
+            5
+          ],
+          "received_frame": "011111",
+          "ones_count": 5,
+          "result": "FAIL"
+        },
+        {
+          "name": "alternative_one_flip_position_1",
+          "flipped_positions": [
+            1
+          ],
+          "flip": "1_to_0",
+          "received_frame": "001101",
+          "ones_count": 3,
+          "result": "FAIL"
+        }
+      ],
+      "rule": "From an initially valid transmitted frame, odd numbers of transmitted-bit flips fail a single parity check and even numbers leave it satisfied; applies to even and odd parity.",
+      "payload": "10110",
+      "appended_parity_bit": "1",
+      "parity_bit_position": 6,
+      "data_bit_positions": [
+        1,
+        2,
+        3,
+        4,
+        5
+      ],
+      "position_roles": {
+        "data_bits": "Positions 1–5 contain the payload 10110.",
+        "appended_parity_bit": "Position 6 contains the appended even-parity bit 1.",
+        "complete_frame": "The transmitted complete frame is payload 10110 followed by parity bit 1, giving 101101."
+      }
+    },
+    "C2.2": {
+      "parity_convention": "even",
+      "data_grid": [
+        "101",
+        "010"
+      ],
+      "row_parity_bits": [
+        "0",
+        "1"
+      ],
+      "column_parity_bits": [
+        "1",
+        "1",
+        "1"
+      ],
+      "corner_parity_bit": "1",
+      "complete_transmitted_grid": [
+        "1010",
+        "0101",
+        "1111"
+      ],
+      "complete_rows": {
+        "R1": {
+          "bits": "1010",
+          "ones": 2,
+          "result": "PASS"
+        },
+        "R2": {
+          "bits": "0101",
+          "ones": 2,
+          "result": "PASS"
+        },
+        "bottom": {
+          "bits": "1111",
+          "ones": 4,
+          "result": "PASS"
+        }
+      },
+      "complete_columns": {
+        "C1": {
+          "bits": "101",
+          "ones": 2,
+          "result": "PASS"
+        },
+        "C2": {
+          "bits": "011",
+          "ones": 2,
+          "result": "PASS"
+        },
+        "C3": {
+          "bits": "101",
+          "ones": 2,
+          "result": "PASS"
+        },
+        "rightmost": {
+          "bits": "011",
+          "ones": 2,
+          "result": "PASS"
+        }
+      },
+      "corner_responsibility": "One bottom-right corner bit completes both the bottom row and the rightmost column.",
+      "receiver_corruption": {
+        "changed_position": "R1C2",
+        "change": "0_to_1",
+        "received_grid": [
+          "1110",
+          "0101",
+          "1111"
+        ],
+        "row_results": {
+          "R1": "FAIL",
+          "R2": "PASS",
+          "bottom": "PASS"
+        },
+        "column_results": {
+          "C1": "PASS",
+          "C2": "FAIL",
+          "C3": "PASS",
+          "rightmost": "PASS"
+        },
+        "failed_groups": [
+          "R1",
+          "C2"
+        ],
+        "receiver_checks_all_seven_groups": true
+      },
+      "position_roles": {
+        "coordinate_rule": "RrCc is 1-based; R1–R2 are the original two data rows and C1–C3 are the original three data columns.",
+        "original_data_cells": [
+          "R1C1",
+          "R1C2",
+          "R1C3",
+          "R2C1",
+          "R2C2",
+          "R2C3"
+        ],
+        "row_parity_cells": [
+          "R1C4",
+          "R2C4"
+        ],
+        "column_parity_cells": [
+          "R3C1",
+          "R3C2",
+          "R3C3"
+        ],
+        "shared_corner_parity_cell": "R3C4",
+        "complete_checking_groups": [
+          "R1",
+          "R2",
+          "R3",
+          "C1",
+          "C2",
+          "C3",
+          "C4"
+        ],
+        "transmitted_cells": "All 12 positions are transmitted and subject to possible bit flips; every position belongs to exactly one complete row and one complete column."
+      }
+    },
+    "C2.3": {
+      "parity_convention": "even",
+      "initial_grid": [
+        "1010",
+        "0101",
+        "1111"
+      ],
+      "receiver_corruption": {
+        "changed_position": "R1C2",
+        "change": "0_to_1",
+        "received_grid": [
+          "1110",
+          "0101",
+          "1111"
+        ],
+        "failed_groups": [
+          "R1",
+          "C2"
+        ],
+        "all_other_groups": "PASS"
+      },
+      "localized_position": "R1C2",
+      "correction": "reverse_received_value_1_to_0",
+      "corrected_grid": [
+        "1010",
+        "0101",
+        "1111"
+      ],
+      "condition": "Exactly one transmitted cell has flipped; failed row/column intersection identifies it only under this assumption.",
+      "scope": "Any transmitted cell may flip, including row parity, column parity or corner checking-bit cells.",
+      "position_roles": {
+        "coordinate_rule": "RrCc is 1-based; R1–R2 are the original two data rows and C1–C3 are the original three data columns.",
+        "original_data_cells": [
+          "R1C1",
+          "R1C2",
+          "R1C3",
+          "R2C1",
+          "R2C2",
+          "R2C3"
+        ],
+        "row_parity_cells": [
+          "R1C4",
+          "R2C4"
+        ],
+        "column_parity_cells": [
+          "R3C1",
+          "R3C2",
+          "R3C3"
+        ],
+        "shared_corner_parity_cell": "R3C4",
+        "complete_checking_groups": [
+          "R1",
+          "R2",
+          "R3",
+          "C1",
+          "C2",
+          "C3",
+          "C4"
+        ],
+        "transmitted_cells": "All 12 positions are transmitted and subject to possible bit flips; every position belongs to exactly one complete row and one complete column."
+      }
+    },
+    "C2.4": {
+      "parity_convention": "even",
+      "initial_grid": [
+        "1010",
+        "0101",
+        "1111"
+      ],
+      "two_bit_cases": [
+        {
+          "name": "same_row",
+          "flipped_positions": [
+            "R1C1",
+            "R1C2"
+          ],
+          "failed_rows": [],
+          "passing_affected_row": "R1",
+          "failed_columns": [
+            "C1",
+            "C2"
+          ],
+          "other_groups": "PASS"
+        },
+        {
+          "name": "same_column",
+          "flipped_positions": [
+            "R1C1",
+            "R2C1"
+          ],
+          "failed_rows": [
+            "R1",
+            "R2"
+          ],
+          "passing_affected_column": "C1",
+          "failed_columns": [],
+          "other_groups": "PASS"
+        },
+        {
+          "name": "different_rows_and_columns",
+          "flipped_positions": [
+            "R1C1",
+            "R2C2"
+          ],
+          "failed_rows": [
+            "R1",
+            "R2"
+          ],
+          "failed_columns": [
+            "C1",
+            "C2"
+          ],
+          "other_groups": "PASS"
+        }
+      ],
+      "guarantee": "Full 2D parity detects every pair of distinct flipped transmitted cells, including checking-bit cells.",
+      "single_parity_comparison": "Single parity misses every two-bit flip pattern.",
+      "limitation": "Detection does not guarantee unique localization or correction of both changed cells.",
+      "position_roles": {
+        "coordinate_rule": "RrCc is 1-based; R1–R2 are the original two data rows and C1–C3 are the original three data columns.",
+        "original_data_cells": [
+          "R1C1",
+          "R1C2",
+          "R1C3",
+          "R2C1",
+          "R2C2",
+          "R2C3"
+        ],
+        "row_parity_cells": [
+          "R1C4",
+          "R2C4"
+        ],
+        "column_parity_cells": [
+          "R3C1",
+          "R3C2",
+          "R3C3"
+        ],
+        "shared_corner_parity_cell": "R3C4",
+        "complete_checking_groups": [
+          "R1",
+          "R2",
+          "R3",
+          "C1",
+          "C2",
+          "C3",
+          "C4"
+        ],
+        "transmitted_cells": "All 12 positions are transmitted and subject to possible bit flips; every position belongs to exactly one complete row and one complete column."
+      }
+    }
+  },
+  "subsections": {
+    "C2.1": {
+      "content_reference_legend": {
+        "C2.1.O01": "Briefly reconnect with the complete single-parity frame and receiver checking learned in C1.",
+        "C2.1.O02": "Understand one/several transmitted-bit flips and the odd-flip detected versus even-flip missed rule, assuming an initially valid complete frame; applies to even/odd parity.",
+        "C2.1.O03": "A single overall parity check cannot identify which transmitted bit changed, even given a one-bit error.",
+        "C2.1.O04": "Distinguish detection, localization and correction.",
+        "C2.1.O05": "Identify both single-parity limitations: inability to localize and inability to detect even-flip patterns."
+      },
+      "moves_by_pedagogy": {
+        "P1": [
+          {
+            "id": "C2.1-P1-M01",
+            "required_content_refs": [
+              "C2.1.O01"
+            ],
+            "source_instructional_action": "Reconnect briefly with C1 parity checking and establish a valid complete even-parity frame.",
+            "exact_delivery": "101101 is the valid complete even-parity frame: payload 10110 occupies positions 1–5, and the appended even-parity bit 1 is at position 6. The complete frame contains four 1s; positions are numbered 1–6 from left to right.",
+            "visual": {
+              "component": "parity",
+              "mode": "baseline"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Valid baseline, convention and positions established."
+          },
+          {
+            "id": "C2.1-P1-M02",
+            "required_content_refs": [
+              "C2.1.O02"
+            ],
+            "source_instructional_action": "Work a one-bit flip and demonstrate detection without claiming localization.",
+            "exact_delivery": "Flip position 3, 1→0: 101101 becomes 100101 (three 1s); the even-parity check fails.",
+            "visual": {
+              "component": "parity",
+              "mode": "single_flip"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "One-bit error and failed check accurately demonstrated."
+          },
+          {
+            "id": "C2.1-P1-M03",
+            "required_content_refs": [
+              "C2.1.O02"
+            ],
+            "source_instructional_action": "Work a two-bit flip and show that the overall check remains satisfied.",
+            "exact_delivery": "Flip positions 2 and 5, both 0→1: 101101 becomes 111111 (six 1s); the check passes despite corruption. Two flips change the 1-count by −2, 0 or +2.",
+            "visual": {
+              "component": "parity",
+              "mode": "two_flip"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Two-flip example and passing result correct; pass is not proof of no error."
+          },
+          {
+            "id": "C2.1-P1-M04",
+            "required_content_refs": [
+              "C2.1.O02"
+            ],
+            "source_instructional_action": "Generalize from one-, two- and three-flip cases; distinguish flip count from count of 1s and briefly include odd parity.",
+            "exact_delivery": "One flip: 100101 FAIL; two: 111111 PASS; three flips at positions 1,2,5: 011111 (five 1s) FAIL. From an initially valid frame, odd flip counts fail and even counts pass, for either parity convention.",
+            "visual": null,
+            "learner_response_policy": "model",
+            "completion_evidence": "Odd/even flip-count rule and initial-validity condition stated correctly."
+          },
+          {
+            "id": "C2.1-P1-M05",
+            "required_content_refs": [
+              "C2.1.O03",
+              "C2.1.O04",
+              "C2.1.O05"
+            ],
+            "source_instructional_action": "Compare different single-bit errors with the same overall check result; consolidate detection, localization, correction and both limitations.",
+            "exact_delivery": "Position 3 flip gives 100101 FAIL; position 1 flip gives 001101 FAIL. One overall result does not identify the changed position. Detection notices a violation; localization identifies the position; correction restores it. Single parity misses even-flip patterns and cannot locate a changed bit.",
+            "visual": null,
+            "learner_response_policy": "model",
+            "completion_evidence": "Same failed result and all three tasks/two limitations correctly distinguished."
+          }
+        ],
+        "P2": [
+          {
+            "id": "C2.1-P2-M01",
+            "required_content_refs": [
+              "C2.1.O01"
+            ],
+            "source_instructional_action": "Reconnect with C1 and invite identification of the complete frame being checked.",
+            "exact_delivery": "Ask: “Which sequence is the complete frame the receiver checks, and is the parity bit included?” Hint: “Look at the full six-bit sequence, not only the five payload bits.” Fallback: Explain that 101101 is the complete valid even-parity frame: payload 10110 is in positions 1–5 and the appended parity bit 1 is at position 6. The frame contains four 1s. Clarify that the receiver has the received frame and its parity rule, not the uncorrupted original. Continue to the next move regardless of the response.",
+            "visual": {
+              "component": "parity",
+              "mode": "baseline_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "Response opportunity and complete-frame reminder provided."
+          },
+          {
+            "id": "C2.1-P2-M02",
+            "required_content_refs": [
+              "C2.1.O02"
+            ],
+            "source_instructional_action": "Guide prediction of a one-bit flip before revealing the result.",
+            "exact_delivery": "Ask: “If position 3 changes from 1 to 0, will the complete received frame pass or fail the even-parity check? Why?” Hint: “Recount the 1s in the complete received frame, including the parity bit.” Fallback: Reveal 100101, which contains three 1s, so the even-parity check fails. Explain that the failed check detects a parity violation but does not identify the changed position. Continue to the next move regardless of the response.",
+            "visual": {
+              "component": "parity",
+              "mode": "single_flip_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "A genuine one-flip prediction opportunity and a correct Tutor explanation of 100101, three 1s and the FAIL result; hint only if needed."
+          },
+          {
+            "id": "C2.1-P2-M03",
+            "required_content_refs": [
+              "C2.1.O02"
+            ],
+            "source_instructional_action": "Guide prediction of a two-bit flip and explain the passing result.",
+            "exact_delivery": "Ask: “If positions 2 and 5 both change from 0 to 1, will the overall even-parity check pass or fail?” Hint: “Count the 1s after both changes; consider how changing two bits affects parity.” Fallback: Reveal 111111, which contains six 1s and therefore passes. Explain that two flips preserve the parity condition even though the frame is corrupted. Continue to the next move regardless of the response.",
+            "visual": {
+              "component": "parity",
+              "mode": "two_flip_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "Prediction opportunity and correct interpretation provided."
+          },
+          {
+            "id": "C2.1-P2-M04",
+            "required_content_refs": [
+              "C2.1.O02"
+            ],
+            "source_instructional_action": "Guide comparison of one, two and three flips to discover the odd/even rule.",
+            "exact_delivery": "Ask: “Compare the one-flip, two-flip and three-flip cases. What pattern do you notice in the check results?” Hint: “Group the number of flips into odd and even counts rather than focusing only on the resulting number of 1s.” Fallback: Explain that, from an initially valid frame, an odd number of flips causes the parity check to fail and an even number leaves it satisfied. This applies to both even and odd parity conventions. Use 100101 (one flip, FAIL), 111111 (two flips, PASS) and 011111 (three flips, FAIL). Continue to the next move regardless of the response.",
+            "visual": null,
+            "learner_response_policy": "guided",
+            "completion_evidence": "Learner is invited to generalize; precise rule supplied regardless of response."
+          },
+          {
+            "id": "C2.1-P2-M05",
+            "required_content_refs": [
+              "C2.1.O03",
+              "C2.1.O04",
+              "C2.1.O05"
+            ],
+            "source_instructional_action": "Guide comparison of two different single-bit errors and consolidate the three tasks and two limitations.",
+            "exact_delivery": "Ask: “Compare two possible received frames: 100101 and 001101. Both fail the overall parity check. Does that failed result by itself reveal which position changed?” Hint, if needed: “A failed overall check reports a violation, not a position.” Follow through: These are instructor-constructed alternatives from the same valid frame; a receiver normally sees only its own received frame. The identical FAIL result does not identify the flipped position. Detection notices a violated rule; localization identifies a position; correction restores the original value. Single parity misses even-flip patterns and cannot localize a changed bit. Continue regardless of learner accuracy.",
+            "visual": null,
+            "learner_response_policy": "guided",
+            "completion_evidence": "Localization limit and both limitations explained even after incorrect/uncertain response."
+          }
+        ],
+        "P3": [
+          {
+            "id": "C2.1-P3-M01",
+            "required_content_refs": [
+              "C2.1.O01"
+            ],
+            "source_instructional_action": "Establish a valid baseline and contrast instructor knowledge with receiver observations.",
+            "exact_delivery": "Use complete frame 101101: payload 10110 occupies positions 1–5 and the appended even-parity bit 1 is at position 6, giving four 1s. Positions are numbered 1–6 from left to right. The instructor constructing an example knows which bit flipped; the receiver sees only the received frame and check result.",
+            "visual": {
+              "component": "parity",
+              "mode": "baseline"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Baseline and observer roles explicit."
+          },
+          {
+            "id": "C2.1-P3-M02",
+            "required_content_refs": [
+              "C2.1.O02"
+            ],
+            "source_instructional_action": "Contrast a one-bit error with a two-bit error from the same valid frame.",
+            "exact_delivery": "One flip at position 3 gives 100101 FAIL; two flips at positions 2 and 5 give 111111 PASS. Contrast odd- and even-flip outcomes.",
+            "visual": {
+              "component": "parity",
+              "mode": "single_vs_double"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Both cases and outcomes correct."
+          },
+          {
+            "id": "C2.1-P3-M03",
+            "required_content_refs": [
+              "C2.1.O02"
+            ],
+            "source_instructional_action": "Contrast failed and passed checks as receiver observations.",
+            "exact_delivery": "100101 fails, detecting a parity-rule violation; 111111 passes, meaning the rule is satisfied, not that transmission was error-free.",
+            "visual": null,
+            "learner_response_policy": "compare",
+            "completion_evidence": "Pass/fail interpretations correctly bounded."
+          },
+          {
+            "id": "C2.1-P3-M04",
+            "required_content_refs": [
+              "C2.1.O02"
+            ],
+            "source_instructional_action": "Contrast one-, two- and three-flip cases to establish the flip-count pattern.",
+            "exact_delivery": "One flip 100101 FAIL; two flips 111111 PASS; three flips at positions 1,2,5 give 011111 FAIL. Odd counts fail and even counts pass from an initially valid frame, for even or odd parity.",
+            "visual": null,
+            "learner_response_policy": "compare",
+            "completion_evidence": "Cases and general rule accurate."
+          },
+          {
+            "id": "C2.1-P3-M05",
+            "required_content_refs": [
+              "C2.1.O03",
+              "C2.1.O04",
+              "C2.1.O05"
+            ],
+            "source_instructional_action": "Contrast different single-bit positions producing the same failed result; consolidate the limitations.",
+            "exact_delivery": "100101 (position 3 flipped) and 001101 (position 1 flipped) both fail. The receiver detects a violation but cannot locate the bit from one overall check. Distinguish detection, localization and correction; state both limitations.",
+            "visual": null,
+            "learner_response_policy": "compare",
+            "completion_evidence": "Same result demonstrates localization limit; both limitations stated."
+          }
+        ]
+      },
+      "visual_component_cap": 1,
+      "visual_interactive": false,
+      "implementation": "design_only"
+    },
+    "C2.2": {
+      "content_reference_legend": {
+        "C2.2.O01": "Motivate multiple checking constraints rather than one overall check.",
+        "C2.2.O02": "Arrange original data bits in rows and columns.",
+        "C2.2.O03": "Calculate and add row and column parity bits.",
+        "C2.2.O04": "Determine the shared corner parity bit and construct the complete rectangular transmitted grid.",
+        "C2.2.O05": "Make each complete row and column obey the agreed parity convention, including checking-bit cells.",
+        "C2.2.O06": "Receiver verifies every complete row and column of the full transmitted grid."
+      },
+      "moves_by_pedagogy": {
+        "P1": [
+          {
+            "id": "C2.2-P1-M01",
+            "required_content_refs": [
+              "C2.2.O01",
+              "C2.2.O02"
+            ],
+            "source_instructional_action": "Motivate multiple checking groups and arrange six data bits in rows and columns.",
+            "exact_delivery": "Use even parity. Arrange data as rows 101 and 010 in a 2×3 grid. These six positions are the original data cells; the extra checking cells will be added outside this 2×3 data block.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "data_arrangement"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Motivation and arrangement clear."
+          },
+          {
+            "id": "C2.2-P1-M02",
+            "required_content_refs": [
+              "C2.2.O03",
+              "C2.2.O05"
+            ],
+            "source_instructional_action": "Calculate and append each row parity bit, explaining complete-row even parity.",
+            "exact_delivery": "101 has two 1s, so append 0; 010 has one 1, so append 1. Extended rows: 1010 and 0101.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "row_parity"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Both row bits and counts correct."
+          },
+          {
+            "id": "C2.2-P1-M03",
+            "required_content_refs": [
+              "C2.2.O03",
+              "C2.2.O05"
+            ],
+            "source_instructional_action": "Calculate the three column parity bits and append below the columns.",
+            "exact_delivery": "Columns 10, 01 and 10 each have one 1, so their parity bits are 1, 1 and 1.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "column_parity"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "All column bits correct."
+          },
+          {
+            "id": "C2.2-P1-M04",
+            "required_content_refs": [
+              "C2.2.O04",
+              "C2.2.O05"
+            ],
+            "source_instructional_action": "Calculate the shared corner bit, assemble the complete grid and verify all complete rows and columns.",
+            "exact_delivery": "Corner 1 makes bottom row 1111 and rightmost column 011 even. Complete grid: 1010 / 0101 / 1111. All three rows and four columns pass. The original data are R1–R2/C1–C3; R1C4 and R2C4 are row-check bits, R3C1–R3C3 are column-check bits, and R3C4 is the shared corner.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "complete_grid"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Dual corner role, complete grid and seven passing checks shown."
+          },
+          {
+            "id": "C2.2-P1-M05",
+            "required_content_refs": [
+              "C2.2.O06"
+            ],
+            "source_instructional_action": "Demonstrate receiver verification of all seven groups on a corrupted grid; stop before localization.",
+            "exact_delivery": "Flip R1C2 from 0→1: received grid 1110 / 0101 / 1111. Row 1 and column 2 fail; row 2, bottom row, columns 1,3,4 pass. Receiver checks all seven complete groups including check-bit cells; do not explain intersection.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "receiver_verification"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "All seven outcomes correct; localization deferred."
+          }
+        ],
+        "P2": [
+          {
+            "id": "C2.2-P2-M01",
+            "required_content_refs": [
+              "C2.2.O01",
+              "C2.2.O02"
+            ],
+            "source_instructional_action": "Guide why multiple checking groups are useful and arrange the fixed data into rows and columns.",
+            "exact_delivery": "Ask: “How could we check smaller groups of the data instead of relying on one overall check?” Hint: “Try arranging the six data bits into more than one row, with corresponding columns.” Fallback: Arrange the fixed data as two rows, 101 and 010, in a 2×3 grid. Explain that this creates separate row and column checking groups; do not claim localization at this stage. Continue to the next move regardless of the response. The 2×3 block contains the six original data cells. Added checking cells will occupy the rightmost column, the bottom row, and their common corner.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "data_arrangement_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One learner response opportunity and a correct Tutor arrangement of the 2×3 original data cells and checking-group motivation; hint only if needed."
+          },
+          {
+            "id": "C2.2-P2-M02",
+            "required_content_refs": [
+              "C2.2.O03",
+              "C2.2.O05"
+            ],
+            "source_instructional_action": "Guide row parity calculation with count-first questions and hints.",
+            "exact_delivery": "Ask: “For row 101, how many 1s are present, and which parity bit makes the complete row even? Repeat for row 010.” Hint: “A row with an odd number of 1s needs a 1; a row with an even number needs a 0.” Fallback: Explain that 101 has two 1s, so its row parity bit is 0; 010 has one 1, so its row parity bit is 1. The extended rows are 1010 and 0101. Continue to the next move regardless of the response.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "row_parity_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "A learner response opportunity and correct Tutor explanation of both row-bit calculations and complete rows; hint only if needed."
+          },
+          {
+            "id": "C2.2-P2-M03",
+            "required_content_refs": [
+              "C2.2.O03",
+              "C2.2.O05"
+            ],
+            "source_instructional_action": "Guide calculation of each column parity bit.",
+            "exact_delivery": "Ask: “What parity bit should be added below each of the three columns: 10, 01 and 10?” Hint: “Count the 1s in each column and make the complete column contain an even number.” Fallback: Explain that each column has one 1, so each requires a parity bit of 1. The three column parity bits are therefore 1, 1 and 1. Continue to the next move regardless of the response.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "column_parity_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One learner response opportunity and correct Tutor explanation of the 1,1,1 column parity bits and their counts; hint only if needed."
+          },
+          {
+            "id": "C2.2-P2-M04",
+            "required_content_refs": [
+              "C2.2.O04",
+              "C2.2.O05"
+            ],
+            "source_instructional_action": "Guide discovery of the corner bit's dual responsibility, then assemble and verify the grid.",
+            "exact_delivery": "Ask: “After adding the row and column parity bits, what must the bottom-right corner bit accomplish?” Hint: “The corner belongs to two checking groups: the bottom row and the rightmost column.” Fallback: Explain that the corner bit is 1, making the bottom row 1111 and the rightmost column 011; both contain an even number of 1s. Assemble 1010 / 0101 / 1111 and verify all seven complete groups. Continue to the next move regardless of the response. Identify the complete grid positions: data in R1–R2/C1–C3, row-check bits at R1C4/R2C4, column-check bits at R3C1–R3C3, and corner at R3C4.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "corner_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One learner response opportunity and complete Tutor explanation of the shared corner, position roles and all seven valid checks; hint only if needed."
+          },
+          {
+            "id": "C2.2-P2-M05",
+            "required_content_refs": [
+              "C2.2.O06"
+            ],
+            "source_instructional_action": "Ask learner to predict failed checks after a specified corruption, then reveal complete receiver verification.",
+            "exact_delivery": "Ask: “If R1C2 changes from 0 to 1, which complete rows and columns will fail their parity checks?” Hint: “Trace the changed cell's row and column, then check the remaining groups rather than assuming they fail.” Fallback: Reveal the received grid 1110 / 0101 / 1111. Row 1 and column 2 fail; row 2, the bottom row, columns 1 and 3, and the rightmost column pass. Explain that the receiver checks all seven complete groups, including groups containing checking-bit cells. Do not explain the row-column intersection yet. Continue to the next move regardless of the response.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "receiver_verification_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One learner response opportunity plus correct Tutor explanation of all seven check outcomes, checking-cell scope and localization deferral; hint only if needed."
+          }
+        ],
+        "P3": [
+          {
+            "id": "C2.2-P3-M01",
+            "required_content_refs": [
+              "C2.2.O01",
+              "C2.2.O02"
+            ],
+            "source_instructional_action": "Contrast one overall check with separate row and column checking groups; arrange the fixed data.",
+            "exact_delivery": "Introduce 101 / 010 as a 2×3 grid. Contrast a single overall check with separate row/column groups without claiming localization. The six original data cells occupy R1–R2 and C1–C3; checking positions will be added outside that block.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "single_vs_2d"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Motivation and arrangement accurately contrasted."
+          },
+          {
+            "id": "C2.2-P3-M02",
+            "required_content_refs": [
+              "C2.2.O03",
+              "C2.2.O05"
+            ],
+            "source_instructional_action": "Contrast correct and incorrect row parity choices while the row-checking cells are being constructed; reserve their effect on the complete rightmost column until the full grid is assembled.",
+            "exact_delivery": "Compare row 101 with appended 0 (1010: two 1s, PASS) against appended 1 (1011: three 1s, FAIL). Compare row 010 with appended 1 (0101: two 1s, PASS) against appended 0 (0100: one 1, FAIL). The correct row-check choices make each complete row even. Do not introduce the rightmost-column check before its corner is constructed.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "row_parity_contrast"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Both correct-versus-incorrect row-bit contrasts, counts, and row pass/fail results are explained without premature full-grid claims."
+          },
+          {
+            "id": "C2.2-P3-M03",
+            "required_content_refs": [
+              "C2.2.O03",
+              "C2.2.O05"
+            ],
+            "source_instructional_action": "Contrast correct versus incorrect column checking-bit choices while constructing the bottom checking row; defer implications for the complete bottom-row check until the corner is added.",
+            "exact_delivery": "The original data columns 10, 01 and 10 each contain one 1, so each needs a column-check bit 1 to make its complete column even. For one such column, compare appended 1 (two 1s, PASS) with appended 0 (one 1, FAIL). All three correct column-check bits are 1. The full bottom-row check is completed when the shared corner bit is added next.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "column_parity_contrast"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "All three column bits and a correct-versus-incorrect column result are explained; bottom-row checking is deferred until the corner is present."
+          },
+          {
+            "id": "C2.2-P3-M04",
+            "required_content_refs": [
+              "C2.2.O04",
+              "C2.2.O05"
+            ],
+            "source_instructional_action": "Contrast both corner values and explain the corner's shared responsibility.",
+            "exact_delivery": "With row bits 0,1 and column bits 1,1,1, corner 1 makes bottom row 1111 and rightmost column 011 even; corner 0 makes both odd. Present 1010 / 0101 / 1111. Distinguish six original data cells, two row-check cells, three column-check cells and the shared corner R3C4.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "corner_contrast"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "One corner bit correctly shown completing both groups."
+          },
+          {
+            "id": "C2.2-P3-M05",
+            "required_content_refs": [
+              "C2.2.O06"
+            ],
+            "source_instructional_action": "Contrast valid and corrupted grids and compare all receiver check outcomes.",
+            "exact_delivery": "Valid 1010 / 0101 / 1111: all seven pass. After R1C2 0→1, 1110 / 0101 / 1111: row 1 and column 2 fail; other five pass. Receiver checks all complete rows/columns; defer intersection.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "valid_vs_corrupted"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "All outcomes correct and localization deferred."
+          }
+        ]
+      },
+      "visual_component_cap": 1,
+      "visual_interactive": false,
+      "implementation": "design_only"
+    },
+    "C2.3": {
+      "content_reference_legend": {
+        "C2.3.O01": "Establish a transmission in which exactly one transmitted cell flips.",
+        "C2.3.O02": "Identify the row and column checks that fail.",
+        "C2.3.O03": "Locate the candidate cell at the failed row-column intersection, including possible checking-bit positions.",
+        "C2.3.O04": "Correct the one received flipped bit by reversing it and checking again.",
+        "C2.3.O05": "State the exactly-one-error assumption, which cannot be proved from a one-row/one-column failure alone.",
+        "C2.3.O06": "Contrast conditional 2D localization/correction with the localization limitation of single parity."
+      },
+      "moves_by_pedagogy": {
+        "P1": [
+          {
+            "id": "C2.3-P1-M01",
+            "required_content_refs": [
+              "C2.3.O01"
+            ],
+            "source_instructional_action": "Reconnect with the valid full 2D grid and establish the exactly-one-flipped-cell case.",
+            "exact_delivery": "Valid grid 1010 / 0101 / 1111. Assume exactly one transmitted cell has flipped; receiver initially does not know its position. The two data rows and three data columns occupy the top-left 2×3 block; the right and bottom edges contain transmitted checking bits including corner R3C4.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "valid_grid"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Grid and assumption explicit."
+          },
+          {
+            "id": "C2.3-P1-M02",
+            "required_content_refs": [
+              "C2.3.O01",
+              "C2.3.O02"
+            ],
+            "source_instructional_action": "Demonstrate a single-cell corruption and identify failed row and column checks.",
+            "exact_delivery": "Flip R1C2 0→1: received grid 1110 / 0101 / 1111. Row 1 and column 2 fail; all other complete groups pass.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "single_error_received"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Received grid and failed checks correct."
+          },
+          {
+            "id": "C2.3-P1-M03",
+            "required_content_refs": [
+              "C2.3.O02",
+              "C2.3.O03",
+              "C2.3.O05"
+            ],
+            "source_instructional_action": "Use the failed row/column intersection to locate the changed cell under the exactly-one-error assumption.",
+            "exact_delivery": "Failed row 1 and column 2 intersect at R1C2. This identifies the changed cell only under the exactly-one-error assumption; the changed cell may also be a row, column or corner check-bit cell.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "intersection"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Intersection, assumption and check-cell scope explicit."
+          },
+          {
+            "id": "C2.3-P1-M04",
+            "required_content_refs": [
+              "C2.3.O04"
+            ],
+            "source_instructional_action": "Reverse the received value at the identified cell and reverify.",
+            "exact_delivery": "At R1C2 reverse 1→0. Grid returns to 1010 / 0101 / 1111; all seven complete groups pass.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "correction"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Reversal and re-verification correct."
+          },
+          {
+            "id": "C2.3-P1-M05",
+            "required_content_refs": [
+              "C2.3.O05",
+              "C2.3.O06"
+            ],
+            "source_instructional_action": "Consolidate conditional correction and contrast with single parity; warn that the check pattern alone does not prove one error.",
+            "exact_delivery": "Full 2D parity locates/corrects one flipped cell if exactly one transmitted bit changed. Single parity cannot locate it. One failed row and one failed column do not prove only one error; complex patterns are reserved for C3.",
+            "visual": null,
+            "learner_response_policy": "model",
+            "completion_evidence": "Conditional capability and C3 boundary stated."
+          }
+        ],
+        "P2": [
+          {
+            "id": "C2.3-P2-M01",
+            "required_content_refs": [
+              "C2.3.O01"
+            ],
+            "source_instructional_action": "Reconnect with valid grid and invite prediction about the checks affected by one flipped cell.",
+            "exact_delivery": "Ask: “If exactly one transmitted cell has flipped but the receiver does not know where, which checking groups could reveal that something changed?” Hint: “Think about the row and column that contain the changed cell.” Fallback: Explain that a single flipped cell changes the parity of its complete row and complete column; the receiver checks all complete rows and columns. State that the exactly-one-error condition is an assumption for this example, not something the receiver has established yet. Continue to the next move regardless of the response. All 12 positions, including row-check, column-check and corner cells, are transmitted and count toward the one-cell-flip assumption.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "single_error_prediction"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One learner response opportunity and correct Tutor explanation of the exactly-one-flipped-transmitted-cell assumption and affected groups; hint only if needed."
+          },
+          {
+            "id": "C2.3-P2-M02",
+            "required_content_refs": [
+              "C2.3.O01",
+              "C2.3.O02"
+            ],
+            "source_instructional_action": "Guide verification of the received grid row by row and column by column.",
+            "exact_delivery": "Ask: “In the received grid 1110 / 0101 / 1111, which complete row fails first? Which complete column fails?” Hint: “Count the 1s in each complete row, then in each complete column, including the checking-bit row and column.” Fallback: Explain that row 1 and column 2 fail, while row 2, the bottom row, and columns 1, 3 and 4 pass. Continue to the next move regardless of the response.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "failed_checks_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "A learner response opportunity and the correct Tutor explanation of the seven complete row/column check results; hint only if needed."
+          },
+          {
+            "id": "C2.3-P2-M03",
+            "required_content_refs": [
+              "C2.3.O02",
+              "C2.3.O03",
+              "C2.3.O05"
+            ],
+            "source_instructional_action": "Guide the learner to identify the failed row/column intersection under the stated assumption.",
+            "exact_delivery": "Ask: “Which cell lies at the intersection of failed row 1 and failed column 2?” Hint: “Use the row label and column label together to identify one grid position.” Fallback: Identify R1C2 as the intersection. Explain that it identifies the changed cell only under the stated exactly-one-transmitted-cell-flipped assumption. The possible position may be a data cell or any checking-bit cell, including the corner. Continue to the next move regardless of the response.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "intersection_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One learner response opportunity and correct Tutor explanation of the R1C2 intersection, conditional assumption and checking-cell scope; hint only if needed."
+          },
+          {
+            "id": "C2.3-P2-M04",
+            "required_content_refs": [
+              "C2.3.O04"
+            ],
+            "source_instructional_action": "Guide reversal of the received value and verification of the corrected grid.",
+            "exact_delivery": "Ask: “The received value at the identified position R1C2 is 1. Under the exactly-one-error assumption, what should the receiver do?” Hint: “A bit flip changes 0 to 1 or 1 to 0; reverse the received value.” Fallback: Explain that reversing 1 to 0 restores the valid example grid 1010 / 0101 / 1111. Recheck all seven complete groups and show that they pass. Continue to the next move regardless of the response.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "correction_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One learner response opportunity and correct Tutor explanation of reversing R1C2 and rechecking all seven complete groups; hint only if needed."
+          },
+          {
+            "id": "C2.3-P2-M05",
+            "required_content_refs": [
+              "C2.3.O05",
+              "C2.3.O06"
+            ],
+            "source_instructional_action": "Prompt distinction between conditional localization and an unsupported conclusion; consolidate advantage over single parity.",
+            "exact_delivery": "Ask: “Do one failed row and one failed column, by themselves, prove that exactly one transmitted bit changed?” Hint: “Separate the assumption used in this worked example from what the receiver can conclude from the checks alone.” Fallback: Explain that the intersection locates the changed cell when exactly one transmitted cell has flipped, but the check pattern alone does not prove that assumption. Contrast this conditional capability with single parity's inability to locate a bit, and defer multiple-error ambiguity patterns to C3. Continue regardless of the response; do not use correctness to gate progression.",
+            "visual": null,
+            "learner_response_policy": "guided",
+            "completion_evidence": "Correct caveat and C3 boundary supplied regardless of response."
+          }
+        ],
+        "P3": [
+          {
+            "id": "C2.3-P3-M01",
+            "required_content_refs": [
+              "C2.3.O01"
+            ],
+            "source_instructional_action": "Contrast intact grid with a received grid containing exactly one flipped cell.",
+            "exact_delivery": "Compare 1010 / 0101 / 1111 with 1110 / 0101 / 1111 after R1C2 changes 0→1. Receiver initially does not know the position. The receiver sees its received complete grid; the instructor presents both grids to demonstrate the change. All 12 positions, including checking bits, are eligible to flip.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "intact_vs_corrupted"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Matched cases and assumption clear."
+          },
+          {
+            "id": "C2.3-P3-M02",
+            "required_content_refs": [
+              "C2.3.O02"
+            ],
+            "source_instructional_action": "Contrast passing and failing checks in the received grid.",
+            "exact_delivery": "For 1110 / 0101 / 1111, row 1 and column 2 fail; row 2, bottom row and columns 1,3,4 pass.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "pass_fail_groups"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "All seven outcomes correct."
+          },
+          {
+            "id": "C2.3-P3-M03",
+            "required_content_refs": [
+              "C2.3.O02",
+              "C2.3.O03",
+              "C2.3.O05",
+              "C2.3.O06"
+            ],
+            "source_instructional_action": "Contrast one overall parity failure with paired row/column clues and their intersection.",
+            "exact_delivery": "One overall failure does not name a position. Failed row 1 and column 2 intersect at R1C2, identifying the cell if exactly one transmitted bit flipped; check-bit cells are included.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "single_vs_2d"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Additional localization information and condition explicit."
+          },
+          {
+            "id": "C2.3-P3-M04",
+            "required_content_refs": [
+              "C2.3.O04"
+            ],
+            "source_instructional_action": "Contrast corrupted and corrected grids and verify the reversal.",
+            "exact_delivery": "Compare 1110 / 0101 / 1111 with 1010 / 0101 / 1111 after R1C2 changes 1→0; all seven checks pass after correction.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "corrupted_vs_corrected"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Correction and re-verification correct."
+          },
+          {
+            "id": "C2.3-P3-M05",
+            "required_content_refs": [
+              "C2.3.O05",
+              "C2.3.O06"
+            ],
+            "source_instructional_action": "Contrast a valid conditional claim with an unsupported universal claim about one failed row and column.",
+            "exact_delivery": "Valid: under exactly-one-bit assumption, intersection identifies the cell. Unsupported: one failed row and one failed column prove exactly one error. Multiple-error ambiguity belongs to C3.",
+            "visual": null,
+            "learner_response_policy": "compare",
+            "completion_evidence": "Conditional claim and inference boundary clear."
+          }
+        ]
+      },
+      "visual_component_cap": 1,
+      "visual_interactive": false,
+      "implementation": "design_only"
+    },
+    "C2.4": {
+      "content_reference_legend": {
+        "C2.4.O01": "Consider two distinct transmitted-cell flips anywhere in the complete grid.",
+        "C2.4.O02": "Full 2D parity detects every two-bit flip pattern.",
+        "C2.4.O03": "Single parity misses every two-bit flip pattern.",
+        "C2.4.O04": "Distinguish detecting corruption from uniquely locating and correcting both changed cells.",
+        "C2.4.O05": "Full 2D parity does not generally guarantee unique correction of arbitrary two-bit corruption.",
+        "C2.4.O06": "Contrast conditional one-bit correction with guaranteed two-bit detection."
+      },
+      "moves_by_pedagogy": {
+        "P1": [
+          {
+            "id": "C2.4-P1-M01",
+            "required_content_refs": [
+              "C2.4.O01",
+              "C2.4.O06"
+            ],
+            "source_instructional_action": "Reconnect with full 2D parity and conditional single-error correction; introduce two distinct flipped transmitted cells.",
+            "exact_delivery": "Use valid grid 1010 / 0101 / 1111. The two-bit guarantee covers any two distinct transmitted cells, including checking-bit cells. This includes pairs of original data cells, checking-bit cells, or one of each. All 12 positions are transmitted.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "two_error_baseline"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Two distinct cells and full-grid scope clear."
+          },
+          {
+            "id": "C2.4-P1-M02",
+            "required_content_refs": [
+              "C2.4.O01",
+              "C2.4.O02",
+              "C2.4.O03"
+            ],
+            "source_instructional_action": "Contrast single parity with full 2D parity and demonstrate two flips in the same row.",
+            "exact_delivery": "Single parity remains satisfied after two flips. Flip R1C1 and R1C2: row 1 passes, columns 1 and 2 fail. Full 2D parity detects this case.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "same_row"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Same-row results and comparison correct."
+          },
+          {
+            "id": "C2.4-P1-M03",
+            "required_content_refs": [
+              "C2.4.O01",
+              "C2.4.O02"
+            ],
+            "source_instructional_action": "Demonstrate two flips in the same column.",
+            "exact_delivery": "Flip R1C1 and R2C1. Rows 1 and 2 fail; column 1 passes because it contains both flips; remaining groups pass. The corruption is detected.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "same_column"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Same-column outcomes correct."
+          },
+          {
+            "id": "C2.4-P1-M04",
+            "required_content_refs": [
+              "C2.4.O01",
+              "C2.4.O02"
+            ],
+            "source_instructional_action": "Demonstrate two flips in different rows and different columns.",
+            "exact_delivery": "Flip R1C1 and R2C2. Rows 1 and 2 and columns 1 and 2 fail; other groups pass. The corruption is detected.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "different_rows_columns"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Different-row/different-column outcomes correct."
+          },
+          {
+            "id": "C2.4-P1-M05",
+            "required_content_refs": [
+              "C2.4.O02",
+              "C2.4.O03",
+              "C2.4.O04",
+              "C2.4.O05",
+              "C2.4.O06"
+            ],
+            "source_instructional_action": "Summarize the three arrangements and state the detection guarantee without a unified causal derivation; distinguish detection from correction.",
+            "exact_delivery": "For any two distinct cells in the grid, exactly one of three positional relationships holds: both are in the same row, both are in the same column, or they are in different rows and different columns. These three arrangements exhaust all possible pairs of distinct cells. Full 2D parity detects every pair; single parity misses every two-flip pattern. Detection does not guarantee unique localization/correction of both. Contrast with conditional one-bit correction; defer deeper causal analysis to C3.",
+            "visual": null,
+            "learner_response_policy": "model",
+            "completion_evidence": "Guarantee and limits correct without C3-level explanation."
+          }
+        ],
+        "P2": [
+          {
+            "id": "C2.4-P2-M01",
+            "required_content_refs": [
+              "C2.4.O01",
+              "C2.4.O03",
+              "C2.4.O06"
+            ],
+            "source_instructional_action": "Reconnect with single-error correction and ask how single parity responds to two flips.",
+            "exact_delivery": "Ask: “If two transmitted bits flip, what happens to a single overall parity check?” Hint: “Think about whether two flips change an even number of bits relative to the original valid frame.” Fallback: Explain that two flips preserve the overall parity condition, so single parity misses every two-bit flip pattern. Introduce the comparison that 2D parity checks separate rows and columns as well. Continue to the next move regardless of the response. The guarantee concerns any two distinct transmitted cells, including checking-bit cells, not only the six original data cells.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "two_error_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One learner response opportunity plus correct Tutor explanation of single parity missing every two-flip pattern and 2D parity using additional complete checks; hint only if needed."
+          },
+          {
+            "id": "C2.4-P2-M02",
+            "required_content_refs": [
+              "C2.4.O01",
+              "C2.4.O02"
+            ],
+            "source_instructional_action": "Guide prediction of failed checks for two flips in the same row.",
+            "exact_delivery": "Ask: “If R1C1 and R1C2 both flip, does row 1 fail? Which columns are affected?” Hint: “Check the number of flips within row 1, then inspect each of the two columns separately.” Fallback: Explain that row 1 passes because it contains two flips, while columns 1 and 2 each contain one flip and fail. Therefore, the two-bit corruption is detected by full 2D parity. Continue to the next move regardless of the response.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "same_row_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One learner response opportunity plus correct Tutor explanation of same-row two-flip outcomes (R1 passes, C1/C2 fail); hint only if needed."
+          },
+          {
+            "id": "C2.4-P2-M03",
+            "required_content_refs": [
+              "C2.4.O01",
+              "C2.4.O02"
+            ],
+            "source_instructional_action": "Guide prediction of failed checks for two flips in the same column.",
+            "exact_delivery": "Ask: “If R1C1 and R2C1 both flip, what happens to rows 1 and 2, and what happens to column 1?” Hint: “Each affected row contains one flip, while column 1 contains both flips.” Fallback: Explain that rows 1 and 2 fail, while column 1 passes because it contains two flips; the remaining groups pass. The corruption is still detected by the failed row checks. Continue to the next move regardless of the response.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "same_column_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One learner response opportunity plus correct Tutor explanation of same-column two-flip outcomes (R1/R2 fail, C1 passes); hint only if needed."
+          },
+          {
+            "id": "C2.4-P2-M04",
+            "required_content_refs": [
+              "C2.4.O01",
+              "C2.4.O02"
+            ],
+            "source_instructional_action": "Guide prediction of failed checks for two flips in different rows and columns.",
+            "exact_delivery": "Ask: “If R1C1 and R2C2 flip, which rows and columns contain one changed cell each?” Hint: “The two changed cells are in different rows and different columns; trace each cell's row and column.” Fallback: Explain that rows 1 and 2 and columns 1 and 2 fail, while the other groups pass. The two-bit corruption is detected. Continue to the next move regardless of the response.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "different_rows_columns_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One learner response opportunity plus correct Tutor explanation of four failed groups for distributed two-flip positions; hint only if needed."
+          },
+          {
+            "id": "C2.4-P2-M05",
+            "required_content_refs": [
+              "C2.4.O02",
+              "C2.4.O03",
+              "C2.4.O04",
+              "C2.4.O05",
+              "C2.4.O06"
+            ],
+            "source_instructional_action": "Guide comparison of all three cases and distinguish detection from unique localization/correction.",
+            "exact_delivery": "Ask: “Across the same-row, same-column and different-row/different-column cases, what can full 2D parity guarantee, and what can it not guarantee?” Hint: “Separate noticing that an error exists from identifying and correcting both changed positions.” Fallback: Explain that for any two distinct cells, exactly one of these three positional relationships holds: same row, same column, or different rows and different columns. These cases exhaust all possible pairs. Full 2D parity detects every two-bit pattern, whereas single parity misses every two-flip pattern. Detection does not guarantee unique localization or correction of both changed cells. Contrast with conditional single-bit correction and leave the deeper causal derivation to C3. Continue regardless of the response; do not use correctness to gate progression.",
+            "visual": null,
+            "learner_response_policy": "guided",
+            "completion_evidence": "One learner response opportunity plus correct Tutor explanation of the exhaustive positional cases, two-bit detection guarantee, and non-guaranteed unique correction; hint only if needed."
+          }
+        ],
+        "P3": [
+          {
+            "id": "C2.4-P3-M01",
+            "required_content_refs": [
+              "C2.4.O01",
+              "C2.4.O03"
+            ],
+            "source_instructional_action": "Contrast single parity's response to two flips with the additional checks in full 2D parity.",
+            "exact_delivery": "Two flips leave a single overall parity condition satisfied; 2D parity also checks separate rows and columns. Both single and 2D checking operate on complete transmitted bits, including the checking cells in the 3×4 grid.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "single_vs_2d"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "The two arrangements correctly contrasted."
+          },
+          {
+            "id": "C2.4-P3-M02",
+            "required_content_refs": [
+              "C2.4.O01",
+              "C2.4.O02"
+            ],
+            "source_instructional_action": "Contrast same-row and same-column two-bit cases and their different outcomes.",
+            "exact_delivery": "Same row R1C1,R1C2: row 1 passes; columns 1,2 fail. Same column R1C1,R2C1: rows 1,2 fail; column 1 passes. Both detected.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "same_row_vs_same_column"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Both arrangements and outcomes correct."
+          },
+          {
+            "id": "C2.4-P3-M03",
+            "required_content_refs": [
+              "C2.4.O01",
+              "C2.4.O02"
+            ],
+            "source_instructional_action": "Contrast different-row/different-column case with aligned cases.",
+            "exact_delivery": "Flips at R1C1 and R2C2 make rows 1,2 and columns 1,2 fail. Compare this with the previous two arrangements; this case is also detected.",
+            "visual": {
+              "component": "parity_grid",
+              "mode": "aligned_vs_unaligned"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Four failed checks correctly identified."
+          },
+          {
+            "id": "C2.4-P3-M04",
+            "required_content_refs": [
+              "C2.4.O02",
+              "C2.4.O03"
+            ],
+            "source_instructional_action": "Compare the three demonstrated arrangements to state the two-bit detection guarantee, without a unified causal proof.",
+            "exact_delivery": "The same-row, same-column and different-row/different-column cases exhaust the possible positional relationships for any two distinct cells in the grid: two cells must either share a row, share a column, or share neither. Each arrangement produces at least one failed row or column check. Full 2D parity detects every two-bit pattern; single parity misses every two-flip pattern. State the guarantee at C2's level without giving the unified causal proof reserved for C3.",
+            "visual": null,
+            "learner_response_policy": "compare",
+            "completion_evidence": "Case comparison supports guarantee at C2's level."
+          },
+          {
+            "id": "C2.4-P3-M05",
+            "required_content_refs": [
+              "C2.4.O04",
+              "C2.4.O05",
+              "C2.4.O06"
+            ],
+            "source_instructional_action": "Contrast guaranteed detection with guaranteed unique localization/correction; compare with the single-error case.",
+            "exact_delivery": "Full 2D parity detects every two-bit pattern but does not generally locate and correct both uniquely. Contrast with conditional correction under the exactly-one-error assumption in C2.3; defer complex interpretation to C3.",
+            "visual": null,
+            "learner_response_policy": "compare",
+            "completion_evidence": "Detection, correction limits and single-error condition distinguished."
+          }
+        ]
+      },
+      "visual_component_cap": 1,
+      "visual_interactive": false,
+      "implementation": "design_only"
+    }
+  }
+}

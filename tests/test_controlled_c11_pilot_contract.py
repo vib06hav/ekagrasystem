@@ -116,7 +116,7 @@ class _ControlledPilotClient:
     async def send(self, prepared):
         from solo_harness.runtime.ai import RawLLMResponse
         request = prepared.request
-        pilot = "[CONTROLLED_C11_CURRENT_TUTOR_CONTEXT]" in request.messages[0].content
+        pilot = "[CONTROLLED_C1_NATURAL_TUTOR_RULES_V3]" in request.messages[0].content
         if request.logical_role == "TUTOR":
             payload = {
                 "learner_message": "A fixed, treatment-faithful explanation for the active move.",
@@ -127,6 +127,24 @@ class _ControlledPilotClient:
         return RawLLMResponse(None, 200, json.dumps(payload),
                               {"choices": [{"message": {"parsed": payload}}]}, payload,
                               "stop", False, {}, 1)
+
+
+class _DoubtContinuationClient(_ControlledPilotClient):
+    """Exercise an incomplete doubt answer before the follow-up answer is reviewed."""
+    def __init__(self):
+        self.incomplete_doubt_sent = False
+
+    async def send(self, prepared):
+        if (prepared.request.logical_role == "TUTOR"
+                and prepared.request.audit_context.get("pilot_response_mode") == "DOUBT"
+                and not self.incomplete_doubt_sent):
+            self.incomplete_doubt_sent = True
+            payload = {"learner_message": "Let me explain one part first.", "ready_for_judge": False}
+            from solo_harness.runtime.ai import RawLLMResponse
+            return RawLLMResponse(None, 200, json.dumps(payload),
+                                  {"choices": [{"message": {"parsed": payload}}]}, payload,
+                                  "stop", False, {}, 1)
+        return await super().send(prepared)
 
 
 def _pilot_settings():
@@ -155,19 +173,35 @@ def _controlled_runtime(db, pedagogy):
 @pytest.mark.skipif(not os.environ.get("EKAGRA_STAGE3_DATABASE_URL"),
                     reason="set EKAGRA_STAGE3_DATABASE_URL for PostgreSQL pilot integration")
 @pytest.mark.parametrize("pedagogy", ["P1", "P3"])
-def test_controlled_c11_non_guided_pedagogies_complete_ordered_moves(pedagogy):
+def test_controlled_c11_non_guided_pedagogies_require_each_learner_next(pedagogy):
     from solo_harness.db.engine import make_session_factory
     from solo_harness.db.models import Message, SubsectionProgress
     from solo_harness.runtime.ai import AIExecutionRuntime
 
     with make_session_factory(os.environ["EKAGRA_STAGE3_DATABASE_URL"])() as db:
         runtime, session_id = _controlled_runtime(db, pedagogy)
-        call_id = AIExecutionRuntime(runtime, _ControlledPilotClient(), _pilot_settings()).reserve_tutor(db, session_id, commit=True)
-        asyncio.run(AIExecutionRuntime(runtime, _ControlledPilotClient(), _pilot_settings()).execute(db, call_id))
+        ai = AIExecutionRuntime(runtime, _ControlledPilotClient(), _pilot_settings())
+        moves = contract()["subsections"]["C1.1"]["moves_by_pedagogy"][pedagogy]
+        call_id = ai.reserve_tutor(db, session_id, commit=True)
+        for index, move in enumerate(moves):
+            asyncio.run(ai.execute(db, call_id))
+            progress = db.scalar(select(SubsectionProgress).where(
+                SubsectionProgress.session_id == session_id, SubsectionProgress.subsection_id == "C1.1"
+            ))
+            controlled = progress.instructional_state["controlled_c11"]
+            assert controlled["move_index"] == index
+            assert controlled["status"] == "APPROVED_AWAITING_NEXT"
+            assert set(progress.move_evidence) == {item["id"] for item in moves[:index + 1]}
+            next_move = runtime.continue_controlled_c11_move(db, session_id, controlled["approval_version"], commit=True)
+            if next_move is None:
+                break
+            assert next_move["id"] == moves[index + 1]["id"]
+            call_id = ai.reserve_tutor(db, session_id, commit=True)
         progress = db.scalar(select(SubsectionProgress).where(
             SubsectionProgress.session_id == session_id, SubsectionProgress.subsection_id == "C1.1"
         ))
-        assert progress.status == "COMPLETED"
+        assert progress.status == "ACTIVE"
+        assert progress.instructional_state["controlled_c11"]["status"] == "PILOT_BOUNDARY_HANDOFF"
         assert set(progress.move_evidence) == set(progress.required_move_ids)
         assert set(progress.content_evidence) == set(progress.required_content_ids)
         traces = db.scalars(select(Message).where(Message.attempt_id == progress.attempt_id, Message.role == "TUTOR")).all()
@@ -189,12 +223,18 @@ def test_controlled_c11_guided_moves_require_learner_turns_and_resolve_visuals()
         progress = db.scalar(select(SubsectionProgress).where(
             SubsectionProgress.session_id == session_id, SubsectionProgress.subsection_id == "C1.1"
         ))
-        assert progress.instructional_state["controlled_c11"]["move_index"] == 1
-        for reply in ("I do not know.", "110", "2"):
-            call_id = ai.reserve_tutor(db, session_id, reply, commit=True)
-            asyncio.run(ai.execute(db, call_id))
+        state = progress.instructional_state["controlled_c11"]
+        assert state["move_index"] == 0 and state["status"] == "APPROVED_AWAITING_NEXT"
+        runtime.continue_controlled_c11_move(db, session_id, state["approval_version"], commit=True)
+        call_id = ai.reserve_tutor(db, session_id, commit=True)
+        asyncio.run(ai.execute(db, call_id))
         db.refresh(progress)
-        assert progress.status == "COMPLETED"
+        assert progress.instructional_state["controlled_c11"]["status"] == "AWAITING_LEARNER"
+        call_id = ai.reserve_tutor(db, session_id, "I do not know.", commit=True)
+        asyncio.run(ai.execute(db, call_id))
+        db.refresh(progress)
+        assert progress.instructional_state["controlled_c11"]["move_index"] == 1
+        assert progress.instructional_state["controlled_c11"]["status"] == "APPROVED_AWAITING_NEXT"
         traces = db.scalars(select(Message).where(Message.attempt_id == progress.attempt_id, Message.role == "TUTOR")).all()
         visuals = [message.instructional_trace.get("pilot_visual") for message in traces if message.instructional_trace.get("pilot_visual")]
         assert visuals and all("html" not in visual for visual in visuals)
@@ -212,3 +252,64 @@ def test_controlled_c11_rejects_direct_subsection_bypass():
         runtime, session_id = _controlled_runtime(db, "P1")
         with pytest.raises(ConversationJudgeRejected, match="move-level Judge authorization"):
             runtime.advance_v051_subsection(db, session_id, "C1.1", commit=False)
+
+
+@pytest.mark.skipif(not os.environ.get("EKAGRA_STAGE3_DATABASE_URL"),
+                    reason="set EKAGRA_STAGE3_DATABASE_URL for PostgreSQL pilot integration")
+def test_post_approval_doubt_preserves_entitlement_and_duplicate_next_is_rejected():
+    from solo_harness.db.engine import make_session_factory
+    from solo_harness.db.models import LLMCall, SubsectionProgress
+    from solo_harness.runtime.ai import AIExecutionRuntime
+
+    with make_session_factory(os.environ["EKAGRA_STAGE3_DATABASE_URL"])() as db:
+        runtime, session_id = _controlled_runtime(db, "P1")
+        ai = AIExecutionRuntime(runtime, _ControlledPilotClient(), _pilot_settings())
+        call_id = ai.reserve_tutor(db, session_id, commit=True)
+        asyncio.run(ai.execute(db, call_id))
+        progress = db.scalar(select(SubsectionProgress).where(
+            SubsectionProgress.session_id == session_id, SubsectionProgress.subsection_id == "C1.1"
+        ))
+        before = dict(progress.move_evidence)
+        version = progress.instructional_state["controlled_c11"]["approval_version"]
+        doubt = ai.reserve_tutor(db, session_id, "Why is the order important?", commit=True)
+        asyncio.run(ai.execute(db, doubt))
+        db.refresh(progress)
+        controlled = progress.instructional_state["controlled_c11"]
+        assert controlled["status"] == "APPROVED_AWAITING_NEXT"
+        assert controlled["approval_version"] == version
+        assert progress.move_evidence == before
+        doubt_call = db.get(LLMCall, doubt)
+        assert doubt_call.request_payload["audit"]["pilot_response_mode"] == "DOUBT"
+        judge = db.scalar(select(LLMCall).where(LLMCall.session_id == session_id,
+                          LLMCall.purpose == "CONVERSATION_JUDGE").order_by(LLMCall.started_at.desc()))
+        assert judge.request_payload["audit"]["pilot_review_mode"] == "DOUBT_REVIEW"
+        runtime.continue_controlled_c11_move(db, session_id, version, commit=True)
+        with pytest.raises(ValueError, match="stale or not approved"):
+            runtime.continue_controlled_c11_move(db, session_id, version, commit=False)
+
+
+@pytest.mark.skipif(not os.environ.get("EKAGRA_STAGE3_DATABASE_URL"),
+                    reason="set EKAGRA_STAGE3_DATABASE_URL for PostgreSQL pilot integration")
+def test_incomplete_doubt_answer_keeps_chat_available_until_reviewed():
+    from solo_harness.db.engine import make_session_factory
+    from solo_harness.db.models import SubsectionProgress
+    from solo_harness.runtime.ai import AIExecutionRuntime
+
+    with make_session_factory(os.environ["EKAGRA_STAGE3_DATABASE_URL"])() as db:
+        runtime, session_id = _controlled_runtime(db, "P1")
+        ai = AIExecutionRuntime(runtime, _DoubtContinuationClient(), _pilot_settings())
+        call_id = ai.reserve_tutor(db, session_id, commit=True)
+        asyncio.run(ai.execute(db, call_id))
+        progress = db.scalar(select(SubsectionProgress).where(
+            SubsectionProgress.session_id == session_id, SubsectionProgress.subsection_id == "C1.1"
+        ))
+        version = progress.instructional_state["controlled_c11"]["approval_version"]
+        call_id = ai.reserve_tutor(db, session_id, "Please explain the order.", commit=True)
+        asyncio.run(ai.execute(db, call_id))
+        db.refresh(progress)
+        assert progress.instructional_state["controlled_c11"]["status"] == "RESPONDING_TO_DOUBT"
+        call_id = ai.reserve_tutor(db, session_id, "Please continue.", commit=True)
+        asyncio.run(ai.execute(db, call_id))
+        db.refresh(progress)
+        assert progress.instructional_state["controlled_c11"]["status"] == "APPROVED_AWAITING_NEXT"
+        assert progress.instructional_state["controlled_c11"]["approval_version"] == version

@@ -6,8 +6,8 @@ from pathlib import Path
 import pytest
 
 from solo_harness.runtime import v051_assessment
-from solo_harness.runtime.v04_assessment import ScientificReviewHold
-from solo_harness.studies.scientific_v04 import _oracle
+from solo_harness.runtime.native_assessment import ScientificReviewHold
+from solo_harness.studies.native_policy import load_reference_oracle
 from solo_harness.studies.scientific_v051 import load_scientific_v051
 from solo_harness.studies.v051_native_compiler import compile_v051
 from solo_harness.studies.v051_scenarios import (
@@ -74,7 +74,7 @@ def test_invalid_initial_one_d_frame_is_rejected_even_if_oracle_fields_are_consi
     sent = old[:-1] + str(1 - int(old[-1]))
     x["oracle"]["sent_frame"] = sent
     x["oracle"]["sender_check_bit"] = int(sent[-1])
-    o = _oracle(Path("studies/networks_error_detection_parity_f1/v0.4"))
+    o = load_reference_oracle()
     received = o.flip_positions(tuple(map(int, sent)), x["oracle"]["flipped_positions"])
     x["oracle"]["received_frame"] = "".join(map(str, received))
     x["oracle"]["receiver_passes"] = o.receiver_pass(received, x["public"]["convention"])
@@ -109,7 +109,8 @@ def test_fingerprints_ignore_labels_but_detect_scientific_changes():
 
 def test_assessment_rejects_numerical_reuse_with_instruction_before_writer_call():
     c = compiled()
-    blueprint = next(blueprint for family in c.assessment_families.values() for blueprint in family["forms"])
+    old_blueprint = c.authored["v051"]["scientific"]["assessment_families.yaml"]["blueprints"][0]
+    blueprint = {"id": old_blueprint["id"], "v051_item_contracts": old_blueprint["items"]}
     first = resolve_v051_typed_case(c, blueprint["v051_item_contracts"][0]["id"], seed=5)
     exclusion = {scientific_case_fingerprint(case) for case in first["cases"]}
     original = v051_assessment.fresh_verified_case

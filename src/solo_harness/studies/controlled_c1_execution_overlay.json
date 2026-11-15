@@ -1,0 +1,577 @@
+{
+  "overlay_id": "EKAGRAAI_C1_EXECUTION_V1",
+  "source_contract_id": "EKAGRAAI_CONTROLLED_C1_V1",
+  "scope": "C1.2–C1.4 only; C1.1 retains its authored delivery_controls",
+  "moves": {
+    "C1.2-P1-M01": {
+      "focus": "Introduce sender, channel and receiver while showing that a bit sequence travels between them.",
+      "verified_fact_keys": [
+        "roles",
+        "sent"
+      ],
+      "avoid": "",
+      "critical_checks": [
+        "Identifies sender, channel and receiver and the sent bits."
+      ],
+      "target_words": 32
+    },
+    "C1.2-P1-M02": {
+      "focus": "Work one during-transmission bit flip with a clear sent/received comparison.",
+      "verified_fact_keys": [
+        "sent",
+        "corrupted",
+        "changed_position",
+        "flip_directions"
+      ],
+      "avoid": "",
+      "critical_checks": [
+        "Identifies the change at 1-based position 3, from 1 to 0 during transmission.",
+        "Notes a bit flip can also be from 0 to 1."
+      ],
+      "target_words": 32
+    },
+    "C1.2-P1-M03": {
+      "focus": "Explain the difference between an instructor seeing two sequences and a real receiver seeing only what arrived.",
+      "verified_fact_keys": [
+        "corrupted",
+        "receiver_view",
+        "instructor_view"
+      ],
+      "avoid": "",
+      "critical_checks": [
+        "Does not imply the receiver ordinarily has the clean original."
+      ],
+      "target_words": 32
+    },
+    "C1.2-P1-M04": {
+      "focus": "Conclude briefly why a receiver needs a way to check for possible changed bits.",
+      "verified_fact_keys": [
+        "receiver_view",
+        "detection_need"
+      ],
+      "avoid": "",
+      "critical_checks": [
+        "Connects the receiver limitation to the need for detection."
+      ],
+      "target_words": 32
+    },
+    "C1.2-P2-M01": {
+      "focus": "Supply sender/channel/receiver terms directly before guided comparisons.",
+      "verified_fact_keys": [
+        "roles",
+        "sent"
+      ],
+      "avoid": "No novice guessing or required question.",
+      "critical_checks": [
+        "Supplies all three communication roles."
+      ],
+      "target_words": 32
+    },
+    "C1.2-P2-M02": {
+      "focus": "Ask the learner to locate the different bit between sent and received sequences; then explain the flip.",
+      "verified_fact_keys": [
+        "sent",
+        "corrupted",
+        "changed_position",
+        "flip_directions"
+      ],
+      "avoid": "Do not reveal position 3 or the changed symbol before the learner replies.",
+      "critical_checks": [
+        "Question precedes revealing the changed position.",
+        "After a learner reply, verifies 1 to 0 at position 3 and mentions both flip directions."
+      ],
+      "target_words": 32,
+      "first_guided_fact_keys": [
+        "sent",
+        "corrupted"
+      ],
+      "guided_question": "Sent bits are `10110` and received bits are `10010`. Which position changed?"
+    },
+    "C1.2-P2-M03": {
+      "focus": "Guide which sequence an actual receiver can inspect and contrast with the instructor view.",
+      "verified_fact_keys": [
+        "receiver_view",
+        "instructor_view",
+        "corrupted"
+      ],
+      "avoid": "Do not give away the receiver-only perspective before the learner replies.",
+      "critical_checks": [
+        "Question precedes answer.",
+        "Explains that receiver ordinarily has only the received bits, not the clean original."
+      ],
+      "target_words": 32,
+      "first_guided_fact_keys": [
+        "corrupted",
+        "roles"
+      ],
+      "guided_question": "We can see both sequences here. Which one would the receiver normally have?"
+    },
+    "C1.2-P2-M04": {
+      "focus": "If a learner earlier claimed the receiver already knows the original, correct that; otherwise briefly reaffirm without another question.",
+      "verified_fact_keys": [
+        "receiver_view",
+        "instructor_view"
+      ],
+      "avoid": "Conditional move: do not invent a misconception or require a new learner response.",
+      "critical_checks": [
+        "No extra guided question.",
+        "Corrects a receiver-has-original misconception if actually expressed."
+      ],
+      "target_words": 22
+    },
+    "C1.2-P2-M05": {
+      "focus": "Finish the short chain: sender to receiver, flip during transmission, receiver lacks original, so checking helps.",
+      "verified_fact_keys": [
+        "roles",
+        "flip_directions",
+        "receiver_view",
+        "detection_need"
+      ],
+      "avoid": "Do not retell the full example or add a quiz.",
+      "critical_checks": [
+        "Connects transmission changes and receiver limitation to detection."
+      ],
+      "target_words": 32
+    },
+    "C1.2-P3-M01": {
+      "focus": "Introduce a send/receive comparison with an unchanged case and a one-bit-changed case.",
+      "verified_fact_keys": [
+        "roles",
+        "intact_pair",
+        "corrupted",
+        "changed_position"
+      ],
+      "avoid": "",
+      "critical_checks": [
+        "Compares same sent bits in intact and corrupted examples.",
+        "Names the changed bit at position 3 as transmission corruption."
+      ],
+      "target_words": 32
+    },
+    "C1.2-P3-M02": {
+      "focus": "Compare what stays fixed across the cases and what the receiver gets.",
+      "verified_fact_keys": [
+        "roles",
+        "sent",
+        "intact_pair",
+        "corrupted",
+        "changed_position",
+        "flip_directions"
+      ],
+      "avoid": "No repeated full transmission introduction.",
+      "critical_checks": [
+        "Sender, channel and sent bits are held fixed; only received position 3 differs."
+      ],
+      "target_words": 32
+    },
+    "C1.2-P3-M03": {
+      "focus": "Contrast an outside instructor who sees the original and the receiver who does not.",
+      "verified_fact_keys": [
+        "receiver_view",
+        "instructor_view",
+        "corrupted"
+      ],
+      "avoid": "",
+      "critical_checks": [
+        "Explains information difference and lack of direct original comparison."
+      ],
+      "target_words": 32
+    },
+    "C1.2-P3-M04": {
+      "focus": "Draw the need for a checking method from the receiver-perspective contrast.",
+      "verified_fact_keys": [
+        "receiver_view",
+        "detection_need"
+      ],
+      "avoid": "No new question or repeated case walkthrough.",
+      "critical_checks": [
+        "Links no clean original to the reason for error detection."
+      ],
+      "target_words": 32
+    },
+    "C1.3-P1-M01": {
+      "focus": "Use the receiver limitation from the previous subsection to motivate extra checking information.",
+      "verified_fact_keys": [
+        "receiver_need",
+        "checking_purpose"
+      ],
+      "avoid": "",
+      "critical_checks": [
+        "Connects no original to the usefulness of checking information."
+      ],
+      "target_words": 32
+    },
+    "C1.3-P1-M02": {
+      "focus": "Show the original payload and a separate symbolic position p, defining the added position as redundancy and parity-bit location.",
+      "verified_fact_keys": [
+        "payload",
+        "symbolic_p",
+        "redundancy",
+        "parity_definition"
+      ],
+      "avoid": "",
+      "critical_checks": [
+        "Identifies original payload separately from extra checking position.",
+        "Explains p is placeholder, not literal sent character or calculated bit."
+      ],
+      "target_words": 32
+    },
+    "C1.3-P1-M03": {
+      "focus": "Explain why the extra parity-bit value is determined from the original data by an agreed rule.",
+      "verified_fact_keys": [
+        "payload",
+        "data_dependence",
+        "nonarbitrary"
+      ],
+      "avoid": "",
+      "critical_checks": [
+        "Distinguishes rule-based choice from arbitrary choice without calculating p."
+      ],
+      "target_words": 32
+    },
+    "C1.3-P1-M04": {
+      "focus": "Explain why sender and receiver must use the same rule; save even/odd calculations for later.",
+      "verified_fact_keys": [
+        "shared_rule",
+        "nonarbitrary"
+      ],
+      "avoid": "",
+      "critical_checks": [
+        "Both sides must agree on the checking rule; no concrete parity-bit calculation."
+      ],
+      "target_words": 32
+    },
+    "C1.3-P2-M01": {
+      "focus": "Explain directly why extra checking information might help a receiver without the original.",
+      "verified_fact_keys": [
+        "receiver_need",
+        "checking_purpose"
+      ],
+      "avoid": "Supply prerequisite, no compulsory question.",
+      "critical_checks": [
+        "Explains receiver limitation and checking motivation."
+      ],
+      "target_words": 32
+    },
+    "C1.3-P2-M02": {
+      "focus": "Ask the learner to identify original payload versus the extra symbolic checking position.",
+      "verified_fact_keys": [
+        "payload",
+        "symbolic_p",
+        "redundancy"
+      ],
+      "avoid": "Do not supply the payload-versus-redundancy answer before the question; p is a placeholder.",
+      "critical_checks": [
+        "Learner is asked to distinguish original payload from extra position.",
+        "After reply, explains extra checking information and symbolic p."
+      ],
+      "target_words": 32,
+      "first_guided_fact_keys": [
+        "diagram_only"
+      ],
+      "guided_question": "Look at `10110 | p`. Which part is the original data, and which is the added position?"
+    },
+    "C1.3-P2-M03": {
+      "focus": "Introduce the parity bit briefly and guide why it needs to depend on the original data.",
+      "verified_fact_keys": [
+        "parity_definition",
+        "data_dependence"
+      ],
+      "avoid": "Do not reveal the complete data-dependence explanation before the reply; do not calculate p.",
+      "critical_checks": [
+        "Question engages data dependence.",
+        "After reply, parity bit is defined as one data-dependent checking bit."
+      ],
+      "target_words": 32,
+      "first_guided_fact_keys": [
+        "parity_bit_intro"
+      ],
+      "guided_question": "If the extra checking bit had nothing to do with the original data, how could it help us check that data?"
+    },
+    "C1.3-P2-M04": {
+      "focus": "Ask what goes wrong with an arbitrary choice when sender and receiver must agree.",
+      "verified_fact_keys": [
+        "nonarbitrary",
+        "shared_rule"
+      ],
+      "avoid": "No binary parity calculation; no follow-up quiz.",
+      "critical_checks": [
+        "Contrasts random choice with a shared data-dependent rule after learner reply."
+      ],
+      "target_words": 32,
+      "first_guided_fact_keys": [
+        "symbolic_p"
+      ],
+      "guided_question": "What could go wrong if the sender picks the extra bit randomly but the receiver expects an agreed rule?"
+    },
+    "C1.3-P2-M05": {
+      "focus": "Conclude that both sides use one agreed rule to select and check the extra bit.",
+      "verified_fact_keys": [
+        "checking_purpose",
+        "parity_definition",
+        "data_dependence",
+        "shared_rule"
+      ],
+      "avoid": "No repetition of all previous questions, no p calculation.",
+      "critical_checks": [
+        "Data dependence and shared rule are explicit without assigning 0 or 1 to p."
+      ],
+      "target_words": 32
+    },
+    "C1.3-P3-M01": {
+      "focus": "Compare the original payload alone with the same payload plus a symbolic checking position.",
+      "verified_fact_keys": [
+        "payload",
+        "symbolic_p",
+        "redundancy",
+        "parity_definition"
+      ],
+      "avoid": "",
+      "critical_checks": [
+        "Payload alone versus payload with extra p position are contrasted.",
+        "p has no calculated numerical value here."
+      ],
+      "target_words": 32
+    },
+    "C1.3-P3-M02": {
+      "focus": "Contrast an arbitrary extra bit with one chosen from the payload using a shared rule.",
+      "verified_fact_keys": [
+        "nonarbitrary",
+        "data_dependence",
+        "shared_rule"
+      ],
+      "avoid": "",
+      "critical_checks": [
+        "Only data-dependent agreed rule has meaningful checking purpose.",
+        "No concrete p value."
+      ],
+      "target_words": 32
+    },
+    "C1.3-P3-M03": {
+      "focus": "Compare sender/receiver using the same rule against using different rules.",
+      "verified_fact_keys": [
+        "shared_rule",
+        "redundancy"
+      ],
+      "avoid": "",
+      "critical_checks": [
+        "Explains the checking consequence of mismatched conventions."
+      ],
+      "target_words": 32
+    },
+    "C1.3-P3-M04": {
+      "focus": "Briefly synthesize redundancy, data dependence and shared-rule agreement.",
+      "verified_fact_keys": [
+        "checking_purpose",
+        "parity_definition",
+        "data_dependence",
+        "shared_rule"
+      ],
+      "avoid": "No invented even/odd example or numerical p.",
+      "critical_checks": [
+        "Summarizes extra checking bit and agreed rule, with no early calculation."
+      ],
+      "target_words": 32
+    },
+    "C1.4-P1-M01": {
+      "focus": "State both parity conventions based on the count of ones in the complete frame, including parity bit.",
+      "verified_fact_keys": [
+        "even_rule",
+        "odd_rule"
+      ],
+      "avoid": "",
+      "critical_checks": [
+        "Both rules count the appended parity bit."
+      ],
+      "target_words": 32
+    },
+    "C1.4-P1-M02": {
+      "focus": "Work even and odd sender constructions from the same payload, checking the complete-frame counts.",
+      "verified_fact_keys": [
+        "payload_count",
+        "even_sender",
+        "odd_sender"
+      ],
+      "avoid": "",
+      "critical_checks": [
+        "Even appends 1 to 10110 giving 101101 (4 ones).",
+        "Odd appends 0 giving 101100 (3 ones)."
+      ],
+      "target_words": 32
+    },
+    "C1.4-P1-M03": {
+      "focus": "Work full-frame receiver pass and fail checks for even parity, then briefly confirm the odd example.",
+      "verified_fact_keys": [
+        "even_rule",
+        "odd_rule",
+        "even_receive_pass",
+        "even_receive_fail",
+        "odd_receive_pass"
+      ],
+      "avoid": "",
+      "critical_checks": [
+        "Counts all received bits including parity bit.",
+        "Even 101101 passes and 100101 fails; odd 101100 passes."
+      ],
+      "target_words": 32
+    },
+    "C1.4-P1-M04": {
+      "focus": "Explain what pass and fail mean and distinguish detecting, locating and correcting.",
+      "verified_fact_keys": [
+        "pass_meaning",
+        "fail_meaning",
+        "three_actions"
+      ],
+      "avoid": "No C2 theorem on odd/even numbers of flips.",
+      "critical_checks": [
+        "Pass is not proof of no corruption.",
+        "Detection is different from locating or correcting."
+      ],
+      "target_words": 32
+    },
+    "C1.4-P2-M01": {
+      "focus": "Supply even and odd whole-frame rules directly before asking for calculations.",
+      "verified_fact_keys": [
+        "even_rule",
+        "odd_rule"
+      ],
+      "avoid": "No quiz until the guided sender move.",
+      "critical_checks": [
+        "Definitions refer to all bits including parity bit."
+      ],
+      "target_words": 32
+    },
+    "C1.4-P2-M02": {
+      "focus": "Guide the sender through adding the correct even-parity bit to the fixed payload.",
+      "verified_fact_keys": [
+        "even_rule",
+        "payload_count",
+        "even_sender"
+      ],
+      "avoid": "Do not show the appended even bit or finished frame before the answer.",
+      "critical_checks": [
+        "Guided question precedes even parity-bit reveal.",
+        "After reply, checks 101101 with four ones."
+      ],
+      "target_words": 32,
+      "first_guided_fact_keys": [
+        "even_rule",
+        "payload_count"
+      ],
+      "guided_question": "The data `10110` has three `1`s. For even parity, should we add `0` or `1`?"
+    },
+    "C1.4-P2-M03": {
+      "focus": "Guide odd parity for the same payload and briefly compare the rule.",
+      "verified_fact_keys": [
+        "odd_rule",
+        "payload_count",
+        "odd_sender"
+      ],
+      "avoid": "Do not show the odd parity bit or finished frame before the reply.",
+      "critical_checks": [
+        "Learner gets one odd-parity construction question.",
+        "After reply, checks 101100 with three ones."
+      ],
+      "target_words": 32,
+      "first_guided_fact_keys": [
+        "odd_rule",
+        "payload_count"
+      ],
+      "guided_question": "For the same `10110`, what bit should we add so the whole frame has an odd number of `1`s?"
+    },
+    "C1.4-P2-M04": {
+      "focus": "Guide a receiver to classify the even-rule check for a complete received frame, then give brief pass/odd comparisons.",
+      "verified_fact_keys": [
+        "even_rule",
+        "odd_rule",
+        "even_receive_pass",
+        "even_receive_fail",
+        "odd_receive_pass"
+      ],
+      "avoid": "Do not reveal FAIL before learner replies; avoid a second full question cycle for odd parity.",
+      "critical_checks": [
+        "Explains even 100101 fails and 101101 passes; odd 101100 passes.",
+        "Counts parity-bit position too."
+      ],
+      "target_words": 32,
+      "first_guided_fact_keys": [
+        "even_rule",
+        "received_check_bits"
+      ],
+      "guided_question": "Under even parity, does received `100101` pass or fail? Count its `1`s, including the last bit."
+    },
+    "C1.4-P2-M05": {
+      "focus": "Explain what pass/fail can and cannot show; distinguish detecting, locating and correcting.",
+      "verified_fact_keys": [
+        "pass_meaning",
+        "fail_meaning",
+        "three_actions"
+      ],
+      "avoid": "No mastery check or C2 flip-count theorem.",
+      "critical_checks": [
+        "Pass does not guarantee no error.",
+        "Detection, location and correction are distinct."
+      ],
+      "target_words": 32
+    },
+    "C1.4-P3-M01": {
+      "focus": "Introduce even and odd whole-frame rules using the same original payload as the shared comparison.",
+      "verified_fact_keys": [
+        "even_rule",
+        "odd_rule",
+        "payload_bits"
+      ],
+      "avoid": "Save append-bit calculations and completed frames for next comparison.",
+      "critical_checks": [
+        "States both complete-frame rules and identical payload."
+      ],
+      "target_words": 32
+    },
+    "C1.4-P3-M02": {
+      "focus": "Compare both checked sender constructions for that same payload.",
+      "verified_fact_keys": [
+        "payload_count",
+        "even_sender",
+        "odd_sender"
+      ],
+      "avoid": "",
+      "critical_checks": [
+        "Contrasts append-1 even frame with append-0 odd frame and correct counts."
+      ],
+      "target_words": 32
+    },
+    "C1.4-P3-M03": {
+      "focus": "Contrast full received frames passing and failing the agreed rule, noting what a pass does not prove.",
+      "verified_fact_keys": [
+        "even_rule",
+        "odd_rule",
+        "even_receive_pass",
+        "even_receive_fail",
+        "odd_receive_pass",
+        "pass_meaning"
+      ],
+      "avoid": "",
+      "critical_checks": [
+        "Full-frame even pass/fail results correct.",
+        "Pass does not prove no corruption."
+      ],
+      "target_words": 32
+    },
+    "C1.4-P3-M04": {
+      "focus": "Summarize how sender and receiver use the shared parity rule and how detection differs from location/correction.",
+      "verified_fact_keys": [
+        "even_rule",
+        "odd_rule",
+        "pass_meaning",
+        "fail_meaning",
+        "three_actions"
+      ],
+      "avoid": "Do not introduce C2 multi-flip theorem.",
+      "critical_checks": [
+        "Both sides use agreed convention.",
+        "Three operations distinguished; no bit-flip count theorem."
+      ],
+      "target_words": 32
+    }
+  }
+}

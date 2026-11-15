@@ -1,0 +1,18 @@
+# CHANGED: Separate disposable PostgreSQL for full C1-C4 acceptance tests.
+# CHANGED: Never point scripted acceptance tests at a participant database.
+services:
+  postgres_unified_test:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ekagra_unified_test
+      POSTGRES_USER: ekagra_test
+      POSTGRES_PASSWORD: ekagra_test
+    ports:
+      - "127.0.0.1:55432:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ekagra_test -d ekagra_unified_test"]
+      interval: 3s
+      timeout: 3s
+      retries: 25

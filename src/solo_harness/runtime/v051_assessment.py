@@ -12,10 +12,10 @@ import secrets
 from typing import Any
 
 from solo_harness.runtime.ai import CanonicalMessage
-from solo_harness.runtime.v04_assessment import (
+from solo_harness.runtime.native_assessment import (
     RecordedResult, ScientificReviewHold, validate_mcq, validate_subjective,
 )
-from solo_harness.runtime.v04_native import MCQProse, SemanticReview, SubjectiveProse, SubjectiveReview
+from solo_harness.runtime.native_contracts import MCQProse, SemanticReview, SubjectiveProse, SubjectiveReview
 from solo_harness.runtime.v051_judge import V05SubjectiveJudgment
 from solo_harness.studies.v051_scenarios import resolve_v051_typed_case, scientific_case_fingerprints
 
@@ -93,7 +93,40 @@ async def construct_v051_assessment(compiled, blueprint: dict, invoke, checkpoin
 
 def v051_judge_messages(compiled, resolved: dict, frozen_question: str, learner_response: str):
     source = compiled.authored["v051"]
-    payload = {"subjective_item": {"prompt": frozen_question, "contract": resolved["contract"]}, "verified_scenario": resolved["case"], "learner_response": learner_response, "judge_contract": source["scientific"]["judge.yaml"]}
-    return (CanonicalMessage(role="system", content=source["prompts"]["SUBJECTIVE_JUDGE_PROMPT.md"]
+    contract = resolved["contract"]
+    judge_contract = source["scientific"]["judge.yaml"]
+    prompt = source["prompts"]["SUBJECTIVE_JUDGE_PROMPT.md"]
+    mode = contract.get("assessment_mode")
+    if mode in ("fixed_c1_receiver_only", "fixed_c2_multistructural_patterns", "fixed_c3_relational_causal", "fixed_c4_extended_abstract"):
+        import copy
+        judge_contract = copy.deepcopy(judge_contract)
+        for anchor in judge_contract.get("transition_anchors", []):
+            if anchor.get("transition_id") == contract.get("transition_id"):
+                anchor["min_1"] = contract["score_anchor"]["1"]
+                anchor["full_2"] = contract["score_anchor"]["2"]
+                anchor["zero"] = contract["score_anchor"]["0"]
+        if mode == "fixed_c2_multistructural_patterns":
+            prompt = prompt.replace(
+                "- **C2:** Two distinct correct properties spanning 1D and full 2D may earn 1; do NOT demand a C3-style causal chain.",
+                "- **C2:** On this fixed 2D-pattern question, apply its specific rubric: at least two distinct correctly analysed patterns for 1 point; all three patterns and limits for 2. Do not require an unasked 1D discussion or C3-level derivation.",
+            )
+        prompt += ("\n\n[FIXED_ITEM_SCORING_PRIORITY]\nThe frozen item-specific score_anchor 0/1/2 and evidence_elements "
+                   "override any differing generic transition examples. Score only the explicitly asked question. "
+                   "For fixed C1, sender reconstruction is NOT required for full credit. "
+                   "For fixed C2, one isolated pattern is INSUFFICIENT for 1 point; two independently correct patterns are required. "
+                   "For fixed C3, one correctly explained case-linked causal direction earns 1 point; both directions earn 2. "
+                   "For fixed C4, a justified generalized pattern or counterexample earns 1 point; correct predictions, counterexample and added-rule evaluation together earn 2. "
+                   "Do not require exact reference wording. Apply contradiction and alternative-reasoning rules.")
+        if mode == "fixed_c1_receiver_only":
+            prompt += "\n[FIXED_C1_ITEM_SCORING_PRIORITY]\nReceiver-only item scoring priority applies."
+    if mode and mode.startswith("fixed_"):
+        contract = dict(contract)
+        contract.pop("calibration_examples", None)
+        verified_case = dict(resolved["case"])
+        verified_case.pop("reference_answer_for_calibration_only", None)
+    else:
+        verified_case = resolved["case"]
+    payload = {"subjective_item": {"prompt": frozen_question, "contract": contract}, "verified_scenario": verified_case, "learner_response": learner_response, "judge_contract": judge_contract}
+    return (CanonicalMessage(role="system", content=prompt
                              + "\n\n[V051_BLIND_SUBJECTIVE_JUDGE_CONTEXT]\n" + _compact(payload)
                              + "\n\n[OUTPUT_SCHEMA]\n" + _compact(V05SubjectiveJudgment.model_json_schema())),)

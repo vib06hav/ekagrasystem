@@ -206,8 +206,8 @@ def test_internal_candidate_selection_uses_configured_v05_not_registration_order
         runtime, session_id, _, _ = _setup(db)
         current = db.get(StudyVersion, db.get(Session, session_id).study_version_id)
         _historical_version(db, current)
-        selected = _internal_v051_candidate(db, SimpleNamespace(v051_internal_candidate_version="v0.5"))
-        assert selected.id == current.id and selected.content_version == "v0.5"
+        selected = _internal_v051_candidate(db, SimpleNamespace(v051_internal_candidate_version=current.content_version))
+        assert selected.id == current.id and selected.content_version == "v0.5.5"
 
 
 def test_real_persisted_tutor_judge_flow_advances_without_forced_learner_turns_to_paas_and_assessment():
@@ -225,7 +225,7 @@ def test_real_persisted_tutor_judge_flow_advances_without_forced_learner_turns_t
         build = ai.reserve_paas_assessment(db, session_id, 5, commit=True)
         asyncio.run(ai.execute(db, build))
         assessment = db.scalar(select(AssessmentInstance).where(AssessmentInstance.attempt_id == session.current_attempt_id))
-        from solo_harness.runtime.v04_persistence import submit_f1_response
+        from solo_harness.runtime.assessment_persistence import submit_f1_response
         answers = {item["id"]: next(option["id"] for option in item["options"] if option["id"] == next(private["correct_option_id"] for private in assessment.frozen_private_snapshot["mcqs"] if private["id"] == item["id"])) for item in assessment.frozen_public_snapshot["mcqs"]}
         response = submit_f1_response(db, runtime, session_id, answers, "The stated parity rule explains the shown result.", uuid.uuid4())
         db.commit(); judge = ai.reserve_f1_judge(db, session_id, response, commit=True); asyncio.run(ai.execute(db, judge))

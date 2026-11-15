@@ -33,8 +33,9 @@ class _FirstSelector:
 
 def _compiled_and_version(db):
     compiled = compile_v051(load_scientific_v051(ROOT))
+    existing_pointer = db.get(ActiveStudyVersion, compiled.study_id)
     version = activate(db, compiled)  # Default must register candidates without activation.
-    assert db.get(ActiveStudyVersion, compiled.study_id) is None
+    assert db.get(ActiveStudyVersion, compiled.study_id) is existing_pointer
     return compiled, version
 
 

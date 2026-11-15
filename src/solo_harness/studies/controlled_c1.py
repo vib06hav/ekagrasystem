@@ -1,8 +1,10 @@
-"""Authoritative fixed C1 contract and the opt-in C1.1 instructional pilot.
+"""Authoritative fixed C1 contract and the opt-in controlled C1 pilot.
 
 Source-ordered scientific core moves remain in the immutable v0.5 study.
 This separate, versioned pilot contract adds deterministic delivery instructions.
-Only C1.1 is executable; the remaining C1 definitions are design-only.
+The source contract retains C1.2--C1.4's ``design_only`` provenance.  The
+separate execution overlay, validated by the prompt-context module, is the
+only opt-in authority that makes those source moves executable.
 """
 from __future__ import annotations
 
@@ -29,7 +31,22 @@ def contract_hash() -> str:
 
 
 def new_c11_state() -> dict:
-    return {"contract_id": contract()["contract_id"], "contract_sha256": contract_hash(), "move_index": 0}
+    # This state is kept on the existing subsection ledger so the C1.1 pilot
+    # remains migration-free and recoverable under the ordinary session lock.
+    return {
+        "contract_id": contract()["contract_id"],
+        "contract_sha256": contract_hash(),
+        "move_index": 0,
+        "status": "TEACHING",
+        "approval_version": 0,
+    }
+
+
+def new_c1_state() -> dict:
+    """Fresh full-C1 state; old C1.1-only attempts retain ``new_c11_state``."""
+    from solo_harness.runtime.controlled_c1_prompt_context import execution_overlay_hash
+    return {**new_c11_state(), "execution_overlay_sha256": execution_overlay_hash(),
+            "pilot_scope": "C1.1_TO_C1.4"}
 
 
 def is_controlled_c11(progress) -> bool:
@@ -38,18 +55,39 @@ def is_controlled_c11(progress) -> bool:
             and isinstance(progress.instructional_state.get("controlled_c11"), dict))
 
 
+def is_controlled_c1(progress) -> bool:
+    """True for compatible C1.1 ledgers and all fresh full-C1 ledgers."""
+    if progress is None or not isinstance(progress.instructional_state, dict):
+        return False
+    state = progress.instructional_state.get("controlled_c11")
+    if not isinstance(state, dict):
+        return False
+    if progress.subsection_id == "C1.1":
+        return True
+    return (progress.subsection_id in ("C1.2", "C1.3", "C1.4")
+            and state.get("pilot_scope") == "C1.1_TO_C1.4")
+
+
 def active_move(compiled, progress) -> tuple[dict, int]:
-    if not is_controlled_c11(progress):
-        raise ControlledC1Error("controlled C1.1 is not enabled on this subsection ledger")
+    if not is_controlled_c1(progress):
+        raise ControlledC1Error("controlled C1 is not enabled on this subsection ledger")
     state = progress.instructional_state["controlled_c11"]
     if state.get("contract_id") != contract()["contract_id"] or state.get("contract_sha256") != contract_hash():
         raise ControlledC1Error("controlled C1 contract changed during a persisted attempt")
-    cells = contract()["subsections"]["C1.1"]["moves_by_pedagogy"]
+    subsection_id = progress.subsection_id
+    if subsection_id not in contract()["subsections"]:
+        raise ControlledC1Error("controlled C1 subsection is unknown")
+    if subsection_id != "C1.1":
+        from solo_harness.runtime.controlled_c1_prompt_context import execution_overlay_hash, execution_overlay
+        if state.get("pilot_scope") != "C1.1_TO_C1.4" or state.get("execution_overlay_sha256") != execution_overlay_hash():
+            raise ControlledC1Error("controlled C1 execution overlay changed during a persisted attempt")
+        execution_overlay()  # validates the separate 39-move opt-in overlay.
+    cells = contract()["subsections"][subsection_id]["moves_by_pedagogy"]
     moves = cells.get(progress.pedagogy_id)
     if not moves or [m["id"] for m in moves] != list(progress.required_move_ids):
         raise ControlledC1Error("pilot move IDs disagree with the persisted scientific move order")
     source = compiled.authored["v051"]["scientific"]["subsection_interventions.yaml"]["cells"]
-    authored = next((c for c in source if c["id"] == f"C1.1-{progress.pedagogy_id}"), None)
+    authored = next((c for c in source if c["id"] == f"{subsection_id}-{progress.pedagogy_id}"), None)
     if not authored or len(authored["core_moves"]) != len(moves):
         raise ControlledC1Error("pilot context disagrees with scientific subsection cell")
     for local, locked in zip(moves, authored["core_moves"]):
@@ -59,7 +97,7 @@ def active_move(compiled, progress) -> tuple[dict, int]:
             raise ControlledC1Error("pilot move is not aligned to its locked source action")
     position = state.get("move_index")
     if type(position) is not int or position < 0 or position >= len(moves):
-        raise ControlledC1Error("invalid persisted C1.1 move position")
+        raise ControlledC1Error("invalid persisted C1 move position")
     return moves[position], position
 
 
@@ -91,6 +129,25 @@ def c11_instance(pedagogy_id: str) -> dict:
             "instance_id": "INSTRUCTION_ONLY:C11_CONTROLLED:" + identity}
 
 
+def c1_instance(subsection_id: str, pedagogy_id: str) -> dict:
+    """Deterministic locked instance for any full-C1 subsection.
+
+    C1.1 keeps its existing public mapper contract.  Later visuals receive
+    only verified fixed-case data from the immutable source contract.
+    """
+    if subsection_id == "C1.1":
+        return c11_instance(pedagogy_id)
+    if subsection_id not in ("C1.2", "C1.3", "C1.4") or pedagogy_id not in ("P1", "P2", "P3"):
+        raise ControlledC1Error("unknown controlled C1 fixed instance")
+    from solo_harness.runtime.controlled_c1_prompt_context import science_library
+    facts = science_library(subsection_id)  # validates fixed arithmetic/structure.
+    public = {"facts": facts, "fixed_cases": contract()["fixed_cases"][subsection_id]}
+    identity = hashlib.sha256(json.dumps(public, sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+    return {"instruction_only": True, "verified": True, "subsection_id": subsection_id,
+            "pedagogy_id": pedagogy_id, "public": public, "private_oracle": {},
+            "case_fingerprints": [], "instance_id": "INSTRUCTION_ONLY:C1_CONTROLLED:" + identity}
+
+
 def visual_descriptor(move: dict, instructional_instance: dict, stage: str = "complete") -> dict | None:
     """Frontend-only render data, never sourced from LLM prose or HTML."""
     requested = move["visual"]
@@ -98,9 +155,14 @@ def visual_descriptor(move: dict, instructional_instance: dict, stage: str = "co
         return None
     if stage not in ("prompt", "complete"):
         raise ControlledC1Error("invalid visual reveal stage")
-    return {"component": requested["component"], "mode": requested["mode"], "stage": stage,
-            "rule": instructional_instance["public"]["rule"],
-            "cases": instructional_instance["public"]["cases"]}
+    descriptor = {"component": requested["component"], "mode": requested["mode"], "stage": stage,
+                  "subsection_id": move["id"].split("-")[0]}
+    if descriptor["subsection_id"] == "C1.1":
+        return {**descriptor, "rule": instructional_instance["public"]["rule"],
+                "cases": instructional_instance["public"]["cases"]}
+    # The template renders these passive, verified fields without LLM prose.
+    return {**descriptor, "facts": instructional_instance["public"]["facts"],
+            "fixed_cases": instructional_instance["public"]["fixed_cases"]}
 
 
 def unambiguous_reply_feedback(move: dict, learner_text: str | None, instructional_instance: dict) -> dict | None:
@@ -109,7 +171,8 @@ def unambiguous_reply_feedback(move: dict, learner_text: str | None, instruction
     Other responses (including doubts, explanations and mixed prose) remain for
     the LLM to interpret naturally. Only the current guided move is checked.
     """
-    if learner_text is None or move["learner_response_policy"] != "guided":
+    if (learner_text is None or move["learner_response_policy"] != "guided"
+            or not move["id"].startswith("C1.1-")):
         return None
     answer = learner_text.strip()
     expected = instructional_instance["public"]["cases"][0]

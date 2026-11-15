@@ -1,0 +1,1251 @@
+{
+  "schema_version": "ekagra.c2.fixed_assessment_bank.v1",
+  "status": "CONTENT_CANDIDATE__NOT_YET_WIRED_TO_RUNTIME",
+  "study_id": "EkagraAI",
+  "transition_id": "C2",
+  "solo_from": "Unistructural",
+  "solo_to": "Multistructural",
+  "authorities": {
+    "curriculum": "EkagraAI_C1_C4_Final_Course_Content_Ground_Truth.md",
+    "teaching_contracts": "EKAGRAAI_C2_ALL_60_MOVE_CONTRACTS_V2_1.json",
+    "assessment_design_reference": "EKAGRAAI_C1_ASSESSMENT_BANK_A_B_C_V1.json",
+    "assessment_judge_sources": [
+      "v0.5/07_PROMPT_CONTRACTS/SUBJECTIVE_JUDGE_PROMPT.md",
+      "v0.5/08_SCIENTIFIC_YAML/judge.yaml",
+      "src/solo_harness/runtime/v051_assessment.py",
+      "src/solo_harness/runtime/assessment_grading.py"
+    ]
+  },
+  "blueprint": {
+    "questions_per_set": {
+      "mcq": 3,
+      "subjective": 1
+    },
+    "slots": [
+      {
+        "slot": "MCQ1",
+        "role": "single_parity_even_flip_limitation",
+        "subsections": [
+          "C2.1"
+        ],
+        "evidence": "Recognize that two bit flips preserve a single overall parity check even though the transmitted frame is corrupted."
+      },
+      {
+        "slot": "MCQ2",
+        "role": "two_dimensional_single_cell_check_interpretation",
+        "subsections": [
+          "C2.2",
+          "C2.3"
+        ],
+        "evidence": "Interpret complete row and column checks and identify their intersection under the exactly-one-flipped-cell assumption."
+      },
+      {
+        "slot": "MCQ3",
+        "role": "two_dimensional_two_bit_same_row_detection",
+        "subsections": [
+          "C2.4"
+        ],
+        "evidence": "Recognize that two flips in the same row leave that row passing while the two affected columns fail."
+      },
+      {
+        "slot": "SUB1",
+        "role": "comparison_of_two_bit_error_patterns",
+        "subsections": [
+          "C2.2",
+          "C2.4"
+        ],
+        "evidence": "Analyse same-row, same-column and different-row/different-column two-bit patterns, and distinguish detection from guaranteed localization or correction."
+      }
+    ],
+    "c2_structural_anchor": "Minimum M evidence requires more than one relevant aspect to be correctly identified and used. For this assessment, one correct isolated parity statement is insufficient for 1 subjective point; the learner must correctly analyse at least two independent two-bit patterns and their affected check outcomes.",
+    "scope_exclusions": [
+      "integrated_general_causal_derivation_of_complex_error_patterns_reserved_for_C3",
+      "claims_that_one_failed_row_and_one_failed_column_prove_exactly_one_error",
+      "guaranteed_localization_or_correction_of_two_flipped_cells",
+      "advanced_error_correction_codes_or_hamming_distance"
+    ],
+    "form_equivalence": "Sets A/B/C use parallel reasoning operations, comparable grid dimensions and the same scoring anchors; empirical psychometric equivalence has NOT been established.",
+    "form_assignment": "Allocate sets A/B/C independently of pedagogy; balance assignment across treatments and record chosen set and frozen delivered order."
+  },
+  "scoring": {
+    "mcqs": {
+      "points_per_correct": 1,
+      "total_possible": 3,
+      "grade_against": "private.mcqs[].correct_option_id"
+    },
+    "subjective": {
+      "possible_points": [
+        0,
+        1,
+        2,
+        null
+      ],
+      "grade_using": "private.subjective_resolved.contract + private.subjective_resolved.case + exact public.subjective.prompt + exact raw learner response",
+      "assessment_judge_output_shape": {
+        "subjective_points": "0|1|2|null",
+        "reason": "nonempty string"
+      },
+      "meaning_of_null": "technical/scientific grading ambiguity; review hold, NOT zero",
+      "judge_blinding": "Do not pass pedagogy, Tutor history, MCQs, MCQ score, prior attempts, or learner identity to Assessment Judge."
+    },
+    "existing_v05_scoring_gate_reference": {
+      "mcq_correct_minimum": 2,
+      "subjective_points_minimum": 1,
+      "use": "Existing backend scoring rule; not a declaration of validated SOLO state."
+    }
+  },
+  "randomization": {
+    "authored_option_order": "Correct positions vary across sets; options A-D are frozen authored positions in this file.",
+    "runtime_rule": "Optional: shuffle all four options independently per learner, assign display IDs A-D anew, atomically update matching private correct_option_id, and freeze both public and private versions for that attempt. Never reshuffle after the learner sees a question.",
+    "audit": "Record set ID, displayed options and the mapped correct option privately; do not leak private keys to frontend."
+  },
+  "exposure_and_isolation": {
+    "learner_receives": "sets[set_id].public only",
+    "assessment_judge_receives": "Exact frozen public subjective prompt, private subjective contract and verified case, learner response, official v0.5 judge rubric; not the MCQ key or pedagogy.",
+    "backend_receives": "Frozen public and private snapshots for scoring; only backend calculates pass/fail and progression.",
+    "avoid_frozen_teaching_examples": "Assessment grids and payloads are deliberately different from the fixed numerical examples in the C2 teaching contract.",
+    "implementation_notice": "This three-set fixed bank is a content candidate and is not automatically loaded by the existing runtime. Requires a deliberate adapter and policy decision without bypassing frozen-item provenance or recorded assessment lifecycle."
+  },
+  "sets": {
+    "A": {
+      "set_id": "C2-SET-A",
+      "intended_difficulty": "introductory_C2_U_to_M",
+      "public": {
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "stem": "A valid complete even-parity frame is transmitted. During transmission, the bits at positions 2 and 5 each flip. What does the receiver's single overall even-parity check report?",
+            "options": [
+              {
+                "id": "A",
+                "text": "It fails because any bit flip causes a parity failure."
+              },
+              {
+                "id": "B",
+                "text": "It passes, even though the received frame is corrupted."
+              },
+              {
+                "id": "C",
+                "text": "It identifies both changed positions."
+              },
+              {
+                "id": "D",
+                "text": "It corrects both changed bits automatically."
+              }
+            ]
+          },
+          {
+            "id": "MCQ2",
+            "stem": "The receiver checks every complete row and every complete column of the received grid below. Exactly one transmitted cell has flipped. Which pair of checks fails?",
+            "grid": [
+              "1110",
+              "0110",
+              "1100"
+            ],
+            "options": [
+              {
+                "id": "A",
+                "text": "R1 and C1"
+              },
+              {
+                "id": "B",
+                "text": "R2 and C2"
+              },
+              {
+                "id": "C",
+                "text": "R1 and C2"
+              },
+              {
+                "id": "D",
+                "text": "R1 and C3"
+              }
+            ]
+          },
+          {
+            "id": "MCQ3",
+            "stem": "In a full 2D even-parity grid, two distinct cells in the same row (R1C1 and R1C2) flip. Which outcome is expected?",
+            "options": [
+              {
+                "id": "A",
+                "text": "The affected row fails, but both affected columns pass; the corruption is not detected."
+              },
+              {
+                "id": "B",
+                "text": "Every row and column passes."
+              },
+              {
+                "id": "C",
+                "text": "The affected row passes, but the two affected columns fail; the corruption is detected."
+              },
+              {
+                "id": "D",
+                "text": "The receiver automatically identifies and corrects both flipped cells."
+              }
+            ]
+          }
+        ],
+        "subjective": {
+          "id": "SUB1",
+          "prompt": "A communication system uses full two-dimensional even parity. The valid complete transmitted grid is shown below; the final column contains row-checking bits, the bottom row contains column-checking bits, and the bottom-right cell completes both the bottom row and the rightmost column:\n\n1 0 1 0\n0 1 1 0\n1 1 0 0\n\nConsider three independent cases. In each case, exactly two distinct transmitted cells flip:\n1. Same row: R1C1, R1C3.\n2. Same column: R1C2, R2C2.\n3. Different rows and different columns: R1C1, R2C3.\n\nFor each case, identify which complete row and column checks fail and which affected row or column still passes. Then state whether the corruption is detected and explain whether detection guarantees that both flipped positions can be uniquely located and corrected."
+        }
+      },
+      "private": {
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "role": "single_parity_even_flip_limitation",
+            "subsection_refs": [
+              "C2.1"
+            ],
+            "correct_option_id": "B",
+            "correct_answer": "It passes, even though the received frame is corrupted.",
+            "oracle": {
+              "payload": "10110",
+              "parity_convention": "even",
+              "valid_complete_frame": "101101",
+              "valid_frame_ones": 4,
+              "flipped_positions_1_based": [
+                2,
+                5
+              ],
+              "received_frame": "111111",
+              "received_ones": 6,
+              "result": "PASS",
+              "interpretation": "Two flips preserve the overall parity condition; a passing check does not prove an error-free frame."
+            },
+            "option_feedback": {
+              "A": "A pair of flips changes the number of 1s by an even amount, so overall parity remains satisfied.",
+              "B": "Correct: two flips preserve the overall parity condition, even though the frame is corrupted.",
+              "C": "A single overall parity result does not identify changed positions.",
+              "D": "Single parity detects some violations; it does not automatically correct bits."
+            }
+          },
+          {
+            "id": "MCQ2",
+            "role": "two_dimensional_single_cell_check_interpretation",
+            "subsection_refs": [
+              "C2.2",
+              "C2.3"
+            ],
+            "correct_option_id": "C",
+            "correct_answer": "R1 and C2",
+            "oracle": {
+              "valid_grid": [
+                "1010",
+                "0110",
+                "1100"
+              ],
+              "received_grid": [
+                "1110",
+                "0110",
+                "1100"
+              ],
+              "flipped_position": "R1C2",
+              "row_results": {
+                "R1": "FAIL",
+                "R2": "PASS",
+                "R3": "PASS"
+              },
+              "column_results": {
+                "C1": "PASS",
+                "C2": "FAIL",
+                "C3": "PASS",
+                "C4": "PASS"
+              },
+              "failed_rows": [
+                "R1"
+              ],
+              "failed_columns": [
+                "C2"
+              ],
+              "localization_condition": "The failed row/column intersection identifies the changed cell only under the exactly-one-flipped-cell assumption."
+            },
+            "option_feedback": {
+              "A": "Recheck every complete row and column, including the checking-bit row and column.",
+              "B": "Recheck every complete row and column, including the checking-bit row and column.",
+              "C": "Correct: the failed row and failed column intersect at the flipped cell, under the stated exactly-one-flip assumption.",
+              "D": "Recheck every complete row and column, including the checking-bit row and column."
+            }
+          },
+          {
+            "id": "MCQ3",
+            "role": "two_dimensional_two_bit_same_row_detection",
+            "subsection_refs": [
+              "C2.4"
+            ],
+            "correct_option_id": "C",
+            "correct_answer": "The affected row passes, but the two affected columns fail; the corruption is detected.",
+            "oracle": {
+              "valid_grid": [
+                "1010",
+                "0110",
+                "1100"
+              ],
+              "flipped_positions": [
+                "R1C1",
+                "R1C2"
+              ],
+              "received_grid": [
+                "0110",
+                "0110",
+                "1100"
+              ],
+              "row_results": {
+                "R1": "PASS",
+                "R2": "PASS",
+                "R3": "PASS"
+              },
+              "column_results": {
+                "C1": "FAIL",
+                "C2": "FAIL",
+                "C3": "PASS",
+                "C4": "PASS"
+              },
+              "failed_rows": [],
+              "failed_columns": [
+                "C1",
+                "C2"
+              ],
+              "interpretation": "The affected row contains two flips and remains even; each affected column contains one flip and fails."
+            },
+            "option_feedback": {
+              "A": "The parity of the row with two flips remains satisfied.",
+              "B": "The two affected columns each contain one flip and fail.",
+              "C": "Correct: the row contains two flips and passes, while each affected column contains one flip and fails.",
+              "D": "Detection does not guarantee automatic localization and correction of both cells."
+            }
+          }
+        ],
+        "subjective_resolved": {
+          "contract": {
+            "id": "C2-SET-A-SUB1",
+            "type": "SUBJECTIVE",
+            "transition_id": "C2",
+            "shared_role": "compare independent two-bit corruption patterns under full 2D parity",
+            "mapped_locked_subsections": [
+              "C2.1",
+              "C2.2",
+              "C2.4"
+            ],
+            "solo_target": "U_to_M",
+            "target_structural_evidence": "The learner identifies multiple independent row/column check outcomes across the three patterns and distinguishes detection from guaranteed localization or correction.",
+            "score_anchor": {
+              "0": "Does not correctly analyse usable two-dimensional parity outcomes, or materially claims that two-bit errors are always missed or automatically corrected.",
+              "1": "Correctly analyses at least two of the three patterns by identifying the affected passing/failing row/column checks and recognizes that corruption is detected; may omit or incompletely explain the limitation on localization/correction.",
+              "2": "Correctly analyses all three patterns, identifies which affected groups fail and which affected group(s) still pass, states that all three two-bit patterns are detected, and explains that detection does not guarantee unique localization or correction of both flipped cells."
+            },
+            "evidence_elements": {
+              "same_row": "Two flips in one row leave that complete row parity satisfied; the two corresponding columns fail.",
+              "same_column": "Two flips in one column leave that complete column parity satisfied; the two corresponding rows fail.",
+              "different_rows_columns": "Each affected row and each affected column contains one flip and fails.",
+              "detection": "Full 2D parity detects each of these two-distinct-cell patterns.",
+              "limitation": "Detection does not guarantee unique localization or correction of both changed cells."
+            },
+            "legitimate_alternative_explanations": [
+              "Equivalent wording such as check passes/fails, parity remains even/becomes odd, or corruption is detected.",
+              "The learner may describe affected groups without reproducing every complete received grid, provided the check outcomes are unambiguous.",
+              "Equivalent row/column labels are acceptable if coordinates are consistently interpreted."
+            ],
+            "material_invalidators": [
+              "Claims that two flips in the same row or same column necessarily make that shared group fail.",
+              "Claims that full 2D parity misses every two-bit error.",
+              "Claims that a passing affected group means the entire transmission is error-free.",
+              "Claims that detection automatically guarantees both flipped positions can be uniquely identified and corrected."
+            ],
+            "full_credit_blockers": [
+              "Analyses fewer than all three patterns correctly.",
+              "Fails to distinguish a passing affected row/column from the failing orthogonal checks.",
+              "Claims guaranteed unique localization or correction of both flipped cells."
+            ],
+            "contradiction_handling": "A material contradiction of the two-bit detection guarantee blocks full credit and may warrant zero if it negates the usable analysis. Evaluate the reasoning and check outcomes, not keyword presence.",
+            "judge_instruction": "Grade ONLY the frozen public subjective prompt, this verified case, and the exact raw learner response. Do not use pedagogy, Tutor history, MCQs, MCQ score, prior attempts, or learner identity. Accept equivalent reasoning rather than exact-match text. Return only subjective_points (0/1/2 or null) and a nonempty reason. Null is reserved for genuine grading ambiguity or technical/scientific review hold, not an incorrect or blank answer.",
+            "calibration_status": "illustrative_synthetic_examples_not_human_validated",
+            "calibration_examples": [
+              {
+                "response": "In the same row case, the row passes but both columns fail. In the same column case, the column passes but both rows fail. When the cells are in different rows and columns, both rows and both columns fail. All are detected, but detection does not mean both positions can always be corrected.",
+                "expected_points": 2,
+                "why": "All three patterns and the detection-versus-correction limitation are correctly explained."
+              },
+              {
+                "response": "In the same-row case, the row passes while the two corresponding columns fail. In the same-column case, the column passes while the two corresponding rows fail. Both patterns are detected.",
+                "expected_points": 1,
+                "why": "Two independent patterns and their group outcomes are correctly analysed; the third pattern and localization/correction limitation are missing."
+              },
+              {
+                "response": "Two bits in the same row make that row fail, and the system then corrects both positions automatically.",
+                "expected_points": 0,
+                "why": "The central parity outcome and correction claim are incorrect."
+              }
+            ],
+            "assessment_mode": "fixed_c2_multistructural_patterns"
+          },
+          "case": {
+            "scenario_kind": "two_dimensional_parity_two_bit_detection",
+            "parity_convention": "even",
+            "valid_complete_grid": [
+              "1010",
+              "0110",
+              "1100"
+            ],
+            "grid_dimensions": "3 rows x 4 columns including checking-bit row and column",
+            "all_transmitted_cells_in_scope": true,
+            "cases": {
+              "same_row": {
+                "flipped_positions": [
+                  "R1C1",
+                  "R1C3"
+                ],
+                "received_grid": [
+                  "0000",
+                  "0110",
+                  "1100"
+                ],
+                "row_results": {
+                  "R1": "PASS",
+                  "R2": "PASS",
+                  "R3": "PASS"
+                },
+                "column_results": {
+                  "C1": "FAIL",
+                  "C2": "PASS",
+                  "C3": "FAIL",
+                  "C4": "PASS"
+                },
+                "failed_rows": [],
+                "failed_columns": [
+                  "C1",
+                  "C3"
+                ]
+              },
+              "same_column": {
+                "flipped_positions": [
+                  "R1C2",
+                  "R2C2"
+                ],
+                "received_grid": [
+                  "1110",
+                  "0010",
+                  "1100"
+                ],
+                "row_results": {
+                  "R1": "FAIL",
+                  "R2": "FAIL",
+                  "R3": "PASS"
+                },
+                "column_results": {
+                  "C1": "PASS",
+                  "C2": "PASS",
+                  "C3": "PASS",
+                  "C4": "PASS"
+                },
+                "failed_rows": [
+                  "R1",
+                  "R2"
+                ],
+                "failed_columns": []
+              },
+              "different_rows_columns": {
+                "flipped_positions": [
+                  "R1C1",
+                  "R2C3"
+                ],
+                "received_grid": [
+                  "0010",
+                  "0100",
+                  "1100"
+                ],
+                "row_results": {
+                  "R1": "FAIL",
+                  "R2": "FAIL",
+                  "R3": "PASS"
+                },
+                "column_results": {
+                  "C1": "FAIL",
+                  "C2": "PASS",
+                  "C3": "FAIL",
+                  "C4": "PASS"
+                },
+                "failed_rows": [
+                  "R1",
+                  "R2"
+                ],
+                "failed_columns": [
+                  "C1",
+                  "C3"
+                ]
+              }
+            },
+            "guarantee": "Full 2D parity detects every pair of distinct flipped transmitted cells, including checking-bit cells.",
+            "limitation": "Detection does not guarantee unique localization or correction of both changed cells."
+          }
+        }
+      },
+      "scientific_review": {
+        "scope": "C2_only",
+        "status": "authored_and_programmatically_checked_requires_independent_human_approval",
+        "no_instructional_frozen_bit_strings": true,
+        "notes": "All complete-grid checks, single-flip localization and two-flip outcomes were programmatically recomputed. Human review is still required for content validity, SOLO alignment and judge calibration."
+      }
+    },
+    "B": {
+      "set_id": "C2-SET-B",
+      "intended_difficulty": "introductory_C2_U_to_M",
+      "public": {
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "stem": "A valid complete even-parity frame is transmitted. During transmission, the bits at positions 1 and 4 each flip. What does the receiver's single overall even-parity check report?",
+            "options": [
+              {
+                "id": "A",
+                "text": "It fails because any bit flip causes a parity failure."
+              },
+              {
+                "id": "B",
+                "text": "It identifies both changed positions."
+              },
+              {
+                "id": "C",
+                "text": "It corrects both changed bits automatically."
+              },
+              {
+                "id": "D",
+                "text": "It passes, even though the received frame is corrupted."
+              }
+            ]
+          },
+          {
+            "id": "MCQ2",
+            "stem": "The receiver checks every complete row and every complete column of the received grid below. Exactly one transmitted cell has flipped. Which pair of checks fails?",
+            "grid": [
+              "1100",
+              "1011",
+              "1111"
+            ],
+            "options": [
+              {
+                "id": "A",
+                "text": "R2 and C1"
+              },
+              {
+                "id": "B",
+                "text": "R1 and C1"
+              },
+              {
+                "id": "C",
+                "text": "R2 and C2"
+              },
+              {
+                "id": "D",
+                "text": "R1 and C3"
+              }
+            ]
+          },
+          {
+            "id": "MCQ3",
+            "stem": "In a full 2D even-parity grid, two distinct cells in the same row (R2C1 and R2C2) flip. Which outcome is expected?",
+            "options": [
+              {
+                "id": "A",
+                "text": "The affected row fails, but both affected columns pass; the corruption is not detected."
+              },
+              {
+                "id": "B",
+                "text": "The affected row passes, but the two affected columns fail; the corruption is detected."
+              },
+              {
+                "id": "C",
+                "text": "Every row and column passes."
+              },
+              {
+                "id": "D",
+                "text": "The receiver automatically identifies and corrects both flipped cells."
+              }
+            ]
+          }
+        ],
+        "subjective": {
+          "id": "SUB1",
+          "prompt": "A communication system uses full two-dimensional even parity. The valid complete transmitted grid is shown below; the final column contains row-checking bits, the bottom row contains column-checking bits, and the bottom-right cell completes both the bottom row and the rightmost column:\n\n1 1 0 0\n0 0 1 1\n1 1 1 1\n\nConsider three independent cases. In each case, exactly two distinct transmitted cells flip:\n1. Same row: R2C1, R2C3.\n2. Same column: R1C2, R2C2.\n3. Different rows and different columns: R1C3, R2C1.\n\nFor each case, identify which complete row and column checks fail and which affected row or column still passes. Then state whether the corruption is detected and explain whether detection guarantees that both flipped positions can be uniquely located and corrected."
+        }
+      },
+      "private": {
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "role": "single_parity_even_flip_limitation",
+            "subsection_refs": [
+              "C2.1"
+            ],
+            "correct_option_id": "D",
+            "correct_answer": "It passes, even though the received frame is corrupted.",
+            "oracle": {
+              "payload": "11001",
+              "parity_convention": "even",
+              "valid_complete_frame": "110011",
+              "valid_frame_ones": 4,
+              "flipped_positions_1_based": [
+                1,
+                4
+              ],
+              "received_frame": "010111",
+              "received_ones": 4,
+              "result": "PASS",
+              "interpretation": "Two flips preserve the overall parity condition; a passing check does not prove an error-free frame."
+            },
+            "option_feedback": {
+              "A": "A pair of flips changes the number of 1s by an even amount, so overall parity remains satisfied.",
+              "B": "A single overall parity result does not identify changed positions.",
+              "C": "Single parity detects some violations; it does not automatically correct bits.",
+              "D": "Correct: two flips preserve the overall parity condition, even though the frame is corrupted."
+            }
+          },
+          {
+            "id": "MCQ2",
+            "role": "two_dimensional_single_cell_check_interpretation",
+            "subsection_refs": [
+              "C2.2",
+              "C2.3"
+            ],
+            "correct_option_id": "A",
+            "correct_answer": "R2 and C1",
+            "oracle": {
+              "valid_grid": [
+                "1100",
+                "0011",
+                "1111"
+              ],
+              "received_grid": [
+                "1100",
+                "1011",
+                "1111"
+              ],
+              "flipped_position": "R2C1",
+              "row_results": {
+                "R1": "PASS",
+                "R2": "FAIL",
+                "R3": "PASS"
+              },
+              "column_results": {
+                "C1": "FAIL",
+                "C2": "PASS",
+                "C3": "PASS",
+                "C4": "PASS"
+              },
+              "failed_rows": [
+                "R2"
+              ],
+              "failed_columns": [
+                "C1"
+              ],
+              "localization_condition": "The failed row/column intersection identifies the changed cell only under the exactly-one-flipped-cell assumption."
+            },
+            "option_feedback": {
+              "A": "Correct: the failed row and failed column intersect at the flipped cell, under the stated exactly-one-flip assumption.",
+              "B": "Recheck every complete row and column, including the checking-bit row and column.",
+              "C": "Recheck every complete row and column, including the checking-bit row and column.",
+              "D": "Recheck every complete row and column, including the checking-bit row and column."
+            }
+          },
+          {
+            "id": "MCQ3",
+            "role": "two_dimensional_two_bit_same_row_detection",
+            "subsection_refs": [
+              "C2.4"
+            ],
+            "correct_option_id": "B",
+            "correct_answer": "The affected row passes, but the two affected columns fail; the corruption is detected.",
+            "oracle": {
+              "valid_grid": [
+                "1100",
+                "0011",
+                "1111"
+              ],
+              "flipped_positions": [
+                "R2C1",
+                "R2C2"
+              ],
+              "received_grid": [
+                "1100",
+                "1111",
+                "1111"
+              ],
+              "row_results": {
+                "R1": "PASS",
+                "R2": "PASS",
+                "R3": "PASS"
+              },
+              "column_results": {
+                "C1": "FAIL",
+                "C2": "FAIL",
+                "C3": "PASS",
+                "C4": "PASS"
+              },
+              "failed_rows": [],
+              "failed_columns": [
+                "C1",
+                "C2"
+              ],
+              "interpretation": "The affected row contains two flips and remains even; each affected column contains one flip and fails."
+            },
+            "option_feedback": {
+              "A": "The parity of the row with two flips remains satisfied.",
+              "B": "Correct: the row contains two flips and passes, while each affected column contains one flip and fails.",
+              "C": "The two affected columns each contain one flip and fail.",
+              "D": "Detection does not guarantee automatic localization and correction of both cells."
+            }
+          }
+        ],
+        "subjective_resolved": {
+          "contract": {
+            "id": "C2-SET-B-SUB1",
+            "type": "SUBJECTIVE",
+            "transition_id": "C2",
+            "shared_role": "compare independent two-bit corruption patterns under full 2D parity",
+            "mapped_locked_subsections": [
+              "C2.1",
+              "C2.2",
+              "C2.4"
+            ],
+            "solo_target": "U_to_M",
+            "target_structural_evidence": "The learner identifies multiple independent row/column check outcomes across the three patterns and distinguishes detection from guaranteed localization or correction.",
+            "score_anchor": {
+              "0": "Does not correctly analyse usable two-dimensional parity outcomes, or materially claims that two-bit errors are always missed or automatically corrected.",
+              "1": "Correctly analyses at least two of the three patterns by identifying the affected passing/failing row/column checks and recognizes that corruption is detected; may omit or incompletely explain the limitation on localization/correction.",
+              "2": "Correctly analyses all three patterns, identifies which affected groups fail and which affected group(s) still pass, states that all three two-bit patterns are detected, and explains that detection does not guarantee unique localization or correction of both flipped cells."
+            },
+            "evidence_elements": {
+              "same_row": "Two flips in one row leave that complete row parity satisfied; the two corresponding columns fail.",
+              "same_column": "Two flips in one column leave that complete column parity satisfied; the two corresponding rows fail.",
+              "different_rows_columns": "Each affected row and each affected column contains one flip and fails.",
+              "detection": "Full 2D parity detects each of these two-distinct-cell patterns.",
+              "limitation": "Detection does not guarantee unique localization or correction of both changed cells."
+            },
+            "legitimate_alternative_explanations": [
+              "Equivalent wording such as check passes/fails, parity remains even/becomes odd, or corruption is detected.",
+              "The learner may describe affected groups without reproducing every complete received grid, provided the check outcomes are unambiguous.",
+              "Equivalent row/column labels are acceptable if coordinates are consistently interpreted."
+            ],
+            "material_invalidators": [
+              "Claims that two flips in the same row or same column necessarily make that shared group fail.",
+              "Claims that full 2D parity misses every two-bit error.",
+              "Claims that a passing affected group means the entire transmission is error-free.",
+              "Claims that detection automatically guarantees both flipped positions can be uniquely identified and corrected."
+            ],
+            "full_credit_blockers": [
+              "Analyses fewer than all three patterns correctly.",
+              "Fails to distinguish a passing affected row/column from the failing orthogonal checks.",
+              "Claims guaranteed unique localization or correction of both flipped cells."
+            ],
+            "contradiction_handling": "A material contradiction of the two-bit detection guarantee blocks full credit and may warrant zero if it negates the usable analysis. Evaluate the reasoning and check outcomes, not keyword presence.",
+            "judge_instruction": "Grade ONLY the frozen public subjective prompt, this verified case, and the exact raw learner response. Do not use pedagogy, Tutor history, MCQs, MCQ score, prior attempts, or learner identity. Accept equivalent reasoning rather than exact-match text. Return only subjective_points (0/1/2 or null) and a nonempty reason. Null is reserved for genuine grading ambiguity or technical/scientific review hold, not an incorrect or blank answer.",
+            "calibration_status": "illustrative_synthetic_examples_not_human_validated",
+            "calibration_examples": [
+              {
+                "response": "In the same row case, the row passes but both columns fail. In the same column case, the column passes but both rows fail. When the cells are in different rows and columns, both rows and both columns fail. All are detected, but detection does not mean both positions can always be corrected.",
+                "expected_points": 2,
+                "why": "All three patterns and the detection-versus-correction limitation are correctly explained."
+              },
+              {
+                "response": "In the same-row case, the row passes while the two corresponding columns fail. In the same-column case, the column passes while the two corresponding rows fail. Both patterns are detected.",
+                "expected_points": 1,
+                "why": "Two independent patterns and their group outcomes are correctly analysed; the third pattern and localization/correction limitation are missing."
+              },
+              {
+                "response": "Two bits in the same row make that row fail, and the system then corrects both positions automatically.",
+                "expected_points": 0,
+                "why": "The central parity outcome and correction claim are incorrect."
+              }
+            ],
+            "assessment_mode": "fixed_c2_multistructural_patterns"
+          },
+          "case": {
+            "scenario_kind": "two_dimensional_parity_two_bit_detection",
+            "parity_convention": "even",
+            "valid_complete_grid": [
+              "1100",
+              "0011",
+              "1111"
+            ],
+            "grid_dimensions": "3 rows x 4 columns including checking-bit row and column",
+            "all_transmitted_cells_in_scope": true,
+            "cases": {
+              "same_row": {
+                "flipped_positions": [
+                  "R2C1",
+                  "R2C3"
+                ],
+                "received_grid": [
+                  "1100",
+                  "1001",
+                  "1111"
+                ],
+                "row_results": {
+                  "R1": "PASS",
+                  "R2": "PASS",
+                  "R3": "PASS"
+                },
+                "column_results": {
+                  "C1": "FAIL",
+                  "C2": "PASS",
+                  "C3": "FAIL",
+                  "C4": "PASS"
+                },
+                "failed_rows": [],
+                "failed_columns": [
+                  "C1",
+                  "C3"
+                ]
+              },
+              "same_column": {
+                "flipped_positions": [
+                  "R1C2",
+                  "R2C2"
+                ],
+                "received_grid": [
+                  "1000",
+                  "0111",
+                  "1111"
+                ],
+                "row_results": {
+                  "R1": "FAIL",
+                  "R2": "FAIL",
+                  "R3": "PASS"
+                },
+                "column_results": {
+                  "C1": "PASS",
+                  "C2": "PASS",
+                  "C3": "PASS",
+                  "C4": "PASS"
+                },
+                "failed_rows": [
+                  "R1",
+                  "R2"
+                ],
+                "failed_columns": []
+              },
+              "different_rows_columns": {
+                "flipped_positions": [
+                  "R1C3",
+                  "R2C1"
+                ],
+                "received_grid": [
+                  "1110",
+                  "1011",
+                  "1111"
+                ],
+                "row_results": {
+                  "R1": "FAIL",
+                  "R2": "FAIL",
+                  "R3": "PASS"
+                },
+                "column_results": {
+                  "C1": "FAIL",
+                  "C2": "PASS",
+                  "C3": "FAIL",
+                  "C4": "PASS"
+                },
+                "failed_rows": [
+                  "R1",
+                  "R2"
+                ],
+                "failed_columns": [
+                  "C1",
+                  "C3"
+                ]
+              }
+            },
+            "guarantee": "Full 2D parity detects every pair of distinct flipped transmitted cells, including checking-bit cells.",
+            "limitation": "Detection does not guarantee unique localization or correction of both changed cells."
+          }
+        }
+      },
+      "scientific_review": {
+        "scope": "C2_only",
+        "status": "authored_and_programmatically_checked_requires_independent_human_approval",
+        "no_instructional_frozen_bit_strings": true,
+        "notes": "All complete-grid checks, single-flip localization and two-flip outcomes were programmatically recomputed. Human review is still required for content validity, SOLO alignment and judge calibration."
+      }
+    },
+    "C": {
+      "set_id": "C2-SET-C",
+      "intended_difficulty": "introductory_C2_U_to_M",
+      "public": {
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "stem": "A valid complete even-parity frame is transmitted. During transmission, the bits at positions 2 and 3 each flip. What does the receiver's single overall even-parity check report?",
+            "options": [
+              {
+                "id": "A",
+                "text": "It passes, even though the received frame is corrupted."
+              },
+              {
+                "id": "B",
+                "text": "It fails because any bit flip causes a parity failure."
+              },
+              {
+                "id": "C",
+                "text": "It identifies both changed positions."
+              },
+              {
+                "id": "D",
+                "text": "It corrects both changed bits automatically."
+              }
+            ]
+          },
+          {
+            "id": "MCQ2",
+            "stem": "The receiver checks every complete row and every complete column of the received grid below. Exactly one transmitted cell has flipped. Which pair of checks fails?",
+            "grid": [
+              "0100",
+              "1001",
+              "1111"
+            ],
+            "options": [
+              {
+                "id": "A",
+                "text": "R1 and C1"
+              },
+              {
+                "id": "B",
+                "text": "R2 and C2"
+              },
+              {
+                "id": "C",
+                "text": "R2 and C3"
+              },
+              {
+                "id": "D",
+                "text": "R1 and C3"
+              }
+            ]
+          },
+          {
+            "id": "MCQ3",
+            "stem": "In a full 2D even-parity grid, two distinct cells in the same row (R1C2 and R1C3) flip. Which outcome is expected?",
+            "options": [
+              {
+                "id": "A",
+                "text": "The affected row fails, but both affected columns pass; the corruption is not detected."
+              },
+              {
+                "id": "B",
+                "text": "Every row and column passes."
+              },
+              {
+                "id": "C",
+                "text": "The receiver automatically identifies and corrects both flipped cells."
+              },
+              {
+                "id": "D",
+                "text": "The affected row passes, but the two affected columns fail; the corruption is detected."
+              }
+            ]
+          }
+        ],
+        "subjective": {
+          "id": "SUB1",
+          "prompt": "A communication system uses full two-dimensional even parity. The valid complete transmitted grid is shown below; the final column contains row-checking bits, the bottom row contains column-checking bits, and the bottom-right cell completes both the bottom row and the rightmost column:\n\n0 1 1 0\n1 0 0 1\n1 1 1 1\n\nConsider three independent cases. In each case, exactly two distinct transmitted cells flip:\n1. Same row: R1C2, R1C4.\n2. Same column: R1C1, R2C1.\n3. Different rows and different columns: R1C2, R2C3.\n\nFor each case, identify which complete row and column checks fail and which affected row or column still passes. Then state whether the corruption is detected and explain whether detection guarantees that both flipped positions can be uniquely located and corrected."
+        }
+      },
+      "private": {
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "role": "single_parity_even_flip_limitation",
+            "subsection_refs": [
+              "C2.1"
+            ],
+            "correct_option_id": "A",
+            "correct_answer": "It passes, even though the received frame is corrupted.",
+            "oracle": {
+              "payload": "01101",
+              "parity_convention": "even",
+              "valid_complete_frame": "011011",
+              "valid_frame_ones": 4,
+              "flipped_positions_1_based": [
+                2,
+                3
+              ],
+              "received_frame": "000011",
+              "received_ones": 2,
+              "result": "PASS",
+              "interpretation": "Two flips preserve the overall parity condition; a passing check does not prove an error-free frame."
+            },
+            "option_feedback": {
+              "A": "Correct: two flips preserve the overall parity condition, even though the frame is corrupted.",
+              "B": "A pair of flips changes the number of 1s by an even amount, so overall parity remains satisfied.",
+              "C": "A single overall parity result does not identify changed positions.",
+              "D": "Single parity detects some violations; it does not automatically correct bits."
+            }
+          },
+          {
+            "id": "MCQ2",
+            "role": "two_dimensional_single_cell_check_interpretation",
+            "subsection_refs": [
+              "C2.2",
+              "C2.3"
+            ],
+            "correct_option_id": "D",
+            "correct_answer": "R1 and C3",
+            "oracle": {
+              "valid_grid": [
+                "0110",
+                "1001",
+                "1111"
+              ],
+              "received_grid": [
+                "0100",
+                "1001",
+                "1111"
+              ],
+              "flipped_position": "R1C3",
+              "row_results": {
+                "R1": "FAIL",
+                "R2": "PASS",
+                "R3": "PASS"
+              },
+              "column_results": {
+                "C1": "PASS",
+                "C2": "PASS",
+                "C3": "FAIL",
+                "C4": "PASS"
+              },
+              "failed_rows": [
+                "R1"
+              ],
+              "failed_columns": [
+                "C3"
+              ],
+              "localization_condition": "The failed row/column intersection identifies the changed cell only under the exactly-one-flipped-cell assumption."
+            },
+            "option_feedback": {
+              "A": "Recheck every complete row and column, including the checking-bit row and column.",
+              "B": "Recheck every complete row and column, including the checking-bit row and column.",
+              "C": "Recheck every complete row and column, including the checking-bit row and column.",
+              "D": "Correct: the failed row and failed column intersect at the flipped cell, under the stated exactly-one-flip assumption."
+            }
+          },
+          {
+            "id": "MCQ3",
+            "role": "two_dimensional_two_bit_same_row_detection",
+            "subsection_refs": [
+              "C2.4"
+            ],
+            "correct_option_id": "D",
+            "correct_answer": "The affected row passes, but the two affected columns fail; the corruption is detected.",
+            "oracle": {
+              "valid_grid": [
+                "0110",
+                "1001",
+                "1111"
+              ],
+              "flipped_positions": [
+                "R1C2",
+                "R1C3"
+              ],
+              "received_grid": [
+                "0000",
+                "1001",
+                "1111"
+              ],
+              "row_results": {
+                "R1": "PASS",
+                "R2": "PASS",
+                "R3": "PASS"
+              },
+              "column_results": {
+                "C1": "PASS",
+                "C2": "FAIL",
+                "C3": "FAIL",
+                "C4": "PASS"
+              },
+              "failed_rows": [],
+              "failed_columns": [
+                "C2",
+                "C3"
+              ],
+              "interpretation": "The affected row contains two flips and remains even; each affected column contains one flip and fails."
+            },
+            "option_feedback": {
+              "A": "The parity of the row with two flips remains satisfied.",
+              "B": "The two affected columns each contain one flip and fail.",
+              "C": "Detection does not guarantee automatic localization and correction of both cells.",
+              "D": "Correct: the row contains two flips and passes, while each affected column contains one flip and fails."
+            }
+          }
+        ],
+        "subjective_resolved": {
+          "contract": {
+            "id": "C2-SET-C-SUB1",
+            "type": "SUBJECTIVE",
+            "transition_id": "C2",
+            "shared_role": "compare independent two-bit corruption patterns under full 2D parity",
+            "mapped_locked_subsections": [
+              "C2.1",
+              "C2.2",
+              "C2.4"
+            ],
+            "solo_target": "U_to_M",
+            "target_structural_evidence": "The learner identifies multiple independent row/column check outcomes across the three patterns and distinguishes detection from guaranteed localization or correction.",
+            "score_anchor": {
+              "0": "Does not correctly analyse usable two-dimensional parity outcomes, or materially claims that two-bit errors are always missed or automatically corrected.",
+              "1": "Correctly analyses at least two of the three patterns by identifying the affected passing/failing row/column checks and recognizes that corruption is detected; may omit or incompletely explain the limitation on localization/correction.",
+              "2": "Correctly analyses all three patterns, identifies which affected groups fail and which affected group(s) still pass, states that all three two-bit patterns are detected, and explains that detection does not guarantee unique localization or correction of both flipped cells."
+            },
+            "evidence_elements": {
+              "same_row": "Two flips in one row leave that complete row parity satisfied; the two corresponding columns fail.",
+              "same_column": "Two flips in one column leave that complete column parity satisfied; the two corresponding rows fail.",
+              "different_rows_columns": "Each affected row and each affected column contains one flip and fails.",
+              "detection": "Full 2D parity detects each of these two-distinct-cell patterns.",
+              "limitation": "Detection does not guarantee unique localization or correction of both changed cells."
+            },
+            "legitimate_alternative_explanations": [
+              "Equivalent wording such as check passes/fails, parity remains even/becomes odd, or corruption is detected.",
+              "The learner may describe affected groups without reproducing every complete received grid, provided the check outcomes are unambiguous.",
+              "Equivalent row/column labels are acceptable if coordinates are consistently interpreted."
+            ],
+            "material_invalidators": [
+              "Claims that two flips in the same row or same column necessarily make that shared group fail.",
+              "Claims that full 2D parity misses every two-bit error.",
+              "Claims that a passing affected group means the entire transmission is error-free.",
+              "Claims that detection automatically guarantees both flipped positions can be uniquely identified and corrected."
+            ],
+            "full_credit_blockers": [
+              "Analyses fewer than all three patterns correctly.",
+              "Fails to distinguish a passing affected row/column from the failing orthogonal checks.",
+              "Claims guaranteed unique localization or correction of both flipped cells."
+            ],
+            "contradiction_handling": "A material contradiction of the two-bit detection guarantee blocks full credit and may warrant zero if it negates the usable analysis. Evaluate the reasoning and check outcomes, not keyword presence.",
+            "judge_instruction": "Grade ONLY the frozen public subjective prompt, this verified case, and the exact raw learner response. Do not use pedagogy, Tutor history, MCQs, MCQ score, prior attempts, or learner identity. Accept equivalent reasoning rather than exact-match text. Return only subjective_points (0/1/2 or null) and a nonempty reason. Null is reserved for genuine grading ambiguity or technical/scientific review hold, not an incorrect or blank answer.",
+            "calibration_status": "illustrative_synthetic_examples_not_human_validated",
+            "calibration_examples": [
+              {
+                "response": "In the same row case, the row passes but both columns fail. In the same column case, the column passes but both rows fail. When the cells are in different rows and columns, both rows and both columns fail. All are detected, but detection does not mean both positions can always be corrected.",
+                "expected_points": 2,
+                "why": "All three patterns and the detection-versus-correction limitation are correctly explained."
+              },
+              {
+                "response": "In the same-row case, the row passes while the two corresponding columns fail. In the same-column case, the column passes while the two corresponding rows fail. Both patterns are detected.",
+                "expected_points": 1,
+                "why": "Two independent patterns and their group outcomes are correctly analysed; the third pattern and localization/correction limitation are missing."
+              },
+              {
+                "response": "Two bits in the same row make that row fail, and the system then corrects both positions automatically.",
+                "expected_points": 0,
+                "why": "The central parity outcome and correction claim are incorrect."
+              }
+            ],
+            "assessment_mode": "fixed_c2_multistructural_patterns"
+          },
+          "case": {
+            "scenario_kind": "two_dimensional_parity_two_bit_detection",
+            "parity_convention": "even",
+            "valid_complete_grid": [
+              "0110",
+              "1001",
+              "1111"
+            ],
+            "grid_dimensions": "3 rows x 4 columns including checking-bit row and column",
+            "all_transmitted_cells_in_scope": true,
+            "cases": {
+              "same_row": {
+                "flipped_positions": [
+                  "R1C2",
+                  "R1C4"
+                ],
+                "received_grid": [
+                  "0011",
+                  "1001",
+                  "1111"
+                ],
+                "row_results": {
+                  "R1": "PASS",
+                  "R2": "PASS",
+                  "R3": "PASS"
+                },
+                "column_results": {
+                  "C1": "PASS",
+                  "C2": "FAIL",
+                  "C3": "PASS",
+                  "C4": "FAIL"
+                },
+                "failed_rows": [],
+                "failed_columns": [
+                  "C2",
+                  "C4"
+                ]
+              },
+              "same_column": {
+                "flipped_positions": [
+                  "R1C1",
+                  "R2C1"
+                ],
+                "received_grid": [
+                  "1110",
+                  "0001",
+                  "1111"
+                ],
+                "row_results": {
+                  "R1": "FAIL",
+                  "R2": "FAIL",
+                  "R3": "PASS"
+                },
+                "column_results": {
+                  "C1": "PASS",
+                  "C2": "PASS",
+                  "C3": "PASS",
+                  "C4": "PASS"
+                },
+                "failed_rows": [
+                  "R1",
+                  "R2"
+                ],
+                "failed_columns": []
+              },
+              "different_rows_columns": {
+                "flipped_positions": [
+                  "R1C2",
+                  "R2C3"
+                ],
+                "received_grid": [
+                  "0010",
+                  "1011",
+                  "1111"
+                ],
+                "row_results": {
+                  "R1": "FAIL",
+                  "R2": "FAIL",
+                  "R3": "PASS"
+                },
+                "column_results": {
+                  "C1": "PASS",
+                  "C2": "FAIL",
+                  "C3": "FAIL",
+                  "C4": "PASS"
+                },
+                "failed_rows": [
+                  "R1",
+                  "R2"
+                ],
+                "failed_columns": [
+                  "C2",
+                  "C3"
+                ]
+              }
+            },
+            "guarantee": "Full 2D parity detects every pair of distinct flipped transmitted cells, including checking-bit cells.",
+            "limitation": "Detection does not guarantee unique localization or correction of both changed cells."
+          }
+        }
+      },
+      "scientific_review": {
+        "scope": "C2_only",
+        "status": "authored_and_programmatically_checked_requires_independent_human_approval",
+        "no_instructional_frozen_bit_strings": true,
+        "notes": "All complete-grid checks, single-flip localization and two-flip outcomes were programmatically recomputed. Human review is still required for content validity, SOLO alignment and judge calibration."
+      }
+    }
+  }
+}

@@ -38,11 +38,15 @@ class Settings(BaseSettings):
     required_capture_streams: Literal["screen", "screen_and_webcam"] = "screen_and_webcam"
     enable_f1_v04_development: bool = False
     enable_v051_internal_testing: bool = False
+    enable_v051_unified_study: bool = False  # CHANGED: explicit opt-in for real C1--C4 execution
     enable_controlled_c11_pilot: bool = False  # internal v0.5 sessions only; default off
+    enable_controlled_c1_full_pilot: bool = False  # explicit internal C1.1--C1.4 overlay; default off
     v051_internal_testing_token: SecretStr | None = None
     # The implementation retains its v051 module names, but there is one
     # executable experimental study candidate: v0.5.
-    v051_internal_candidate_version: str = "v0.5"
+    # v0.5.5 is the immutable C1-C4 fixed-assessment revision.  Earlier
+    # versions remain valid database identities and are never rewritten.
+    v051_internal_candidate_version: str = "v0.5.5"
     f1_v04_study_dir: Path = Path("/app/studies/networks_error_detection_parity_f1/v0.4")
     active_capture_max_age_seconds: int = Field(default=15, gt=0)  # recorder heartbeat age
     participant_study_title: str = "Learning study"

@@ -4,8 +4,8 @@ from __future__ import annotations
 from pathlib import Path
 from types import SimpleNamespace
 
-from solo_harness.runtime.v04_assessment import RecordedResult
-from solo_harness.runtime.v04_native import MCQProse, SemanticReview, SubjectiveProse, SubjectiveReview
+from solo_harness.runtime.native_assessment import RecordedResult
+from solo_harness.runtime.native_contracts import MCQProse, SemanticReview, SubjectiveProse, SubjectiveReview
 from solo_harness.runtime.v051_assessment import construct_v051_assessment, fresh_verified_case, v051_judge_messages
 from solo_harness.runtime.v051_conversation import v051_tutor_prompt
 from solo_harness.studies.scientific_v051 import load_scientific_v051
@@ -39,7 +39,8 @@ def test_all_v051_item_contracts_have_a_fresh_oracle_checked_case():
 
 def test_v051_constructor_uses_contracts_writer_reviewer_and_freezes_three_plus_one():
     compiled = compile_v051(load_scientific_v051(ROOT))
-    blueprint = compiled.assessment_families["C2"]["forms"][0]
+    blueprint_source = next(x for x in compiled.authored["v051"]["scientific"]["assessment_families.yaml"]["blueprints"] if x["transition_id"] == "C2")
+    blueprint = {"id": blueprint_source["id"], "v051_item_contracts": blueprint_source["items"]}
     checkpoints = {}
 
     async def invoke(role, messages, schema, audit):

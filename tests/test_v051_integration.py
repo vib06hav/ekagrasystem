@@ -18,17 +18,19 @@ TEST_TEMP_DIR = Path(os.environ.get("V051_TEST_TEMP_DIR", Path.cwd()))
 
 def test_v051_load_compile_and_snapshot_preserve_every_authored_context():
     study = load_scientific_v051(ROOT)
-    assert load_scientific(ROOT).content_version == "v0.5"
-    assert study.content_version == "v0.5"
+    assert load_scientific(ROOT).content_version == "v0.5.5"
+    assert study.content_version == "v0.5.5"
     compiled = compile_v051(study)
     snapshot = compiled.to_snapshot()
     restored = compiled.from_snapshot(snapshot)
     source = restored.authored["v051"]["scientific"]
-    assert len(study.source_hashes) == 19
+    assert len(study.source_hashes) == 23
     assert len(source["subsection_interventions.yaml"]["cells"]) == 39
     assert len(source["curriculum.yaml"]["subsections"]) == 13
-    assert sum(len(form["v051_item_contracts"]) for family in restored.assessment_families.values() for form in family["forms"]) == 64
-    assert restored.authored["manifest"]["content_version"] == "v0.5"
+    assert [form["id"] for form in restored.assessment_families["C1"]["forms"]] == ["C1-SET-A", "C1-SET-B", "C1-SET-C"]
+    assert all([form["id"] for form in restored.assessment_families[section]["forms"]] == [f"{section}-SET-{set_id}" for set_id in "ABC"] for section in ("C2", "C3", "C4"))
+    assert set(restored.authored["v051"]["fixed_assessment_banks"]) == {"C1", "C2", "C3", "C4"}
+    assert restored.authored["manifest"]["content_version"] == "v0.5.5"
     assert restored.authored["v051"]["prompts"]["TUTOR_PROMPT.md"] == (ROOT / "07_PROMPT_CONTRACTS/TUTOR_PROMPT.md").read_text(encoding="utf-8")
     assert restored.authored["v051"]["prompts"]["CONVERSATION_JUDGE_PROMPT.md"] == (ROOT / "07_PROMPT_CONTRACTS/CONVERSATION_JUDGE_PROMPT.md").read_text(encoding="utf-8")
     assert set(V051TutorOutput.model_fields) == {"learner_message", "ready_for_judge"}

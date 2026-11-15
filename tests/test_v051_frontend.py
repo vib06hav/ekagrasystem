@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from jinja2 import Environment, FileSystemLoader
 from pydantic import SecretStr
 
-from solo_harness.runtime.v04_persistence import is_deliverable_f1, is_f1_study
+from solo_harness.runtime.assessment_persistence import is_deliverable_f1, is_f1_study
 from solo_harness.studies.scientific_v051 import load_scientific_v051
 from solo_harness.studies.v051_native_compiler import compile_v051
 from solo_harness.web import _internal_v051_access_enabled, _operation_refresh_required, _v051_subsection_projection
@@ -50,7 +50,7 @@ def test_projection_uses_the_current_attempt_persisted_order_and_titles():
     assert projected[1]["title"] == "Introduction and Construction of Two-Dimensional Parity"
 
 
-def test_subsection_navigation_and_transcript_marker_are_visible_but_not_links():
+def test_subsection_titles_and_transcript_marker_are_visible_but_not_links():
     rows = _v051_subsection_projection(_compiled(), SimpleNamespace(id="current"), [
         SimpleNamespace(subsection_id="C2.1", order_in_attempt=1, status="COMPLETED"),
         SimpleNamespace(subsection_id="C2.2", order_in_attempt=2, status="ACTIVE"),
@@ -60,13 +60,14 @@ def test_subsection_navigation_and_transcript_marker_are_visible_but_not_links()
     view = _view(section_number=2, sections=[{"enabled": True, "state": "current", "number": 2}],
                  section_title="Capabilities and Limitations of Parity-Based Error Detection",
                  v051_subsections=rows, active_subsection=rows[1],
-                 timeline=[{"kind": "subsection", "subsection_id": "C2.2", "label": "C2.2 — Two-Dimensional Parity Construction"}])
+                 timeline=[{"kind": "subsection", "subsection_id": "C2.2", "title": "Two-Dimensional Parity Construction"}])
     html = Environment(loader=FileSystemLoader("src/solo_harness/templates")).get_template("partials/session_main.html").render(
         view=view, settings=SimpleNamespace(enable_f1_v04_development=False, enable_v051_internal_testing=False), new_key="key"
     )
-    assert "Part 2 of 4 · C2.2" in html
+    assert "Part 2 of 4 — Introduction and Construction of Two-Dimensional Parity" in html
     assert 'data-subsection-marker="C2.2"' in html
-    assert "C2.1 ·" in html and "C2.4 ·" in html
+    assert rows[0]["title"] in html and rows[3]["title"] in html
+    assert ">C2.1 ·" not in html and ">C2.4 ·" not in html and "C2.2 —" not in html
     assert '/session/sections/2' in html
     assert 'href="/session/subsections/' not in html
 
@@ -121,3 +122,32 @@ def test_controlled_c11_visual_is_passive_and_comes_from_server_descriptor():
     assert 'data-controlled-c11-visual="mapping"' in html
     assert "Yes = 1, No = 0" in html and "Ordered sequence: <code>110</code>" in html
     assert "<script" not in html
+
+
+def test_controlled_c11_next_is_a_single_chat_flow_control_without_internal_label():
+    environment = Environment(loader=FileSystemLoader("src/solo_harness/templates"))
+    environment.filters["tutor_markdown"] = lambda value: value
+    subsection = {"id": "C1.1", "title": "Digital Representation", "order": 1, "state": "ACTIVE"}
+    html = environment.get_template("partials/session_main.html").render(
+        view=_view(active_subsection=subsection, v051_subsections=[subsection],
+                   controlled_c11={"status": "APPROVED_AWAITING_NEXT", "approval_version": 3,
+                                   "move_index": 0, "is_final_move": False},
+                   timeline=[{"kind": "message", "role": "TUTOR", "content": "A short explanation.",
+                              "sequence_no": 1, "timestamp": datetime.now(timezone.utc), "visual": None}]),
+        settings=SimpleNamespace(enable_f1_v04_development=False, enable_v051_internal_testing=False), new_key="key"
+    )
+    assert html.count('hx-post="/session/actions/c11-next"') == 1
+    assert ">Next<" in html and ">C1.1 ·" not in html and "· C1.1 —" not in html
+
+
+def test_controlled_c11_boundary_uses_neutral_completion_wording():
+    environment = Environment(loader=FileSystemLoader("src/solo_harness/templates"))
+    subsection = {"id": "C1.1", "title": "Digital Representation", "order": 1, "state": "ACTIVE"}
+    html = environment.get_template("partials/session_main.html").render(
+        view=_view(active_subsection=subsection, v051_subsections=[subsection],
+                   controlled_c11={"status": "PILOT_BOUNDARY_HANDOFF", "move_index": 3,
+                                   "is_final_move": True}),
+        settings=SimpleNamespace(enable_f1_v04_development=False, enable_v051_internal_testing=False), new_key="key"
+    )
+    assert "This subsection is complete." in html
+    assert "C1.1 is complete" not in html and "C1.2" not in html and "pilot" not in html.lower()

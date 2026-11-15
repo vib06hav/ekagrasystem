@@ -1,0 +1,1332 @@
+{
+  "contract_id": "EKAGRAAI_CONTROLLED_C4_V1",
+  "status": "DESIGN_REVIEWED_C4_1_TO_C4_3__RUNTIME_NOT_IMPLEMENTED",
+  "provenance": "Authored from EkagraAI Final Course Content Ground Truth (C1–C4), version 1.0, and the reviewed C4.1–C4.3 P1/P2/P3 design discussions. Shape follows the provided EKAGRAAI_C3_ALL_MOVE_CONTRACTS_V1_1 JSON, preserving its seven move-level keys. C4.x.Oxx identifiers are local references mapped to the ordered locked subsection content bullets; they are not official ground-truth IDs. This is an instructional-design contract, not a runtime implementation or evidence of assessed SOLO growth.",
+  "control_boundary": {
+    "backend": "Selects active section/subsection/pedagogy/move, fixed scientific material, approved passive visual and display phase, completion ledger and explicit Next progression; enforces section-end PAAS handoff.",
+    "frontend": "Renders optional passive, preverified checking_groups visuals; P2 prompt phase cannot reveal answer/results before response opportunity; visuals are never learner-controlled or Tutor-generated.",
+    "tutor": "Explains exactly the active move in natural, adaptable language, responds to learner contingencies and doubts, and does not choose cases, flip values, visual results or progression.",
+    "judge": "Evaluates learner-visible instructional evidence and P1/P2/P3 fidelity; never requires learner mastery or a correct answer."
+  },
+  "shared_guards": [
+    "No mastery, correct-answer, or compulsory confirmation gate during teaching; PAAS is the separate section-level assessment.",
+    "Only one primary guided question per P2 move; provide a responsive explanation regardless of answer correctness, with hints only when useful.",
+    "No assessment questions or assessment scoring inside the teaching-move contracts.",
+    "No cross-subsection leakage: C4.1 establishes group structure, C4.2 derives detection/non-detection law, C4.3 evaluates changes and transfers.",
+    "No unexplained unfamiliar checking group: define member positions and parity convention before any calculation or guided prediction.",
+    "All fixed bit values, order, membership lists, received sequences, checked-group counts and PASS/FAIL results must match the verified fixed_cases.",
+    "A transmitted checking bit is part of its complete checked group and may itself flip during transmission.",
+    "Any extra checking bit for a new group must have an explicitly defined parity-based value in the initial valid transmission.",
+    "The receiver observes received bits and agreed checking rules; it is not presumed to know the pristine original or actual flip history.",
+    "Any before/after or changed-position highlight is labeled as an instructor-constructed history, not as evidence available to the receiver.",
+    "A passing check means a rule is satisfied; even all groups passing does not establish that no corruption occurred.",
+    "A failed check detects a violated parity rule, not necessarily the actual changed position or a uniquely correct repair.",
+    "For any initially valid complete checked group, an odd count of flipped transmitted positions reverses PASS to FAIL; an even count preserves PASS.",
+    "For any initially valid multiple-group parity system, corruption is undetected iff every complete checked group has an even number of flipped positions; this holds for initially satisfied even or odd parity rules.",
+    "Count flipped positions inside each group separately; do not equate total error count with checking-group flip count or received number of ones.",
+    "Do not generalize the full 2D-parity guarantee of detecting every two-cell error to arbitrary overlapping groups.",
+    "Candidate A and Candidate B in C4.3 are mutually exclusive alternative seven-bit checking designs, not simultaneous added bits.",
+    "Candidate B fails to detect the specified D2+D3 corruption; do not describe it as globally useless for every pattern.",
+    "An additional rule aids detection of a specified previously missed pattern only if that new rule is violated by the pattern; neither candidate guarantees universal detection.",
+    "Different added checks each cost a transmitted checking bit; do not claim optimality or quantify general detection performance without evidence.",
+    "Passive visuals are optional support and do not by themselves constitute Tutor instructional delivery evidence.",
+    "For P2 visuals, withhold the asked-for bit value or check result until a learner response opportunity has occurred; the backend controls reveal state.",
+    "A learner doubt may interrupt a move or occur after approval without independently advancing the move; follow existing backend Next and review rules.",
+    "The authored exact_delivery is a design/review reference, not a verbatim Tutor prompt to inject at runtime; Tutor receives scoped, prompt-safe verified facts and requirements.",
+    "No CRC, separate checksum mechanism, Hamming-code procedures, parity-check matrices, linear algebra, formal coding theory, or optimal code design.",
+    "No claim of measured Extended Abstract mastery or learning outcomes based only on completion of moves.",
+    "C4 has exactly three subsections in the locked syllabus and exactly one section-level PAAS handoff after C4.3, not one after each subsection."
+  ],
+  "fixed_cases": {
+    "C4.1": {
+      "parity_convention": "even",
+      "position_order": [
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "P",
+        "Q"
+      ],
+      "data_positions": [
+        "D1",
+        "D2",
+        "D3",
+        "D4"
+      ],
+      "checking_bit_positions": [
+        "P",
+        "Q"
+      ],
+      "data_sequence": "1100",
+      "initial_complete_sequence": "110001",
+      "groups": {
+        "A": {
+          "members": [
+            "D1",
+            "D2",
+            "D3",
+            "P"
+          ],
+          "checking_bit": "P",
+          "initial_group_bits": "1100",
+          "initial_ones": 2,
+          "initial_result": "PASS"
+        },
+        "B": {
+          "members": [
+            "D2",
+            "D3",
+            "D4",
+            "Q"
+          ],
+          "checking_bit": "Q",
+          "initial_group_bits": "1001",
+          "initial_ones": 2,
+          "initial_result": "PASS"
+        }
+      },
+      "receiver_evidence": "The receiver has the complete received sequence and agreed group memberships/rules, not a pristine reference copy or the instructor's known flip history.",
+      "hypothetical_group_A_parity_contrast": {
+        "correct": {
+          "P": "0",
+          "group_A_bits": "1100",
+          "ones": 2,
+          "result": "PASS"
+        },
+        "incorrect": {
+          "P": "1",
+          "group_A_bits": "1101",
+          "ones": 3,
+          "result": "FAIL",
+          "note": "This is an invalid *proposed checking-bit choice*, not a known transmission history."
+        }
+      }
+    },
+    "C4.2": {
+      "parity_convention": "even",
+      "position_order": [
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "P",
+        "Q"
+      ],
+      "data_positions": [
+        "D1",
+        "D2",
+        "D3",
+        "D4"
+      ],
+      "checking_bit_positions": [
+        "P",
+        "Q"
+      ],
+      "data_sequence": "1100",
+      "initial_complete_sequence": "110001",
+      "groups": {
+        "A": {
+          "members": [
+            "D1",
+            "D2",
+            "D3",
+            "P"
+          ],
+          "checking_bit": "P",
+          "initial_group_bits": "1100",
+          "initial_ones": 2,
+          "initial_result": "PASS"
+        },
+        "B": {
+          "members": [
+            "D2",
+            "D3",
+            "D4",
+            "Q"
+          ],
+          "checking_bit": "Q",
+          "initial_group_bits": "1001",
+          "initial_ones": 2,
+          "initial_result": "PASS"
+        }
+      },
+      "receiver_evidence": "The receiver has the complete received sequence and agreed group memberships/rules, not a pristine reference copy or the instructor's known flip history.",
+      "error_cases": {
+        "baseline": {
+          "flipped_positions": [],
+          "received_sequence": "110001",
+          "group_results": {
+            "A": "PASS",
+            "B": "PASS"
+          },
+          "group_flip_counts": {
+            "A": 0,
+            "B": 0
+          }
+        },
+        "case_A_D1": {
+          "flipped_positions": [
+            "D1"
+          ],
+          "received_sequence": "010001",
+          "group_results": {
+            "A": "FAIL",
+            "B": "PASS"
+          },
+          "group_flip_counts": {
+            "A": 1,
+            "B": 0
+          }
+        },
+        "case_B_D2": {
+          "flipped_positions": [
+            "D2"
+          ],
+          "received_sequence": "100001",
+          "group_results": {
+            "A": "FAIL",
+            "B": "FAIL"
+          },
+          "group_flip_counts": {
+            "A": 1,
+            "B": 1
+          }
+        },
+        "case_C_P": {
+          "flipped_positions": [
+            "P"
+          ],
+          "received_sequence": "110011",
+          "group_results": {
+            "A": "FAIL",
+            "B": "PASS"
+          },
+          "group_flip_counts": {
+            "A": 1,
+            "B": 0
+          }
+        },
+        "case_D_D1_D2": {
+          "flipped_positions": [
+            "D1",
+            "D2"
+          ],
+          "received_sequence": "000001",
+          "group_results": {
+            "A": "PASS",
+            "B": "FAIL"
+          },
+          "group_flip_counts": {
+            "A": 2,
+            "B": 1
+          }
+        },
+        "case_E_D2_D3": {
+          "flipped_positions": [
+            "D2",
+            "D3"
+          ],
+          "received_sequence": "101001",
+          "group_results": {
+            "A": "PASS",
+            "B": "PASS"
+          },
+          "group_flip_counts": {
+            "A": 2,
+            "B": 2
+          }
+        }
+      },
+      "general_rule": "Given a nonzero error pattern and an initially valid set of complete parity checks, corruption is detected iff at least one checked group has an odd count of flipped transmitted positions; undetected iff all checked groups have even counts."
+    },
+    "C4.3": {
+      "parity_convention": "even",
+      "position_order": [
+        "D1",
+        "D2",
+        "D3",
+        "D4",
+        "P",
+        "Q"
+      ],
+      "data_positions": [
+        "D1",
+        "D2",
+        "D3",
+        "D4"
+      ],
+      "checking_bit_positions": [
+        "P",
+        "Q"
+      ],
+      "data_sequence": "1100",
+      "initial_complete_sequence": "110001",
+      "groups": {
+        "A": {
+          "members": [
+            "D1",
+            "D2",
+            "D3",
+            "P"
+          ],
+          "checking_bit": "P",
+          "initial_group_bits": "1100",
+          "initial_ones": 2,
+          "initial_result": "PASS"
+        },
+        "B": {
+          "members": [
+            "D2",
+            "D3",
+            "D4",
+            "Q"
+          ],
+          "checking_bit": "Q",
+          "initial_group_bits": "1001",
+          "initial_ones": 2,
+          "initial_result": "PASS"
+        }
+      },
+      "receiver_evidence": "The receiver has the complete received sequence and agreed group memberships/rules, not a pristine reference copy or the instructor's known flip history.",
+      "specified_target": {
+        "flipped_positions": [
+          "D2",
+          "D3"
+        ],
+        "received_sequence": "101001",
+        "group_results": {
+          "A": "PASS",
+          "B": "PASS"
+        },
+        "group_flip_counts": {
+          "A": 2,
+          "B": 2
+        }
+      },
+      "additional_check_alternatives": {
+        "candidate_A": {
+          "label": "Candidate A — effective for D2+D3 only, no universal guarantee",
+          "position_order": [
+            "D1",
+            "D2",
+            "D3",
+            "D4",
+            "P",
+            "Q",
+            "R"
+          ],
+          "checking_bit_added": "R",
+          "added_group_name": "C",
+          "added_group_members": [
+            "D1",
+            "D2",
+            "D4",
+            "R"
+          ],
+          "initial_complete_sequence": "1100010",
+          "initial_added_group_bits": "1100",
+          "initial_ones": 2,
+          "target_flipped_positions": [
+            "D2",
+            "D3"
+          ],
+          "target_received_sequence": "1010010",
+          "target_added_group_bits": "1000",
+          "target_ones": 1,
+          "target_group_results": {
+            "A": "PASS",
+            "B": "PASS",
+            "C": "FAIL"
+          },
+          "new_group_target_flip_count": 1,
+          "overhead_extra_transmitted_bits": 1
+        },
+        "candidate_B": {
+          "label": "Candidate B — ineffective for the D2+D3 pattern; may detect other patterns",
+          "position_order": [
+            "D1",
+            "D2",
+            "D3",
+            "D4",
+            "P",
+            "Q",
+            "S"
+          ],
+          "checking_bit_added": "S",
+          "added_group_name": "C",
+          "added_group_members": [
+            "D2",
+            "D3",
+            "S"
+          ],
+          "initial_complete_sequence": "1100011",
+          "initial_added_group_bits": "101",
+          "initial_ones": 2,
+          "target_flipped_positions": [
+            "D2",
+            "D3"
+          ],
+          "target_received_sequence": "1010011",
+          "target_added_group_bits": "011",
+          "target_ones": 2,
+          "target_group_results": {
+            "A": "PASS",
+            "B": "PASS",
+            "C": "PASS"
+          },
+          "new_group_target_flip_count": 2,
+          "overhead_extra_transmitted_bits": 1
+        }
+      },
+      "transfer_arrangement": {
+        "parity_convention": "even",
+        "position_order": [
+          "X1",
+          "X2",
+          "X3",
+          "X4",
+          "T",
+          "U"
+        ],
+        "data_positions": [
+          "X1",
+          "X2",
+          "X3",
+          "X4"
+        ],
+        "checking_bit_positions": [
+          "T",
+          "U"
+        ],
+        "initial_complete_sequence": "100111",
+        "groups": {
+          "X": {
+            "members": [
+              "X1",
+              "X3",
+              "T"
+            ],
+            "checking_bit": "T",
+            "initial_group_bits": "101",
+            "initial_ones": 2,
+            "initial_result": "PASS"
+          },
+          "Y": {
+            "members": [
+              "X2",
+              "X3",
+              "X4",
+              "U"
+            ],
+            "checking_bit": "U",
+            "initial_group_bits": "0011",
+            "initial_ones": 2,
+            "initial_result": "PASS"
+          }
+        },
+        "cases": {
+          "X1_only": {
+            "flipped_positions": [
+              "X1"
+            ],
+            "received_sequence": "000111",
+            "group_flip_counts": {
+              "X": 1,
+              "Y": 0
+            },
+            "group_results": {
+              "X": "FAIL",
+              "Y": "PASS"
+            }
+          },
+          "X1_and_T": {
+            "flipped_positions": [
+              "X1",
+              "T"
+            ],
+            "received_sequence": "000101",
+            "group_flip_counts": {
+              "X": 2,
+              "Y": 0
+            },
+            "group_results": {
+              "X": "PASS",
+              "Y": "PASS"
+            }
+          }
+        },
+        "note": "The before/after flip history is instructor-known; receiver observes only the received sequence and agreed checks."
+      },
+      "note": "Alternative designs each add one checking bit. Candidate B is only ineffective for the specified target; no global uselessness or universal coverage inference is licensed."
+    }
+  },
+  "subsections": {
+    "C4.1": {
+      "title": "Generalizing Parity Checking Beyond Rows and Columns",
+      "solo_target": "R_to_EA",
+      "section_objective": "Recognize a general parity-checking group as an explicitly specified set of transmitted bit positions, explain overlapping memberships and receiver verification, and connect this representation to single and full two-dimensional parity without introducing a new algorithm.",
+      "content_reference_legend": {
+        "C4.1.O01": "Revisit single parity and full two-dimensional parity as special cases of parity rules over groups of transmitted bits.",
+        "C4.1.O02": "Recognize that a parity checking group can be any explicitly specified set of transmitted bit positions, rather than necessarily a full message, row, or column.",
+        "C4.1.O03": "Explain that checking groups can overlap and one transmitted position can participate in multiple rules.",
+        "C4.1.O04": "Connect a group's member positions and its transmitted checking information to how the receiver verifies the agreed rule.",
+        "C4.1.O05": "Relate the unfamiliar checking-group representation to the familiar parity principle from C1–C3."
+      },
+      "moves_by_pedagogy": {
+        "P1": [
+          {
+            "id": "C4.1-P1-M01",
+            "required_content_refs": [
+              "C4.1.O01",
+              "C4.1.O02",
+              "C4.1.O05"
+            ],
+            "source_instructional_action": "Revisit single parity and full two-dimensional parity, then define a selected checking group independently of any drawn grid.",
+            "exact_delivery": "In single parity, one agreed complete group is checked; in full two-dimensional parity, complete row and column groups are checked and overlap. Those are particular ways of choosing which transmitted positions participate in parity rules. Generalize the idea: a checking group is an explicitly specified set of transmitted bit positions, whose complete values must satisfy an agreed even- or odd-parity convention. The set does not have to be a complete message or a geometric row or column. Before doing any calculation with a new group, the sender and receiver must know exactly which positions belong to it. This is still parity checking, not a newly invented detection algorithm.",
+            "visual": null,
+            "learner_response_policy": "model",
+            "completion_evidence": "Familiar single/2D group structures, an explicit checking-group definition, and the non-geometric generalization delivered without demanding unfamiliar inference."
+          },
+          {
+            "id": "C4.1-P1-M02",
+            "required_content_refs": [
+              "C4.1.O02",
+              "C4.1.O04"
+            ],
+            "source_instructional_action": "Model creation of the first non-grid group using the given data and rule-determined checking bit.",
+            "exact_delivery": "Take original data D1=1, D2=1, D3=0, D4=0, in that order: 1100. Define Group A as D1, D2, D3 and additional transmitted checking bit P. D4 is present in the transmission but is not a member of A. The selected data bits 1,1,0 contain two ones, already even. To make the complete Group A satisfy even parity, the sender therefore sets P=0. Group A reads 1100 and contains two ones, so it passes. The full transmission will also contain other positions; we must not count them when checking A.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "group_a_construction"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Original data positions, exact Group A membership, reason for P=0, exclusion of D4, and complete even-parity verification modeled."
+          },
+          {
+            "id": "C4.1-P1-M03",
+            "required_content_refs": [
+              "C4.1.O02",
+              "C4.1.O03",
+              "C4.1.O04"
+            ],
+            "source_instructional_action": "Model a second valid overlapping checking group and contrast its membership with A.",
+            "exact_delivery": "Keep the same data 1100. Define Group B as D2,D3,D4 and a separate checking bit Q. Its selected data values 1,0,0 contain one one, so the sender sets Q=1 to make the complete Group B even: 1001 has two ones and passes. The complete transmission in position order D1,D2,D3,D4,P,Q is 110001. Group A checks D1,D2,D3,P; Group B checks D2,D3,D4,Q. D2 and D3 appear in both groups. D1 and P belong only to A; D4 and Q belong only to B. Overlap is permitted because groups are sets of positions, not separate exclusive packets.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "group_a_vs_b"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Q=1 calculated from Group B, both complete groups pass, and D2/D3 overlap and separate check-bit roles made explicit."
+          },
+          {
+            "id": "C4.1-P1-M04",
+            "required_content_refs": [
+              "C4.1.O03",
+              "C4.1.O04"
+            ],
+            "source_instructional_action": "Work receiver verification from the complete received sequence with the agreed membership rules.",
+            "exact_delivery": "Suppose the receiver gets the six transmitted bits 110001 and knows the agreed even-parity group memberships. To verify A it extracts D1=1,D2=1,D3=0,P=0, counts two ones and finds PASS. To verify B it extracts D2=1,D3=0,D4=0,Q=1, counts two ones and finds PASS. It checks complete groups, including the respective transmitted check bit, rather than counting the six-bit message as though it were one check. The receiver does not need the pristine original sent bits to perform these consistency checks. Both checks passing means these agreed rules are satisfied, not that error-free delivery has been proved.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "receiver_checks"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Both receiver checks including P/Q, two-even results, and the receiver information boundary explicitly explained."
+          },
+          {
+            "id": "C4.1-P1-M05",
+            "required_content_refs": [
+              "C4.1.O01",
+              "C4.1.O02",
+              "C4.1.O03",
+              "C4.1.O04",
+              "C4.1.O05"
+            ],
+            "source_instructional_action": "Model a concise generalization linking one whole-sequence group, multiple grid groups and non-grid selected overlapping groups.",
+            "exact_delivery": "Bring the three arrangements together. Single parity selects one complete checked group. Full two-dimensional parity selects several complete row and column groups that overlap. Our new arrangement selects Group A=D1,D2,D3,P and Group B=D2,D3,D4,Q, which overlap at D2 and D3 without needing rows or columns. In every case, the sender follows agreed group rules to determine its checking information; the receiver tests the complete received members of each specified group. The geometry and number of groups can change, while the underlying parity checking idea remains the same. This is our general checking-group representation; we have not yet derived which multi-bit error patterns it will detect.",
+            "visual": null,
+            "learner_response_policy": "model",
+            "completion_evidence": "Explicit cross-system generalization of membership, checking information, receiver verification and scope boundary delivered."
+          }
+        ],
+        "P2": [
+          {
+            "id": "C4.1-P2-M01",
+            "required_content_refs": [
+              "C4.1.O01",
+              "C4.1.O02",
+              "C4.1.O05"
+            ],
+            "source_instructional_action": "Define checking group before one bounded guided question about the necessity of row/column geometry.",
+            "exact_delivery": "FIRST EXPLAIN: Single parity checked one complete group; full two-dimensional parity checked overlapping full rows and columns. A checking group means an explicitly agreed set of transmitted positions to be checked together under a parity convention. ASK ONCE: Must every checking group be a whole message, a row, or a column? HINT IF NEEDED: Those are examples of choosing positions; could the sender and receiver instead agree on a list of positions? EXPLAIN AFTER RESPONSE: No. Any specified group of transmitted bit positions can be checked, and multiple groups can overlap. This is still ordinary parity checking. Continue after the explanation regardless of whether the learner answered correctly.",
+            "visual": null,
+            "learner_response_policy": "guided",
+            "completion_evidence": "Definition given before questioning, one genuine response opportunity, and the correct non-geometric generalization explained without mastery gating."
+          },
+          {
+            "id": "C4.1-P2-M02",
+            "required_content_refs": [
+              "C4.1.O02",
+              "C4.1.O04"
+            ],
+            "source_instructional_action": "Guide the value of P in an explicitly provided non-grid Group A, with answer hidden before response.",
+            "exact_delivery": "FIRST DEFINE: Original data are D1=1,D2=1,D3=0,D4=0. Group A contains only D1,D2,D3 and checking bit P; D4 is not in A. Sender and receiver use even parity. ASK ONCE: What should P be so the complete Group A has an even number of ones? HINT IF NEEDED: The selected data bits 1,1,0 already contain two ones. EXPLAIN AFTER RESPONSE: P=0 keeps two ones in complete Group A=1100, so A passes. The full original data sequence is 1100, but that is not the same as the list of positions included in A. Continue regardless of response correctness.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "group_a_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One guided value-selection opportunity followed by P=0, even count of Group A and D4-exclusion explanation; no compulsory hint or correctness test."
+          },
+          {
+            "id": "C4.1-P2-M03",
+            "required_content_refs": [
+              "C4.1.O02",
+              "C4.1.O03",
+              "C4.1.O04"
+            ],
+            "source_instructional_action": "Guide recognition of overlapping membership, then explain Group B construction in full.",
+            "exact_delivery": "FIRST DEFINE: Group A contains D1,D2,D3,P, with P=0. A second agreed even-parity Group B contains D2,D3,D4,Q. ASK ONCE: Which original data positions belong to both A and B? HINT IF NEEDED: Compare the two membership lists and identify repeated D-labels. EXPLAIN AFTER RESPONSE: D2 and D3 belong to both groups; D1 and P are A-only, D4 and Q are B-only. Group B selected data are 1,0,0, so Q=1 is needed for complete Group B=1001 to contain two ones. In position order D1,D2,D3,D4,P,Q, the valid transmission is 110001. Continue regardless of learner correctness.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "group_a_vs_b_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One overlap question, correct identification D2/D3, calculation Q=1 and accurate comparison of A/B memberships delivered."
+          },
+          {
+            "id": "C4.1-P2-M04",
+            "required_content_refs": [
+              "C4.1.O03",
+              "C4.1.O04"
+            ],
+            "source_instructional_action": "Guide receiver membership selection for B, then demonstrate both complete receiver checks.",
+            "exact_delivery": "FIRST EXPLAIN: The receiver obtains complete sequence 110001 and knows the agreed even-parity memberships; it is not given a pristine original copy. ASK ONCE: When verifying Group B, which transmitted positions should the receiver count? HINT IF NEEDED: Refer to B=D2,D3,D4,Q, not every position in the frame. EXPLAIN AFTER RESPONSE: Group B uses D2=1,D3=0,D4=0,Q=1; its two ones satisfy even parity. Group A uses D1=1,D2=1,D3=0,P=0; it too contains two ones and passes. Q is transmitted checking information belonging to B, and P belongs to A. Passing both means the rules hold, not proof no bits changed. Continue regardless of correctness.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "receiver_checks_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One receiver-membership question, complete A/B checks and correct receiver evidence limits delivered."
+          },
+          {
+            "id": "C4.1-P2-M05",
+            "required_content_refs": [
+              "C4.1.O01",
+              "C4.1.O02",
+              "C4.1.O03",
+              "C4.1.O04",
+              "C4.1.O05"
+            ],
+            "source_instructional_action": "Guide synthesis of the common principle and provide a complete explanation after the response.",
+            "exact_delivery": "ASK ONCE: What makes single parity, full two-dimensional parity and these two selected overlapping groups examples of the same checking idea? HINT IF NEEDED: In every example, ask who defines which transmitted positions belong to each group and which parity rule the receiver applies. EXPLAIN AFTER RESPONSE: All impose agreed parity conditions on explicitly defined complete groups of received transmitted bits, including their checking information. Single parity has one group; full 2D has multiple row/column groups; this arrangement has A and B overlapping at D2/D3. The arrangement of positions can change without changing the basic parity principle. Do not yet generalize a multi-bit detection theorem. Continue regardless of answer correctness.",
+            "visual": null,
+            "learner_response_policy": "guided",
+            "completion_evidence": "One synthesis opportunity and an accurate general explanation of group membership, overlap, shared rule and verification delivered."
+          }
+        ],
+        "P3": [
+          {
+            "id": "C4.1-P3-M01",
+            "required_content_refs": [
+              "C4.1.O01",
+              "C4.1.O02",
+              "C4.1.O05"
+            ],
+            "source_instructional_action": "Compare familiar single and full 2D arrangements with a selected-group rule, defining membership before calculations.",
+            "exact_delivery": "Contrast three kinds of agreed membership. In single parity the checked group may be the whole transmitted frame. In full two-dimensional parity, complete rows and columns form several overlapping groups. A new checking system may instead name any selected positions—no row/column shape is necessary. First establish the definition: a checking group is an explicitly specified set of transmitted positions governed by an agreed parity rule. The difference between the arrangements is which positions and how many groups are checked; the same parity concept underlies all three. Do not ask for inference about an undefined new group.",
+            "visual": null,
+            "learner_response_policy": "compare",
+            "completion_evidence": "All three membership styles compared with a valid common principle and clear unfamiliar-group definition."
+          },
+          {
+            "id": "C4.1-P3-M02",
+            "required_content_refs": [
+              "C4.1.O02",
+              "C4.1.O04"
+            ],
+            "source_instructional_action": "Compare two proposed checking-bit values for identical selected data in Group A.",
+            "exact_delivery": "Hold original data D1=1,D2=1,D3=0,D4=0 and selected Group A=D1,D2,D3,P fixed. Under even parity, compare two hypothetical constructions. Case A chooses P=0, giving complete Group A=1100: two ones, valid. Case B chooses P=1, giving Group A=1101: three ones, invalid under the agreed even-parity rule. The cases differ only in the proposed checking-bit value. Because the selected data already contain two ones, the rule requires P=0; choosing P arbitrarily does not produce a valid group. The P=1 case is a deliberate rule-violating construction, NOT a claim about a received transmission error.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "group_a_valid_vs_invalid"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Both matched constructions, correct counts, fixed members and why one satisfies the agreed rule explicitly contrasted."
+          },
+          {
+            "id": "C4.1-P3-M03",
+            "required_content_refs": [
+              "C4.1.O02",
+              "C4.1.O03",
+              "C4.1.O04"
+            ],
+            "source_instructional_action": "Compare differently defined but overlapping valid checking groups.",
+            "exact_delivery": "Compare Group A=D1,D2,D3,P with Group B=D2,D3,D4,Q on data 1100. A selected data 1,1,0 require P=0; A=1100 has two ones and passes. B selected data 1,0,0 require Q=1; B=1001 also has two ones and passes. Both obey even parity and use separate checking bits, but their member sets are different. D2 and D3 belong to both groups; D1 and P are only in A, D4 and Q only in B. Infer that two overlapping rules need not check exactly the same positions to share a parity convention.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "group_a_vs_b"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Membership, P/Q values, shared D2/D3 positions and common even-parity rule contrasted accurately."
+          },
+          {
+            "id": "C4.1-P3-M04",
+            "required_content_refs": [
+              "C4.1.O03",
+              "C4.1.O04"
+            ],
+            "source_instructional_action": "Contrast receiver verification of the two overlapping groups while keeping its information boundary unchanged.",
+            "exact_delivery": "Contrast the group-verification procedures while keeping the complete received transmission 110001 and the receiver's available information fixed. For Group A, the receiver selects D1,D2,D3,P=1100 and sees two ones: PASS. For Group B it selects D2,D3,D4,Q=1001 and sees two ones: PASS. The groups differ in which positions and which checking bit are included, but each is checked by exactly the same even-parity rule. Neither check requires the receiver to know an uncorrupted original. Thus the comparison shows two distinct group definitions under one common receiver procedure; passing checks alone do not prove the transmission was unchanged.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "receiver_checks"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Two receiver procedures compared, including separate checking bits and absence of an original-message oracle."
+          },
+          {
+            "id": "C4.1-P3-M05",
+            "required_content_refs": [
+              "C4.1.O01",
+              "C4.1.O02",
+              "C4.1.O03",
+              "C4.1.O04",
+              "C4.1.O05"
+            ],
+            "source_instructional_action": "Synthesize familiar-versus-new cases to establish invariant checking structure without leaking C4.2 detection conditions.",
+            "exact_delivery": "Contrast the visible shapes: a complete frame for single parity, intersecting complete rows and columns for full 2D parity, and named overlapping groups A and B for this six-bit arrangement. These examples differ in group membership and number of rules, but each specifies complete sets of transmitted positions and checks an agreed parity condition including any participating checking-bit positions. The receiver can verify those conditions from received bits and the shared definitions. Therefore, the checking-group idea is not tied to geometry. Stop at the common structure; do not yet derive how arbitrary error patterns escape every group.",
+            "visual": null,
+            "learner_response_policy": "compare",
+            "completion_evidence": "Explicit invariant-versus-variable comparison across all three checking arrangements delivered."
+          }
+        ]
+      },
+      "visual_mode_specs": {
+        "group_a_construction": {
+          "component": "checking_groups",
+          "description": "Show D1=1,D2=1,D3=0,D4=0 and P=0, with Group A members D1,D2,D3,P highlighted. Do not reveal the second checking-bit value Q before M03 (omit Q or show it only as an unlabeled-value placeholder). Show A=1100 with 2 ones, even PASS; D4 is outside A."
+        },
+        "group_a_prompt": {
+          "component": "checking_groups",
+          "description": "First show data 1100 and named Group A members D1,D2,D3,P with P=?; suppress A result and one-count until after the learner has had a response opportunity. Reveal P=0, A=1100, 2 ones/PASS during the explanation."
+        },
+        "group_a_valid_vs_invalid": {
+          "component": "checking_groups",
+          "description": "Two matched *hypothetical group-A constructions* with D1,D2,D3=1,1,0: P=0 gives 1100 (2 ones, valid); P=1 gives 1101 (3 ones, violates even-parity rule). Label second as rule-violating candidate, not a factual transmission error history."
+        },
+        "group_a_vs_b": {
+          "component": "checking_groups",
+          "description": "Show the six-position baseline and two membership lists. Group A D1,D2,D3,P=1100 (2 ones); Group B D2,D3,D4,Q=1001 (2 ones). Highlight D2 and D3 as shared; P only A and Q only B."
+        },
+        "group_a_vs_b_prompt": {
+          "component": "checking_groups",
+          "description": "Show both group memberships, D2/D3 overlap visually discoverable but do not label shared positions until the learner responds; show verified A/B bit counts and Q=1 afterward."
+        },
+        "receiver_checks": {
+          "component": "checking_groups",
+          "description": "Show the six received bits 110001, complete A/B memberships, group words 1100 and 1001, two ones each, both PASS. A small note says receiver uses received bits and agreed rules, not original sent copy."
+        },
+        "receiver_checks_prompt": {
+          "component": "checking_groups",
+          "description": "Pre-response show complete received bits 110001 and Group A/B labels, but no highlighted Group B positions or Group B checking result; after response reveal B=D2,D3,D4,Q with two ones/PASS, and show A=D1,D2,D3,P with two ones/PASS."
+        }
+      },
+      "visual_component_cap": 1,
+      "visual_interactive": false,
+      "implementation": "design_only"
+    },
+    "C4.2": {
+      "title": "Developing General Principles of Error Detection",
+      "solo_target": "R_to_EA",
+      "section_objective": "Generalize the position-to-group-to-flip-count causal model to unfamiliar overlapping parity checks and justify the precise detection and non-detection conditions with examples and counterexamples.",
+      "content_reference_legend": {
+        "C4.2.O01": "Extend the familiar bit-flip/check-outcome relationship to multiple overlapping checking groups.",
+        "C4.2.O02": "Reason about the effect of a specified error pattern on every relevant checking rule.",
+        "C4.2.O03": "Establish that corruption is detected if at least one agreed checking rule is violated by the received message.",
+        "C4.2.O04": "Establish that corrupt transmission can be undetected if all agreed checking rules remain satisfied.",
+        "C4.2.O05": "For an initially valid parity system, derive that corruption is undetected if and only if every complete checking group contains an even number of flipped transmitted positions, for either parity convention.",
+        "C4.2.O06": "Support or challenge general detection claims with reasoned examples and counterexamples."
+      },
+      "moves_by_pedagogy": {
+        "P1": [
+          {
+            "id": "C4.2-P1-M01",
+            "required_content_refs": [
+              "C4.2.O01",
+              "C4.2.O02"
+            ],
+            "source_instructional_action": "Model tracing a changed transmitted position into all affected checking groups in the valid non-grid arrangement.",
+            "exact_delivery": "Recall the complete initially valid even-parity transmission D1,D2,D3,D4,P,Q=110001. Group A=D1,D2,D3,P and Group B=D2,D3,D4,Q both pass. Before claiming a check will change, identify which group contains the flipped position. D1 belongs to A only; D2 belongs to both; checking bit P belongs to A. For each imagined transmission error the instructor can show what changed, but the receiver sees only the received bit sequence and the agreed checks. Our job is to predict the observed results by tracing each changed position through the specified group memberships, not by assuming access to an uncorrupted original.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "group_membership_baseline"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Initially valid complete groups, data/checking-bit memberships and instructor-versus-receiver perspectives modeled."
+          },
+          {
+            "id": "C4.2-P1-M02",
+            "required_content_refs": [
+              "C4.2.O01",
+              "C4.2.O02",
+              "C4.2.O03"
+            ],
+            "source_instructional_action": "Work individual data and checking-bit flips with accurate per-group received results.",
+            "exact_delivery": "Work three instructor-constructed single flips, always starting from valid 110001. Case A: D1 flips 1→0, received 010001. A contains that one flip and FAILS; B contains none and PASSES. Case B: D2 flips 1→0, received 100001. D2 belongs to A and B, so both FAIL. Case C: checking bit P flips 0→1, received 110011. P belongs only to A, so A FAILS and B PASSES. Each changed transmitted position reverses the parity outcome of every initially valid group containing it; checking-bit positions are not immune. The receiver observes violations, not the original history.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "single_flips_worked"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "All three fixed received sequences and correct independent A/B checking outcomes, including P, explicitly worked."
+          },
+          {
+            "id": "C4.2-P1-M03",
+            "required_content_refs": [
+              "C4.2.O01",
+              "C4.2.O02",
+              "C4.2.O03",
+              "C4.2.O04"
+            ],
+            "source_instructional_action": "Compare detected and undetected two-flip histories with the same total number of changes.",
+            "exact_delivery": "Work two histories from valid 110001. Case D flips D1 and D2, giving 000001: A includes both flipped positions and PASSES, but B includes D2 only and FAILS. Corruption is detected because at least one group fails. Case E flips D2 and D3, giving 101001: both flipped positions belong to both groups. A contains two flips and PASSES; B contains two flips and PASSES. Corruption occurred but neither check detects it. Both histories involve exactly two flipped transmitted bits; the difference is how those flipped positions are distributed across the defined groups.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "two_flip_worked"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "D and E received words, membership-based A/B flip counts, detection of D and non-detection of E all accurately explained."
+          },
+          {
+            "id": "C4.2-P1-M04",
+            "required_content_refs": [
+              "C4.2.O01",
+              "C4.2.O02",
+              "C4.2.O03",
+              "C4.2.O04",
+              "C4.2.O05"
+            ],
+            "source_instructional_action": "Explicitly derive both directions of the general detection and non-detection condition.",
+            "exact_delivery": "Generalize the causal chain: changed positions → each group's membership → number of flipped transmitted positions within that group → its received parity result → whether any rule fails. Given that every agreed parity group was initially valid, an odd number of flips inside a particular complete group reverses that group from PASS to FAIL; an even number leaves it passing. Consequently corruption is detected precisely when at least one checked group contains an odd number of flipped positions. A nonzero corruption pattern escapes the entire checking system precisely when every checked group contains an even number of flipped positions. This parity-preservation reasoning applies under either an initially satisfied even- or odd-parity convention; count flips inside complete groups, including checking bits, not just total flips or ones.",
+            "visual": null,
+            "learner_response_policy": "model",
+            "completion_evidence": "Full necessary-and-sufficient odd/even per-group law, both parity conventions, nonzero corruption and complete-group scope explicitly derived."
+          },
+          {
+            "id": "C4.2-P1-M05",
+            "required_content_refs": [
+              "C4.2.O03",
+              "C4.2.O04",
+              "C4.2.O05",
+              "C4.2.O06"
+            ],
+            "source_instructional_action": "Use fixed D/E counterexamples to test and reject two overbroad detection claims.",
+            "exact_delivery": "Test the claim “Every two-bit error escapes parity”: Case D contradicts it, because flipping D1 and D2 makes Group B fail. Test the claim “Overlapping parity checks detect every two-bit error”: Case E contradicts it, because flipping D2 and D3 leaves both A and B passing. The fixed cases have equal total flip count, but different membership distributions. The warranted statement is that any failed agreed check detects a violation, whereas all checks passing cannot prove no corruption. For an initially valid system, only the group-by-group flip parity gives the exact escape condition. This is a general principle independent of whether groups are rows, columns, or named selected sets.",
+            "visual": null,
+            "learner_response_policy": "model",
+            "completion_evidence": "Both opposed overgeneralizations rebutted by fixed counterexamples, with justified general condition and receiver limits delivered."
+          }
+        ],
+        "P2": [
+          {
+            "id": "C4.2-P2-M01",
+            "required_content_refs": [
+              "C4.2.O01",
+              "C4.2.O02"
+            ],
+            "source_instructional_action": "Guide identification of group membership before predicting the check outcomes.",
+            "exact_delivery": "FIRST RECALL: The complete valid sequence is 110001. Group A checks D1,D2,D3,P; Group B checks D2,D3,D4,Q. ASK ONCE: If D2 changes during transmission, which of these groups contain that position and could be affected? HINT IF NEEDED: Find D2 in both lists rather than counting all six bits. EXPLAIN AFTER RESPONSE: D2 belongs to both A and B; D1 and P belong only to A. The instructor knows the constructed changed position, whereas the actual receiver tests the received bits with the agreed rules. We need group membership before deciding which checks fail. Continue regardless of learner correctness.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "group_membership_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One genuine membership opportunity and full A/B membership and receiver-evidence explanation delivered."
+          },
+          {
+            "id": "C4.2-P2-M02",
+            "required_content_refs": [
+              "C4.2.O01",
+              "C4.2.O02",
+              "C4.2.O03"
+            ],
+            "source_instructional_action": "Guide one main single-bit prediction, then explain the contrasting single-bit histories.",
+            "exact_delivery": "FIRST SHOW: Starting from initially valid 110001, D2 flips 1→0, so the hypothetical received sequence is 100001; the instructor supplies this change. ASK ONCE: Which group checks fail, A, B, or both, and why? HINT IF NEEDED: D2 is a member of both initially valid groups, and one flip changes each group's parity. EXPLAIN AFTER RESPONSE: Both A and B FAIL. For comparison, D1 flipping gives 010001 and only A fails; checking bit P flipping gives 110011 and only A fails. Every check counts its complete received membership, including the checking bit. The receiver observes pass/fail results rather than the constructed history. Continue regardless of correctness.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "single_flip_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One bounded prediction, correct B/A/C outcomes and reason involving group membership and P delivered; no results revealed before learner turn."
+          },
+          {
+            "id": "C4.2-P2-M03",
+            "required_content_refs": [
+              "C4.2.O02",
+              "C4.2.O03",
+              "C4.2.O04",
+              "C4.2.O06"
+            ],
+            "source_instructional_action": "Guide comparison of two equal-size error patterns, then reveal group-by-group results.",
+            "exact_delivery": "FIRST PRESENT WITHOUT RESULT: From valid 110001, Case D changes D1+D2 to 000001 and Case E changes D2+D3 to 101001. Each contains exactly two flips. ASK ONCE: Which case escapes both agreed checks? HINT IF NEEDED: Count how many of the named flipped positions belong to Group A and then Group B; the total two flips alone is insufficient. EXPLAIN AFTER RESPONSE: D contains two flips in A so A passes, but one in B so B fails and corruption is detected. E contains two flips in both A and B so both pass despite corrupted data; E is undetected. These are constructed histories known to the instructor, not to the receiver. Continue regardless of response correctness.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "two_flip_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One D/E comparison opportunity, verified flip counts/outcomes and observation versus true-history distinction delivered."
+          },
+          {
+            "id": "C4.2-P2-M04",
+            "required_content_refs": [
+              "C4.2.O01",
+              "C4.2.O02",
+              "C4.2.O03",
+              "C4.2.O04",
+              "C4.2.O05"
+            ],
+            "source_instructional_action": "Guide articulation of the general non-detection condition and then give its exact necessary-and-sufficient form.",
+            "exact_delivery": "ASK ONCE: For a nonzero error pattern to escape all checks in a system that was valid before transmission, what must be true about the number of flipped transmitted positions inside each checking group? HINT IF NEEDED: An odd count reverses that particular group's originally passing result; an even count preserves it. EXPLAIN AFTER RESPONSE: Every complete group must contain an even number of flipped positions for all checks to keep passing. If any group contains an odd number, that group fails, so corruption is detected. This is an if-and-only-if condition for an initially valid parity system, applicable to either even or odd parity convention and including participating check bits. Do not confuse flipped positions with the received number of ones. Continue regardless of correctness.",
+            "visual": null,
+            "learner_response_policy": "guided",
+            "completion_evidence": "One generalizing opportunity and accurate if-and-only-if group flip rule with assumptions and scope provided."
+          },
+          {
+            "id": "C4.2-P2-M05",
+            "required_content_refs": [
+              "C4.2.O03",
+              "C4.2.O04",
+              "C4.2.O05",
+              "C4.2.O06"
+            ],
+            "source_instructional_action": "Guide critical evaluation of an overbroad claim by a concrete counterexample.",
+            "exact_delivery": "CLAIM: “If a system has overlapping parity groups, it detects every two-bit error.” ASK ONCE: Is that claim always justified by our A/B arrangement? HINT IF NEEDED: Revisit the D2+D3 case, where the two changed positions appear in both groups. EXPLAIN AFTER RESPONSE: No. D2+D3 gives received 101001 while A and B each contain two flips and still pass, so that pair is not detected. But other two-bit patterns, such as D1+D2, are detected because B contains one flip. Neither blanket claim “every pair detected” nor “every pair missed” is justified for arbitrary overlapping groups. Detection means some rule fails; passing all rules proves only consistency, not error-free delivery. Continue regardless of answer correctness.",
+            "visual": null,
+            "learner_response_policy": "guided",
+            "completion_evidence": "One counterexample reasoning opportunity followed by correct limits and two-case contrast; no mastery requirement."
+          }
+        ],
+        "P3": [
+          {
+            "id": "C4.2-P3-M01",
+            "required_content_refs": [
+              "C4.2.O01",
+              "C4.2.O02"
+            ],
+            "source_instructional_action": "Compare positions with different participation in the same initially valid checking arrangement.",
+            "exact_delivery": "Hold valid 110001 and the two even-parity definitions fixed. Compare D1, which belongs to Group A only, with D2, which belongs to both Group A and Group B. When one position is flipped, only checks including that position can have their parity outcome reversed. Thus a D1 flip is relevant to one check, while a D2 flip is relevant to both. The contrast is about group membership, not about whether the original bit was one or zero. The teaching visual may highlight instructor-known positions, but the actual receiver is limited to the received bits and agreed checks.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "d1_vs_d2_membership"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "D1-only-A versus D2-both memberships contrasted while keeping baseline and convention fixed."
+          },
+          {
+            "id": "C4.2-P3-M02",
+            "required_content_refs": [
+              "C4.2.O01",
+              "C4.2.O02",
+              "C4.2.O03"
+            ],
+            "source_instructional_action": "Contrast two one-bit histories that produce different failed-check patterns.",
+            "exact_delivery": "Compare Case A: only D1 flips, so valid 110001 becomes 010001 and A FAILS while B PASSES. Case B: only D2 flips, producing 100001 and both A and B FAIL. The number of flips and original checking rules are identical across cases, but the changed position participates in a different number of groups. This membership difference explains the different check outcomes. The same rule applies to transmitted checking bit P: if it flips, A fails but B passes. Therefore neither data-bit versus checking-bit role nor the total flip count alone determines the identities of the failed groups.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "single_flip_contrast"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Same-one-flip matched A/B cases, different group membership and proper checker-bit qualification contrasted."
+          },
+          {
+            "id": "C4.2-P3-M03",
+            "required_content_refs": [
+              "C4.2.O01",
+              "C4.2.O02",
+              "C4.2.O03",
+              "C4.2.O04",
+              "C4.2.O06"
+            ],
+            "source_instructional_action": "Compare two two-bit histories that differ only in which positions flipped, producing detected versus missed corruption.",
+            "exact_delivery": "Compare two error histories while holding valid 110001, the A/B groups, the even-parity convention and total two flipped bits fixed. Case D changes D1+D2, received 000001: A contains two flips and PASSES, while B contains one and FAILS; corruption is detected. Case E changes D2+D3, received 101001: both A and B contain two flips and PASS; corruption is undetected. A passing group does not by itself prove that its members were unchanged. The explanatory difference is precisely the distribution of the same total number of flips across the membership lists—not their spatial appearance.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "two_flip_contrast"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Same-size histories and valid initial arrangement, exact group flip counts and opposing detection outcomes contrasted."
+          },
+          {
+            "id": "C4.2-P3-M04",
+            "required_content_refs": [
+              "C4.2.O03",
+              "C4.2.O04",
+              "C4.2.O05"
+            ],
+            "source_instructional_action": "Contrast general conditions for at least one failed rule versus no failed rules.",
+            "exact_delivery": "Compare two abstract error-pattern conditions starting from any initially valid parity checking system. Condition 1: at least one checked group includes an odd number of flipped transmitted positions. That group changes its result to FAIL, and corruption is detected. Condition 2: every checked group includes an even number of flipped positions. Every group keeps PASS, so a nonzero corruption pattern goes undetected. Each group must be counted separately, including its checking-bit members; the relationship is invariant under either initially satisfied even or odd parity convention. The distinction is exactly “at least one violated rule” versus “all rules still satisfied,” not “one flip” versus “many flips” overall.",
+            "visual": null,
+            "learner_response_policy": "compare",
+            "completion_evidence": "Detected-versus-undetected necessary-and-sufficient conditions explicitly contrasted with initially valid and both-convention boundaries."
+          },
+          {
+            "id": "C4.2-P3-M05",
+            "required_content_refs": [
+              "C4.2.O03",
+              "C4.2.O04",
+              "C4.2.O05",
+              "C4.2.O06"
+            ],
+            "source_instructional_action": "Contrast warranted check-level inference with unwarranted universal detection claims, using both fixed pairs.",
+            "exact_delivery": "Compare the warranted claim “Corruption is detected if at least one agreed check fails” with the invalid claim “Overlapping checks detect every corruption pattern.” Case D (D1+D2) makes Group B fail, supporting detection for that pattern. Case E (D2+D3) leaves both groups passing despite corruption, refuting universal coverage. Also reject “every even-total flip pattern is missed”: Case D has two total flips but fails B. What counts is the number of flips within each defined complete group. Passing all checks establishes satisfaction of the rules, not absence of errors; no receiver can infer a pristine original merely from PASS results.",
+            "visual": null,
+            "learner_response_policy": "compare",
+            "completion_evidence": "Supported-versus-unsupported claims and D/E counterexamples explicitly compared, with receiver limits and general law."
+          }
+        ]
+      },
+      "visual_mode_specs": {
+        "group_membership_baseline": {
+          "component": "checking_groups",
+          "description": "Show original 110001, complete memberships A=D1,D2,D3,P and B=D2,D3,D4,Q, both valid. Highlight D2 as belonging to both; all observed pass/fail details come from agreed rules."
+        },
+        "group_membership_prompt": {
+          "component": "checking_groups",
+          "description": "Before response show the baseline bit strip 110001 and A/B membership lists but do not mark D2 as belonging to both or give a computed answer; after response highlight D2 in both groups and explain the effect."
+        },
+        "d1_vs_d2_membership": {
+          "component": "checking_groups",
+          "description": "Two matched membership highlights on the same baseline: D1 is in A only; D2 is in A and B. Do not show flipped receive data yet."
+        },
+        "single_flips_worked": {
+          "component": "checking_groups",
+          "description": "Show separate labeled instructor-constructed histories: baseline 110001; D1 flip ->010001, A FAIL/B PASS; D2 flip ->100001, A FAIL/B FAIL; P flip ->110011, A FAIL/B PASS. Highlight changed position and memberships."
+        },
+        "single_flip_prompt": {
+          "component": "checking_groups",
+          "description": "Show proposed D2 flip 110001->100001 and both group memberships but conceal A/B PASS/FAIL until a learner response opportunity; reveal A FAIL/B FAIL, then show D1 and P as short explanatory contrasts."
+        },
+        "single_flip_contrast": {
+          "component": "checking_groups",
+          "description": "Side-by-side D1-only (010001,A FAIL/B PASS) versus D2-only (100001,A FAIL/B FAIL), marking that both have exactly one flipped data bit and showing differing membership."
+        },
+        "two_flip_worked": {
+          "component": "checking_groups",
+          "description": "Side-by-side case D D1+D2 ->000001 (group A 2 flips PASS; B 1 flip FAIL), and case E D2+D3 ->101001 (A 2 PASS; B 2 PASS). Label instructor-known flips versus receiver-known check outcomes."
+        },
+        "two_flip_prompt": {
+          "component": "checking_groups",
+          "description": "Display the two D/E changed-position pairs and their candidate received sequences, but conceal A/B result indicators until the learner answers. Reveal group-by-group flip counts and results in Tutor explanation."
+        },
+        "two_flip_contrast": {
+          "component": "checking_groups",
+          "description": "Matched D (000001, A PASS/B FAIL) and E (101001, A PASS/B PASS), exactly two flips in both; highlight different group memberships and compare group flip counts."
+        }
+      },
+      "visual_component_cap": 1,
+      "visual_interactive": false,
+      "implementation": "design_only"
+    },
+    "C4.3": {
+      "title": "Applying and Evaluating Generalized Checking Principles",
+      "solo_target": "R_to_EA",
+      "section_objective": "Transfer parity-group reasoning to unfamiliar small arrangements, evaluate whether an additional rule catches a specified missed corruption pattern, justify limitations and one-bit overhead, and defend modest predictions with counterexamples.",
+      "content_reference_legend": {
+        "C4.3.O01": "Apply general parity principles to small unfamiliar explicitly defined overlapping checking groups.",
+        "C4.3.O02": "Predict and justify which specified error patterns are detected or undetected in an unfamiliar system.",
+        "C4.3.O03": "Use scientifically valid counterexamples to challenge overbroad claims about detection.",
+        "C4.3.O04": "Evaluate whether one additional checking rule detects a specified previously undetected error pattern.",
+        "C4.3.O05": "Explain that an additional or repeated check may not add detection capability for the error patterns of interest.",
+        "C4.3.O06": "Recognize the transmission overhead of extra checking information and the trade-off with pattern-specific detection benefit.",
+        "C4.3.O07": "Formulate and defend modest hypotheses or predictions about changes to a small checking arrangement."
+      },
+      "moves_by_pedagogy": {
+        "P1": [
+          {
+            "id": "C4.3-P1-M01",
+            "required_content_refs": [
+              "C4.3.O03",
+              "C4.3.O04"
+            ],
+            "source_instructional_action": "Model a precise evaluation target: an error pattern missed by the original two checks.",
+            "exact_delivery": "Return to original even-parity transmission 110001 with A=D1,D2,D3,P and B=D2,D3,D4,Q. In the instructor's constructed history, D2 and D3 both flip, so the received sequence is 101001. A contains two flipped positions and still PASSES; B also contains two and still PASSES. Yet two data bits changed: neither original checking rule detects this particular corruption. A proposed improvement must be evaluated against this specific D2+D3 pattern, not praised merely because it adds information. The receiver itself observes only the received sequence and the checks; knowledge of the flips belongs to the instructor's example.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "undetected_target"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Original and corrupted sequences, complete A/B groups, both-pass detection gap and specified target clearly established."
+          },
+          {
+            "id": "C4.3-P1-M02",
+            "required_content_refs": [
+              "C4.3.O04",
+              "C4.3.O07"
+            ],
+            "source_instructional_action": "Work an additional checking rule that detects the specified formerly missed pattern.",
+            "exact_delivery": "Evaluate Candidate A: append a new transmitted checking bit R to the original six-bit frame, with a new even-parity Group C=D1,D2,D4,R. Original selected data 1,1,0 contain two ones, so R=0; the complete valid extended sequence is 1100010 and Group C=1100 PASSES. If D2 and D3 flip while R does not, the received extended sequence becomes 1010010. The new Group C sees D1=1,D2=0,D4=0,R=0, or 1000: one one, hence FAIL. Only D2 of the two changed positions belongs to C; original A/B still pass, but new C detects the error. This supports improvement for this specified pattern only.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "candidate_a_worked"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Added-bit value R=0, complete Candidate A group, both seven-bit strings, C FAIL from one in-group flip and pattern-specific conclusion delivered."
+          },
+          {
+            "id": "C4.3-P1-M03",
+            "required_content_refs": [
+              "C4.3.O04",
+              "C4.3.O05",
+              "C4.3.O03"
+            ],
+            "source_instructional_action": "Work an alternative added rule that does not detect the specified pattern, explicitly distinguishing it from Candidate A.",
+            "exact_delivery": "Now consider an alternative design, not simultaneous addition of R and S. Candidate B adds checking bit S with even-parity Group C=D2,D3,S. Original selected data 1,0 require S=1, so complete valid sequence is 1100011 and Group C=101 (two ones, PASS). Under the same D2+D3 error, received 1010011 gives new Group C=011 (two ones, PASS); original A and B also PASS. Candidate B does not detect this specific error because its new group contains both changed positions. Candidate A catches this pattern because its new group contains only D2. Do not conclude that Candidate B can never detect any other pattern.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "candidate_a_vs_b"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Alternative—not combined—seven-bit designs, S=1 and correct Group C result, identical target and comparison to A explicitly explained."
+          },
+          {
+            "id": "C4.3-P1-M04",
+            "required_content_refs": [
+              "C4.3.O04",
+              "C4.3.O05",
+              "C4.3.O06",
+              "C4.3.O07"
+            ],
+            "source_instructional_action": "Evaluate one-bit overhead, check relevance and limits of improvement claims.",
+            "exact_delivery": "Compare the alternatives under one fixed target. Both Candidate A and Candidate B transmit one additional checking bit beyond the original six. That is one extra bit of overhead in either alternative. Candidate A adds a check that is violated by the D2+D3 pattern, so that particular formerly undetected error is now detected. Candidate B adds a check that remains satisfied by that pattern, so it adds no detection capability against this target, although it may help with other patterns. An extra rule can improve useful detection coverage only where it actually distinguishes a formerly missed corruption. We have neither proved universal detection nor optimized the design; we have justified a narrow, testable claim.",
+            "visual": null,
+            "learner_response_policy": "model",
+            "completion_evidence": "Pattern-specific relative benefit, equal one-bit overhead, no-global-uselessness and no-universal-detection caveats delivered."
+          },
+          {
+            "id": "C4.3-P1-M05",
+            "required_content_refs": [
+              "C4.3.O01",
+              "C4.3.O02",
+              "C4.3.O03",
+              "C4.3.O07"
+            ],
+            "source_instructional_action": "Work a genuinely new small overlap arrangement and two matched error histories, including a checking-bit flip.",
+            "exact_delivery": "Transfer to unfamiliar even-parity data X1=1,X2=0,X3=0,X4=1 with transmitted checking bits T=1,U=1; complete initial sequence X1,X2,X3,X4,T,U=100111. Group X=X1,X3,T has bits 1,0,1 and passes; Group Y=X2,X3,X4,U has 0,0,1,1 and passes. If X1 alone flips, received 000111: X contains one flip and FAILS, Y none and PASSES. If X1 and checking bit T both flip, received 000101: X contains two flips and PASSES, Y contains none and PASSES. Therefore this two-flip corruption is undetected. The same per-group principle explains both histories without row/column geometry or a memorized D-position example. These histories are instructor-known, not inferred uniquely by the receiver.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "transfer_worked"
+            },
+            "learner_response_policy": "model",
+            "completion_evidence": "Fresh bit definitions and both groups introduced before use; correct complete sequences, X/Y results, checking-bit role and transfer inference modeled."
+          }
+        ],
+        "P2": [
+          {
+            "id": "C4.3-P2-M01",
+            "required_content_refs": [
+              "C4.3.O03",
+              "C4.3.O04"
+            ],
+            "source_instructional_action": "Guide the learner to diagnose the old system's specified missed pattern before evaluating a new rule.",
+            "exact_delivery": "FIRST RECALL: Original valid 110001 uses A=D1,D2,D3,P and B=D2,D3,D4,Q. The instructor constructs D2+D3 flipping, giving received 101001. ASK ONCE: Why would neither original checking group report a violation in this constructed history? HINT IF NEEDED: Count D2 and D3 within A, then within B. EXPLAIN AFTER RESPONSE: Both flipped positions belong to both groups; each contains two flips, so both remain PASS despite altered data. The receiver does not know that history just from PASS results. Our task is to evaluate a candidate additional rule against this specific missed error. Continue regardless of correctness.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "undetected_target"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One diagnosis opportunity and exact old-system detection gap and receiver limits explained before new checks are introduced."
+          },
+          {
+            "id": "C4.3-P2-M02",
+            "required_content_refs": [
+              "C4.3.O04",
+              "C4.3.O07"
+            ],
+            "source_instructional_action": "Guide a bounded prediction for the proposed useful third group, with outcome hidden until response.",
+            "exact_delivery": "FIRST DEFINE: Candidate A adds transmitted checking bit R and Group C=D1,D2,D4,R, under even parity. From original data 1,1,0 we set R=0, so initial extended 1100010 is valid. The instructor considers the D2+D3 flip, giving 1010010. ASK ONCE: Will new Group C detect this specified corruption? HINT IF NEEDED: Which of the changed positions D2 and D3 is actually in Group C? EXPLAIN AFTER RESPONSE: D2 belongs to C but D3 does not; exactly one of C's transmitted positions flips, changing C=1100 to 1000 with one one, so C FAILS. Original groups A and B still pass, but the added rule detects the target. Continue regardless of response correctness.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "candidate_a_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One candidate-A prediction, both seven-bit values and exact C=FAIL causal explanation delivered without prior answer leakage."
+          },
+          {
+            "id": "C4.3-P2-M03",
+            "required_content_refs": [
+              "C4.3.O04",
+              "C4.3.O05",
+              "C4.3.O03"
+            ],
+            "source_instructional_action": "Guide evaluation of a second alternative one-bit check and explicitly compare to Candidate A.",
+            "exact_delivery": "FIRST DEFINE: Candidate B is an alternative to A, not another simultaneous bit. It adds S with even-parity Group C=D2,D3,S. Selected original data 1,0 require S=1, giving initial 1100011 with C=101. Under the same D2+D3 flips the received extended sequence is 1010011. ASK ONCE: Does Candidate B's new Group C detect the D2+D3 pattern? HINT IF NEEDED: Unlike Candidate A, this group includes both flipped positions. EXPLAIN AFTER RESPONSE: It has two in-group flips, changing 101 to 011 but retaining two ones; C PASSES, as do old A/B. Candidate A detects the target with one in-group flip, Candidate B does not with two. This does not make Candidate B useless for all patterns. Continue regardless of correctness.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "candidate_a_vs_b_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "One candidate-B prediction, S=1, C=PASS, comparison to A and target-only qualification given after learner opportunity."
+          },
+          {
+            "id": "C4.3-P2-M04",
+            "required_content_refs": [
+              "C4.3.O04",
+              "C4.3.O05",
+              "C4.3.O06",
+              "C4.3.O07"
+            ],
+            "source_instructional_action": "Guide recognition that one more bit is overhead, not automatic detection of a specified pattern.",
+            "exact_delivery": "ASK ONCE: Does adding one more transmitted checking bit, by itself, guarantee that the D2+D3 pattern becomes detectable? HINT IF NEEDED: Both Candidate A and Candidate B add exactly one bit, but their new group memberships differ. EXPLAIN AFTER RESPONSE: No. Candidate A detects this pattern because its new Group C fails; Candidate B does not because its Group C passes. Both pay one extra transmitted bit relative to the original six. A useful design change must be evaluated against error patterns of interest, and neither case establishes detection of every possible error or an optimal design. Candidate B might help with different patterns. Continue without requiring a correct answer.",
+            "visual": null,
+            "learner_response_policy": "guided",
+            "completion_evidence": "One evaluation question plus correct overhead, target-specific improvement and scientific qualification delivered."
+          },
+          {
+            "id": "C4.3-P2-M05",
+            "required_content_refs": [
+              "C4.3.O01",
+              "C4.3.O02",
+              "C4.3.O03",
+              "C4.3.O07"
+            ],
+            "source_instructional_action": "Introduce a new arrangement before one transfer question; reveal group results only after learner response.",
+            "exact_delivery": "FIRST DEFINE NEW SYSTEM: Positions X1,X2,X3,X4,T,U have valid initial values 1,0,0,1,1,1 (100111) under even parity. X1–X4 are data; T and U are transmitted checking bits. Group X=X1,X3,T gives 101 (two ones), and Group Y=X2,X3,X4,U gives 0011 (two ones): both initially pass. In an instructor-constructed history X1 and T flip, so received sequence is 000101. ASK ONCE: Will either check fail? HINT IF NEEDED: Group X contains both flips and Group Y contains neither. EXPLAIN AFTER RESPONSE: X has two flips and stays PASS; Y has zero and stays PASS, so this corruption is undetected. Contrast: X1 alone would yield 000111 with X FAIL/Y PASS. The receiver does not directly know the original changes. Continue regardless of correctness.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "transfer_prompt"
+            },
+            "learner_response_policy": "guided",
+            "completion_evidence": "New symbols, checking-bit roles, both full groups and values introduced; one genuine transfer opportunity with correct two-case explanation."
+          }
+        ],
+        "P3": [
+          {
+            "id": "C4.3-P3-M01",
+            "required_content_refs": [
+              "C4.3.O03",
+              "C4.3.O04"
+            ],
+            "source_instructional_action": "Compare intact versus corrupted transmissions that satisfy the same original checks.",
+            "exact_delivery": "Hold original Groups A=D1,D2,D3,P and B=D2,D3,D4,Q and even parity fixed. The intact valid transmission is 110001; A and B PASS. Compare the instructor-constructed received sequence 101001 after D2+D3 flip; A and B still PASS because each contains two changed positions. The transmitted data differ but the observations of these two checks do not. This is a specific detection gap; it supplies a justified evaluation target for an added checking rule. The receiver itself is not shown the true history as evidence, only the received bits and rule results.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "baseline_vs_corrupted"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Intact-versus-corrupted same-check PASS comparison and specified detection gap, with instructor/receiver boundary explained."
+          },
+          {
+            "id": "C4.3-P3-M02",
+            "required_content_refs": [
+              "C4.3.O04",
+              "C4.3.O07"
+            ],
+            "source_instructional_action": "Contrast original two-check design with one extra candidate rule for the same target history.",
+            "exact_delivery": "Contrast the two-check design with the added-check design, holding original data, the D2+D3 corruption, old A/B memberships and even parity constant. In the original six-bit system, D2+D3 changes 110001 to 101001 and both A and B PASS. Candidate A appends R=0, defining new C=D1,D2,D4,R. Valid extended 1100010 becomes 1010010 under the same D2+D3 flips. Old A/B still PASS, but new C sees only the D2 flip, changes from 1100 (two ones) to 1000 (one one), and FAILS. The single addition changes detection of precisely this previously missed pattern, while costing one more transmitted bit; do not infer universal coverage.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "baseline_vs_candidate_a"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Original and Candidate A matched comparison with added R=0, exact group values and target-specific gain explained."
+          },
+          {
+            "id": "C4.3-P3-M03",
+            "required_content_refs": [
+              "C4.3.O04",
+              "C4.3.O05",
+              "C4.3.O06"
+            ],
+            "source_instructional_action": "Contrast equal-overhead alternative added groups with opposite results for the same fixed target.",
+            "exact_delivery": "Compare mutually exclusive proposed designs. Candidate A adds one bit R=0 with new Group C=D1,D2,D4,R, complete valid 1100010. Under D2+D3 flipping, the received 1010010 makes C=1000 (one one) FAIL. Candidate B adds one bit S=1 with new Group C=D2,D3,S, complete valid 1100011. Under the same D2+D3 flipping, the received 1010011 makes C=011 (two ones) PASS. Original A/B pass in either design. Both additions have equal one-bit overhead and the same target error; their different memberships determine the different outcomes. Candidate B is ineffective for this target, not necessarily for other error patterns.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "candidate_a_vs_b"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "Both alternative check definitions and full received sequences matched by target and overhead, with opposite new-check results and limited inference."
+          },
+          {
+            "id": "C4.3-P3-M04",
+            "required_content_refs": [
+              "C4.3.O03",
+              "C4.3.O04",
+              "C4.3.O05",
+              "C4.3.O06",
+              "C4.3.O07"
+            ],
+            "source_instructional_action": "Contrast warranted narrow improvement claims with unsupported universal and quantity-only claims.",
+            "exact_delivery": "Compare warranted: “Adding Group C=D1,D2,D4,R detects the particular D2+D3 error missed by old A/B,” because the added group contains one changed position and fails. Compare unwarranted: “Adding any parity bit detects D2+D3 or every corruption pattern,” because alternative Group C=D2,D3,S contains two flips and remains passing for that same target. Both variants transmit one extra bit, so overhead is real even when a specified target is not newly detected. We cannot conclude Candidate B is globally useless; it may distinguish other histories. Evaluating a proposed rule requires a defined target and group membership, not a claim that more bits guarantee better detection in every case.",
+            "visual": null,
+            "learner_response_policy": "compare",
+            "completion_evidence": "Justified versus overbroad claims, clear target scope, possible other benefits and one-bit overhead contrasted."
+          },
+          {
+            "id": "C4.3-P3-M05",
+            "required_content_refs": [
+              "C4.3.O01",
+              "C4.3.O02",
+              "C4.3.O03",
+              "C4.3.O07"
+            ],
+            "source_instructional_action": "Contrast two histories in a genuinely unfamiliar group system, including a flipped checking bit.",
+            "exact_delivery": "Introduce a distinct valid six-bit arrangement: X1=1,X2=0,X3=0,X4=1,T=1,U=1, sequence 100111; X1–X4 are data while T/U are check bits. Group X=X1,X3,T has 101 (two ones) and Group Y=X2,X3,X4,U has 0011 (two ones); both initially pass even parity. Compare X1-only flip: received 000111; X contains one flip and FAILS, Y none and PASSES. With X1 and checking bit T both flipping: received 000101; X contains two flips and PASSES, Y zero and PASSES. Only the second pattern escapes detection. These new labels and memberships obey the same general rule, demonstrating transfer rather than recall of earlier examples. These flip histories are instructor-known, not receiver-proven.",
+            "visual": {
+              "component": "checking_groups",
+              "mode": "transfer_contrast"
+            },
+            "learner_response_policy": "compare",
+            "completion_evidence": "New complete arrangement and membership, one-versus-two histories and corresponding X/Y outcomes contrasted with general transfer and receiver limitation."
+          }
+        ]
+      },
+      "visual_mode_specs": {
+        "undetected_target": {
+          "component": "checking_groups",
+          "description": "Show baseline 110001 and instructor-constructed D2+D3 corruption 101001 with membership highlights; both original groups A/B PASS despite changed data. Do not imply the receiver knows the two flips."
+        },
+        "baseline_vs_corrupted": {
+          "component": "checking_groups",
+          "description": "Side-by-side complete baseline 110001 vs D2+D3-corrupted 101001, both A/B PASS; mark original/transmission-history information as instructor-only."
+        },
+        "candidate_a_worked": {
+          "component": "checking_groups",
+          "description": "Show separate seven-position Candidate A sequence 1100010 -> 1010010; newly transmitted R=0, Group C=D1,D2,D4,R, originally 1100 2 ones PASS and after target flip 1000 1 one FAIL. A/B PASS."
+        },
+        "candidate_a_prompt": {
+          "component": "checking_groups",
+          "description": "Show Candidate A complete definition, baseline group C and target D2+D3 flips, but mask new C outcome until learner response. Reveal exactly one in-group flip (D2), C FAIL, original A/B PASS afterward."
+        },
+        "baseline_vs_candidate_a": {
+          "component": "checking_groups",
+          "description": "Compare the original two-check design (misses D2+D3) against Candidate A with one new check bit R and Group C; same original data and target flip pattern, new C FAIL."
+        },
+        "candidate_a_vs_b": {
+          "component": "checking_groups",
+          "description": "Matched alternative designs, each adding one *different* check bit (not both simultaneously). A: C=D1,D2,D4,R, 1100010->1010010, new C FAIL. B: C=D2,D3,S, 1100011->1010011, new C PASS. Existing A/B pass in both."
+        },
+        "candidate_a_vs_b_prompt": {
+          "component": "checking_groups",
+          "description": "Show both alternative added group memberships and complete original/target sequences, but withhold Candidate B new check PASS/FAIL until learner response. Reveal A fails (one in-group flip) versus B passes (two) after explanation."
+        },
+        "transfer_worked": {
+          "component": "checking_groups",
+          "description": "Introduce entirely new baseline X1=1 X2=0 X3=0 X4=1 T=1 U=1 (100111), Group X=X1,X3,T and Y=X2,X3,X4,U. Show X1-only ->000111 (X FAIL/Y PASS) versus X1+T ->000101 (X PASS/Y PASS). Mark T as transmitted checking bit."
+        },
+        "transfer_prompt": {
+          "component": "checking_groups",
+          "description": "Introduce and define the new 100111 system and both complete group memberships; show target X1+T flip and received 000101, withholding X/Y outcomes until the response opportunity. Reveal X 2 flips PASS; Y 0 flips PASS, and briefly contrast X1-only FAIL/PASS."
+        },
+        "transfer_contrast": {
+          "component": "checking_groups",
+          "description": "Side-by-side new-system X1-only (000111, X FAIL/Y PASS) and X1+T (000101, X PASS/Y PASS); both trace from valid 100111. Emphasize checking bit T can flip and group counting uses its membership."
+        }
+      },
+      "visual_component_cap": 1,
+      "visual_interactive": false,
+      "implementation": "design_only"
+    }
+  }
+}

@@ -1,0 +1,2050 @@
+{
+  "schema_version": "ekagra.c4.fixed_assessment_bank.v1",
+  "status": "CONTENT_CANDIDATE__NOT_YET_WIRED_TO_RUNTIME",
+  "study_id": "EkagraAI",
+  "transition_id": "C4",
+  "solo_from": "Relational",
+  "solo_to": "Extended Abstract",
+  "authorities": {
+    "curriculum": "EkagraAI_C1_C4_Final_Course_Content_Ground_Truth.md",
+    "teaching_contracts": "EKAGRAAI_C4_ALL_45_MOVE_CONTRACTS_V1.json",
+    "assessment_design_reference": [
+      "EKAGRAAI_C1_ASSESSMENT_BANK_A_B_C_V1.json",
+      "EKAGRAAI_C2_ASSESSMENT_BANK_A_B_C_V1.json",
+      "EKAGRAAI_C3_ASSESSMENT_BANK_A_B_C_V1.json"
+    ],
+    "assessment_judge_sources": [
+      "v0.5/07_PROMPT_CONTRACTS/SUBJECTIVE_JUDGE_PROMPT.md",
+      "v0.5/08_SCIENTIFIC_YAML/judge.yaml",
+      "src/solo_harness/runtime/v051_assessment.py",
+      "src/solo_harness/runtime/assessment_grading.py"
+    ]
+  },
+  "blueprint": {
+    "questions_per_set": {
+      "mcq": 3,
+      "subjective": 1
+    },
+    "slots": [
+      {
+        "slot": "MCQ1",
+        "role": "group_membership_overlap_effect",
+        "subsections": [
+          "C4.1"
+        ],
+        "content_refs": [
+          "C4.1.O01",
+          "C4.1.O02",
+          "C4.1.O03",
+          "C4.1.O04",
+          "C4.1.O05"
+        ],
+        "evidence": "Use an explicit, non-grid group list to recognise that one position can belong to several groups, so a single flip changes the result of every group that contains it."
+      },
+      {
+        "slot": "MCQ2",
+        "role": "general_non_detection_condition_application",
+        "subsections": [
+          "C4.2"
+        ],
+        "content_refs": [
+          "C4.2.O03",
+          "C4.2.O04",
+          "C4.2.O05",
+          "C4.2.O06"
+        ],
+        "evidence": "Apply the general condition (undetected iff every group holds an even number of flipped positions) to a three-flip pattern whose total is odd, rejecting 'odd total is always detected'."
+      },
+      {
+        "slot": "MCQ3",
+        "role": "added_rule_evaluation_against_specified_pattern",
+        "subsections": [
+          "C4.3"
+        ],
+        "content_refs": [
+          "C4.3.O03",
+          "C4.3.O05",
+          "C4.3.O06",
+          "C4.3.O07"
+        ],
+        "evidence": "Choose the one added group guaranteed to be violated by a specified previously missed pattern (odd count of its flipped positions), recognising that a group holding both or neither flipped position does not help."
+      },
+      {
+        "slot": "SUB1",
+        "role": "generalization_counterexample_and_added_rule_evaluation",
+        "subsections": [
+          "C4.1",
+          "C4.2",
+          "C4.3"
+        ],
+        "content_refs": [
+          "C4.2.O05",
+          "C4.2.O06",
+          "C4.3.O01",
+          "C4.3.O02",
+          "C4.3.O03",
+          "C4.3.O06",
+          "C4.3.O07"
+        ],
+        "evidence": "Predict detection for unfamiliar patterns from per-group flip counts, refute an overbroad claim with a counterexample, and evaluate what an added rule does and does not guarantee."
+      }
+    ],
+    "c4_structural_anchor": "Minimum EA evidence is use of the general principle beyond the familiar mechanisms: justified prediction, counterexample and evaluation, not parity recalculation or a re-run of the 2D row/column procedure. For SUB1, 1 point needs correct per-group reasoning for at least two patterns, or a valid counterexample with a correct reason. 2 points need prediction, counterexample and added-rule evaluation together.",
+    "scope_exclusions": [
+      "crc_or_checksum_computation",
+      "hamming_code_procedures_or_syndrome_decoding",
+      "parity_check_matrices_or_linear_algebra",
+      "formal_coding_theory",
+      "optimal_code_design",
+      "exhaustive_enumeration_of_error_patterns",
+      "odd_parity_conventions_not_assessed"
+    ],
+    "form_equivalence": "Sets A/B/C use parallel operations on three small arrangements per set: Arrangement 1 (4 data + 3 checking bits, 3 overlapping groups) for MCQ1 and MCQ2; Arrangement 2 (5 data + 2 checking bits, 2 groups) for MCQ3; Arrangement 3 (4 data + 3 checking bits, 3 overlapping groups, different labels) for SUB1. Empirical psychometric equivalence has NOT been established.",
+    "form_assignment": "Allocate sets A/B/C independently of pedagogy; balance assignment across treatments and record chosen set and frozen delivered order.",
+    "known_design_choices": [
+      "Even parity only, matching the C4 teaching contract.",
+      "public.notation must be shown above the items. Each item carries an `arrangement` field (positions, sent sequence, group lists) that the frontend must render; the sent sequence is shown for the instructor's description, not as receiver evidence.",
+      "No sent sequence, received sequence or group structure equals any in the C4 teaching contract (verified programmatically); position and group labels (M/K/G, Q/Z/H) also differ from the teaching labels.",
+      "MCQ2 and SUB1 Pattern 2 are three-flip patterns in which every group holds two flips. The C4 teaching contract does not work this exact pattern; it is solvable by applying the taught general condition and is intended as transfer.",
+      "SUB1 Pattern 3 (a data bit and its own checking bit) is a two-flip undetected pattern, which also tests that the full-2D two-error guarantee is not generalised to arbitrary groups.",
+      "Within a set, MCQ1/MCQ2 share one arrangement but flip different positions; MCQ3 and SUB1 use different arrangements so one item does not reveal another.",
+      "SUB1 is long (three parts). If pilot learners run out of time or the prompt proves too heavy, split part (c) out or shorten to two patterns; this is a design decision for human review.",
+      "Existing v0.5 scoring gate is inherited unchanged; because SUB1 1 point requires a count-based reason or a valid counterexample, confirm that the gate (MCQ >= 2 and SUB1 >= 1) is acceptable for the final section."
+    ]
+  },
+  "scoring": {
+    "mcqs": {
+      "points_per_correct": 1,
+      "total_possible": 3,
+      "grade_against": "private.mcqs[].correct_option_id"
+    },
+    "subjective": {
+      "possible_points": [
+        0,
+        1,
+        2,
+        null
+      ],
+      "grade_using": "private.subjective_resolved.contract + private.subjective_resolved.case + exact public.subjective.prompt + exact raw learner response",
+      "assessment_judge_output_shape": {
+        "subjective_points": "0|1|2|null",
+        "reason": "nonempty string"
+      },
+      "meaning_of_null": "technical/scientific grading ambiguity; review hold, NOT zero",
+      "judge_blinding": "Do not pass pedagogy, Tutor history, MCQs, MCQ score, prior attempts, or learner identity to Assessment Judge."
+    },
+    "existing_v05_scoring_gate_reference": {
+      "mcq_correct_minimum": 2,
+      "subjective_points_minimum": 1,
+      "use": "Existing backend scoring rule; not a declaration of validated SOLO state."
+    }
+  },
+  "randomization": {
+    "authored_option_order": "Correct positions vary across sets and items: MCQ1 B/D/A, MCQ2 D/A/C, MCQ3 C/B/D for sets A/B/C. Options A-D are the frozen authored positions in this file.",
+    "runtime_rule": "Optional: shuffle all four options independently per learner, assign display IDs A-D anew, atomically update matching private correct_option_id, and freeze both public and private versions for that attempt. Never reshuffle after the learner sees a question.",
+    "audit": "Record set ID, displayed options and the mapped correct option privately; do not leak private keys to frontend."
+  },
+  "exposure_and_isolation": {
+    "learner_receives": "sets[set_id].public only (notation, mcqs including arrangement fields, subjective including arrangement)",
+    "assessment_judge_receives": "Exact frozen public subjective prompt, private subjective contract and verified case, learner response, official v0.5 judge rubric; not the MCQ key or pedagogy.",
+    "backend_receives": "Frozen public and private snapshots for scoring; only backend calculates pass/fail and progression.",
+    "avoid_frozen_teaching_examples": "Assessment arrangements, sequences and labels are deliberately different from every fixed example in the C4 teaching contract (verified programmatically).",
+    "implementation_notice": "This three-set fixed bank is a content candidate and is not automatically loaded by the existing runtime. Requires a deliberate adapter and policy decision without bypassing frozen-item provenance or recorded assessment lifecycle."
+  },
+  "sets": {
+    "A": {
+      "set_id": "C4-SET-A",
+      "intended_difficulty": "C4_R_to_EA_small_arrangements",
+      "public": {
+        "notation": "Each arrangement lists its positions in order. Positions named M or Q hold data; positions named K or Z hold checking bits. A group is a named list of positions. Even parity is used: a group's check passes when the positions in the group hold an even number of 1s. Every checking bit belongs to the group it was set for, and a checking bit can flip in transmission just like a data bit. 'Flip' means a position's value changes from 0 to 1 or from 1 to 0 during transmission. The receiver sees only the received sequence and the group lists; the sent sequence is shown here only for the instructor's description of what happened.",
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "stem": "A valid even-parity sequence is sent using the arrangement below. During transmission exactly one position flips: M2. The receiver checks every group of the received sequence. Which statement is correct?",
+            "arrangement": {
+              "label": "Arrangement 1",
+              "positions": [
+                "M1",
+                "M2",
+                "M3",
+                "M4",
+                "K1",
+                "K2",
+                "K3"
+              ],
+              "sent_sequence": "1011111",
+              "groups": {
+                "G1": [
+                  "M1",
+                  "M2",
+                  "K1"
+                ],
+                "G2": [
+                  "M2",
+                  "M3",
+                  "K2"
+                ],
+                "G3": [
+                  "M1",
+                  "M3",
+                  "M4",
+                  "K3"
+                ]
+              }
+            },
+            "options": [
+              {
+                "id": "A",
+                "text": "Only G1 fails, because each position is checked by just one group."
+              },
+              {
+                "id": "B",
+                "text": "G1 and G2 fail, because M2 belongs to both groups."
+              },
+              {
+                "id": "C",
+                "text": "G1, G2 and G3 all fail, because one flip upsets every check."
+              },
+              {
+                "id": "D",
+                "text": "No group fails, because no checking bit flipped."
+              }
+            ]
+          },
+          {
+            "id": "MCQ2",
+            "stem": "The same arrangement and sent sequence as in MCQ1 are used (shown again below). This time three positions flip during transmission: M1, M2 and M3. The receiver checks every group of the received sequence. Which statement is correct?",
+            "arrangement": {
+              "label": "Arrangement 1",
+              "positions": [
+                "M1",
+                "M2",
+                "M3",
+                "M4",
+                "K1",
+                "K2",
+                "K3"
+              ],
+              "sent_sequence": "1011111",
+              "groups": {
+                "G1": [
+                  "M1",
+                  "M2",
+                  "K1"
+                ],
+                "G2": [
+                  "M2",
+                  "M3",
+                  "K2"
+                ],
+                "G3": [
+                  "M1",
+                  "M3",
+                  "M4",
+                  "K3"
+                ]
+              }
+            },
+            "options": [
+              {
+                "id": "A",
+                "text": "Detected, because an odd number of positions flipped."
+              },
+              {
+                "id": "B",
+                "text": "Detected, because every group contains at least one flipped position."
+              },
+              {
+                "id": "C",
+                "text": "Detected, because the checking bits K1, K2 and K3 were not flipped, so they no longer match the data."
+              },
+              {
+                "id": "D",
+                "text": "Undetected: every group contains an even number of flipped positions (two each), even though three positions flipped in total."
+              }
+            ]
+          },
+          {
+            "id": "MCQ3",
+            "stem": "A valid even-parity sequence is sent using the arrangement below. During transmission M4 and K2 flip. Both original checks pass, so the receiver does not detect the corruption. The designers will add ONE extra checking bit, R, and ONE new group that contains R; R is set so the new group starts with an even number of 1s, and R itself does not flip. Which proposed new group is guaranteed to be violated by exactly this corruption?",
+            "arrangement": {
+              "label": "Arrangement 2",
+              "positions": [
+                "M1",
+                "M2",
+                "M3",
+                "M4",
+                "M5",
+                "K1",
+                "K2"
+              ],
+              "sent_sequence": "1011000",
+              "groups": {
+                "G1": [
+                  "M1",
+                  "M2",
+                  "M3",
+                  "K1"
+                ],
+                "G2": [
+                  "M3",
+                  "M4",
+                  "M5",
+                  "K2"
+                ]
+              }
+            },
+            "options": [
+              {
+                "id": "A",
+                "text": "A new group containing {M4, M5, K2, R}."
+              },
+              {
+                "id": "B",
+                "text": "A new group containing {M1, M2, M3, R}."
+              },
+              {
+                "id": "C",
+                "text": "A new group containing {M1, M4, R}."
+              },
+              {
+                "id": "D",
+                "text": "A new group containing {M2, M3, M5, R}."
+              }
+            ]
+          }
+        ],
+        "subjective": {
+          "id": "SUB1",
+          "prompt": "A system uses even parity on the 7-position arrangement shown below. The groups are: H1 = {Q1, Q2, Z1}; H2 = {Q2, Q3, Q4, Z2}; H3 = {Q1, Q3, Z3}. The sent sequence (positions Q1, Q2, Q3, Q4, Z1, Z2, Z3) is 0101100. An instructor tests three separate corruption patterns, each starting from the sent sequence:\nPattern 1: Q2 and Q4 flip.\nPattern 2: Q1, Q2 and Q3 flip.\nPattern 3: Q4 and Z2 flip.\n\n(a) For each pattern, count the flipped positions inside each group and say whether the receiver's checks detect the corruption.\n(b) A student says: 'If an odd number of positions flip, these checks always detect it.' Use the patterns to say whether this is true, and explain why.\n(c) The designers add one extra checking bit, R, with a new group H4 = {Q1, Q4, Z2, R}. R is set so H4 starts with an even number of 1s, and R does not flip. Would H4 detect Pattern 2? Would it detect Pattern 3? Does adding H4 mean every corruption would now be detected? Explain using flip counts.",
+          "arrangement": {
+            "label": "Arrangement 3",
+            "positions": [
+              "Q1",
+              "Q2",
+              "Q3",
+              "Q4",
+              "Z1",
+              "Z2",
+              "Z3"
+            ],
+            "sent_sequence": "0101100",
+            "groups": {
+              "H1": [
+                "Q1",
+                "Q2",
+                "Z1"
+              ],
+              "H2": [
+                "Q2",
+                "Q3",
+                "Q4",
+                "Z2"
+              ],
+              "H3": [
+                "Q1",
+                "Q3",
+                "Z3"
+              ]
+            }
+          }
+        }
+      },
+      "private": {
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "role": "group_membership_overlap_effect",
+            "subsection_refs": [
+              "C4.1"
+            ],
+            "correct_option_id": "B",
+            "correct_answer": "G1 and G2 fail, because M2 belongs to both groups.",
+            "oracle": {
+              "sent_sequence": "1011111",
+              "groups": {
+                "G1": [
+                  "M1",
+                  "M2",
+                  "K1"
+                ],
+                "G2": [
+                  "M2",
+                  "M3",
+                  "K2"
+                ],
+                "G3": [
+                  "M1",
+                  "M3",
+                  "M4",
+                  "K3"
+                ]
+              },
+              "flipped_positions": [
+                "M2"
+              ],
+              "received_sequence": "1111111",
+              "flips_per_group": {
+                "G1": 1,
+                "G2": 1,
+                "G3": 0
+              },
+              "group_results": {
+                "G1": "FAIL",
+                "G2": "FAIL",
+                "G3": "PASS"
+              },
+              "failed_groups": [
+                "G1",
+                "G2"
+              ],
+              "group_not_containing_flip": "G3",
+              "instructor_view_only": true
+            },
+            "option_feedback": {
+              "B": "M2 is a member of both G1 and G2, so each of those groups contains one flip and fails; G3 contains none and passes.",
+              "A": "Overlap: a position can belong to several groups, and M2 belongs to G1 and G2.",
+              "C": "G3 does not contain M2, so it holds no flip and passes.",
+              "D": "A single flip in a group reverses that group's result, whether or not a checking bit flipped; M2 is in G1 and G2."
+            }
+          },
+          {
+            "id": "MCQ2",
+            "role": "general_non_detection_condition_application",
+            "subsection_refs": [
+              "C4.2"
+            ],
+            "correct_option_id": "D",
+            "correct_answer": "Undetected: every group contains an even number of flipped positions (two each), even though three positions flipped in total.",
+            "oracle": {
+              "sent_sequence": "1011111",
+              "groups": {
+                "G1": [
+                  "M1",
+                  "M2",
+                  "K1"
+                ],
+                "G2": [
+                  "M2",
+                  "M3",
+                  "K2"
+                ],
+                "G3": [
+                  "M1",
+                  "M3",
+                  "M4",
+                  "K3"
+                ]
+              },
+              "flipped_positions": [
+                "M1",
+                "M2",
+                "M3"
+              ],
+              "received_sequence": "0101111",
+              "flips_per_group": {
+                "G1": 2,
+                "G2": 2,
+                "G3": 2
+              },
+              "group_results": {
+                "G1": "PASS",
+                "G2": "PASS",
+                "G3": "PASS"
+              },
+              "failed_groups": [],
+              "total_flips": 3,
+              "interpretation": "Undetected iff every checked group contains an even number of flipped positions; here total flips are odd but every group count is even.",
+              "instructor_view_only": true
+            },
+            "option_feedback": {
+              "D": "Each of the three groups contains exactly two of the flipped positions, so every group's result is unchanged and all checks pass; the corruption is undetected.",
+              "A": "The detection law depends on the flip count inside each group, not on whether the total number of flips is odd; here each group holds two.",
+              "B": "A group containing flips does not necessarily fail; a group with two flips keeps its passing result.",
+              "C": "The checking bits are included in the groups and do not need to flip for a check to be affected; here the passing results come from two flips in each group."
+            }
+          },
+          {
+            "id": "MCQ3",
+            "role": "added_rule_evaluation_against_specified_pattern",
+            "subsection_refs": [
+              "C4.3"
+            ],
+            "correct_option_id": "C",
+            "correct_answer": "A new group containing {M1, M4, R}.",
+            "oracle": {
+              "sent_sequence": "1011000",
+              "groups": {
+                "G1": [
+                  "M1",
+                  "M2",
+                  "M3",
+                  "K1"
+                ],
+                "G2": [
+                  "M3",
+                  "M4",
+                  "M5",
+                  "K2"
+                ]
+              },
+              "flipped_positions": [
+                "M4",
+                "K2"
+              ],
+              "received_sequence": "1010001",
+              "original_group_results": {
+                "G1": "PASS",
+                "G2": "PASS"
+              },
+              "original_flips_per_group": {
+                "G1": 0,
+                "G2": 2
+              },
+              "candidate_groups": [
+                {
+                  "option": "A",
+                  "group": [
+                    "M4",
+                    "M5",
+                    "K2",
+                    "R"
+                  ],
+                  "flipped_inside": 2,
+                  "new_group_result_on_target": "PASS"
+                },
+                {
+                  "option": "B",
+                  "group": [
+                    "M1",
+                    "M2",
+                    "M3",
+                    "R"
+                  ],
+                  "flipped_inside": 0,
+                  "new_group_result_on_target": "PASS"
+                },
+                {
+                  "option": "C",
+                  "group": [
+                    "M1",
+                    "M4",
+                    "R"
+                  ],
+                  "flipped_inside": 1,
+                  "new_group_result_on_target": "FAIL"
+                },
+                {
+                  "option": "D",
+                  "group": [
+                    "M2",
+                    "M3",
+                    "M5",
+                    "R"
+                  ],
+                  "flipped_inside": 0,
+                  "new_group_result_on_target": "PASS"
+                }
+              ],
+              "overhead_extra_transmitted_bits": 1,
+              "interpretation": "An added rule helps against a specified missed pattern only if the new group contains an odd number of its flipped positions; it gives no universal guarantee.",
+              "instructor_view_only": true
+            },
+            "option_feedback": {
+              "C": "The group contains exactly one of the two flipped positions, so it holds one flip, its result reverses and it fails. The added bit costs one extra transmitted bit and this guarantee is only for this specified pattern.",
+              "A": "{M4, M5, K2, R} contains both flipped positions, so it holds two flips and its result is unchanged: the corruption is still undetected.",
+              "B": "{M1, M2, M3, R} contains neither flipped position, so it holds no flips and passes: it adds a check bit but does not help against this pattern.",
+              "D": "{M2, M3, M5, R} contains neither flipped position, so it holds no flips and passes: it adds a check bit but does not help against this pattern."
+            }
+          }
+        ],
+        "subjective_resolved": {
+          "contract": {
+            "id": "C4-SET-A-SUB1",
+            "type": "SUBJECTIVE",
+            "transition_id": "C4",
+            "shared_role": "generalization and evaluation: apply the per-group even/odd flip principle to an unfamiliar arrangement, test an overbroad claim with a counterexample, and evaluate an added checking rule",
+            "mapped_locked_subsections": [
+              "C4.1",
+              "C4.2",
+              "C4.3"
+            ],
+            "solo_target": "R_to_EA",
+            "target_structural_evidence": "The learner uses the general principle (corruption is undetected exactly when every group holds an even number of flipped positions) to predict outcomes in an unfamiliar arrangement, uses a valid counterexample to reject an overbroad claim, AND evaluates what an added rule does and does not establish. Recomputing parities or reciting a 2D-parity procedure is not the defining evidence.",
+            "score_anchor": {
+              "0": "No parity-based principle is used (bare detected/undetected verdicts without counts), or the central principle is materially wrong (for example: total number of flips decides detection; any group containing a flip fails; any added check guarantees detection of everything; two-flip detection is guaranteed in every arrangement).",
+              "1": "Applies the per-group principle correctly with identifiable reasons in part of the task: either (a) correct per-group flip counts and verdicts for at least two of the three patterns, including a correct account of why an undetected pattern passes every group, or (b) a valid counterexample to the odd-flips claim that explains why the total flip count is not the criterion. Part (c) may be missing or incomplete.",
+              "2": "Correct reasoning across the task: (a) per-group counts and verdicts for all three patterns (Pattern 1 detected; Patterns 2 and 3 undetected because every group holds an even count); (b) Pattern 2 as a counterexample, explained by per-group counts rather than total flips; and (c) H4 detects Pattern 2 because it holds an odd number of its flipped positions, does not detect Pattern 3 because it holds an even number, and so an added rule does not guarantee detection of every corruption. Noting the one-bit overhead is a strength, not a requirement."
+            },
+            "evidence_elements": {
+              "pattern_to_group_counts": "Counts flipped positions inside each group separately, including checking-bit positions.",
+              "general_principle": "Corruption is detected iff at least one group has an odd count of flipped positions; undetected iff every group has an even count.",
+              "counterexample": "Pattern 2 (three flips, odd total) is undetected; Pattern 3 shows that a two-flip pattern can be undetected in an arrangement that is not full 2D parity.",
+              "added_rule_evaluation": "H4 detects a specified pattern only if it holds an odd number of that pattern's flipped positions; extra checking bits impose overhead and give no universal guarantee."
+            },
+            "legitimate_alternative_explanations": [
+              "Equivalent parity language: a group's parity changes / stays the same, becomes odd / stays even, check passes / fails / is violated.",
+              "Reasoning group by group without writing out every zero count, provided the groups holding two flips are explained as unchanged.",
+              "Describing the limit of H4 in words (for example, 'another pattern could still slip through') without constructing a specific pattern.",
+              "Equivalent labels for positions and groups, if consistently interpreted."
+            ],
+            "material_invalidators": [
+              "Claims that a group fails because it contains any flipped position, regardless of how many.",
+              "Claims that detection depends on whether the total number of flipped positions is odd or even.",
+              "Claims that the receiver has, or can compare with, the original sequence.",
+              "Claims that adding a checking group guarantees detection of every corruption.",
+              "Claims that every two-flip pattern is detected in this arrangement."
+            ],
+            "full_credit_blockers": [
+              "Only (a), only (b) or only (c) is correctly explained.",
+              "Correct verdicts with no per-group count reasoning.",
+              "Treats H4's detection of Pattern 2 as proof that every corruption is now detected."
+            ],
+            "contradiction_handling": "A material contradiction of the central principle is 0 even if an isolated correct-looking verdict also appears. An incorrect extra claim blocks 2 and may warrant 0 if it overwhelms otherwise correct reasoning; use an evidence-grounded judgment, not keyword triggers.",
+            "judge_instruction": "Grade ONLY the frozen public subjective prompt, this verified case and the exact raw learner response. Do not use pedagogy, Tutor history, MCQs, MCQ score, prior attempts, or learner identity. Accept equivalent reasoning, not exact-match text. Return only subjective_points (0/1/2 or null) and a nonempty reason. Null is for a true grading ambiguity or technical/scientific review hold, not for a wrong or blank answer.",
+            "calibration_status": "illustrative_synthetic_examples_not_human_validated",
+            "calibration_examples": [
+              {
+                "response": "(a) Pattern 1 flips Q2, Q4: counts per group are H1: 1, H2: 2, H3: 0; the groups with an odd count (H1) fail, so it is detected. Pattern 2 flips Q1, Q2, Q3: counts are H1: 2, H2: 2, H3: 2, every group even, so all checks pass and it is undetected. Pattern 3 flips Q4, Z2: counts are H1: 0, H2: 2, H3: 0, every group even, so it is undetected. (b) False: detection depends on whether at least one group holds an odd number of flips, not on the total; Pattern 2 flips three positions (odd) yet each group holds two, so it goes undetected. (c) H4 = {Q1, Q4, Z2, R} holds one of Pattern 2's flipped positions (1), so its result reverses and it fails: Pattern 2 is detected. H4 holds 2 of Pattern 3's flipped positions (both or neither), an even count, so H4 passes and Pattern 3 is still undetected. So one added rule helped against one specified pattern but does not guarantee detection of every corruption; it also costs one extra transmitted bit.",
+                "expected_points": 2,
+                "why": "All three parts are correct and grounded in per-group flip counts, including the limit of the added rule."
+              },
+              {
+                "response": "Pattern 1: counts are H1: 1, H2: 2, H3: 0, so H1 fail and it is caught. Pattern 2: counts are H1: 2, H2: 2, H3: 2, every group has an even number, so nothing fails and it is missed. Pattern 3: counts are H1: 0, H2: 2, H3: 0, also all even, so it is missed.",
+                "expected_points": 1,
+                "why": "Correct per-group counts and verdicts for part (a); parts (b) and (c) are missing."
+              },
+              {
+                "response": "The claim is false. Pattern 2 flips three positions, which is odd, but each group has two flips so every check still passes. What matters is the count inside each group, not the total.",
+                "expected_points": 1,
+                "why": "Valid counterexample with a correct reason; other parts are missing."
+              },
+              {
+                "response": "Pattern 1 is detected. Patterns 2 and 3 are not detected. An odd number of flips is always detected, so the student is right. H4 will detect everything now.",
+                "expected_points": 0,
+                "why": "Verdicts without counts, contradicts its own Pattern 2 result, and claims an added check detects everything."
+              },
+              {
+                "response": "Any group that contains a flipped position fails, so all three patterns are detected, and adding H4 only makes it more certain.",
+                "expected_points": 0,
+                "why": "Materially wrong mechanism: groups holding two flips do not fail."
+              }
+            ],
+            "assessment_mode": "fixed_c4_extended_abstract"
+          },
+          "case": {
+            "scenario_kind": "generalized_parity_groups_detection_and_added_rule_evaluation",
+            "parity_convention": "even",
+            "positions_in_order": [
+              "Q1",
+              "Q2",
+              "Q3",
+              "Q4",
+              "Z1",
+              "Z2",
+              "Z3"
+            ],
+            "data_positions": [
+              "Q1",
+              "Q2",
+              "Q3",
+              "Q4"
+            ],
+            "checking_bit_positions": [
+              "Z1",
+              "Z2",
+              "Z3"
+            ],
+            "groups": {
+              "H1": [
+                "Q1",
+                "Q2",
+                "Z1"
+              ],
+              "H2": [
+                "Q2",
+                "Q3",
+                "Q4",
+                "Z2"
+              ],
+              "H3": [
+                "Q1",
+                "Q3",
+                "Z3"
+              ]
+            },
+            "sent_sequence": "0101100",
+            "patterns": {
+              "Pattern 1": {
+                "flipped_positions": [
+                  "Q2",
+                  "Q4"
+                ],
+                "received_sequence": "0000100",
+                "flips_per_group": {
+                  "H1": 1,
+                  "H2": 2,
+                  "H3": 0
+                },
+                "group_results": {
+                  "H1": "FAIL",
+                  "H2": "PASS",
+                  "H3": "PASS"
+                },
+                "failed_groups": [
+                  "H1"
+                ],
+                "detected": true,
+                "total_flips": 2
+              },
+              "Pattern 2": {
+                "flipped_positions": [
+                  "Q1",
+                  "Q2",
+                  "Q3"
+                ],
+                "received_sequence": "1011100",
+                "flips_per_group": {
+                  "H1": 2,
+                  "H2": 2,
+                  "H3": 2
+                },
+                "group_results": {
+                  "H1": "PASS",
+                  "H2": "PASS",
+                  "H3": "PASS"
+                },
+                "failed_groups": [],
+                "detected": false,
+                "total_flips": 3,
+                "with_H4_results": {
+                  "H1": "PASS",
+                  "H2": "PASS",
+                  "H3": "PASS",
+                  "H4": "FAIL"
+                }
+              },
+              "Pattern 3": {
+                "flipped_positions": [
+                  "Q4",
+                  "Z2"
+                ],
+                "received_sequence": "0100110",
+                "flips_per_group": {
+                  "H1": 0,
+                  "H2": 2,
+                  "H3": 0
+                },
+                "group_results": {
+                  "H1": "PASS",
+                  "H2": "PASS",
+                  "H3": "PASS"
+                },
+                "failed_groups": [],
+                "detected": false,
+                "total_flips": 2,
+                "with_H4_results": {
+                  "H1": "PASS",
+                  "H2": "PASS",
+                  "H3": "PASS",
+                  "H4": "PASS"
+                }
+              }
+            },
+            "added_rule": {
+              "group": "H4",
+              "members": [
+                "Q1",
+                "Q4",
+                "Z2",
+                "R"
+              ],
+              "checking_bit": "R",
+              "R_value_in_sent_sequence": "1",
+              "sent_sequence_with_R": "01011001",
+              "flips_inside_H4_by_pattern": {
+                "Pattern 1": 1,
+                "Pattern 2": 1,
+                "Pattern 3": 2
+              },
+              "detects_pattern_2": true,
+              "detects_pattern_3": false,
+              "overhead_extra_transmitted_bits": 1
+            },
+            "receiver_has_original": false,
+            "instructor_view_only": true,
+            "reference_answer_for_calibration_only": "(a) Pattern 1 flips Q2, Q4: counts per group are H1: 1, H2: 2, H3: 0; the groups with an odd count (H1) fail, so it is detected. Pattern 2 flips Q1, Q2, Q3: counts are H1: 2, H2: 2, H3: 2, every group even, so all checks pass and it is undetected. Pattern 3 flips Q4, Z2: counts are H1: 0, H2: 2, H3: 0, every group even, so it is undetected. (b) False: detection depends on whether at least one group holds an odd number of flips, not on the total; Pattern 2 flips three positions (odd) yet each group holds two, so it goes undetected. (c) H4 = {Q1, Q4, Z2, R} holds one of Pattern 2's flipped positions (1), so its result reverses and it fails: Pattern 2 is detected. H4 holds 2 of Pattern 3's flipped positions (both or neither), an even count, so H4 passes and Pattern 3 is still undetected. So one added rule helped against one specified pattern but does not guarantee detection of every corruption; it also costs one extra transmitted bit."
+          }
+        }
+      },
+      "scientific_review": {
+        "scope": "C4_only",
+        "status": "authored_and_programmatically_checked_requires_independent_human_approval",
+        "no_instructional_frozen_sequences": true,
+        "notes": "All sent sequences, group validity, flip counts per group, received sequences, check results, added-rule outcomes and Pattern 1/2/3 verdicts were programmatically recomputed. Instructor-only sent sequences are not presumed available to the receiver. Human review is still required for content validity, SOLO alignment, readability for first-time learners and judge calibration."
+      }
+    },
+    "B": {
+      "set_id": "C4-SET-B",
+      "intended_difficulty": "C4_R_to_EA_small_arrangements",
+      "public": {
+        "notation": "Each arrangement lists its positions in order. Positions named M or Q hold data; positions named K or Z hold checking bits. A group is a named list of positions. Even parity is used: a group's check passes when the positions in the group hold an even number of 1s. Every checking bit belongs to the group it was set for, and a checking bit can flip in transmission just like a data bit. 'Flip' means a position's value changes from 0 to 1 or from 1 to 0 during transmission. The receiver sees only the received sequence and the group lists; the sent sequence is shown here only for the instructor's description of what happened.",
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "stem": "A valid even-parity sequence is sent using the arrangement below. During transmission exactly one position flips: M3. The receiver checks every group of the received sequence. Which statement is correct?",
+            "arrangement": {
+              "label": "Arrangement 1",
+              "positions": [
+                "M1",
+                "M2",
+                "M3",
+                "M4",
+                "K1",
+                "K2",
+                "K3"
+              ],
+              "sent_sequence": "0110011",
+              "groups": {
+                "G1": [
+                  "M1",
+                  "M2",
+                  "M3",
+                  "K1"
+                ],
+                "G2": [
+                  "M3",
+                  "M4",
+                  "K2"
+                ],
+                "G3": [
+                  "M2",
+                  "M4",
+                  "K3"
+                ]
+              }
+            },
+            "options": [
+              {
+                "id": "A",
+                "text": "Only G1 fails, because each position is checked by just one group."
+              },
+              {
+                "id": "B",
+                "text": "G1, G2 and G3 all fail, because one flip upsets every check."
+              },
+              {
+                "id": "C",
+                "text": "No group fails, because no checking bit flipped."
+              },
+              {
+                "id": "D",
+                "text": "G1 and G2 fail, because M3 belongs to both groups."
+              }
+            ]
+          },
+          {
+            "id": "MCQ2",
+            "stem": "The same arrangement and sent sequence as in MCQ1 are used (shown again below). This time three positions flip during transmission: M2, M3 and M4. The receiver checks every group of the received sequence. Which statement is correct?",
+            "arrangement": {
+              "label": "Arrangement 1",
+              "positions": [
+                "M1",
+                "M2",
+                "M3",
+                "M4",
+                "K1",
+                "K2",
+                "K3"
+              ],
+              "sent_sequence": "0110011",
+              "groups": {
+                "G1": [
+                  "M1",
+                  "M2",
+                  "M3",
+                  "K1"
+                ],
+                "G2": [
+                  "M3",
+                  "M4",
+                  "K2"
+                ],
+                "G3": [
+                  "M2",
+                  "M4",
+                  "K3"
+                ]
+              }
+            },
+            "options": [
+              {
+                "id": "A",
+                "text": "Undetected: every group contains an even number of flipped positions (two each), even though three positions flipped in total."
+              },
+              {
+                "id": "B",
+                "text": "Detected, because an odd number of positions flipped."
+              },
+              {
+                "id": "C",
+                "text": "Detected, because every group contains at least one flipped position."
+              },
+              {
+                "id": "D",
+                "text": "Detected, because the checking bits K1, K2 and K3 were not flipped, so they no longer match the data."
+              }
+            ]
+          },
+          {
+            "id": "MCQ3",
+            "stem": "A valid even-parity sequence is sent using the arrangement below. During transmission M1 and K1 flip. Both original checks pass, so the receiver does not detect the corruption. The designers will add ONE extra checking bit, R, and ONE new group that contains R; R is set so the new group starts with an even number of 1s, and R itself does not flip. Which proposed new group is guaranteed to be violated by exactly this corruption?",
+            "arrangement": {
+              "label": "Arrangement 2",
+              "positions": [
+                "M1",
+                "M2",
+                "M3",
+                "M4",
+                "M5",
+                "K1",
+                "K2"
+              ],
+              "sent_sequence": "0110111",
+              "groups": {
+                "G1": [
+                  "M1",
+                  "M2",
+                  "M4",
+                  "K1"
+                ],
+                "G2": [
+                  "M2",
+                  "M3",
+                  "M5",
+                  "K2"
+                ]
+              }
+            },
+            "options": [
+              {
+                "id": "A",
+                "text": "A new group containing {M1, M4, K1, R}."
+              },
+              {
+                "id": "B",
+                "text": "A new group containing {K1, M3, R}."
+              },
+              {
+                "id": "C",
+                "text": "A new group containing {M2, M4, R}."
+              },
+              {
+                "id": "D",
+                "text": "A new group containing {M3, M5, R}."
+              }
+            ]
+          }
+        ],
+        "subjective": {
+          "id": "SUB1",
+          "prompt": "A system uses even parity on the 7-position arrangement shown below. The groups are: H1 = {Q1, Q2, Q3, Z1}; H2 = {Q3, Q4, Z2}; H3 = {Q2, Q4, Z3}. The sent sequence (positions Q1, Q2, Q3, Q4, Z1, Z2, Z3) is 1001111. An instructor tests three separate corruption patterns, each starting from the sent sequence:\nPattern 1: Q1 and Q3 flip.\nPattern 2: Q2, Q3 and Q4 flip.\nPattern 3: Q1 and Z1 flip.\n\n(a) For each pattern, count the flipped positions inside each group and say whether the receiver's checks detect the corruption.\n(b) A student says: 'If an odd number of positions flip, these checks always detect it.' Use the patterns to say whether this is true, and explain why.\n(c) The designers add one extra checking bit, R, with a new group H4 = {Q1, Q2, Z1, R}. R is set so H4 starts with an even number of 1s, and R does not flip. Would H4 detect Pattern 2? Would it detect Pattern 3? Does adding H4 mean every corruption would now be detected? Explain using flip counts.",
+          "arrangement": {
+            "label": "Arrangement 3",
+            "positions": [
+              "Q1",
+              "Q2",
+              "Q3",
+              "Q4",
+              "Z1",
+              "Z2",
+              "Z3"
+            ],
+            "sent_sequence": "1001111",
+            "groups": {
+              "H1": [
+                "Q1",
+                "Q2",
+                "Q3",
+                "Z1"
+              ],
+              "H2": [
+                "Q3",
+                "Q4",
+                "Z2"
+              ],
+              "H3": [
+                "Q2",
+                "Q4",
+                "Z3"
+              ]
+            }
+          }
+        }
+      },
+      "private": {
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "role": "group_membership_overlap_effect",
+            "subsection_refs": [
+              "C4.1"
+            ],
+            "correct_option_id": "D",
+            "correct_answer": "G1 and G2 fail, because M3 belongs to both groups.",
+            "oracle": {
+              "sent_sequence": "0110011",
+              "groups": {
+                "G1": [
+                  "M1",
+                  "M2",
+                  "M3",
+                  "K1"
+                ],
+                "G2": [
+                  "M3",
+                  "M4",
+                  "K2"
+                ],
+                "G3": [
+                  "M2",
+                  "M4",
+                  "K3"
+                ]
+              },
+              "flipped_positions": [
+                "M3"
+              ],
+              "received_sequence": "0100011",
+              "flips_per_group": {
+                "G1": 1,
+                "G2": 1,
+                "G3": 0
+              },
+              "group_results": {
+                "G1": "FAIL",
+                "G2": "FAIL",
+                "G3": "PASS"
+              },
+              "failed_groups": [
+                "G1",
+                "G2"
+              ],
+              "group_not_containing_flip": "G3",
+              "instructor_view_only": true
+            },
+            "option_feedback": {
+              "D": "M3 is a member of both G1 and G2, so each of those groups contains one flip and fails; G3 contains none and passes.",
+              "A": "Overlap: a position can belong to several groups, and M3 belongs to G1 and G2.",
+              "B": "G3 does not contain M3, so it holds no flip and passes.",
+              "C": "A single flip in a group reverses that group's result, whether or not a checking bit flipped; M3 is in G1 and G2."
+            }
+          },
+          {
+            "id": "MCQ2",
+            "role": "general_non_detection_condition_application",
+            "subsection_refs": [
+              "C4.2"
+            ],
+            "correct_option_id": "A",
+            "correct_answer": "Undetected: every group contains an even number of flipped positions (two each), even though three positions flipped in total.",
+            "oracle": {
+              "sent_sequence": "0110011",
+              "groups": {
+                "G1": [
+                  "M1",
+                  "M2",
+                  "M3",
+                  "K1"
+                ],
+                "G2": [
+                  "M3",
+                  "M4",
+                  "K2"
+                ],
+                "G3": [
+                  "M2",
+                  "M4",
+                  "K3"
+                ]
+              },
+              "flipped_positions": [
+                "M2",
+                "M3",
+                "M4"
+              ],
+              "received_sequence": "0001011",
+              "flips_per_group": {
+                "G1": 2,
+                "G2": 2,
+                "G3": 2
+              },
+              "group_results": {
+                "G1": "PASS",
+                "G2": "PASS",
+                "G3": "PASS"
+              },
+              "failed_groups": [],
+              "total_flips": 3,
+              "interpretation": "Undetected iff every checked group contains an even number of flipped positions; here total flips are odd but every group count is even.",
+              "instructor_view_only": true
+            },
+            "option_feedback": {
+              "A": "Each of the three groups contains exactly two of the flipped positions, so every group's result is unchanged and all checks pass; the corruption is undetected.",
+              "B": "The detection law depends on the flip count inside each group, not on whether the total number of flips is odd; here each group holds two.",
+              "C": "A group containing flips does not necessarily fail; a group with two flips keeps its passing result.",
+              "D": "The checking bits are included in the groups and do not need to flip for a check to be affected; here the passing results come from two flips in each group."
+            }
+          },
+          {
+            "id": "MCQ3",
+            "role": "added_rule_evaluation_against_specified_pattern",
+            "subsection_refs": [
+              "C4.3"
+            ],
+            "correct_option_id": "B",
+            "correct_answer": "A new group containing {K1, M3, R}.",
+            "oracle": {
+              "sent_sequence": "0110111",
+              "groups": {
+                "G1": [
+                  "M1",
+                  "M2",
+                  "M4",
+                  "K1"
+                ],
+                "G2": [
+                  "M2",
+                  "M3",
+                  "M5",
+                  "K2"
+                ]
+              },
+              "flipped_positions": [
+                "M1",
+                "K1"
+              ],
+              "received_sequence": "1110101",
+              "original_group_results": {
+                "G1": "PASS",
+                "G2": "PASS"
+              },
+              "original_flips_per_group": {
+                "G1": 2,
+                "G2": 0
+              },
+              "candidate_groups": [
+                {
+                  "option": "A",
+                  "group": [
+                    "M1",
+                    "M4",
+                    "K1",
+                    "R"
+                  ],
+                  "flipped_inside": 2,
+                  "new_group_result_on_target": "PASS"
+                },
+                {
+                  "option": "B",
+                  "group": [
+                    "K1",
+                    "M3",
+                    "R"
+                  ],
+                  "flipped_inside": 1,
+                  "new_group_result_on_target": "FAIL"
+                },
+                {
+                  "option": "C",
+                  "group": [
+                    "M2",
+                    "M4",
+                    "R"
+                  ],
+                  "flipped_inside": 0,
+                  "new_group_result_on_target": "PASS"
+                },
+                {
+                  "option": "D",
+                  "group": [
+                    "M3",
+                    "M5",
+                    "R"
+                  ],
+                  "flipped_inside": 0,
+                  "new_group_result_on_target": "PASS"
+                }
+              ],
+              "overhead_extra_transmitted_bits": 1,
+              "interpretation": "An added rule helps against a specified missed pattern only if the new group contains an odd number of its flipped positions; it gives no universal guarantee.",
+              "instructor_view_only": true
+            },
+            "option_feedback": {
+              "B": "The group contains exactly one of the two flipped positions, so it holds one flip, its result reverses and it fails. The added bit costs one extra transmitted bit and this guarantee is only for this specified pattern.",
+              "A": "{M1, M4, K1, R} contains both flipped positions, so it holds two flips and its result is unchanged: the corruption is still undetected.",
+              "C": "{M2, M4, R} contains neither flipped position, so it holds no flips and passes: it adds a check bit but does not help against this pattern.",
+              "D": "{M3, M5, R} contains neither flipped position, so it holds no flips and passes: it adds a check bit but does not help against this pattern."
+            }
+          }
+        ],
+        "subjective_resolved": {
+          "contract": {
+            "id": "C4-SET-B-SUB1",
+            "type": "SUBJECTIVE",
+            "transition_id": "C4",
+            "shared_role": "generalization and evaluation: apply the per-group even/odd flip principle to an unfamiliar arrangement, test an overbroad claim with a counterexample, and evaluate an added checking rule",
+            "mapped_locked_subsections": [
+              "C4.1",
+              "C4.2",
+              "C4.3"
+            ],
+            "solo_target": "R_to_EA",
+            "target_structural_evidence": "The learner uses the general principle (corruption is undetected exactly when every group holds an even number of flipped positions) to predict outcomes in an unfamiliar arrangement, uses a valid counterexample to reject an overbroad claim, AND evaluates what an added rule does and does not establish. Recomputing parities or reciting a 2D-parity procedure is not the defining evidence.",
+            "score_anchor": {
+              "0": "No parity-based principle is used (bare detected/undetected verdicts without counts), or the central principle is materially wrong (for example: total number of flips decides detection; any group containing a flip fails; any added check guarantees detection of everything; two-flip detection is guaranteed in every arrangement).",
+              "1": "Applies the per-group principle correctly with identifiable reasons in part of the task: either (a) correct per-group flip counts and verdicts for at least two of the three patterns, including a correct account of why an undetected pattern passes every group, or (b) a valid counterexample to the odd-flips claim that explains why the total flip count is not the criterion. Part (c) may be missing or incomplete.",
+              "2": "Correct reasoning across the task: (a) per-group counts and verdicts for all three patterns (Pattern 1 detected; Patterns 2 and 3 undetected because every group holds an even count); (b) Pattern 2 as a counterexample, explained by per-group counts rather than total flips; and (c) H4 detects Pattern 2 because it holds an odd number of its flipped positions, does not detect Pattern 3 because it holds an even number, and so an added rule does not guarantee detection of every corruption. Noting the one-bit overhead is a strength, not a requirement."
+            },
+            "evidence_elements": {
+              "pattern_to_group_counts": "Counts flipped positions inside each group separately, including checking-bit positions.",
+              "general_principle": "Corruption is detected iff at least one group has an odd count of flipped positions; undetected iff every group has an even count.",
+              "counterexample": "Pattern 2 (three flips, odd total) is undetected; Pattern 3 shows that a two-flip pattern can be undetected in an arrangement that is not full 2D parity.",
+              "added_rule_evaluation": "H4 detects a specified pattern only if it holds an odd number of that pattern's flipped positions; extra checking bits impose overhead and give no universal guarantee."
+            },
+            "legitimate_alternative_explanations": [
+              "Equivalent parity language: a group's parity changes / stays the same, becomes odd / stays even, check passes / fails / is violated.",
+              "Reasoning group by group without writing out every zero count, provided the groups holding two flips are explained as unchanged.",
+              "Describing the limit of H4 in words (for example, 'another pattern could still slip through') without constructing a specific pattern.",
+              "Equivalent labels for positions and groups, if consistently interpreted."
+            ],
+            "material_invalidators": [
+              "Claims that a group fails because it contains any flipped position, regardless of how many.",
+              "Claims that detection depends on whether the total number of flipped positions is odd or even.",
+              "Claims that the receiver has, or can compare with, the original sequence.",
+              "Claims that adding a checking group guarantees detection of every corruption.",
+              "Claims that every two-flip pattern is detected in this arrangement."
+            ],
+            "full_credit_blockers": [
+              "Only (a), only (b) or only (c) is correctly explained.",
+              "Correct verdicts with no per-group count reasoning.",
+              "Treats H4's detection of Pattern 2 as proof that every corruption is now detected."
+            ],
+            "contradiction_handling": "A material contradiction of the central principle is 0 even if an isolated correct-looking verdict also appears. An incorrect extra claim blocks 2 and may warrant 0 if it overwhelms otherwise correct reasoning; use an evidence-grounded judgment, not keyword triggers.",
+            "judge_instruction": "Grade ONLY the frozen public subjective prompt, this verified case and the exact raw learner response. Do not use pedagogy, Tutor history, MCQs, MCQ score, prior attempts, or learner identity. Accept equivalent reasoning, not exact-match text. Return only subjective_points (0/1/2 or null) and a nonempty reason. Null is for a true grading ambiguity or technical/scientific review hold, not for a wrong or blank answer.",
+            "calibration_status": "illustrative_synthetic_examples_not_human_validated",
+            "calibration_examples": [
+              {
+                "response": "(a) Pattern 1 flips Q1, Q3: counts per group are H1: 2, H2: 1, H3: 0; the groups with an odd count (H2) fail, so it is detected. Pattern 2 flips Q2, Q3, Q4: counts are H1: 2, H2: 2, H3: 2, every group even, so all checks pass and it is undetected. Pattern 3 flips Q1, Z1: counts are H1: 2, H2: 0, H3: 0, every group even, so it is undetected. (b) False: detection depends on whether at least one group holds an odd number of flips, not on the total; Pattern 2 flips three positions (odd) yet each group holds two, so it goes undetected. (c) H4 = {Q1, Q2, Z1, R} holds one of Pattern 2's flipped positions (1), so its result reverses and it fails: Pattern 2 is detected. H4 holds 2 of Pattern 3's flipped positions (both or neither), an even count, so H4 passes and Pattern 3 is still undetected. So one added rule helped against one specified pattern but does not guarantee detection of every corruption; it also costs one extra transmitted bit.",
+                "expected_points": 2,
+                "why": "All three parts are correct and grounded in per-group flip counts, including the limit of the added rule."
+              },
+              {
+                "response": "Pattern 1: counts are H1: 2, H2: 1, H3: 0, so H2 fail and it is caught. Pattern 2: counts are H1: 2, H2: 2, H3: 2, every group has an even number, so nothing fails and it is missed. Pattern 3: counts are H1: 2, H2: 0, H3: 0, also all even, so it is missed.",
+                "expected_points": 1,
+                "why": "Correct per-group counts and verdicts for part (a); parts (b) and (c) are missing."
+              },
+              {
+                "response": "The claim is false. Pattern 2 flips three positions, which is odd, but each group has two flips so every check still passes. What matters is the count inside each group, not the total.",
+                "expected_points": 1,
+                "why": "Valid counterexample with a correct reason; other parts are missing."
+              },
+              {
+                "response": "Pattern 1 is detected. Patterns 2 and 3 are not detected. An odd number of flips is always detected, so the student is right. H4 will detect everything now.",
+                "expected_points": 0,
+                "why": "Verdicts without counts, contradicts its own Pattern 2 result, and claims an added check detects everything."
+              },
+              {
+                "response": "Any group that contains a flipped position fails, so all three patterns are detected, and adding H4 only makes it more certain.",
+                "expected_points": 0,
+                "why": "Materially wrong mechanism: groups holding two flips do not fail."
+              }
+            ],
+            "assessment_mode": "fixed_c4_extended_abstract"
+          },
+          "case": {
+            "scenario_kind": "generalized_parity_groups_detection_and_added_rule_evaluation",
+            "parity_convention": "even",
+            "positions_in_order": [
+              "Q1",
+              "Q2",
+              "Q3",
+              "Q4",
+              "Z1",
+              "Z2",
+              "Z3"
+            ],
+            "data_positions": [
+              "Q1",
+              "Q2",
+              "Q3",
+              "Q4"
+            ],
+            "checking_bit_positions": [
+              "Z1",
+              "Z2",
+              "Z3"
+            ],
+            "groups": {
+              "H1": [
+                "Q1",
+                "Q2",
+                "Q3",
+                "Z1"
+              ],
+              "H2": [
+                "Q3",
+                "Q4",
+                "Z2"
+              ],
+              "H3": [
+                "Q2",
+                "Q4",
+                "Z3"
+              ]
+            },
+            "sent_sequence": "1001111",
+            "patterns": {
+              "Pattern 1": {
+                "flipped_positions": [
+                  "Q1",
+                  "Q3"
+                ],
+                "received_sequence": "0011111",
+                "flips_per_group": {
+                  "H1": 2,
+                  "H2": 1,
+                  "H3": 0
+                },
+                "group_results": {
+                  "H1": "PASS",
+                  "H2": "FAIL",
+                  "H3": "PASS"
+                },
+                "failed_groups": [
+                  "H2"
+                ],
+                "detected": true,
+                "total_flips": 2
+              },
+              "Pattern 2": {
+                "flipped_positions": [
+                  "Q2",
+                  "Q3",
+                  "Q4"
+                ],
+                "received_sequence": "1110111",
+                "flips_per_group": {
+                  "H1": 2,
+                  "H2": 2,
+                  "H3": 2
+                },
+                "group_results": {
+                  "H1": "PASS",
+                  "H2": "PASS",
+                  "H3": "PASS"
+                },
+                "failed_groups": [],
+                "detected": false,
+                "total_flips": 3,
+                "with_H4_results": {
+                  "H1": "PASS",
+                  "H2": "PASS",
+                  "H3": "PASS",
+                  "H4": "FAIL"
+                }
+              },
+              "Pattern 3": {
+                "flipped_positions": [
+                  "Q1",
+                  "Z1"
+                ],
+                "received_sequence": "0001011",
+                "flips_per_group": {
+                  "H1": 2,
+                  "H2": 0,
+                  "H3": 0
+                },
+                "group_results": {
+                  "H1": "PASS",
+                  "H2": "PASS",
+                  "H3": "PASS"
+                },
+                "failed_groups": [],
+                "detected": false,
+                "total_flips": 2,
+                "with_H4_results": {
+                  "H1": "PASS",
+                  "H2": "PASS",
+                  "H3": "PASS",
+                  "H4": "PASS"
+                }
+              }
+            },
+            "added_rule": {
+              "group": "H4",
+              "members": [
+                "Q1",
+                "Q2",
+                "Z1",
+                "R"
+              ],
+              "checking_bit": "R",
+              "R_value_in_sent_sequence": "0",
+              "sent_sequence_with_R": "10011110",
+              "flips_inside_H4_by_pattern": {
+                "Pattern 1": 1,
+                "Pattern 2": 1,
+                "Pattern 3": 2
+              },
+              "detects_pattern_2": true,
+              "detects_pattern_3": false,
+              "overhead_extra_transmitted_bits": 1
+            },
+            "receiver_has_original": false,
+            "instructor_view_only": true,
+            "reference_answer_for_calibration_only": "(a) Pattern 1 flips Q1, Q3: counts per group are H1: 2, H2: 1, H3: 0; the groups with an odd count (H2) fail, so it is detected. Pattern 2 flips Q2, Q3, Q4: counts are H1: 2, H2: 2, H3: 2, every group even, so all checks pass and it is undetected. Pattern 3 flips Q1, Z1: counts are H1: 2, H2: 0, H3: 0, every group even, so it is undetected. (b) False: detection depends on whether at least one group holds an odd number of flips, not on the total; Pattern 2 flips three positions (odd) yet each group holds two, so it goes undetected. (c) H4 = {Q1, Q2, Z1, R} holds one of Pattern 2's flipped positions (1), so its result reverses and it fails: Pattern 2 is detected. H4 holds 2 of Pattern 3's flipped positions (both or neither), an even count, so H4 passes and Pattern 3 is still undetected. So one added rule helped against one specified pattern but does not guarantee detection of every corruption; it also costs one extra transmitted bit."
+          }
+        }
+      },
+      "scientific_review": {
+        "scope": "C4_only",
+        "status": "authored_and_programmatically_checked_requires_independent_human_approval",
+        "no_instructional_frozen_sequences": true,
+        "notes": "All sent sequences, group validity, flip counts per group, received sequences, check results, added-rule outcomes and Pattern 1/2/3 verdicts were programmatically recomputed. Instructor-only sent sequences are not presumed available to the receiver. Human review is still required for content validity, SOLO alignment, readability for first-time learners and judge calibration."
+      }
+    },
+    "C": {
+      "set_id": "C4-SET-C",
+      "intended_difficulty": "C4_R_to_EA_small_arrangements",
+      "public": {
+        "notation": "Each arrangement lists its positions in order. Positions named M or Q hold data; positions named K or Z hold checking bits. A group is a named list of positions. Even parity is used: a group's check passes when the positions in the group hold an even number of 1s. Every checking bit belongs to the group it was set for, and a checking bit can flip in transmission just like a data bit. 'Flip' means a position's value changes from 0 to 1 or from 1 to 0 during transmission. The receiver sees only the received sequence and the group lists; the sent sequence is shown here only for the instructor's description of what happened.",
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "stem": "A valid even-parity sequence is sent using the arrangement below. During transmission exactly one position flips: M4. The receiver checks every group of the received sequence. Which statement is correct?",
+            "arrangement": {
+              "label": "Arrangement 1",
+              "positions": [
+                "M1",
+                "M2",
+                "M3",
+                "M4",
+                "K1",
+                "K2",
+                "K3"
+              ],
+              "sent_sequence": "1001110",
+              "groups": {
+                "G1": [
+                  "M1",
+                  "M3",
+                  "K1"
+                ],
+                "G2": [
+                  "M2",
+                  "M3",
+                  "M4",
+                  "K2"
+                ],
+                "G3": [
+                  "M1",
+                  "M4",
+                  "K3"
+                ]
+              }
+            },
+            "options": [
+              {
+                "id": "A",
+                "text": "G2 and G3 fail, because M4 belongs to both groups."
+              },
+              {
+                "id": "B",
+                "text": "Only G2 fails, because each position is checked by just one group."
+              },
+              {
+                "id": "C",
+                "text": "G1, G2 and G3 all fail, because one flip upsets every check."
+              },
+              {
+                "id": "D",
+                "text": "No group fails, because no checking bit flipped."
+              }
+            ]
+          },
+          {
+            "id": "MCQ2",
+            "stem": "The same arrangement and sent sequence as in MCQ1 are used (shown again below). This time three positions flip during transmission: M1, M3 and M4. The receiver checks every group of the received sequence. Which statement is correct?",
+            "arrangement": {
+              "label": "Arrangement 1",
+              "positions": [
+                "M1",
+                "M2",
+                "M3",
+                "M4",
+                "K1",
+                "K2",
+                "K3"
+              ],
+              "sent_sequence": "1001110",
+              "groups": {
+                "G1": [
+                  "M1",
+                  "M3",
+                  "K1"
+                ],
+                "G2": [
+                  "M2",
+                  "M3",
+                  "M4",
+                  "K2"
+                ],
+                "G3": [
+                  "M1",
+                  "M4",
+                  "K3"
+                ]
+              }
+            },
+            "options": [
+              {
+                "id": "A",
+                "text": "Detected, because an odd number of positions flipped."
+              },
+              {
+                "id": "B",
+                "text": "Detected, because every group contains at least one flipped position."
+              },
+              {
+                "id": "C",
+                "text": "Undetected: every group contains an even number of flipped positions (two each), even though three positions flipped in total."
+              },
+              {
+                "id": "D",
+                "text": "Detected, because the checking bits K1, K2 and K3 were not flipped, so they no longer match the data."
+              }
+            ]
+          },
+          {
+            "id": "MCQ3",
+            "stem": "A valid even-parity sequence is sent using the arrangement below. During transmission M5 and K1 flip. Both original checks pass, so the receiver does not detect the corruption. The designers will add ONE extra checking bit, R, and ONE new group that contains R; R is set so the new group starts with an even number of 1s, and R itself does not flip. Which proposed new group is guaranteed to be violated by exactly this corruption?",
+            "arrangement": {
+              "label": "Arrangement 2",
+              "positions": [
+                "M1",
+                "M2",
+                "M3",
+                "M4",
+                "M5",
+                "K1",
+                "K2"
+              ],
+              "sent_sequence": "1101010",
+              "groups": {
+                "G1": [
+                  "M1",
+                  "M3",
+                  "M5",
+                  "K1"
+                ],
+                "G2": [
+                  "M2",
+                  "M3",
+                  "M4",
+                  "K2"
+                ]
+              }
+            },
+            "options": [
+              {
+                "id": "A",
+                "text": "A new group containing {M4, M5, K1, R}."
+              },
+              {
+                "id": "B",
+                "text": "A new group containing {M1, M3, R}."
+              },
+              {
+                "id": "C",
+                "text": "A new group containing {M2, M4, R}."
+              },
+              {
+                "id": "D",
+                "text": "A new group containing {M2, M5, R}."
+              }
+            ]
+          }
+        ],
+        "subjective": {
+          "id": "SUB1",
+          "prompt": "A system uses even parity on the 7-position arrangement shown below. The groups are: H1 = {Q1, Q3, Z1}; H2 = {Q2, Q3, Q4, Z2}; H3 = {Q1, Q4, Z3}. The sent sequence (positions Q1, Q2, Q3, Q4, Z1, Z2, Z3) is 1100111. An instructor tests three separate corruption patterns, each starting from the sent sequence:\nPattern 1: Q1 and Q2 flip.\nPattern 2: Q1, Q3 and Q4 flip.\nPattern 3: Q2 and Z2 flip.\n\n(a) For each pattern, count the flipped positions inside each group and say whether the receiver's checks detect the corruption.\n(b) A student says: 'If an odd number of positions flip, these checks always detect it.' Use the patterns to say whether this is true, and explain why.\n(c) The designers add one extra checking bit, R, with a new group H4 = {Q2, Q4, Z2, R}. R is set so H4 starts with an even number of 1s, and R does not flip. Would H4 detect Pattern 2? Would it detect Pattern 3? Does adding H4 mean every corruption would now be detected? Explain using flip counts.",
+          "arrangement": {
+            "label": "Arrangement 3",
+            "positions": [
+              "Q1",
+              "Q2",
+              "Q3",
+              "Q4",
+              "Z1",
+              "Z2",
+              "Z3"
+            ],
+            "sent_sequence": "1100111",
+            "groups": {
+              "H1": [
+                "Q1",
+                "Q3",
+                "Z1"
+              ],
+              "H2": [
+                "Q2",
+                "Q3",
+                "Q4",
+                "Z2"
+              ],
+              "H3": [
+                "Q1",
+                "Q4",
+                "Z3"
+              ]
+            }
+          }
+        }
+      },
+      "private": {
+        "mcqs": [
+          {
+            "id": "MCQ1",
+            "role": "group_membership_overlap_effect",
+            "subsection_refs": [
+              "C4.1"
+            ],
+            "correct_option_id": "A",
+            "correct_answer": "G2 and G3 fail, because M4 belongs to both groups.",
+            "oracle": {
+              "sent_sequence": "1001110",
+              "groups": {
+                "G1": [
+                  "M1",
+                  "M3",
+                  "K1"
+                ],
+                "G2": [
+                  "M2",
+                  "M3",
+                  "M4",
+                  "K2"
+                ],
+                "G3": [
+                  "M1",
+                  "M4",
+                  "K3"
+                ]
+              },
+              "flipped_positions": [
+                "M4"
+              ],
+              "received_sequence": "1000110",
+              "flips_per_group": {
+                "G1": 0,
+                "G2": 1,
+                "G3": 1
+              },
+              "group_results": {
+                "G1": "PASS",
+                "G2": "FAIL",
+                "G3": "FAIL"
+              },
+              "failed_groups": [
+                "G2",
+                "G3"
+              ],
+              "group_not_containing_flip": "G1",
+              "instructor_view_only": true
+            },
+            "option_feedback": {
+              "A": "M4 is a member of both G2 and G3, so each of those groups contains one flip and fails; G1 contains none and passes.",
+              "B": "Overlap: a position can belong to several groups, and M4 belongs to G2 and G3.",
+              "C": "G1 does not contain M4, so it holds no flip and passes.",
+              "D": "A single flip in a group reverses that group's result, whether or not a checking bit flipped; M4 is in G2 and G3."
+            }
+          },
+          {
+            "id": "MCQ2",
+            "role": "general_non_detection_condition_application",
+            "subsection_refs": [
+              "C4.2"
+            ],
+            "correct_option_id": "C",
+            "correct_answer": "Undetected: every group contains an even number of flipped positions (two each), even though three positions flipped in total.",
+            "oracle": {
+              "sent_sequence": "1001110",
+              "groups": {
+                "G1": [
+                  "M1",
+                  "M3",
+                  "K1"
+                ],
+                "G2": [
+                  "M2",
+                  "M3",
+                  "M4",
+                  "K2"
+                ],
+                "G3": [
+                  "M1",
+                  "M4",
+                  "K3"
+                ]
+              },
+              "flipped_positions": [
+                "M1",
+                "M3",
+                "M4"
+              ],
+              "received_sequence": "0010110",
+              "flips_per_group": {
+                "G1": 2,
+                "G2": 2,
+                "G3": 2
+              },
+              "group_results": {
+                "G1": "PASS",
+                "G2": "PASS",
+                "G3": "PASS"
+              },
+              "failed_groups": [],
+              "total_flips": 3,
+              "interpretation": "Undetected iff every checked group contains an even number of flipped positions; here total flips are odd but every group count is even.",
+              "instructor_view_only": true
+            },
+            "option_feedback": {
+              "C": "Each of the three groups contains exactly two of the flipped positions, so every group's result is unchanged and all checks pass; the corruption is undetected.",
+              "A": "The detection law depends on the flip count inside each group, not on whether the total number of flips is odd; here each group holds two.",
+              "B": "A group containing flips does not necessarily fail; a group with two flips keeps its passing result.",
+              "D": "The checking bits are included in the groups and do not need to flip for a check to be affected; here the passing results come from two flips in each group."
+            }
+          },
+          {
+            "id": "MCQ3",
+            "role": "added_rule_evaluation_against_specified_pattern",
+            "subsection_refs": [
+              "C4.3"
+            ],
+            "correct_option_id": "D",
+            "correct_answer": "A new group containing {M2, M5, R}.",
+            "oracle": {
+              "sent_sequence": "1101010",
+              "groups": {
+                "G1": [
+                  "M1",
+                  "M3",
+                  "M5",
+                  "K1"
+                ],
+                "G2": [
+                  "M2",
+                  "M3",
+                  "M4",
+                  "K2"
+                ]
+              },
+              "flipped_positions": [
+                "M5",
+                "K1"
+              ],
+              "received_sequence": "1101100",
+              "original_group_results": {
+                "G1": "PASS",
+                "G2": "PASS"
+              },
+              "original_flips_per_group": {
+                "G1": 2,
+                "G2": 0
+              },
+              "candidate_groups": [
+                {
+                  "option": "A",
+                  "group": [
+                    "M4",
+                    "M5",
+                    "K1",
+                    "R"
+                  ],
+                  "flipped_inside": 2,
+                  "new_group_result_on_target": "PASS"
+                },
+                {
+                  "option": "B",
+                  "group": [
+                    "M1",
+                    "M3",
+                    "R"
+                  ],
+                  "flipped_inside": 0,
+                  "new_group_result_on_target": "PASS"
+                },
+                {
+                  "option": "C",
+                  "group": [
+                    "M2",
+                    "M4",
+                    "R"
+                  ],
+                  "flipped_inside": 0,
+                  "new_group_result_on_target": "PASS"
+                },
+                {
+                  "option": "D",
+                  "group": [
+                    "M2",
+                    "M5",
+                    "R"
+                  ],
+                  "flipped_inside": 1,
+                  "new_group_result_on_target": "FAIL"
+                }
+              ],
+              "overhead_extra_transmitted_bits": 1,
+              "interpretation": "An added rule helps against a specified missed pattern only if the new group contains an odd number of its flipped positions; it gives no universal guarantee.",
+              "instructor_view_only": true
+            },
+            "option_feedback": {
+              "D": "The group contains exactly one of the two flipped positions, so it holds one flip, its result reverses and it fails. The added bit costs one extra transmitted bit and this guarantee is only for this specified pattern.",
+              "A": "{M4, M5, K1, R} contains both flipped positions, so it holds two flips and its result is unchanged: the corruption is still undetected.",
+              "B": "{M1, M3, R} contains neither flipped position, so it holds no flips and passes: it adds a check bit but does not help against this pattern.",
+              "C": "{M2, M4, R} contains neither flipped position, so it holds no flips and passes: it adds a check bit but does not help against this pattern."
+            }
+          }
+        ],
+        "subjective_resolved": {
+          "contract": {
+            "id": "C4-SET-C-SUB1",
+            "type": "SUBJECTIVE",
+            "transition_id": "C4",
+            "shared_role": "generalization and evaluation: apply the per-group even/odd flip principle to an unfamiliar arrangement, test an overbroad claim with a counterexample, and evaluate an added checking rule",
+            "mapped_locked_subsections": [
+              "C4.1",
+              "C4.2",
+              "C4.3"
+            ],
+            "solo_target": "R_to_EA",
+            "target_structural_evidence": "The learner uses the general principle (corruption is undetected exactly when every group holds an even number of flipped positions) to predict outcomes in an unfamiliar arrangement, uses a valid counterexample to reject an overbroad claim, AND evaluates what an added rule does and does not establish. Recomputing parities or reciting a 2D-parity procedure is not the defining evidence.",
+            "score_anchor": {
+              "0": "No parity-based principle is used (bare detected/undetected verdicts without counts), or the central principle is materially wrong (for example: total number of flips decides detection; any group containing a flip fails; any added check guarantees detection of everything; two-flip detection is guaranteed in every arrangement).",
+              "1": "Applies the per-group principle correctly with identifiable reasons in part of the task: either (a) correct per-group flip counts and verdicts for at least two of the three patterns, including a correct account of why an undetected pattern passes every group, or (b) a valid counterexample to the odd-flips claim that explains why the total flip count is not the criterion. Part (c) may be missing or incomplete.",
+              "2": "Correct reasoning across the task: (a) per-group counts and verdicts for all three patterns (Pattern 1 detected; Patterns 2 and 3 undetected because every group holds an even count); (b) Pattern 2 as a counterexample, explained by per-group counts rather than total flips; and (c) H4 detects Pattern 2 because it holds an odd number of its flipped positions, does not detect Pattern 3 because it holds an even number, and so an added rule does not guarantee detection of every corruption. Noting the one-bit overhead is a strength, not a requirement."
+            },
+            "evidence_elements": {
+              "pattern_to_group_counts": "Counts flipped positions inside each group separately, including checking-bit positions.",
+              "general_principle": "Corruption is detected iff at least one group has an odd count of flipped positions; undetected iff every group has an even count.",
+              "counterexample": "Pattern 2 (three flips, odd total) is undetected; Pattern 3 shows that a two-flip pattern can be undetected in an arrangement that is not full 2D parity.",
+              "added_rule_evaluation": "H4 detects a specified pattern only if it holds an odd number of that pattern's flipped positions; extra checking bits impose overhead and give no universal guarantee."
+            },
+            "legitimate_alternative_explanations": [
+              "Equivalent parity language: a group's parity changes / stays the same, becomes odd / stays even, check passes / fails / is violated.",
+              "Reasoning group by group without writing out every zero count, provided the groups holding two flips are explained as unchanged.",
+              "Describing the limit of H4 in words (for example, 'another pattern could still slip through') without constructing a specific pattern.",
+              "Equivalent labels for positions and groups, if consistently interpreted."
+            ],
+            "material_invalidators": [
+              "Claims that a group fails because it contains any flipped position, regardless of how many.",
+              "Claims that detection depends on whether the total number of flipped positions is odd or even.",
+              "Claims that the receiver has, or can compare with, the original sequence.",
+              "Claims that adding a checking group guarantees detection of every corruption.",
+              "Claims that every two-flip pattern is detected in this arrangement."
+            ],
+            "full_credit_blockers": [
+              "Only (a), only (b) or only (c) is correctly explained.",
+              "Correct verdicts with no per-group count reasoning.",
+              "Treats H4's detection of Pattern 2 as proof that every corruption is now detected."
+            ],
+            "contradiction_handling": "A material contradiction of the central principle is 0 even if an isolated correct-looking verdict also appears. An incorrect extra claim blocks 2 and may warrant 0 if it overwhelms otherwise correct reasoning; use an evidence-grounded judgment, not keyword triggers.",
+            "judge_instruction": "Grade ONLY the frozen public subjective prompt, this verified case and the exact raw learner response. Do not use pedagogy, Tutor history, MCQs, MCQ score, prior attempts, or learner identity. Accept equivalent reasoning, not exact-match text. Return only subjective_points (0/1/2 or null) and a nonempty reason. Null is for a true grading ambiguity or technical/scientific review hold, not for a wrong or blank answer.",
+            "calibration_status": "illustrative_synthetic_examples_not_human_validated",
+            "calibration_examples": [
+              {
+                "response": "(a) Pattern 1 flips Q1, Q2: counts per group are H1: 1, H2: 1, H3: 1; the groups with an odd count (H1, H2, H3) fail, so it is detected. Pattern 2 flips Q1, Q3, Q4: counts are H1: 2, H2: 2, H3: 2, every group even, so all checks pass and it is undetected. Pattern 3 flips Q2, Z2: counts are H1: 0, H2: 2, H3: 0, every group even, so it is undetected. (b) False: detection depends on whether at least one group holds an odd number of flips, not on the total; Pattern 2 flips three positions (odd) yet each group holds two, so it goes undetected. (c) H4 = {Q2, Q4, Z2, R} holds one of Pattern 2's flipped positions (1), so its result reverses and it fails: Pattern 2 is detected. H4 holds 2 of Pattern 3's flipped positions (both or neither), an even count, so H4 passes and Pattern 3 is still undetected. So one added rule helped against one specified pattern but does not guarantee detection of every corruption; it also costs one extra transmitted bit.",
+                "expected_points": 2,
+                "why": "All three parts are correct and grounded in per-group flip counts, including the limit of the added rule."
+              },
+              {
+                "response": "Pattern 1: counts are H1: 1, H2: 1, H3: 1, so H1, H2, H3 fail and it is caught. Pattern 2: counts are H1: 2, H2: 2, H3: 2, every group has an even number, so nothing fails and it is missed. Pattern 3: counts are H1: 0, H2: 2, H3: 0, also all even, so it is missed.",
+                "expected_points": 1,
+                "why": "Correct per-group counts and verdicts for part (a); parts (b) and (c) are missing."
+              },
+              {
+                "response": "The claim is false. Pattern 2 flips three positions, which is odd, but each group has two flips so every check still passes. What matters is the count inside each group, not the total.",
+                "expected_points": 1,
+                "why": "Valid counterexample with a correct reason; other parts are missing."
+              },
+              {
+                "response": "Pattern 1 is detected. Patterns 2 and 3 are not detected. An odd number of flips is always detected, so the student is right. H4 will detect everything now.",
+                "expected_points": 0,
+                "why": "Verdicts without counts, contradicts its own Pattern 2 result, and claims an added check detects everything."
+              },
+              {
+                "response": "Any group that contains a flipped position fails, so all three patterns are detected, and adding H4 only makes it more certain.",
+                "expected_points": 0,
+                "why": "Materially wrong mechanism: groups holding two flips do not fail."
+              }
+            ],
+            "assessment_mode": "fixed_c4_extended_abstract"
+          },
+          "case": {
+            "scenario_kind": "generalized_parity_groups_detection_and_added_rule_evaluation",
+            "parity_convention": "even",
+            "positions_in_order": [
+              "Q1",
+              "Q2",
+              "Q3",
+              "Q4",
+              "Z1",
+              "Z2",
+              "Z3"
+            ],
+            "data_positions": [
+              "Q1",
+              "Q2",
+              "Q3",
+              "Q4"
+            ],
+            "checking_bit_positions": [
+              "Z1",
+              "Z2",
+              "Z3"
+            ],
+            "groups": {
+              "H1": [
+                "Q1",
+                "Q3",
+                "Z1"
+              ],
+              "H2": [
+                "Q2",
+                "Q3",
+                "Q4",
+                "Z2"
+              ],
+              "H3": [
+                "Q1",
+                "Q4",
+                "Z3"
+              ]
+            },
+            "sent_sequence": "1100111",
+            "patterns": {
+              "Pattern 1": {
+                "flipped_positions": [
+                  "Q1",
+                  "Q2"
+                ],
+                "received_sequence": "0000111",
+                "flips_per_group": {
+                  "H1": 1,
+                  "H2": 1,
+                  "H3": 1
+                },
+                "group_results": {
+                  "H1": "FAIL",
+                  "H2": "FAIL",
+                  "H3": "FAIL"
+                },
+                "failed_groups": [
+                  "H1",
+                  "H2",
+                  "H3"
+                ],
+                "detected": true,
+                "total_flips": 2
+              },
+              "Pattern 2": {
+                "flipped_positions": [
+                  "Q1",
+                  "Q3",
+                  "Q4"
+                ],
+                "received_sequence": "0111111",
+                "flips_per_group": {
+                  "H1": 2,
+                  "H2": 2,
+                  "H3": 2
+                },
+                "group_results": {
+                  "H1": "PASS",
+                  "H2": "PASS",
+                  "H3": "PASS"
+                },
+                "failed_groups": [],
+                "detected": false,
+                "total_flips": 3,
+                "with_H4_results": {
+                  "H1": "PASS",
+                  "H2": "PASS",
+                  "H3": "PASS",
+                  "H4": "FAIL"
+                }
+              },
+              "Pattern 3": {
+                "flipped_positions": [
+                  "Q2",
+                  "Z2"
+                ],
+                "received_sequence": "1000101",
+                "flips_per_group": {
+                  "H1": 0,
+                  "H2": 2,
+                  "H3": 0
+                },
+                "group_results": {
+                  "H1": "PASS",
+                  "H2": "PASS",
+                  "H3": "PASS"
+                },
+                "failed_groups": [],
+                "detected": false,
+                "total_flips": 2,
+                "with_H4_results": {
+                  "H1": "PASS",
+                  "H2": "PASS",
+                  "H3": "PASS",
+                  "H4": "PASS"
+                }
+              }
+            },
+            "added_rule": {
+              "group": "H4",
+              "members": [
+                "Q2",
+                "Q4",
+                "Z2",
+                "R"
+              ],
+              "checking_bit": "R",
+              "R_value_in_sent_sequence": "0",
+              "sent_sequence_with_R": "11001110",
+              "flips_inside_H4_by_pattern": {
+                "Pattern 1": 1,
+                "Pattern 2": 1,
+                "Pattern 3": 2
+              },
+              "detects_pattern_2": true,
+              "detects_pattern_3": false,
+              "overhead_extra_transmitted_bits": 1
+            },
+            "receiver_has_original": false,
+            "instructor_view_only": true,
+            "reference_answer_for_calibration_only": "(a) Pattern 1 flips Q1, Q2: counts per group are H1: 1, H2: 1, H3: 1; the groups with an odd count (H1, H2, H3) fail, so it is detected. Pattern 2 flips Q1, Q3, Q4: counts are H1: 2, H2: 2, H3: 2, every group even, so all checks pass and it is undetected. Pattern 3 flips Q2, Z2: counts are H1: 0, H2: 2, H3: 0, every group even, so it is undetected. (b) False: detection depends on whether at least one group holds an odd number of flips, not on the total; Pattern 2 flips three positions (odd) yet each group holds two, so it goes undetected. (c) H4 = {Q2, Q4, Z2, R} holds one of Pattern 2's flipped positions (1), so its result reverses and it fails: Pattern 2 is detected. H4 holds 2 of Pattern 3's flipped positions (both or neither), an even count, so H4 passes and Pattern 3 is still undetected. So one added rule helped against one specified pattern but does not guarantee detection of every corruption; it also costs one extra transmitted bit."
+          }
+        }
+      },
+      "scientific_review": {
+        "scope": "C4_only",
+        "status": "authored_and_programmatically_checked_requires_independent_human_approval",
+        "no_instructional_frozen_sequences": true,
+        "notes": "All sent sequences, group validity, flip counts per group, received sequences, check results, added-rule outcomes and Pattern 1/2/3 verdicts were programmatically recomputed. Instructor-only sent sequences are not presumed available to the receiver. Human review is still required for content validity, SOLO alignment, readability for first-time learners and judge calibration."
+      }
+    }
+  }
+}

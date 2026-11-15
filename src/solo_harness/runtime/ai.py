@@ -10,6 +10,7 @@ from sqlalchemy import and_, or_, select
 from solo_harness.config import Settings
 from solo_harness.db.models import AssessmentInstance, AssessmentResponse, Attempt, LLMCall, Message, Session, StudyVersion, SubsectionProgress, V04Evaluation
 from solo_harness.runtime.engine import ConversationJudgeRejected, SessionRuntime
+from solo_harness.runtime import controlled_executor as _controlled  # CHANGED
 
 class CanonicalMessage(BaseModel):
     model_config=ConfigDict(frozen=True,extra="forbid")
@@ -107,11 +108,11 @@ class AIExecutionRuntime:
             context=resolve_v051_tutor_context(compiled,progress.subsection_id,attempt.pedagogy_id)
             state=progress.instructional_state or {}
             instructional = state.get("verified_instructional_instance")
-            from solo_harness.studies.controlled_c1 import is_controlled_c11, active_move, c11_instance, contract_hash
-            pilot = is_controlled_c11(progress)
+            from solo_harness.studies.controlled_c1 import is_controlled_c1, active_move, c1_instance, contract_hash
+            pilot = _controlled.is_controlled(progress)
             if instructional is None:
                 if pilot:
-                    instructional = c11_instance(attempt.pedagogy_id)
+                    instructional = _controlled.instance(progress.subsection_id, attempt.pedagogy_id)
                 else:
                     from solo_harness.studies.v051_scenarios import resolve_v051_instructional_instance
                     instructional = resolve_v051_instructional_instance(compiled, progress.subsection_id, attempt.pedagogy_id)
@@ -121,13 +122,53 @@ class AIExecutionRuntime:
             audit={"v051":True,"attempt_id":str(attempt.id),"subsection_id":progress.subsection_id,
                    "pedagogy_id":attempt.pedagogy_id,"judge_guidance":guidance,"auto_reviews_since_learner":auto_reviews_since_learner}
             if pilot:
-                from solo_harness.runtime.v051_conversation import controlled_c11_tutor_prompt
-                move, position = active_move(compiled, progress)
+                from solo_harness.runtime.v051_conversation import controlled_c1_tutor_prompt
+                move, position = _controlled.active_move(compiled, progress)
+                controlled = dict(_controlled.state(progress))
+                status = controlled.get("status", "TEACHING")
+                response_mode, pending_doubt = "MOVE", None
+                if learner_text is not None:
+                    learner = next((item for item in reversed(dialogue) if item["role"] == "LEARNER"), None)
+                    if status == "APPROVED_AWAITING_NEXT":
+                        if learner is None:
+                            raise ValueError("missing controlled C1.1 learner message")
+                        pending_doubt = {"learner_message_id": learner["id"], "text": learner["content"],
+                                         "move_id": move["id"]}
+                        controlled.update({"status": "RESPONDING_TO_DOUBT", "pending_doubt": pending_doubt})
+                        progress.instructional_state = {**(progress.instructional_state or {}), _controlled.state_key(progress): controlled}
+                        response_mode = "DOUBT"
+                    elif status == "RESPONDING_TO_DOUBT":
+                        pending_doubt = controlled.get("pending_doubt")
+                        if not isinstance(pending_doubt, dict):
+                            raise ValueError("controlled C1.1 doubt context is missing")
+                        if learner is not None:
+                            pending_doubt = {**pending_doubt, "learner_message_id": learner["id"], "text": learner["content"]}
+                            controlled["pending_doubt"] = pending_doubt
+                            progress.instructional_state = {**(progress.instructional_state or {}), _controlled.state_key(progress): controlled}
+                        response_mode = "DOUBT"
+                    elif status not in ("TEACHING", "AWAITING_LEARNER"):
+                        raise ValueError("controlled C1.1 is not ready for a learner message")
+                elif status == "RESPONDING_TO_DOUBT":
+                    pending_doubt = controlled.get("pending_doubt")
+                    if not isinstance(pending_doubt, dict):
+                        raise ValueError("controlled C1.1 doubt context is missing")
+                    response_mode = "DOUBT"
+                elif status != "TEACHING":
+                    raise ValueError("controlled C1.1 is waiting for the learner or continuation")
                 from solo_harness.studies.controlled_c1 import unambiguous_reply_feedback
-                verified_reply = unambiguous_reply_feedback(move, learner_text, instructional)
-                prompt = controlled_c11_tutor_prompt(compiled, context, dialogue, guidance, instructional, move, position, verified_reply)
+                verified_reply = _controlled.unambiguous_reply_feedback(move, learner_text, instructional)
+                # CHANGED: preserve mature C1 V3.2 prompt verbatim; C2--C4 get
+                # the equivalent move-scoped, schema-identical prompt adapter.
+                if _controlled.section_of(progress) == "C1":
+                    prompt = controlled_c1_tutor_prompt(compiled, context, dialogue, guidance, instructional, move, position,
+                                                         verified_reply, response_mode=response_mode, pending_doubt=pending_doubt)
+                else:
+                    from solo_harness.runtime.controlled_unified_prompts import tutor_prompt
+                    prompt = tutor_prompt(compiled, context, dialogue, guidance, instructional, move, position,
+                                          verified_reply, response_mode=response_mode, pending_doubt=pending_doubt)
                 audit.update({"pilot_move_id":move["id"], "pilot_move_index":position,
-                              "pilot_contract_sha256":contract_hash()})
+                              "pilot_contract_sha256":_controlled.contract_hash(progress), "pilot_response_mode":response_mode,
+                              "pending_doubt_message_id": pending_doubt.get("learner_message_id") if pending_doubt else None})
             else:
                 prompt = v051_tutor_prompt(compiled,progress,context,dialogue,guidance,instructional)
             messages=(CanonicalMessage(role="system",content=prompt),)
@@ -162,22 +203,40 @@ class AIExecutionRuntime:
         if active: raise ValueError("a Conversation Judge operation is already active")
         dialogue=[{"id":str(message.id),"role":message.role,"content":message.content_text,"instructional_trace":message.instructional_trace} for message in dialogue_rows]
         context=resolve_v051_tutor_context(compiled,progress.subsection_id,attempt.pedagogy_id)
-        from solo_harness.studies.controlled_c1 import is_controlled_c11, active_move, contract, contract_hash
-        pilot=is_controlled_c11(progress)
+        from solo_harness.studies.controlled_c1 import is_controlled_c1, active_move, contract, contract_hash
+        pilot=_controlled.is_controlled(progress)
         audit={"v051":True,"attempt_id":str(attempt.id),"subsection_id":progress.subsection_id,
                "latest_learner_message_id":str(latest.id) if latest else None,
                "reviewed_tutor_message_id":str(reviewed_tutor.id),"auto_reviews_since_learner":auto_reviews_since_learner}
         if pilot:
-            from solo_harness.runtime.v051_conversation import controlled_c11_judge_prompt
-            move, position = active_move(compiled, progress)
+            from solo_harness.runtime.v051_conversation import controlled_c1_judge_prompt
+            move, position = _controlled.active_move(compiled, progress)
+            controlled = _controlled.state(progress)
+            status = controlled.get("status")
+            review_mode = "DOUBT_REVIEW" if status == "REVIEWING_DOUBT" else "MOVE_REVIEW"
+            if status not in ("REVIEWING_MOVE", "REVIEWING_DOUBT"):
+                raise ValueError("controlled C1.1 is not ready for Judge review")
+            pending_doubt = controlled.get("pending_doubt") if review_mode == "DOUBT_REVIEW" else None
+            if review_mode == "DOUBT_REVIEW" and not isinstance(pending_doubt, dict):
+                raise ValueError("controlled C1.1 doubt review is missing its learner message")
             if (reviewed_tutor.instructional_trace or {}).get("pilot_move_id") != move["id"]:
                 raise ValueError("latest Tutor response is not from the active controlled move")
-            all_moves=contract()["subsections"]["C1.1"]["moves_by_pedagogy"][attempt.pedagogy_id]
-            prompt=controlled_c11_judge_prompt(compiled, context, dialogue,
-                (progress.instructional_state or {}).get("verified_instructional_instance"),
-                move, position, position == len(all_moves)-1, progress.move_evidence or {})
+            all_moves=_controlled.moves(progress)
+            # CHANGED: the audit/decision machinery is common; prompt science is section-specific.
+            if _controlled.section_of(progress) == "C1":
+                prompt = controlled_c1_judge_prompt(compiled, context, dialogue,
+                    (progress.instructional_state or {}).get("verified_instructional_instance"),
+                    move, position, position == len(all_moves)-1, progress.move_evidence or {},
+                    review_mode=review_mode, pending_doubt=pending_doubt)
+            else:
+                from solo_harness.runtime.controlled_unified_prompts import judge_prompt
+                prompt = judge_prompt(compiled, context, dialogue,
+                    (progress.instructional_state or {}).get("verified_instructional_instance"),
+                    move, position, position == len(all_moves)-1, progress.move_evidence or {},
+                    review_mode=review_mode, pending_doubt=pending_doubt)
             audit.update({"pilot_move_id":move["id"],"pilot_move_index":position,
-                          "pilot_contract_sha256":contract_hash()})
+                          "pilot_contract_sha256":_controlled.contract_hash(progress), "pilot_review_mode":review_mode,
+                          "pending_doubt_message_id": pending_doubt.get("learner_message_id") if pending_doubt else None})
         else:
             prompt=conversation_judge_prompt(compiled,progress,context,dialogue,(progress.instructional_state or {}).get("verified_instructional_instance"))
         call=self._reserve(db,session,attempt,None,"CONVERSATION_JUDGE",(CanonicalMessage(role="system",content=prompt),),ConversationJudgeOutput,audit)
@@ -235,8 +294,32 @@ class AIExecutionRuntime:
         from solo_harness.runtime.v04_recorded import AssessmentCheckpoint, PersistedModelInvoker
         item=db.get(AssessmentInstance,call.assessment_instance_id); compiled=self.runtime._compiled(db,session)
         if self.runtime._v051(compiled):
+            # Fixed forms are executable source content, not an LLM generation
+            # pathway.  Freeze the chosen immutable A/B/C form atomically.
+            if item.blueprint_snapshot.get("task_type") == "V051_FIXED_ASSESSMENT":
+                from solo_harness.runtime.fixed_assessment import construct_fixed_assessment
+                package=construct_fixed_assessment(compiled,item.blueprint_snapshot)
+                item=db.scalar(select(AssessmentInstance).where(AssessmentInstance.id==item.id).with_for_update())
+                item.frozen_public_snapshot=package["public"]
+                item.frozen_private_snapshot=package["private"]
+                item.frozen_metadata_snapshot=package["metadata"]
+                item.frozen_package_fingerprint=package["fingerprint"]
+                item.frozen_schema_version="v051.fixed.1"
+                item.delivery_status=package["status"]
+                item.frozen_at=datetime.now(timezone.utc)
+                item.status="ACTIVE"
+                attempt.status="ASSESSMENT_ACTIVE"
+                session.phase="ASSESSMENT_ACTIVE"
+                call.status="SUCCEEDED"
+                call.completed_at=datetime.now(timezone.utc)
+                call.parsed_response={"frozen":True,"items":4,"fixed":True,"v051":True}
+                self.runtime._event(db,session,"V051_FIXED_ASSESSMENT_FROZEN",{"assessment_id":str(item.id),"fingerprint":package["fingerprint"]},attempt.id)
+                db.commit()
+                return
+            if compiled.authored["v051"].get("fixed_assessment_banks"):
+                raise ValueError("fixed-bank v0.5 study cannot dynamically generate assessment questions")
             from solo_harness.runtime.v051_assessment import construct_v051_assessment
-            from solo_harness.runtime.v04_recorded import AssessmentCheckpoint, PersistedModelInvoker
+            from solo_harness.runtime.persisted_calls import AssessmentCheckpoint, PersistedModelInvoker
             # Treat every previously exposed instructional and assessment case
             # in this learner session as a reuse collision, including retries.
             from solo_harness.studies.v051_scenarios import scientific_case_fingerprints
@@ -306,6 +389,7 @@ class AIExecutionRuntime:
     async def _finalize_received(self, db, call_id):
         """Apply one saved provider response exactly once; never call the provider."""
         from solo_harness.runtime.v04_native import MCQProse, SemanticReview, SubjectiveJudgment, SubjectiveProse, SubjectiveReview, TutorProse
+        from solo_harness.runtime.native_contracts import MCQProse as NativeMCQProse, SemanticReview as NativeSemanticReview, SubjectiveProse as NativeSubjectiveProse, SubjectiveReview as NativeSubjectiveReview
         from solo_harness.runtime.v051_conversation import ConversationJudgeOutput, V051TutorOutput
         from solo_harness.runtime.v051_judge import V05SubjectiveJudgment
         call=db.scalar(select(LLMCall).where(LLMCall.id==call_id).with_for_update())
@@ -313,10 +397,11 @@ class AIExecutionRuntime:
         session=db.get(Session,call.session_id)
         version=db.get(StudyVersion,session.study_version_id) if session else None
         audit=call.request_payload.get("audit") or {}
-        if audit.get("v051") and call.purpose in ("TUTOR","CONVERSATION_JUDGE") and (version is None or version.content_version != "v0.5"):
+        if audit.get("v051") and call.purpose in ("TUTOR","CONVERSATION_JUDGE") and (version is None or version.content_version not in {"v0.5", "v0.5.2", "v0.5.3", "v0.5.4", "v0.5.5"}):
             self._hold_historical_v051_call(db,call,version.content_version if version else "unknown")
             return
-        schemas={"TUTOR":V051TutorOutput if (call.request_payload.get("audit") or {}).get("v051") else TutorProse,"ASSESSMENT_WRITER":MCQProse if call.request_payload.get("schema_name")=="MCQProse" else SubjectiveProse,"SEMANTIC_REVIEW":SemanticReview if call.request_payload.get("schema_name")=="SemanticReview" else SubjectiveReview,"JUDGE":V05SubjectiveJudgment if call.request_payload.get("schema_name")=="V05SubjectiveJudgment" else SubjectiveJudgment,"CONVERSATION_JUDGE":ConversationJudgeOutput}
+        v051_call = bool((call.request_payload.get("audit") or {}).get("v051"))
+        schemas={"TUTOR":V051TutorOutput if v051_call else TutorProse,"ASSESSMENT_WRITER":(NativeMCQProse if call.request_payload.get("schema_name")=="MCQProse" else NativeSubjectiveProse) if v051_call else (MCQProse if call.request_payload.get("schema_name")=="MCQProse" else SubjectiveProse),"SEMANTIC_REVIEW":(NativeSemanticReview if call.request_payload.get("schema_name")=="SemanticReview" else NativeSubjectiveReview) if v051_call else (SemanticReview if call.request_payload.get("schema_name")=="SemanticReview" else SubjectiveReview),"JUDGE":V05SubjectiveJudgment if call.request_payload.get("schema_name")=="V05SubjectiveJudgment" else SubjectiveJudgment,"CONVERSATION_JUDGE":ConversationJudgeOutput}
         schema=schemas.get(call.purpose)
         if schema is None:
             return
@@ -337,13 +422,15 @@ class AIExecutionRuntime:
                     self._reject_conversation_judge(db,call.id,out,exc); return
                 call.parsed_response=out.model_dump(mode="json"); call.status="SUCCEEDED"; call.completed_at=datetime.now(timezone.utc)
                 next_call = None
-                if decision.action != "HOLD" and session.phase == "INTERVENTION_ACTIVE":
+                pilot_review = bool(audit.get("pilot_move_id"))
+                if (decision.action == "CONTINUE" and session.phase == "INTERVENTION_ACTIVE") or (
+                        not pilot_review and decision.action != "HOLD" and session.phase == "INTERVENTION_ACTIVE"):
                     # The Judge is a real controller: its stored guidance is
                     # compiled into the next Tutor request, rather than merely
                     # being displayed or left for an external caller to use.
                     reviewed = int(audit.get("auto_reviews_since_learner", 0))
                     next_call = self.reserve_tutor(db, session.id, commit=False,
-                        auto_reviews_since_learner=0 if decision.action == "ADVANCE" else reviewed)
+                        auto_reviews_since_learner=(reviewed if pilot_review else (0 if decision.action == "ADVANCE" else reviewed)))
                 db.commit(); return next_call or decision
             if call.purpose in ("ASSESSMENT_WRITER","SEMANTIC_REVIEW"):
                 # A received assessment role is applied as its own durable result.
@@ -357,25 +444,26 @@ class AIExecutionRuntime:
                         if audit.get("pilot_move_id"):
                             from solo_harness.studies.controlled_c1 import active_move, visual_descriptor
                             _, pilot_progress = self.runtime._active_v051_progress(db, session)
-                            move, position = active_move(self.runtime._compiled(db,session), pilot_progress)
+                            move, position = _controlled.active_move(self.runtime._compiled(db,session), pilot_progress)
                             if (move["id"] != audit["pilot_move_id"] or position != audit["pilot_move_index"]
-                                    or audit.get("pilot_contract_sha256") != (pilot_progress.instructional_state or {})["controlled_c11"]["contract_sha256"]):
+                                    or audit.get("pilot_contract_sha256") != _controlled.state(pilot_progress)["contract_sha256"]):
                                 raise ValueError("stale controlled C1.1 Tutor response")
-                            trace.update({"pilot_move_id":move["id"], "pilot_contract_sha256":audit["pilot_contract_sha256"]})
+                            trace.update({"pilot_move_id":move["id"], "pilot_contract_sha256":audit["pilot_contract_sha256"],
+                                          "pilot_response_mode":audit.get("pilot_response_mode", "MOVE")})
                             earlier=db.scalars(select(Message).where(Message.attempt_id==attempt.id, Message.role=="TUTOR").order_by(Message.sequence_no)).all()
                             prior_current=[m for m in earlier if (m.instructional_trace or {}).get("pilot_move_id")==move["id"]]
                             # A visual appears once at the first message, with an optional
                             # verified resolution after the actual guided response.
                             visual=None
                             if not prior_current:
-                                visual=visual_descriptor(move, pilot_progress.instructional_state["verified_instructional_instance"], "prompt" if move["visual"] and move["visual"]["mode"].startswith("guided") else "complete")
+                                visual=_controlled.visual_descriptor(move, pilot_progress.instructional_state["verified_instructional_instance"], "prompt" if move["learner_response_policy"] == "guided" else "complete")  # CHANGED
                             elif (out.ready_for_judge and move["visual"]
-                                  and move["visual"]["mode"].startswith("guided")):
+                                  and move["learner_response_policy"] == "guided"):  # CHANGED
                                 first=prior_current[0]
                                 had_reply=db.scalar(select(Message.id).where(Message.attempt_id==attempt.id,
                                     Message.role=="LEARNER",Message.sequence_no>first.sequence_no)) is not None
                                 if had_reply:
-                                    visual=visual_descriptor(move, pilot_progress.instructional_state["verified_instructional_instance"], "complete")
+                                    visual=_controlled.visual_descriptor(move, pilot_progress.instructional_state["verified_instructional_instance"], "complete")
                             if visual:
                                 trace["pilot_visual"] = visual
                     else:
@@ -391,8 +479,9 @@ class AIExecutionRuntime:
                     if wants_review and audit.get("pilot_move_id"):
                         from solo_harness.studies.controlled_c1 import active_move
                         _, pilot_progress=self.runtime._active_v051_progress(db,session)
-                        current, _=active_move(self.runtime._compiled(db,session),pilot_progress)
-                        if current["learner_response_policy"] == "guided":
+                        current, _=_controlled.active_move(self.runtime._compiled(db,session),pilot_progress)
+                        response_mode = audit.get("pilot_response_mode", "MOVE")
+                        if response_mode == "MOVE" and current["learner_response_policy"] == "guided":
                             # Wait for a real learner reply following the first prompt.
                             # A premature Tutor readiness flag cannot trigger a Judge
                             # rejection or turn a guided move into a monologue.
@@ -401,6 +490,24 @@ class AIExecutionRuntime:
                                 (row.instructional_trace or {}).get("pilot_move_id")==current["id"]),None)
                             wants_review=bool(first and any(row.role=="LEARNER" and
                                 first.sequence_no < row.sequence_no < message.sequence_no for row in all_rows))
+                        controlled = dict(_controlled.state(pilot_progress))
+                        if wants_review:
+                            controlled["status"] = "REVIEWING_DOUBT" if response_mode == "DOUBT" else "REVIEWING_MOVE"
+                        elif response_mode == "MOVE":
+                            controlled["status"] = "AWAITING_LEARNER"
+                        pilot_progress.instructional_state = {**(pilot_progress.instructional_state or {}),
+                                                            _controlled.state_key(pilot_progress): controlled}  # CHANGED
+                    elif audit.get("pilot_move_id"):
+                        # A guided question is the only ordinary state that waits
+                        # for an actual learner reply without a Judge call.
+                        from solo_harness.studies.controlled_c1 import active_move
+                        _, pilot_progress=self.runtime._active_v051_progress(db,session)
+                        controlled = dict(_controlled.state(pilot_progress))
+                        if audit.get("pilot_response_mode", "MOVE") == "MOVE":
+                            current, _ = _controlled.active_move(self.runtime._compiled(db,session), pilot_progress)
+                            controlled["status"] = "AWAITING_LEARNER" if current["learner_response_policy"] == "guided" else "TEACHING"
+                            pilot_progress.instructional_state = {**(pilot_progress.instructional_state or {}),
+                                                            _controlled.state_key(pilot_progress): controlled}  # CHANGED
                     next_call=(self.reserve_conversation_judge(db, session.id, commit=False,
                         auto_reviews_since_learner=reviewed + 1) if wants_review else None)
                 elif out.teaching_complete and session.phase=="INTERVENTION_ACTIVE":
@@ -428,9 +535,9 @@ class AIExecutionRuntime:
                         call.error_class="REVIEW_HOLD"; call.error_message=str(exc)[:4000]
                         db.commit()
                         return
-                from solo_harness.runtime.v04_execution import finalize_v04_evaluation
+                from solo_harness.runtime.assessment_execution import finalize_assessment_evaluation
                 if not db.scalar(select(V04Evaluation.id).join(AssessmentResponse, V04Evaluation.assessment_response_id==AssessmentResponse.id).where(AssessmentResponse.assessment_instance_id==call.assessment_instance_id)):
-                    finalize_v04_evaluation(db,self.runtime,session.id,out,call.id)
+                    finalize_assessment_evaluation(db,self.runtime,session.id,out,call.id)
                 else: db.commit()
             else:
                 call.error_class="REVIEW_HOLD"; call.error_message=out.reason if v05_judgment else out.review_reason; db.commit()
@@ -453,7 +560,7 @@ class AIExecutionRuntime:
         transient=[]
         try:
             schema=type("Schema",(),{"__name__":request_payload["schema_name"],"model_json_schema":staticmethod(lambda:request_payload["schema"])})
-            request=self._request(purpose,tuple(CanonicalMessage.model_validate(x) for x in request_payload["messages"]),model,schema,{})
+            request=self._request(purpose,tuple(CanonicalMessage.model_validate(x) for x in request_payload["messages"]),model,schema,request_payload.get("audit") or {})
             prepared=PreparedLLMRequest(request,json.loads(request_body),request_body,{})
             for automatic_attempt in range(3):
                 try:

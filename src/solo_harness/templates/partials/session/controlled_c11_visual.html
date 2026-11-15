@@ -1,7 +1,7 @@
 {# Passive, frontend-owned C1.1 materials. Facts come only from the persisted
    server-generated instructional trace, never from model HTML/Markdown. #}
 {% set visual = item.visual %}
-{% if visual and visual.component in ('mapping', 'sequence') %}
+{% if visual and (visual.subsection_id is not defined or visual.subsection_id[:2] == 'C1') and visual.component in ('mapping', 'sequence') %}
 <figure class="controlled-c11-visual" data-controlled-c11-visual="{{ visual.component }}" data-visual-mode="{{ visual.mode }}" data-visual-stage="{{ visual.stage }}">
   {% if visual.component == 'mapping' %}
     <figcaption>Representing information with bits · Yes = {{ visual.rule.Yes }}, No = {{ visual.rule.No }}</figcaption>
@@ -48,5 +48,230 @@
       </div>
     {% endif %}
   {% endif %}
+</figure>
+{% endif %}
+{% if visual and (visual.subsection_id is not defined or visual.subsection_id[:2] == 'C1') and visual.component in ('transmission', 'checking', 'parity') %}
+{# Full-C1 passive materials: verified fixed data only. Prompt-stage guided
+   visuals deliberately omit the answer-bearing comparison/result fields. #}
+<figure class="controlled-c11-visual" data-controlled-c1-visual="{{ visual.component }}" data-visual-mode="{{ visual.mode }}" data-visual-stage="{{ visual.stage }}">
+  {% if visual.component == 'transmission' %}
+    <figcaption>Sending bits through a channel</figcaption>
+    <div class="c11-unit-contrast"><div><span class="c11-label">Sender</span><code>{{ visual.fixed_cases.sent }}</code></div><div><span class="c11-label">Receiver</span><code>{% if visual.stage == 'prompt' %}received bits{% else %}{{ visual.fixed_cases.corrupted_received }}{% endif %}</code></div></div>
+    {% if visual.stage != 'prompt' %}<div class="c11-sequence-label">One bit can change while travelling.</div>{% endif %}
+  {% elif visual.component == 'checking' %}
+    <figcaption>Data with one checking position</figcaption>
+    <div class="c11-unit-contrast"><div><span class="c11-label">Data</span><code>{{ visual.fixed_cases.payload_bits }}</code></div><div><span class="c11-label">Checking position</span><code>p</code></div></div>
+  {% elif visual.component == 'parity' %}
+    <figcaption>Checking a complete bit frame</figcaption>
+    {% if visual.stage == 'prompt' %}<div class="c11-sequence-label">Use the shown payload and the stated checking rule.</div>
+    {% else %}<div class="c11-unit-contrast"><div><span class="c11-label">Payload</span><code>{{ visual.fixed_cases.payload_bits }}</code></div><div><span class="c11-label">Complete frame</span><code>{{ visual.fixed_cases.even_frame }}</code></div></div>{% endif %}
+  {% endif %}
+</figure>
+{% endif %}
+
+{# CHANGED: one passive science-card renderer for C2--C4; never Tutor HTML. #}
+{% if visual and visual.subsection_id is defined and visual.subsection_id[:2] in ('C2', 'C3', 'C4') %}
+{% set facts = visual.fixed_cases %}
+{% set concealed = visual.stage == 'prompt' %}
+<figure class="controlled-c11-visual unified-check-visual" data-unified-visual="{{ visual.component }}" data-visual-mode="{{ visual.mode }}" data-visual-stage="{{ visual.stage }}">
+  <figcaption>{{ visual.subsection_id }} · Checking groups · {{ visual.mode|replace('_', ' ')|capitalize }}</figcaption>
+
+  {# Non-grid arrangement: labeled transmitted bits and agreed overlapping groups. #}
+  {% set arrangement = facts.transfer_arrangement if facts.transfer_arrangement is defined else facts %}
+  {% if arrangement.position_order is defined and arrangement.initial_complete_sequence is defined %}
+    <div class="c11-bit-row" aria-label="Transmitted positions">
+    {% for pos in arrangement.position_order %}
+      <div class="c11-bit-cell">
+        <span class="c11-position">{{ pos }}</span>
+        <span class="c11-value">{% if concealed and visual.subsection_id == 'C4.1' and 'group_a' in visual.mode and pos == 'P' %}?{% else %}{{ arrangement.initial_complete_sequence[loop.index0] }}{% endif %}</span>
+      </div>
+    {% endfor %}
+    </div>
+  {% elif facts.initial_valid_complete_transmitted_frame is defined %}
+    <div class="c11-sequence-label">Valid complete transmitted frame: <code>{{ facts.initial_valid_complete_transmitted_frame }}</code></div>
+  {% elif facts.initial_valid_grid is defined %}
+    <div class="c11-sequence-label">Initially valid grid: {% for row in facts.initial_valid_grid %}<code>{{ row }}</code> {% endfor %}</div>
+  {% elif facts.initial_grid is defined %}
+    <div class="c11-sequence-label">Initially valid grid: {% for row in facts.initial_grid %}<code>{{ row }}</code> {% endfor %}</div>
+  {% elif facts.complete_transmitted_grid is defined %}
+    <div class="c11-sequence-label">Complete grid: {% for row in facts.complete_transmitted_grid %}<code>{{ row }}</code> {% endfor %}</div>
+  {% elif facts.data_grid is defined %}
+    <div class="c11-sequence-label">Data arrangement: {% for row in facts.data_grid %}<code>{{ row }}</code> {% endfor %}</div>
+  {% endif %}
+
+  {# CHANGED: the C2.2 grid construction must expose authored check-bit locations and the complete row/column checking groups. #}
+  {% if facts.row_parity_bits is defined %}
+    <div class="c11-case"><strong>Row checking positions</strong>
+      {% if concealed %}R1C4 and R2C4{% else %}R1C4 = {{ facts.row_parity_bits[0] }} · R2C4 = {{ facts.row_parity_bits[1] }}{% endif %}
+    </div>
+  {% endif %}
+  {% if facts.column_parity_bits is defined %}
+    <div class="c11-case"><strong>Column checking positions</strong>
+      {% if concealed %}R3C1, R3C2 and R3C3{% else %}R3C1 = {{ facts.column_parity_bits[0] }} · R3C2 = {{ facts.column_parity_bits[1] }} · R3C3 = {{ facts.column_parity_bits[2] }}{% endif %}
+    </div>
+  {% endif %}
+  {% if facts.corner_parity_bit is defined %}
+    <div class="c11-case"><strong>Shared corner position</strong>
+      R3C4{% if not concealed %} = {{ facts.corner_parity_bit }}{% endif %}
+    </div>
+  {% endif %}
+  {% if facts.complete_rows is defined and not concealed %}
+    <div class="c11-mapping-cases" aria-label="Complete row parity checks">
+    {% for group, check in facts.complete_rows.items() %}
+      <div class="c11-case"><strong>{{ group|replace('bottom', 'R3') }}</strong> <code>{{ check.bits }}</code> · {{ check.ones }} ones · {{ check.result }}</div>
+    {% endfor %}
+    </div>
+  {% endif %}
+  {% if facts.complete_columns is defined and not concealed %}
+    <div class="c11-mapping-cases" aria-label="Complete column parity checks">
+    {% for group, check in facts.complete_columns.items() %}
+      <div class="c11-case"><strong>{{ group|replace('rightmost', 'C4') }}</strong> <code>{{ check.bits }}</code> · {{ check.ones }} ones · {{ check.result }}</div>
+    {% endfor %}
+    </div>
+  {% endif %}
+  {% if facts.checking_groups is defined and facts.initial_valid_grid is defined %}
+    <div class="c11-sequence-label">Agreed checks: {{ facts.checking_groups|join(' · ') }} (including transmitted checking-bit cells).</div>
+  {% endif %}
+
+  {% if arrangement.groups is defined %}
+    <div class="c11-mapping-cases">
+    {% for group_name, group in arrangement.groups.items() %}
+      <div class="c11-case"><strong>Group {{ group_name }}</strong>
+        <div class="c11-sequence-label">{{ group.members|join(' · ') }}</div>
+        {% if not concealed %}<span>{{ group.initial_group_bits }} · {{ group.initial_result }}</span>{% endif %}
+      </div>
+    {% endfor %}
+    </div>
+  {% endif %}
+
+  {# Only move-scoped fixed cases are rendered; guided prompts conceal answer results. #}
+  {% if facts.cases is defined and facts.cases is sequence and facts.cases is not string %}
+    <div class="c11-mapping-cases">
+    {% for c in facts.cases %}
+      <div class="c11-case"><strong>{{ c.name|replace('_', ' ')|capitalize }}</strong>
+        {% if c.received_frame is defined %}<code>{{ c.received_frame }}</code>{% endif %}
+        {% if c.received_sequence is defined %}<code>{{ c.received_sequence }}</code>{% endif %}
+        {% if c.flipped_positions is defined %}<div>Changed positions: {{ c.flipped_positions|join(', ') }}</div>{% endif %}
+        {% if not concealed %}
+          {% if c.check_result is defined %}<div>Checking result: {{ c.check_result }}</div>{% endif %}
+          {% if c.failed_groups is defined %}<div>Failed checks: {{ c.failed_groups|join(', ') }}</div>{% endif %}
+        {% endif %}
+      </div>
+    {% endfor %}
+    </div>
+  {% endif %}
+
+  {# CHANGED: C4.1 P3 M02 must compare both prescribed valid/invalid
+     CHANGED: check-bit choices, not merely show the correct one. #}
+  {% if facts.hypothetical_group_A_parity_contrast is defined and visual.mode == 'group_a_valid_vs_invalid' %}
+    <div class="c11-mapping-cases" data-group-a-parity-contrast>
+      {% for label, candidate in facts.hypothetical_group_A_parity_contrast.items() %}
+        <div class="c11-case">
+          <strong>{{ 'Valid P choice' if label == 'correct' else 'Invalid P choice' }}</strong>
+          <div>Group A bits: <code>{{ candidate.group_A_bits }}</code></div>
+          {% if not concealed %}<div>{{ candidate.ones }} ones · {{ candidate.result }}</div>{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if facts.error_cases is defined %}
+    <div class="c11-mapping-cases">
+    {% for key,c in facts.error_cases.items() %}
+      <div class="c11-case"><strong>{{ key|replace('_',' ')|capitalize }}</strong>
+      <code>{{ c.received_sequence }}</code>
+      <div>Changed positions: {{ c.flipped_positions|join(', ') if c.flipped_positions else 'None' }}</div>
+      {% if not concealed %}<div>Results: {% for group,result in c.group_results.items() %}{{ group }} {{ result }}{% if not loop.last %} · {% endif %}{% endfor %}</div>{% endif %}
+      </div>
+    {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if facts.two_bit_cases is defined %}
+    <div class="c11-mapping-cases">
+    {% for c in facts.two_bit_cases %}
+      <div class="c11-case"><strong>{{ c.name|replace('_',' ')|capitalize }}</strong>
+      <div>Changed: {{ c.flipped_positions|join(', ') }}</div>
+      {% if c.received_grid is defined %}<div>{% for line in c.received_grid %}<code>{{ line }}</code> {% endfor %}</div>{% endif %}
+      {% if not concealed %}<div>Failed rows: {{ c.failed_rows|join(', ') if c.failed_rows is defined and c.failed_rows else 'None' }} · Failed columns: {{ c.failed_columns|join(', ') if c.failed_columns is defined and c.failed_columns else 'None' }}</div>{% endif %}
+      </div>
+    {% endfor %}
+    </div>
+  {% endif %}
+
+  {% if facts.receiver_corruption is defined %}
+    <div class="c11-case"><strong>Received grid</strong>
+      {% if facts.receiver_corruption.received_grid is defined %}{% for line in facts.receiver_corruption.received_grid %}<code>{{ line }}</code> {% endfor %}{% endif %}
+      {% if facts.receiver_corruption.changed_position is defined %}<span>Example change: {{ facts.receiver_corruption.changed_position }}</span>{% endif %}
+      {% if not concealed and facts.receiver_corruption.failed_groups is defined %}<div>Failed checks: {{ facts.receiver_corruption.failed_groups|join(', ') }}</div>{% endif %}
+    </div>
+  {% endif %}
+
+  {% for key,c in facts.items() %}
+    {% if key[:5] == 'case_' and c is mapping %}
+      <div class="c11-case"><strong>{{ c.learner_facing_label if c.learner_facing_label is defined else key|replace('_',' ')|capitalize }}</strong>
+        {% if c.received_grid is defined %}<div>{% for line in c.received_grid %}<code>{{ line }}</code> {% endfor %}</div>{% endif %}
+        {% if c.flipped_positions is defined %}<div>Example changes: {{ c.flipped_positions|join(', ') }}</div>{% endif %}
+        {% if not concealed %}<div>Failed rows: {{ c.failed_rows|join(', ') if c.failed_rows is defined and c.failed_rows else 'None' }} · Failed columns: {{ c.failed_columns|join(', ') if c.failed_columns is defined and c.failed_columns else 'None' }}</div>{% endif %}
+      </div>
+    {% endif %}
+  {% endfor %}
+
+  {# CHANGED: C2.3's conditional correction and C3.2's evidence limits must never render as empty cards. #}
+  {% if facts.corrected_grid is defined %}
+    <div class="c11-case" data-correction-example>
+      <strong>Conditional correction</strong>
+      <div>{{ facts.condition if facts.condition is defined else 'Assume exactly one bit flipped.' }}</div>
+      {% if concealed %}
+        <div>Determine the proposed correction from the failed row and column.</div>
+      {% else %}
+        {% if facts.localized_position is defined %}<div>Localized position under the assumption: {{ facts.localized_position }}</div>{% endif %}
+        <div>Proposed corrected grid: {% for line in facts.corrected_grid %}<code>{{ line }}</code> {% endfor %}</div>
+      {% endif %}
+    </div>
+  {% endif %}
+  {% if facts.interpretive_rules is defined %}
+    <div class="c11-case" data-receiver-inference-summary>
+      <strong>Receiver conclusions and limitations</strong>
+      {% if concealed %}
+        <div>Compare what failed or passing checks establish with what would require an error-count assumption.</div>
+      {% else %}
+        <ul>{% for rule in facts.interpretive_rules %}<li>{{ rule }}</li>{% endfor %}</ul>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  {% if facts.specified_target is defined %}
+    <div class="c11-case"><strong>Previously missed changes</strong>
+      <code>{{ facts.specified_target.received_sequence }}</code>
+      <div>Changed positions: {{ facts.specified_target.flipped_positions|join(', ') }}</div>
+      {% if not concealed %}<div>Original checks: {% for name,result in facts.specified_target.group_results.items() %}{{ name }} {{ result }} {% endfor %}</div>{% endif %}
+    </div>
+  {% endif %}
+  {% if facts.additional_check_alternatives is defined %}
+    <div class="c11-mapping-cases">
+    {% for key,c in facts.additional_check_alternatives.items() %}
+      <div class="c11-case"><strong>{{ c.label }}</strong>
+        <div>Added group: {{ c.added_group_members|join(' · ') }}</div>
+        {% if c.initial_complete_sequence is defined %}<div>Original: <code>{{ c.initial_complete_sequence }}</code></div>{% endif %}
+        {% if not concealed %}<div>After specified corruption: <code>{{ c.target_received_sequence if c.target_received_sequence is defined else '' }}</code></div>
+          {% if c.target_group_results is defined %}<div>New check: {{ c.target_group_results.C }}{% if c.new_group_target_flip_count is defined %} · Flips in new group: {{ c.new_group_target_flip_count }}{% endif %}</div>{% endif %}
+        {% endif %}
+      </div>
+    {% endfor %}
+    </div>
+  {% endif %}
+  {% if arrangement.cases is defined and facts.transfer_arrangement is defined %}
+    <div class="c11-mapping-cases">
+    {% for key,c in arrangement.cases.items() %}
+      <div class="c11-case"><strong>{{ key|replace('_',' ')|capitalize }}</strong>
+        {% if c.received_sequence is defined %}<code>{{ c.received_sequence }}</code>{% endif %}
+        {% if c.flipped_positions is defined %}<div>Changed positions: {{ c.flipped_positions|join(', ') }}</div>{% endif %}
+        {% if not concealed and c.group_results is defined %}<div>{% for group,result in c.group_results.items() %}{{ group }} {{ result }} {% endfor %}</div>{% endif %}
+      </div>
+    {% endfor %}
+    </div>
+  {% endif %}
+  {% if concealed %}<div class="c11-sequence-label">Use the shown positions and the agreed rule. Checking results will follow the guided response.</div>{% endif %}
 </figure>
 {% endif %}

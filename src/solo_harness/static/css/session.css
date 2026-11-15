@@ -115,6 +115,12 @@
     .assessment label{display:block;font-weight:600;font-size:.92rem;margin:1.25rem 0 .5rem}
     .assessment button{margin-top:1rem}
     .assessment-prompt{font-size:1.05rem;line-height:1.65;padding:1.1rem 1.25rem;background:var(--soft);border:1px solid var(--line);border-radius:14px;white-space:pre-wrap;margin-top:.75rem}
+    .assessment-notation{white-space:pre-wrap;font-size:.9rem;line-height:1.6;background:var(--soft);border-radius:10px;padding:.8rem 1rem}
+    .assessment-bit-grid{font:600 1rem/1.8 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.18em;white-space:pre;margin:.65rem 0 1rem;padding:.8rem 1rem;background:var(--soft);border:1px solid var(--line);border-radius:10px;overflow:auto;width:fit-content;max-width:100%}
+    .assessment-arrangement{margin:.65rem 0 1.15rem;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:.8rem 1rem;max-width:100%}
+    .assessment-arrangement-title{display:block;margin-bottom:.5rem}.assessment-arrangement-scroll{max-width:100%;overflow-x:auto}
+    .assessment-position-table{border-collapse:collapse;width:max-content;min-width:16rem;font:600 .9rem/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;text-align:center}.assessment-position-table caption{text-align:left;font:400 .78rem/1.4 system-ui,sans-serif;margin-bottom:.25rem;color:var(--muted)}.assessment-position-table th,.assessment-position-table td{border:1px solid var(--line);padding:.25rem .55rem}
+    .assessment-group-membership{font:.88rem/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;margin-top:.6rem;overflow-wrap:anywhere}.assessment-subjective-prompt{white-space:pre-wrap;line-height:1.7;font-size:.95rem;background:var(--soft);border:1px solid var(--line);border-radius:10px;padding:1rem;margin-bottom:1rem}
     .processing{display:flex;align-items:center;gap:.8rem;color:var(--muted)}
     .dots{display:flex;gap:.25rem}
     .dots i{width:.5rem;height:.5rem;border-radius:50%;background:var(--ink);animation:pulse 1.2s infinite ease-in-out}

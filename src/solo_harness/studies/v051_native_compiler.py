@@ -34,12 +34,17 @@ def compile_v051(study):
     families, rubrics = {}, {}
     blueprints = study.source["assessment_families.yaml"]["blueprints"]
     for transition in transitions:
-        forms = [{"id": blueprint["id"], "title": blueprint["title"], "task_type": "V051_FOUR_ITEM_CANDIDATE", "generation_goal": blueprint["blueprint_focus"], "scenario_seed": "candidate-only", "equivalence_constraints": [], "required_response_features": [], "misconception_probes": [], "prohibited_leakage": [], "target_kc_ids": [ref for ref in blueprint["target_refs"] if ref.startswith("K")], "target_relation_ids": [ref for ref in blueprint["target_refs"] if ref.startswith("R")], "target_evidence_ids": [], "relevant_misconception_ids": transition["relevant_misconception_ids"], "v051_item_contracts": blueprint["items"]} for blueprint in blueprints if blueprint["transition_id"] == transition["id"]]
+        section = transition["id"]
+        forms = [{"id": f"{section}-SET-{set_id}", "title": f"{section} fixed set {set_id}",
+                  "transition_id": section, "task_type": "V051_FIXED_ASSESSMENT",
+                  "fixed_bank_set_id": set_id, "target_kc_ids": [], "target_relation_ids": [],
+                  "target_evidence_ids": [], "relevant_misconception_ids": transition["relevant_misconception_ids"]}
+                 for set_id in ("A", "B", "C")]
         families[transition["id"]] = {"id": "v051-" + transition["id"], "transition_id": transition["id"], "forms": forms}
         rubrics[transition["id"]] = {"id": "v051-" + transition["id"], "transition_id": transition["id"], "target_state_id": transition["target_state_id"], "evidence_criteria": [], "success_rule": {"minimum_evidence": 0}}
-    authored = {"manifest": {"study_id": study.study_id, "content_version": study.content_version, "study_schema_version": "v051-native-1", "markdown_provenance": {"locked_curriculum_sha256": study.source_hashes["CURRICULUM_SOURCE_LOCKED.md"]}}, "knowledge": knowledge, "pedagogies": pedagogies, "cells": list(cells.values()), "shared_intervention_envelope": {}, "v051": {"candidate_only": True, "source_hashes": study.source_hashes, "locked_curriculum": study.locked_curriculum, "scientific": study.source, "prompts": study.prompts}}
+    authored = {"manifest": {"study_id": study.study_id, "content_version": study.content_version, "study_schema_version": "v051-native-1", "markdown_provenance": {"locked_curriculum_sha256": study.source_hashes["CURRICULUM_SOURCE_LOCKED.md"]}}, "knowledge": knowledge, "pedagogies": pedagogies, "cells": list(cells.values()), "shared_intervention_envelope": {}, "v051": {"candidate_only": True, "source_hashes": study.source_hashes, "locked_curriculum": study.locked_curriculum, "scientific": study.source, "prompts": study.prompts, "fixed_assessment_banks": study.fixed_assessment_banks}}
     slices = {transition["id"]: {"transition": transition, "knowledge_components": [], "relations": [], "misconceptions": []} for transition in transitions}
-    return CompiledStudy(study.study_id, study.content_version, authored, MappingProxyType(slices), MappingProxyType(cells), MappingProxyType(moves), MappingProxyType(recipes), MappingProxyType(families), MappingProxyType(rubrics), {"initial_state_id": "P", "transition_ids": ["C1", "C2", "C3", "C4"], "pedagogy_ids": ["P1", "P2", "P3"], "max_attempts_per_transition": 3, "assessment_strategy": "candidate_not_executable", "pedagogy_strategy": "random_without_replacement"})
+    return CompiledStudy(study.study_id, study.content_version, authored, MappingProxyType(slices), MappingProxyType(cells), MappingProxyType(moves), MappingProxyType(recipes), MappingProxyType(families), MappingProxyType(rubrics), {"initial_state_id": "P", "transition_ids": ["C1", "C2", "C3", "C4"], "pedagogy_ids": ["P1", "P2", "P3"], "max_attempts_per_transition": 3, "assessment_strategy": "c1_c2_c3_c4_fixed", "pedagogy_strategy": "random_without_replacement"})
 
 
 def resolve_v051_tutor_context(compiled: CompiledStudy, subsection_id: str, pedagogy_id: str) -> dict:
