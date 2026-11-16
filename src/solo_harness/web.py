@@ -46,6 +46,26 @@ logger = logging.getLogger(__name__)
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 templates.env.filters["tutor_markdown"] = render_tutor_markdown
 
+_STATIC_DIR = Path(__file__).parent / "static"
+_asset_hashes: dict[str, tuple[int, str]] = {}
+
+
+def asset_url(path: str) -> str:
+    """Return /static/<path>?v=<content hash> so browsers never reuse a stale cached copy of a changed asset."""
+    file = _STATIC_DIR / path
+    try:
+        mtime = file.stat().st_mtime_ns
+        cached = _asset_hashes.get(path)
+        if cached is None or cached[0] != mtime:
+            cached = (mtime, hashlib.sha256(file.read_bytes()).hexdigest()[:12])
+            _asset_hashes[path] = cached
+    except OSError:
+        return f"/static/{path}"
+    return f"/static/{path}?v={cached[1]}"
+
+
+templates.env.globals["asset_url"] = asset_url
+
 
 def _v051_subsection_projection(compiled, attempt, progress_rows):
     """Participant-safe subsection labels from the persisted attempt ledger."""

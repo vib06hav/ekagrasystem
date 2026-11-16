@@ -247,7 +247,7 @@ def main() -> None:
             page.goto(f"{BASE_URL}/join", wait_until="networkidle")
             page.get_by_role("button", name="Continue").click()
             page.locator("#consent-ack").check()
-            page.get_by_role("button", name="I acknowledge — continue").click()
+            page.get_by_role("button", name="I agree — continue").click()
             page.locator("#participant-code").fill(RUN_ID)
             page.get_by_role("button", name="Continue").click()
             page.locator("#session-main").wait_for(state="visible", timeout=30_000)

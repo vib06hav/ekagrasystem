@@ -4,129 +4,226 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Study introduction</title>
-  <link rel="stylesheet" href="/static/css/join.css">
-  <script src="/static/theme.js"></script>
+  <link rel="stylesheet" href="{{ asset_url('css/join.css') }}">
+  <script src="{{ asset_url('theme.js') }}"></script>
 </head>
 <body class="join-page"><main class="page">
   <div class="brand"><span class="brand-mark" aria-hidden="true">E</span><span>Ekagra AI</span><button class="theme-toggle" type="button" data-theme-toggle aria-label="Switch to dark mode"><svg class="i-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4 8 8 0 1 0 20 14.5z"/></svg><svg class="i-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg></button></div>
-  <div class="eyebrow">{{ settings.participant_study_title }}</div>
-  <h1>Welcome to Ekagra AI</h1>
-  <p class="intro">A guided learning study exploring how people develop their understanding of a topic.</p>
-  <section class="panel">
-    <h2>What to expect</h2>
-    <p>You will complete four guided learning sections. Each section follows a structured learning approach that helps you understand a concept, explore its importance, and learn how it works in practice.</p>
-    <div class="steps">
-      <div><h3 class="step-label">What</h3><p>When data travels from one device to another, it is sent as bits. <em>Error detection</em> is a way for the receiving device to notice that some bits may have been changed on the way.</p></div>
-      <div><h3 class="step-label">Why</h3><p>If a changed bit goes unnoticed, the receiver treats wrong data as correct, and nothing warns it. A receiver that can notice a problem knows when not to trust what it got.</p></div>
-      <div><h3 class="step-label">How</h3><p>You will meet three simple checks, one idea at a time: a single extra bit (parity), a grid of extra bits (two-dimensional parity), and a sum of words (a checksum). You will start with one check and build up.</p></div>
-    </div>
-    <p class="note">Your responses and interactions are recorded for the study.</p>
+  <section class="welcome" id="welcome-step" aria-labelledby="welcome-heading" data-journey-step="welcome"{% if error %} hidden{% endif %}>
+    <div class="eyebrow">{{ settings.participant_study_title }}</div>
+    <h1 id="welcome-heading" tabindex="-1">Welcome to Ekagra AI</h1>
+    <p class="intro">Ekagra AI is a guided learning program. You will learn a new topic one step at a time with the help of a friendly study assistant, and check your understanding as you go.</p>
+    <section class="panel" aria-labelledby="purpose-heading">
+      <h2 id="purpose-heading">Why we are doing this</h2>
+      <p>We want to understand how people learn best, so that learning tools can be made clearer and more helpful. Your participation helps us improve them. There is nothing to prepare, and no prior knowledge is needed.</p>
+    </section>
+    <noscript><p class="error" role="alert">JavaScript is required to continue. Please enable it in your browser.</p></noscript>
+    <button type="button" id="start-details" aria-controls="id-entry">Get started</button>
   </section>
-  <section class="outline" aria-labelledby="outline-heading">
-    <h2 id="outline-heading">Study Overview</h2>
-    <p class="outline-title">Error Detection: Principles, Schemes &amp; Limits</p>
-    <p class="outline-sub">A guided learning study exploring how digital systems detect corrupted data during transmission.</p>
-
-    <div class="outline-block">
-      <h3>About the Study</h3>
-      <p>This study introduces the fundamental principles of error detection in digital communication. Participants explore how additional check bits help receiving systems identify whether transmitted data has been corrupted.</p>
-    </div>
-
-    <div class="outline-block">
-      <h3>What You Will Learn</h3>
-      <ul>
-        <li>Understand how parity-based error detection works.</li>
-        <li>Identify which types of bit changes can be detected or missed.</li>
-        <li>Explain the differences between one-dimensional and two-dimensional parity.</li>
-        <li>Analyze why certain error patterns escape detection.</li>
-        <li>Apply these ideas to unfamiliar error-checking schemes.</li>
-      </ul>
-    </div>
-
-    <div class="outline-block">
-      <h3 id="modules-heading">Your Learning Journey</h3>
-      <ol class="modules" aria-labelledby="modules-heading">
-        <li class="module"><p class="module-num">Module 01</p><h4>Foundations of Parity Checking</h4><p>Even parity, odd parity and sender-receiver verification.</p></li>
-        <li class="module"><p class="module-num">Module 02</p><h4>Multidimensional Parity</h4><p>Row-column checks, error patterns and detection limitations.</p></li>
-        <li class="module"><p class="module-num">Module 03</p><h4>Understanding Error Detection Mechanisms</h4><p>Constraint cancellation, error localization and protection trade-offs.</p></li>
-        <li class="module"><p class="module-num">Module 04</p><h4>Generalized Error Detection</h4><p>Group-based checks, membership patterns and undetected errors.</p></li>
-      </ol>
-    </div>
-
-    <div class="outline-block">
-      <h3>How the Study Works</h3>
-      <p>Each of the four modules consists of:</p>
-      <ul>
-        <li>A guided teaching conversation.</li>
-        <li>An opportunity to understand and reason through the concepts.</li>
-        <li>An independent assessment to evaluate understanding.</li>
-      </ul>
-      <p class="outline-closing">The study progresses from foundational concepts to more advanced reasoning.</p>
-    </div>
-  </section>
-  <section class="entry" id="begin-box" aria-labelledby="begin-heading">
-    <h2 id="begin-heading">Ready to begin?</h2>
+  <section class="entry" id="id-entry" aria-labelledby="entry-heading" data-journey-step="details"{% if not error %} hidden{% endif %}>
+    <header class="entry-head">
+      <div class="entry-top"><span class="entry-pill">Participant onboarding</span></div>
+      <p class="entry-eyebrow">Before we begin &middot; 01</p>
+      <h2 id="entry-heading" tabindex="-1">Let&#39;s get to know you.</h2>
+      <p class="id-note">A few details will help us organize your learning experience and research participation.</p>
+      <div class="entry-progress" aria-hidden="true"><span></span><span></span><span></span></div>
+    </header>
     {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
-    <p class="lead">Before you enter the study, you will be asked to read the study information and acknowledge it.</p>
-    <button type="button" id="open-consent" aria-haspopup="dialog" aria-controls="consent-modal">Continue</button>
-    <noscript><p class="error" role="alert">JavaScript is required to review the study information and continue.</p></noscript>
-  </section>
-  <section class="entry" id="id-entry" aria-labelledby="entry-heading" hidden>
-    <h2 id="entry-heading">Enter the study</h2>
-    <p class="id-note">We'll use your university roll number to track your progress across the learning sections and associate your learning interactions with your assessment responses.</p>
-    <form id="join-form" method="post" action="/join">
-      <label class="field" for="participant-code">University ID</label>
-      <input id="participant-code" name="institutional_id" required maxlength="200" autocomplete="off" placeholder="Enter your university roll number">
-      <button type="submit">Continue</button>
+    <h3 class="entry-section">Participant information</h3>
+    <form id="join-form" class="details-form" method="post" action="/join" novalidate>
+      <div class="form-group">
+        <label class="field" for="participant-code">Participant ID</label>
+        <input id="participant-code" name="institutional_id" required maxlength="200" autocomplete="off" placeholder="Enter your participant ID" aria-describedby="participant-code-error">
+        <p class="field-error" id="participant-code-error" role="alert" hidden>Please enter your Participant ID.</p>
+      </div>
+      <div class="form-row">
+      <div class="form-group">
+        <label class="field" for="participant-age">Age</label>
+        <input id="participant-age" name="age" type="number" inputmode="numeric" min="5" max="120" step="1" required autocomplete="off" placeholder="e.g. 20" aria-describedby="participant-age-error">
+        <p class="field-error" id="participant-age-error" role="alert" hidden>Please enter your age as a whole number.</p>
+      </div>
+      <div class="form-group">
+        <label class="field" for="participant-gender">Gender</label>
+        <select id="participant-gender" name="gender" required aria-describedby="participant-gender-error">
+          <option value="" selected disabled>Select</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+          <option value="other">Other</option>
+        </select>
+        <p class="field-error" id="participant-gender-error" role="alert" hidden>Please select your gender.</p>
+      </div>
+      </div>
+      <div class="form-group">
+        <label class="field" for="participant-education">Educational Qualification</label>
+        <select id="participant-education" name="educational_qualification" required aria-describedby="participant-education-error">
+          <option value="" selected disabled>Select your qualification</option>
+          <option value="secondary_school">Secondary School</option>
+          <option value="higher_secondary_school">Higher Secondary School</option>
+          <option value="undergraduate">Undergraduate</option>
+          <option value="postgraduate">Postgraduate</option>
+          <option value="other">Other</option>
+        </select>
+        <p class="field-error" id="participant-education-error" role="alert" hidden>Please select your educational qualification.</p>
+      </div>
+      <button type="submit" id="details-continue" aria-controls="intro-step">Continue <span aria-hidden="true">&rarr;</span></button>
+      <button type="button" class="back-btn" id="back-to-welcome">Back</button>
+      <p class="entry-note">Your information will be used for research purposes.</p>
     </form>
+  </section>
+  <section class="intro-step" id="intro-step" aria-labelledby="intro-heading" data-journey-step="introduction" hidden>
+    <h1 id="intro-heading" tabindex="-1">Understanding Error Detection</h1>
+    <p class="intro">When information travels from one digital device to another, mistakes can sometimes happen along the way.</p>
+    <section class="panel" aria-label="About error detection">
+      <div class="steps stack">
+        <div><h3 class="step-label">What is error detection?</h3><p>Error Detection is the process of identifying whether information received by a device has changed or become corrupted during transmission.</p></div>
+        <div><h3 class="step-label">Why does it matter?</h3><p>Imagine sending a message to someone. If a few parts of that message change while travelling, the receiver might get something different from what you originally sent. If the mistake goes unnoticed, the receiver may treat incorrect information as correct.</p></div>
+        <div><h3 class="step-label">How will you learn?</h3><p>You will learn through a guided experience that builds your understanding step by step, helping you gradually discover how digital systems identify errors in transmitted information.</p></div>
+      </div>
+    </section>
+    <div class="step-actions">
+      <button type="button" id="intro-continue" aria-controls="overview-step">Continue</button>
+      <button type="button" class="back-btn" id="back-to-details">Back</button>
+    </div>
+  </section>
+  <section class="overview-step" id="overview-step" aria-labelledby="overview-heading" data-journey-step="overview" hidden>
+    <h1 id="overview-heading" tabindex="-1">Study Overview</h1>
+    <p class="intro">In this study, you will explore how computers send information and what can happen when that information changes along the way.</p>
+    <p class="intro overview-more">You will start by learning how information is represented using 0s and 1s. Gradually, you will discover how simple checking rules can help us notice changes, what these rules can and cannot tell us, and how the same ideas can be used in new situations.</p>
+    <p class="intro overview-more">You do not need any prior knowledge of this topic. We will start with the basics and build your understanding step by step.</p>
+    <section class="panel" aria-labelledby="objectives-heading">
+      <h2 id="objectives-heading">What you will learn</h2>
+      <p class="objectives-lead">By the end of this study, you should be able to:</p>
+      <ol class="objectives">
+        <li><strong>Understand how computers send information:</strong> Explain how information is represented using 0s and 1s, how it travels from one place to another, and how it can change during transmission.</li>
+        <li><strong>Learn how simple checking rules work:</strong> Understand how additional information can help detect changes, and explore what a single check can and cannot reveal.</li>
+        <li><strong>Explore checking information in rows and columns:</strong> Understand how checking information arranged in rows and columns can help detect changes and, under certain conditions, identify where a change occurred.</li>
+        <li><strong>Understand what checking results tell us:</strong> Explain why different changes can produce different results, why some changes can be difficult to distinguish, and what we can reasonably conclude from a check.</li>
+        <li><strong>Apply what you have learned to new situations:</strong> Use the same underlying ideas to reason about different groups of information, determine when changes can be detected, and evaluate whether adding another check would help.</li>
+      </ol>
+    </section>
+    <div class="step-actions">
+      <button type="button" id="overview-continue" aria-controls="structure-step">Continue</button>
+      <button type="button" class="back-btn" id="back-to-intro">Back</button>
+    </div>
+  </section>
+  <section class="structure-step" id="structure-step" aria-labelledby="structure-heading" data-journey-step="structure" hidden>
+    <h1 id="structure-heading" tabindex="-1">Your Learning Journey</h1>
+    <p class="intro">Starting with the basics, you will gradually discover how computers detect errors in transmitted information. Each section builds on what you learned in the previous one, taking you from the fundamentals to applying these ideas in new situations.</p>
+    <section class="panel" aria-labelledby="sections-heading">
+      <h2 id="sections-heading" class="sr-only">The four guided learning sections</h2>
+      <ol class="journey">
+        <li><p class="journey-num">Section 1</p><h3>The Basics</h3><p class="journey-q">How do computers send information, and how can we detect errors?</p><p>Start by understanding how information is represented using 0s and 1s, how computers send information to each other, and how that information can change during transmission. You will then learn how a simple checking method called parity helps detect such changes.</p></li>
+        <li><p class="journey-num">Section 2</p><h3>Exploring Parity</h3><p class="journey-q">How much can parity checks tell us about errors?</p><p>Build on what you learned about parity to explore its strengths and limitations. You will discover how checking information in rows and columns can help detect errors, locate a single changed bit under the right assumption, and detect two changed bits.</p></li>
+        <li><p class="journey-num">Section 3</p><h3>Connecting the Ideas</h3><p class="journey-q">Why do different errors produce different checking results?</p><p>Go beyond simply identifying which checks pass or fail. You will understand how the positions of changed bits affect rows and columns, why some errors produce identical checking results, and why a passing check does not always mean that nothing changed.</p></li>
+        <li><p class="journey-num">Section 4</p><h3>Applying What You Have Learned</h3><p class="journey-q">Can we use the same checking idea in new situations?</p><p>Take your understanding beyond rows and columns. You will explore how different groups of bits can be checked, develop general rules for detecting errors, and use these rules to evaluate new checking arrangements and the benefits of adding more checks.</p></li>
+      </ol>
+    </section>
+    <section class="how-sections" aria-labelledby="how-heading">
+      <h2 id="how-heading">How Each Section Works</h2>
+      <ol>
+        <li>First, you learn the concepts through a guided conversation with the study assistant.</li>
+        <li>Next, you complete an independent assessment to check your understanding.</li>
+        <li>After completing the section, you move to the next one. Each section builds on the previous section.</li>
+      </ol>
+    </section>
+    <div class="step-actions">
+      <button type="button" id="open-consent" aria-haspopup="dialog" aria-controls="consent-modal">Continue</button>
+      <button type="button" class="back-btn" id="back-to-overview">Back</button>
+    </div>
   </section>
   <dialog class="consent-modal" id="consent-modal" aria-labelledby="consent-title" aria-describedby="consent-draft">
     <div class="modal-head">
       <div class="modal-title-row">
-        <h2 id="consent-title" tabindex="-1">Study information and consent</h2>
+        <div class="modal-titles">
+          <h2 id="consent-title" tabindex="-1">Study Information &amp; Consent</h2>
+          <p class="modal-intro">Please review the following information carefully before deciding whether to participate in this study.</p>
+        </div>
         <button type="button" class="modal-close" id="consent-close" aria-label="Close study information without acknowledging"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
       </div>
       <div class="draft-flag" id="consent-draft" role="note">DRAFT &mdash; PENDING RESEARCH-TEAM APPROVAL. NOT FOR PARTICIPANT USE.</div>
     </div>
+    {#- RESEARCH-TEAM NOTES (not shown to participants). Wording below is a DRAFT; see docs/CONSENT_MODAL_DRAFT_NOTES.md for items needing approval:
+        retention period, access/storage security terms, voluntary-participation and withdrawal/deletion policy, researcher contact, ethics approval,
+        whether screen/webcam recording is used, and whether age/gender/semester will be collected.
+        NOTE: the details form now also asks for age, gender and educational qualification, but those are NOT yet stored or mentioned here;
+        add wording only once collection is implemented and approved. The identifier is stored as institutional_id; the form calls it
+        "Participant ID" and this text follows the form's wording (research team to confirm it is the intended identifier). -#}
     <div class="modal-body" id="consent-body" role="region" aria-label="Study information" tabindex="0">
-      <section aria-labelledby="consent-a">
-        <h3 id="consent-a">A. Study purpose <span class="draft-tag">DRAFT</span></h3>
-        <p>You are being invited to take part in an educational research study examining how different teaching approaches support learning and understanding.</p>
+      <section class="consent-section" aria-labelledby="consent-a">
+        <h3 id="consent-a"><span class="sec-num" aria-hidden="true">01</span>Information collected</h3>
+        <p class="sec-lead">To study how people learn from this activity, the study records the following:</p>
+        <div class="topic">
+          <h4>Participant identification</h4>
+          <ul><li><strong>Your Participant ID.</strong> It links everything you do in this study to you. You will not be asked for your name.</li></ul>
+        </div>
+        <div class="topic">
+          <h4>Messages and assessment responses</h4>
+          <ul><li><strong>What you write.</strong> Your messages to the study assistant and your answers to the assessments, along with your assessment scores.</li></ul>
+        </div>
+        <div class="topic">
+          <h4>How you interact with the study</h4>
+          <ul><li><strong>How you use the study.</strong> For example, which pages you see, which buttons you select, and when. Your screen activity on the study pages is also recorded so that researchers can replay how the study was used.</li></ul>
+        </div>
+        <div class="topic">
+          <h4>Typing timing</h4>
+          <ul><li><strong>How you type.</strong> In the answer boxes only, the timing of your key presses and the general kind of key (for example a letter, a space or Backspace). The letters you type are not stored in this timing record.</li></ul>
+        </div>
+        <div class="topic">
+          <h4>Screen and webcam recordings</h4>
+          <ul><li><strong>Recordings, if used.</strong> Some study sessions may also include a screen recording and webcam recording made on the study computer.</li></ul>
+          <p class="placeholder">[Wording to be provided by the research team: whether screen and webcam recording are used in this study.]</p>
+        </div>
+        <div class="topic">
+          <h4>AI service</h4>
+          <p>Your messages and answers are also sent to an AI service so the study assistant can reply.</p>
+        </div>
       </section>
-      <section aria-labelledby="consent-b">
-        <h3 id="consent-b">B. What participation involves</h3>
-        <ul>
-          <li>You will complete four guided learning sections.</li>
-          <li>Each section includes a teaching interaction (a conversation with a study assistant).</li>
-          <li>An independent assessment follows each teaching section.</li>
-          <li>The study compares three teaching approaches across the learning sections.</li>
-        </ul>
+      <section class="consent-section" aria-labelledby="consent-b">
+        <h3 id="consent-b"><span class="sec-num" aria-hidden="true">02</span>Privacy and data handling</h3>
+        <div class="topic">
+          <h4>Data storage</h4>
+          <ul><li>Your study records are stored in the study&rsquo;s database and in study files, and are linked to your Participant ID.</li></ul>
+        </div>
+        <div class="topic">
+          <h4>Coded participant identification</h4>
+          <ul><li>When researchers export study data for analysis, your Participant ID is replaced by a coded version of it.</li></ul>
+        </div>
+        <div class="topic">
+          <h4>Confidentiality and data access</h4>
+          <p class="placeholder">[Wording to be provided by the research team: who can access the data, how it is kept confidential, how long it is kept, and the researcher&rsquo;s contact details.]</p>
+        </div>
+        <div class="topic">
+          <h4>Personal information in responses and recordings</h4>
+          <ul><li>Your answers, recordings and replays can contain personal details if you type or show them, so please avoid sharing personal information that the study does not ask for.</li></ul>
+        </div>
       </section>
-      <section aria-labelledby="consent-c">
-        <h3 id="consent-c">C. Information collected</h3>
-        <ul>
-          <li>Your responses and learning interactions.</li>
-          <li>Your assessment responses and scores.</li>
-          <li>Your age.</li>
-          <li>Your gender.</li>
-          <li>Your semester.</li>
-          <li>A participant user ID, used to associate your study records.</li>
-        </ul>
-        <p>You will not be asked for your name.</p>
-        <p class="placeholder"><strong>PLACEHOLDER &mdash; RESEARCH TEAM TO CONFIRM:</strong> the next screen asks for your University ID. It has not been confirmed whether that ID is the participant user ID described above or will be replaced by an anonymous ID.</p>
-        <p class="placeholder"><strong>PLACEHOLDER &mdash; RESEARCH TEAM TO CONFIRM:</strong> age, gender and semester are listed as discussed on 26 October; this version of the application does not yet ask for them. Any other interaction or technical data recorded during the session is to be listed here.</p>
-        <p class="placeholder"><strong>PLACEHOLDER:</strong> institutional approval, researcher contact details, data-retention period, confidentiality terms and withdrawal procedure are to be supplied by the research team. None are stated in this draft.</p>
+      <section class="consent-section" aria-labelledby="consent-c">
+        <h3 id="consent-c"><span class="sec-num" aria-hidden="true">03</span>Voluntary participation and withdrawal</h3>
+        <div class="topic">
+          <h4>Voluntary participation</h4>
+          <ul><li>If you select Close without agreeing, you will not start the study and no study session is created.</li></ul>
+          <p class="placeholder">[Wording to be provided by the research team: that taking part is voluntary.]</p>
+        </div>
+        <div class="topic">
+          <h4>Your right to withdraw</h4>
+          <p class="placeholder">[Wording to be provided by the research team: how to withdraw.]</p>
+        </div>
+        <div class="topic">
+          <h4>Study data after withdrawal</h4>
+          <p class="placeholder">[Wording to be provided by the research team: what happens to your data if you withdraw.]</p>
+        </div>
       </section>
     </div>
     <div class="modal-foot">
-      <h3 id="consent-d">D. Consent acknowledgement</h3>
-      <label class="consent" for="consent-ack"><input type="checkbox" id="consent-ack" name="acknowledged" value="yes" form="join-form" required aria-describedby="consent-draft"> <span>I have read and understood the study information above.</span></label>
+      <h3 id="consent-d"><span class="sec-num" aria-hidden="true">04</span>Consent acknowledgement</h3>
+      <label class="consent" for="consent-ack"><input type="checkbox" id="consent-ack" name="acknowledged" value="yes" form="join-form" required aria-describedby="consent-draft consent-hint"> <span>I have read and understood the information above and agree to participate in this study.</span></label>
+      <p class="consent-hint" id="consent-hint">Select the checkbox to enable &ldquo;I agree &mdash; continue&rdquo;.</p>
       <div class="modal-actions">
         <button type="button" class="modal-btn secondary" id="consent-cancel">Close</button>
-        <button type="button" class="modal-btn" id="consent-confirm" disabled>I acknowledge &mdash; continue</button>
+        <button type="button" class="modal-btn" id="consent-confirm" disabled>I agree &mdash; continue</button>
       </div>
     </div>
   </dialog>
 </main>
-<script src="/static/js/join_consent.js"></script>
+<script src="{{ asset_url('js/join_consent.js') }}"></script>
 </body></html>

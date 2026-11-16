@@ -12,7 +12,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 TEMPLATES = Path(__file__).resolve().parents[1] / "src" / "solo_harness" / "templates"
 
 AUTHORED = {
-    1: ("Understanding parity checks", "How can a receiver tell when transmitted data may have changed?"),
+    1: ("Understanding How Computers Detect Errors", "How can computers detect when information changes during transmission?"),
     2: ("Exploring 1D and 2D parity", "What can different checking arrangements tell us?"),
     3: ("Connecting parity checks to outcomes", "Why do particular bit changes cause particular check results?"),
     4: ("Applying parity reasoning to new systems", "Can the same checking ideas explain unfamiliar arrangements?"),

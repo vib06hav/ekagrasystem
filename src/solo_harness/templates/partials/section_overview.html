@@ -2,10 +2,11 @@
 {% set overview_version = 'f1-v04-section-overview-v1' %}
 {% set overviews = {
   1: {
-    'title': 'Understanding parity checks',
-    'subtitle': 'How can a receiver tell when transmitted data may have changed?',
-    'objective': 'Recognize the role of a parity bit and interpret a sender–receiver parity check under an agreed rule.',
-    'explore': "You'll examine what is sent, what is checked, and what a check result can tell the receiver."
+    'title': 'Understanding How Computers Detect Errors',
+    'subtitle': 'How can computers detect when information changes during transmission?',
+    'objective': 'By the end of this section, you should understand how computers represent information using 0s and 1s, how information can change during transmission, and how an agreed parity rule helps a receiver detect possible changes.',
+    'explore': 'You will begin by learning how information is represented using bits and how computers send information to each other. Then, you will explore what can happen when information changes during transmission, why additional checking information is useful, and how even and odd parity rules help a receiver check the information they receive.',
+    'action_note': 'Start the guided learning experience with the study assistant.'
   },
   2: {
     'title': 'Exploring 1D and 2D parity',
@@ -44,7 +45,7 @@
   <hr>
   <div class="section-overview-action">
     <form hx-post="/session/actions/begin" hx-target="#session-main" hx-swap="outerHTML" method="post"><input type="hidden" name="idempotency_key" value="{{ new_key }}"><button>{% if not view.started_at %}Begin study{% else %}Begin teaching activity {{ view.activity_number }}{% endif %}</button></form>
-    <p>Start the teaching conversation with the study assistant.</p>
+    <p>{{ overview.action_note or 'Start the teaching conversation with the study assistant.' }}</p>
   </div>
 </section>
 {% endif %}
