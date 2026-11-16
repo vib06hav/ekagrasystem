@@ -24,7 +24,7 @@ from solo_harness.runtime.master_console import create_master_session, is_master
 from solo_harness.studies.activation import activate
 from solo_harness.studies.scientific_v051 import load_scientific_v051
 from solo_harness.studies.v051_native_compiler import compile_v051
-from solo_harness.web import ParticipantApplication, _master_console_authorized, _master_console_enabled, participant_router
+from solo_harness.web import ParticipantApplication, _master_console_enabled, participant_router
 
 from test_unified_c1_c4_sqlite_runtime import _db, _close_db
 
@@ -106,19 +106,12 @@ def test_bad_selections_are_rejected_without_creating_sessions(setup_runtime):
     assert db.scalar(select(Session.id)) is None
 
 
-def test_flags_and_cookie_auth_fail_closed():
-    settings = SimpleNamespace(enable_v051_internal_testing=True, enable_master_test_console=True,
-         v051_internal_testing_token=SecretStr('not-public-secret'),
-         web_session_secret=SecretStr('development-only-session-secret-change-before-research'))
-    assert not _master_console_enabled(settings)
-    settings.web_session_secret = SecretStr('a-long-private-browser-session-signing-key-1234')
-    assert _master_console_enabled(settings)
-    assert not _master_console_authorized(settings, {})
-    settings.enable_master_test_console = False
-    assert not _master_console_enabled(settings)
+def test_console_requires_explicit_development_environment():
+    assert not _master_console_enabled(SimpleNamespace(app_environment='production'))
+    assert _master_console_enabled(SimpleNamespace(app_environment='development'))
 
 
-def test_http_console_auth_csrf_launch_and_restricted_trace(setup_runtime, monkeypatch, tmp_path):
+def test_http_console_direct_dev_access_csrf_launch_and_restricted_trace(setup_runtime, monkeypatch, tmp_path):
     _, compiled, _, runtime = setup_runtime
     engine = create_engine(f"sqlite+pysqlite:///{tmp_path / 'master.sqlite'}")
     Base.metadata.create_all(engine)
@@ -126,8 +119,8 @@ def test_http_console_auth_csrf_launch_and_restricted_trace(setup_runtime, monke
     version = activate(db, compiled, make_active=True, allow_unified_candidate=True)
     factory = sessionmaker(bind=engine, expire_on_commit=False)
     settings = SimpleNamespace(
-        enable_v051_internal_testing=True, enable_master_test_console=True,
-        v051_internal_testing_token=SecretStr('staff-only-very-long-secret'),
+        app_environment='development', enable_v051_internal_testing=False,
+        enable_v051_unified_study=True,
         web_session_secret=SecretStr('long-test-cookie-signing-secret-1234567890'),
         v051_internal_candidate_version='v0.5.5', app_build_id='master-test',
         research_data_dir=tmp_path, required_capture_streams='screen',
@@ -142,11 +135,6 @@ def test_http_console_auth_csrf_launch_and_restricted_trace(setup_runtime, monke
     app.include_router(participant_router(backend))
     client = TestClient(app)
     assert client.get('/internal/master').status_code == 200
-    assert 'Staff authentication' in client.get('/internal/master').text
-    assert client.post('/internal/master/launch', data={}).status_code == 404
-    assert client.post('/internal/master/auth', data={'token':'wrong'}).status_code == 403
-    auth = client.post('/internal/master/auth', data={'token':'staff-only-very-long-secret'}, follow_redirects=False)
-    assert auth.status_code == 303
     screen = client.get('/internal/master')
     assert 'Create a test session' in screen.text
     csrf = re.search(r'name="csrf" value="([^"]+)"', screen.text).group(1)
@@ -178,14 +166,9 @@ def test_http_console_auth_csrf_launch_and_restricted_trace(setup_runtime, monke
         assert {'session_export.json','manifest.json'} <= set(z.namelist())
         assert json.loads(z.read('manifest.json'))['synthetic_dev_session'] is True
     assert client.get(f'/internal/master/trace/{uuid.uuid4()}').status_code == 404
-    settings.enable_master_test_console = False
+    settings.app_environment = 'production'
     assert client.get('/internal/master').status_code == 404
     assert client.get(f'/internal/master/trace/{current.id}').status_code == 404
-    settings.enable_master_test_console = True
-    logout = client.post('/internal/master/logout', data={'csrf': csrf}, follow_redirects=False)
-    assert logout.status_code == 303
-    assert 'Staff authentication' in client.get('/internal/master').text
-    assert client.get('/session', follow_redirects=False).headers['location'] == '/join'
 
 
 @pytest.mark.parametrize('pass_assessment', [True, False])

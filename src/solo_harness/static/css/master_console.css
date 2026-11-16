@@ -27,7 +27,3 @@ button:hover, .download:hover { background: #193c76; }
 .download { margin-top: 10px; }
 .disclaimer { font-size: 12px; margin-top: 20px; }
 @media(max-width: 570px) { .panel { padding: 20px; } .console { margin-top: 30px; } }
-
-.logout-form { margin-top: 18px; }
-.logout-button { background: transparent; color: #3e5372; border: 1px solid #c5d1e1; width: fit-content; }
-.logout-button:hover { background: #e8edf5; }

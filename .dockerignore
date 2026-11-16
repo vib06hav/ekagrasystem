@@ -4,4 +4,17 @@ __pycache__
 .pytest_cache
 *.pyc
 .env
+dev.env
 exports
+research-data
+artifacts
+local-artifacts
+reports
+capture-runs
+tools/runtime
+*.zip
+*.sqlite
+*.db
+*.ndjson
+*.mkv
+*.mp4

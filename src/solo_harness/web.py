@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import hashlib
-import hmac
 import io
 import zipfile
 import json
@@ -96,35 +95,22 @@ def _internal_v051_access_enabled(settings, presented_token):
 
 
 def _master_console_enabled(settings) -> bool:
-    """Fail closed without both flags, a staff token, and a strong cookie signer."""
-    secret = getattr(settings, "web_session_secret", None)
-    token = getattr(settings, "v051_internal_testing_token", None)
-    return bool(getattr(settings, "enable_v051_internal_testing", False)
-                and getattr(settings, "enable_master_test_console", False)
-                and secret and token
-                and secret.get_secret_value()
-                and secret.get_secret_value() !=
-                "development-only-session-secret-change-before-research")
+    """Expose local developer controls only in the explicit development environment."""
+    return getattr(settings, "app_environment", "production") == "development"
 
 
-def _master_console_auth_digest(settings) -> str:
-    return hmac.new(
-        settings.web_session_secret.get_secret_value().encode("utf-8"),
-        ("ekagra-master-console:" + settings.v051_internal_testing_token.get_secret_value()).encode("utf-8"),
-        hashlib.sha256,
-    ).hexdigest()
-
-
-def _master_console_authorized(settings, browser_session) -> bool:
-    candidate = browser_session.get("master_console_auth")
-    return bool(_master_console_enabled(settings) and isinstance(candidate, str)
-                and hmac.compare_digest(candidate, _master_console_auth_digest(settings)))
+def _master_console_csrf(request: Request) -> str:
+    token = request.session.get("master_console_csrf")
+    if not isinstance(token, str):
+        token = secrets.token_urlsafe(24)
+        request.session["master_console_csrf"] = token
+    return token
 
 
 def _master_console_csrf_valid(browser_session, value: str) -> bool:
     candidate = browser_session.get("master_console_csrf")
     return bool(isinstance(candidate, str) and isinstance(value, str)
-                and hmac.compare_digest(candidate, value))
+                and secrets.compare_digest(candidate, value))
 
 
 _ALLOWED_GENDERS = frozenset({"male", "female", "other"})
@@ -612,66 +598,33 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
     async def master_console_page(request: Request):
         if not _master_console_enabled(application.settings):
             raise HTTPException(status_code=404)
-        authorized = _master_console_authorized(application.settings, request.session)
-        capture = None
+        csrf = _master_console_csrf(request)
         latest = None
-        if authorized:
-            _, capture_reason = inspect_active_capture(
-                application.settings.research_data_dir,
-                required_streams=application.settings.required_capture_streams,
-                heartbeat_max_age_seconds=application.settings.active_capture_max_age_seconds,
-            )
-            capture = capture_reason
-            raw = request.session.get("master_console_latest_session_id")
-            if raw:
-                try:
-                    with application.factory() as db:
-                        latest_candidate = db.get(Session, uuid.UUID(raw))
-                        if is_master_session(latest_candidate):
-                            latest = {"id": str(latest_candidate.id),
-                                      "section": latest_candidate.current_transition_id,
-                                      "phase": latest_candidate.phase}
-                except (ValueError, TypeError):
-                    pass
+        _, capture_reason = inspect_active_capture(
+            application.settings.research_data_dir,
+            required_streams=application.settings.required_capture_streams,
+            heartbeat_max_age_seconds=application.settings.active_capture_max_age_seconds,
+        )
+        raw = request.session.get("master_console_latest_session_id")
+        if raw:
+            try:
+                with application.factory() as db:
+                    latest_candidate = db.get(Session, uuid.UUID(raw))
+                    if is_master_session(latest_candidate):
+                        latest = {"id": str(latest_candidate.id),
+                                  "section": latest_candidate.current_transition_id,
+                                  "phase": latest_candidate.phase}
+            except (ValueError, TypeError):
+                pass
         return templates.TemplateResponse(request, "internal/master.html", {
-            "authorized": authorized, "error": None, "csrf": request.session.get("master_console_csrf"),
+            "csrf": csrf,
             "sections": SECTIONS, "pedagogies": PEDAGOGIES, "sets": SETS,
-            "capture_status": capture, "latest": latest,
+            "capture_status": capture_reason, "latest": latest,
         }, headers={"Cache-Control": "no-store"})
-
-    @router.post("/internal/master/auth")
-    async def master_console_login(request: Request):
-        if not _master_console_enabled(application.settings):
-            raise HTTPException(status_code=404)
-        form = await request.form()
-        token = form.get("token")
-        if not isinstance(token, str) or len(token) > 512:
-            raise HTTPException(status_code=403, detail="invalid developer authorization")
-        if not _internal_v051_access_enabled(application.settings, token):
-            raise HTTPException(status_code=403, detail="invalid developer authorization")
-        request.session["master_console_auth"] = _master_console_auth_digest(application.settings)
-        request.session["master_console_csrf"] = secrets.token_urlsafe(24)
-        return RedirectResponse("/internal/master", status_code=303,
-                                headers={"Cache-Control": "no-store"})
-
-    @router.post("/internal/master/logout")
-    async def master_console_logout(request: Request):
-        if not _master_console_authorized(application.settings, request.session):
-            raise HTTPException(status_code=404)
-        form = await request.form()
-        if not _master_console_csrf_valid(request.session, form.get("csrf", "")):
-            raise HTTPException(status_code=403, detail="invalid console form token")
-        if (request.session.get("participant_session_id")
-                == request.session.get("master_console_latest_session_id")):
-            request.session.pop("participant_session_id", None)
-        for key in ("master_console_auth", "master_console_csrf", "master_console_latest_session_id"):
-            request.session.pop(key, None)
-        return RedirectResponse("/internal/master", status_code=303,
-                                headers={"Cache-Control": "no-store"})
 
     @router.post("/internal/master/launch")
     async def master_console_launch(request: Request):
-        if not _master_console_authorized(application.settings, request.session):
+        if not _master_console_enabled(application.settings):
             raise HTTPException(status_code=404)
         form = await request.form()
         section, pedagogy, mode = (form.get(key) for key in ("section", "pedagogy", "mode"))
@@ -702,7 +655,7 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
 
     @router.get("/internal/master/trace/{session_id}")
     async def master_console_trace(request: Request, session_id: uuid.UUID):
-        if not _master_console_authorized(application.settings, request.session):
+        if not _master_console_enabled(application.settings):
             raise HTTPException(status_code=404)
         with application.factory() as db:
             record = db.get(Session, session_id)

@@ -14,17 +14,6 @@
     <h1>EkagraAI Master Console</h1>
     <p>Launch an isolated test session using real Tutor and Assessment Judge behavior.</p>
   </header>
-  {% if not authorized %}
-  <section class="panel login-panel" aria-labelledby="login-title">
-    <h2 id="login-title">Staff authentication</h2>
-    <p>Enter the configured internal testing token. Console controls are unavailable in participant mode.</p>
-    <form action="/internal/master/auth" method="post">
-      <label for="access-token">Internal testing token</label>
-      <input id="access-token" name="token" type="password" autocomplete="off" required>
-      <button type="submit">Unlock console</button>
-    </form>
-  </section>
-  {% else %}
   <section class="panel" aria-labelledby="launch-title">
     <div class="panel-heading">
       <h2 id="launch-title">Create a test session</h2>
@@ -79,12 +68,7 @@
     <p class="hint">Launch a session to enable a trace ZIP download.</p>
     {% endif %}
   </section>
-  <form method="post" action="/internal/master/logout" class="logout-form">
-    <input type="hidden" name="csrf" value="{{ csrf }}">
-    <button type="submit" class="logout-button">Sign out of console</button>
-  </form>
-  <p class="disclaimer">Developer sessions use generated IDs and synthetic demographics. They do not represent consented research participants and must be excluded from participant analysis. Use a disposable testing database.</p>
-  {% endif %}
+  <p class="disclaimer">This console is available only when APP_ENV=development. Developer sessions use generated IDs and synthetic demographics. They do not represent consented research participants and must be excluded from participant analysis.</p>
 </main>
 </body>
 </html>

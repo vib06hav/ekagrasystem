@@ -1,0 +1,90 @@
+name: ekagra-dev
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${EKAGRA_DEV_DB_NAME:-ekagra_dev}
+      POSTGRES_USER: ${EKAGRA_DEV_DB_USER:-ekagra_dev}
+      POSTGRES_PASSWORD: ${EKAGRA_DEV_DB_PASSWORD:-ekagra_dev_password}
+    ports:
+      - "127.0.0.1:${EKAGRA_DEV_DB_PORT:-55433}:5432"
+    volumes:
+      - ekagra_dev_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 3s
+      timeout: 3s
+      retries: 25
+
+  app:
+    build: .
+    environment:
+      APP_ENV: development
+      DATABASE_URL: postgresql+psycopg://${EKAGRA_DEV_DB_USER:-ekagra_dev}:${EKAGRA_DEV_DB_PASSWORD:-ekagra_dev_password}@db:5432/${EKAGRA_DEV_DB_NAME:-ekagra_dev}
+      STUDY_DIR: /app/studies/networks_error_detection_parity_f1/v0.5
+      ACTIVATE_STUDY_ON_BOOTSTRAP: "true"
+      ENABLE_F1_V04_DEVELOPMENT: "false"
+      ENABLE_V051_UNIFIED_STUDY: "true"
+      REQUIRE_ACTIVE_CAPTURE: "false"
+      REQUIRED_CAPTURE_STREAMS: screen
+      RESEARCH_DATA_DIR: /var/lib/ekagra-dev/research-data
+      APP_BUILD_ID: ekagra-local-development
+      WEB_SESSION_SECRET: ${EKAGRA_DEV_SESSION_SECRET:-ekagra-local-development-session-secret}
+      AICREDITS_BASE_URL: ${EKAGRA_DEV_AICREDITS_BASE_URL:-}
+      AICREDITS_API_KEY: ${EKAGRA_DEV_AICREDITS_API_KEY:-}
+      TUTOR_MODEL: ${EKAGRA_DEV_TUTOR_MODEL:-}
+      JUDGE_MODEL: ${EKAGRA_DEV_JUDGE_MODEL:-}
+    ports:
+      - "127.0.0.1:${EKAGRA_DEV_APP_PORT:-18080}:8000"
+    volumes:
+      - ekagra_dev_research_data:/var/lib/ekagra-dev/research-data
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  test_db:
+    image: postgres:16-alpine
+    profiles: ["test"]
+    environment:
+      POSTGRES_DB: ekagra_test
+      POSTGRES_USER: ekagra_test
+      POSTGRES_PASSWORD: ekagra_test_password
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ekagra_test -d ekagra_test"]
+      interval: 3s
+      timeout: 3s
+      retries: 25
+
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    profiles: ["test"]
+    command: >-
+      sh -c "python -m alembic upgrade head && python -m pytest -q"
+    environment:
+      APP_ENV: production
+      DATABASE_URL: postgresql+psycopg://ekagra_test:ekagra_test_password@test_db:5432/ekagra_test
+      EKAGRA_STAGE3_DATABASE_URL: postgresql+psycopg://ekagra_test:ekagra_test_password@test_db:5432/ekagra_test
+      STUDY_DIR: /workspace/studies/networks_error_detection_parity_f1/v0.5
+      ACTIVATE_STUDY_ON_BOOTSTRAP: "true"
+      ENABLE_F1_V04_DEVELOPMENT: "false"
+      ENABLE_V051_UNIFIED_STUDY: "true"
+      REQUIRE_ACTIVE_CAPTURE: "false"
+      RESEARCH_DATA_DIR: /tmp/ekagra-test-research-data
+      WEB_SESSION_SECRET: ekagra-test-session-secret
+    depends_on:
+      test_db:
+        condition: service_healthy
+
+volumes:
+  ekagra_dev_pgdata:
+  ekagra_dev_research_data:

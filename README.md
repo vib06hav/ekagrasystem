@@ -1,193 +1,106 @@
-# SOLO Harness — Fibonacci Memoization Study
+# EkagraAI — Unified C1–C4 Study
 
-SOLO Harness runs a single-participant learning study on recursive Fibonacci and memoization. It provides a FastAPI participant application, PostgreSQL persistence, an OpenAI-compatible LLM adapter, browser telemetry, optional Windows screen/webcam capture, and session export tools.
+EkagraAI is a PostgreSQL-backed learning study for error detection and parity.
+The active v0.5 study contains four sections (C1–C4), fixed assessment banks,
+Tutor/Judge execution, PAAS, progression, demographics, trace exports, and the
+developer-only Master Testing Console.
 
-## Study activation
+## Local Docker development
 
-Bootstrap preserves an existing active study version by default. To activate a reviewed new authored pack such as `studies/python_fibonacci_memoization/v0.5`, point `STUDY_DIR` at that pack and explicitly set `ACTIVATE_STUDY_ON_BOOTSTRAP=true` for the activation run. Historical study versions are not rewritten.
+The recommended development workflow needs only Docker Desktop with Compose v2.
+It does not use a locally installed Python or PostgreSQL service, the existing
+collection database, or `compose.yaml`.
 
-## Run it with Docker (recommended)
-
-### Prerequisites
-
-- Docker Desktop with Docker Compose v2
-- An OpenAI-compatible chat-completions endpoint and API key
-- Windows only: PowerShell and a webcam if you will collect screen/webcam recordings
-
-### 1. Clone and configure
-
-```powershell
-git clone https://github.com/vib06hav/ekagrasystem.git
-cd ekagrasystem
-```
-
-Create a local `.env` file. It is intentionally ignored by Git.
-
-```dotenv
-# Required to use the live tutor and judge.
-AICREDITS_BASE_URL=https://your-openai-compatible-provider/v1
-AICREDITS_API_KEY=replace-with-your-secret
-TUTOR_MODEL=your-tutor-model
-JUDGE_MODEL=your-judge-model
-
-# Optional defaults shown explicitly for clarity.
-APP_PORT=8000
-LLM_STRUCTURED_OUTPUT_MODE=provider_native_json_schema
-REQUIRE_ACTIVE_CAPTURE=false
-```
-
-`AICREDITS_BASE_URL` must be the base URL before `/chat/completions`. Do not commit the `.env` file or any captured research data.
-
-### 2. Start the complete application
+Optional: copy [`dev.env.example`](dev.env.example) to `dev.env` and replace the
+local development password and session secret. The defaults are sufficient for
+a localhost-only development installation.
 
 ```powershell
-docker compose up -d --build --wait
+Copy-Item dev.env.example dev.env
+docker compose --env-file dev.env -f compose.dev.yaml up --build -d --wait
 ```
 
-This starts PostgreSQL and the web application. During app startup, the application automatically:
-
-1. applies all Alembic migrations;
-2. loads and validates `studies/python_fibonacci_memoization/v0.1`;
-3. compiles the study content; and
-4. activates the immutable study version in PostgreSQL.
-
-Check that both services are healthy:
+Without a `dev.env` file, run:
 
 ```powershell
-docker compose ps
-Invoke-RestMethod http://127.0.0.1:8000/health/ready
+docker compose -f compose.dev.yaml up --build -d --wait
 ```
 
-The final command should return `status : ready`.
+Open the application at <http://127.0.0.1:18080> and the Master Testing Console
+directly at <http://127.0.0.1:18080/internal/master>.
 
-### 3. Run a participant session
+The development stack explicitly uses `APP_ENV=development`, the unified v0.5
+study, and `REQUIRE_ACTIVE_CAPTURE=false`. The console requires no token in this
+local-only stack. Docker binds both the app and development PostgreSQL port to
+`127.0.0.1`, so it is not exposed to the network.
 
-Open <http://127.0.0.1:8000>. Enter a new institutional ID, acknowledge the study information, and complete the four sections in order. Each section includes a tutor interaction followed by an independent assessment.
-
-Important operating rules:
-
-- One installation supports one active participant at a time.
-- An institutional ID is single-use.
-- Completed sections are retained as read-only history.
-- Restarting an already used participant session requires researcher intervention; do not ask the participant to re-enter.
-
-### 4. Stop the application
+### Useful commands
 
 ```powershell
-docker compose down
+# Inspect services and follow application logs.
+docker compose -f compose.dev.yaml ps
+docker compose -f compose.dev.yaml logs -f app
+
+# Stop the development stack while retaining its isolated dev database.
+docker compose -f compose.dev.yaml down
+
+# Deliberately reset development-only data and volumes.
+docker compose -f compose.dev.yaml down -v
 ```
 
-Use the following only when you deliberately want to remove the local PostgreSQL database as well:
+The development database and research-data volume are named independently from
+the existing collection stack. `down -v` affects only the `ekagra-dev` project
+when using the commands above.
+
+## Master Testing Console
+
+`/internal/master` is available only when `APP_ENV=development`. In production,
+the page, launch route, and trace route return `404`.
+
+The Console creates clearly marked synthetic `DEV-...` sessions with synthetic
+demographics. It can start C1–C4 with P1/P2/P3/Random pedagogy, or directly
+open fixed assessment Set A/B/C/Random. It uses the real fixed-assessment,
+submission, Judge, retry, progression, visual, and trace-export paths without
+claiming that a participant consented or that capture requirements were met.
+
+Direct assessment can be explored without a live LLM provider. Teaching and
+Judge execution call the configured provider only when those actions are taken.
+Set the optional `EKAGRA_DEV_AICREDITS_*`, `EKAGRA_DEV_TUTOR_MODEL`, and
+`EKAGRA_DEV_JUDGE_MODEL` variables in `dev.env` only when intentionally testing
+with a paid provider.
+
+## Docker test suite
+
+Run the complete deterministic suite, including PostgreSQL integration tests,
+inside Docker:
 
 ```powershell
-docker compose down -v
+docker compose -p ekagra-test -f compose.dev.yaml --profile test up -d --wait test_db
+docker compose -p ekagra-test -f compose.dev.yaml --profile test run --build --rm --no-deps test
+docker compose -p ekagra-test -f compose.dev.yaml --profile test down -v --remove-orphans
 ```
 
-## Windows screen and webcam recording (optional)
+The test service uses its own PostgreSQL container with a temporary in-memory
+data directory. It receives `EKAGRA_STAGE3_DATABASE_URL` internally, so the
+PostgreSQL lifecycle tests run rather than skip. It never connects to the
+development or participant database.
 
-Recordings run on the Windows host, outside Docker. The application never starts or stops capture itself.
+## Runtime configuration
 
-1. Install the pinned FFmpeg runtime once:
+[`.env.example`](.env.example) documents deployment configuration for the
+ordinary application. Keep actual `.env` files out of Git. The development stack
+intentionally uses its own `EKAGRA_DEV_*` variables rather than reading the
+repository `.env`, preventing collection credentials and research settings from
+leaking into local development.
 
-   ```powershell
-   powershell -ExecutionPolicy Bypass -File tools/windows_capture/bootstrap_ffmpeg.ps1
-   ```
+The older [`compose.yaml`](compose.yaml) remains the existing collection-oriented
+stack. Use [`compose.dev.yaml`](compose.dev.yaml) for local development and
+testing.
 
-2. Confirm that the webcam and desktop capture are usable:
+## Research integrity
 
-   ```powershell
-   python tools/windows_capture/record.py preflight
-   ```
-
-   The tool requires exactly one DirectShow webcam unless you use `--no-webcam`.
-
-3. Start Docker as above, then start recording before the participant begins:
-
-   ```powershell
-   python tools/windows_capture/record.py record
-   ```
-
-4. Open the participant application and run the study. Stop recording with `Ctrl+C` after the participant finishes.
-
-Capture artifacts are written under `research-data/capture-runs/`. That directory, along with videos and telemetry exports, is ignored by Git. `REQUIRE_ACTIVE_CAPTURE=true` now independently gates participant admission regardless of development mode; the default recording policy requires both webcam and screen. See [`docs/CAPTURE_ENVIRONMENT_MODES.md`](docs/CAPTURE_ENVIRONMENT_MODES.md) for the separate ordinary-development and capture-required development commands, heartbeat requirements, limitations, and safety notes.
-
-For a screen-only dry run:
-
-```powershell
-python tools/windows_capture/record.py record --no-webcam
-```
-
-## Export or inspect a completed session
-
-Run these commands in the running app container. Replace `<session-id>` with the UUID created for the participant session.
-
-```powershell
-docker compose exec app solo-harness inspect-session --session-id <session-id>
-docker compose exec app solo-harness export-session --session-id <session-id> --output /app/exports/session.json
-```
-
-The export appears locally as `exports/session.json`. It references eligible capture manifests but never embeds video. Exports and research data may contain sensitive participant information and are ignored by Git.
-
-## Local Python development (without Docker)
-
-Use Python 3.12 or later and a PostgreSQL database. Docker is still the easiest way to run PostgreSQL locally.
-
-```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-python -m pip install --upgrade pip
-python -m pip install -e ".[dev]"
-python -m playwright install chromium
-```
-
-Create `.env` with the LLM settings shown above plus local database and study paths:
-
-```dotenv
-DATABASE_URL=postgresql+psycopg://solo_harness:change-me@127.0.0.1:5432/solo_harness
-STUDY_DIR=studies/python_fibonacci_memoization/v0.1
-AICREDITS_BASE_URL=https://your-openai-compatible-provider/v1
-AICREDITS_API_KEY=replace-with-your-secret
-TUTOR_MODEL=your-tutor-model
-JUDGE_MODEL=your-judge-model
-```
-
-Start PostgreSQL only, then start the app. The app performs migrations and study activation during startup.
-
-```powershell
-docker compose up -d postgres --wait
-python -m solo_harness
-```
-
-Useful study checks:
-
-```powershell
-solo-harness validate-study
-solo-harness inspect-study
-pytest
-```
-
-The browser suite requires a disposable PostgreSQL database and never targets the
-collection database. Set `TEST_DATABASE_URL` to that isolated database, then run:
-
-```powershell
-$env:TEST_DATABASE_URL = "postgresql+psycopg://solo_test:solo_test@127.0.0.1:55432/solo_test"
-python -m pytest tests/e2e/test_participant_browser.py -q
-```
-
-The deterministic browser tests use scripted model responses and make no external
-LLM calls. Chromium runs headless in the normal suite. The recorded validation
-driver in `scripts/recorded_reconstruction_e2e.py` launches a visible Chromium
-window and requires the real Windows capture preflight to pass.
-
-## Project layout
-
-- `src/solo_harness/` — FastAPI application, runtime, study compiler, database models, and telemetry.
-- `studies/python_fibonacci_memoization/v0.1/` — executable study definition and its content.
-- `migrations/` — Alembic database migrations.
-- `tools/windows_capture/` — host-side recording tools.
-- `docs/` — collection and recording specifications.
-- `01_*.md` through `05_*.md` — human-readable research provenance; the YAML study files are the executable source of truth.
-
-## Safety and data handling
-
-The live database, browser telemetry, exports, screen recordings, webcam recordings, and provider traffic may contain sensitive data. Keep `.env`, `research-data/`, `exports/`, `artifacts/`, and Graphify outputs out of version control. Review `docs/COMPLETE_DATA_COLLECTION_SPECIFICATION.md` and `docs/research_recording.md` before collecting participant data.
+Development and test records are isolated from collection data by database,
+Docker project, and research-data volume. Synthetic Console records are marked
+in their session configuration and must be excluded from participant analysis.
+Historical `StudyVersion` identities are preserved; migrations add schema only
+and do not rewrite study/session identities.
