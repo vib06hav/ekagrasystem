@@ -4,6 +4,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import re
 import secrets
 import uuid
 from collections import defaultdict
@@ -88,6 +89,29 @@ def _internal_v051_access_enabled(settings, presented_token):
                 and secrets.compare_digest(configured.get_secret_value(), presented_token))
 
 
+_ALLOWED_GENDERS = frozenset({"male", "female", "other"})
+_ALLOWED_QUALIFICATIONS = frozenset({
+    "secondary_school", "higher_secondary_school", "undergraduate", "postgraduate", "other",
+})
+
+
+def _validate_join_details(institutional_id: str, age: str, gender: str,
+                           educational_qualification: str, acknowledged: str) -> tuple[str, int, str, str]:
+    """Validate all enrollment inputs before allocating a study or capture run."""
+    participant_id = institutional_id.strip()
+    if not participant_id or len(participant_id) > 200:
+        raise ValueError("Enter a valid Participant ID.")
+    if not re.fullmatch(r"[0-9]{1,3}", age or "") or not (5 <= int(age) <= 120):
+        raise ValueError("Enter an age between 5 and 120 in whole years.")
+    if gender not in _ALLOWED_GENDERS:
+        raise ValueError("Select a valid gender option.")
+    if educational_qualification not in _ALLOWED_QUALIFICATIONS:
+        raise ValueError("Select a valid educational qualification.")
+    if acknowledged != "yes":
+        raise ValueError("Study information must be acknowledged before joining.")
+    return participant_id, int(age), gender, educational_qualification
+
+
 def _internal_v051_candidate(db, settings):
     """Select only the explicitly configured immutable candidate revision."""
     return db.scalar(select(StudyVersion).where(
@@ -118,7 +142,8 @@ class ParticipantApplication:
             return None
         return capture_run_id
 
-    def activate(self, institutional_id: str) -> uuid.UUID | None:
+    def activate(self, institutional_id: str, *, age: int | None = None,
+                 gender: str | None = None, educational_qualification: str | None = None) -> uuid.UUID | None:
         normalized = institutional_id.strip()
         if not normalized:
             return None
@@ -159,6 +184,10 @@ class ParticipantApplication:
                     },
                     commit=False,
                 )
+                # Kept off prompt-visible runtime configuration and protocol events.
+                session.age = age
+                session.gender = gender
+                session.educational_qualification = educational_qualification
                 self.execution.runtime._event(db, session, "PARTICIPANT_ENTERED", {"entry_method": "INSTITUTIONAL_ID", "study_information_acknowledged": True}, session.current_attempt_id)
                 db.commit()
             except IntegrityError:
@@ -514,8 +543,19 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
         return templates.TemplateResponse(request, "join.html", {"error": None, "settings": application.settings})
 
     @router.post("/join", response_class=HTMLResponse)
-    async def join(request: Request, institutional_id: str = Form(..., max_length=200), acknowledged: str = Form(...)):
-        session_id = application.activate(institutional_id)
+    async def join(request: Request, institutional_id: str = Form(..., max_length=200),
+                   age: str = Form(...), gender: str = Form(...),
+                   educational_qualification: str = Form(...), acknowledged: str = Form(...)):
+        try:
+            participant_id, parsed_age, parsed_gender, parsed_qualification = _validate_join_details(
+                institutional_id, age, gender, educational_qualification, acknowledged
+            )
+        except ValueError as exc:
+            return templates.TemplateResponse(request, "join.html", {
+                "error": str(exc), "settings": application.settings,
+            }, status_code=422)
+        session_id = application.activate(participant_id, age=parsed_age, gender=parsed_gender,
+                                          educational_qualification=parsed_qualification)
         if session_id is None:
             message = "The study is not ready yet. Please contact the researcher." if getattr(application.settings, "require_active_capture", False) else "This participant cannot start a new study session. Please contact the researcher."
             return templates.TemplateResponse(request, "join.html", {"error": message, "settings": application.settings}, status_code=403)

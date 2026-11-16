@@ -48,6 +48,10 @@ class Session(Base):
     __tablename__ = "sessions"
     id: Mapped[uuid.UUID] = uuid_pk()
     institutional_id: Mapped[str | None] = mapped_column(String, unique=True)
+    # Nullable columns preserve all pre-existing research and internal sessions.
+    age: Mapped[int | None] = mapped_column(Integer)
+    gender: Mapped[str | None] = mapped_column(String(16))
+    educational_qualification: Mapped[str | None] = mapped_column(String(32))
     capture_run_id: Mapped[uuid.UUID | None] = mapped_column(UUID(as_uuid=True), unique=True)
     study_version_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("study_versions.id", ondelete="RESTRICT"), nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False)

@@ -30,7 +30,7 @@ from solo_harness.db.models import (
 )
 from solo_harness.research_time import RESEARCH_TIMEZONE_NAME, in_research_timezone
 
-EXPORT_SCHEMA_VERSION = "1.3"
+EXPORT_SCHEMA_VERSION = "1.4"
 
 
 def _derived_transition_outcomes(events) -> dict[str, str]:

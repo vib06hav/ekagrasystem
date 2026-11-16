@@ -144,9 +144,9 @@
     </div>
     {#- RESEARCH-TEAM NOTES (not shown to participants). Wording below is a DRAFT; see docs/CONSENT_MODAL_DRAFT_NOTES.md for items needing approval:
         retention period, access/storage security terms, voluntary-participation and withdrawal/deletion policy, researcher contact, ethics approval,
-        whether screen/webcam recording is used, and whether age/gender/semester will be collected.
-        NOTE: the details form now also asks for age, gender and educational qualification, but those are NOT yet stored or mentioned here;
-        add wording only once collection is implemented and approved. The identifier is stored as institutional_id; the form calls it
+        whether screen/webcam recording is used, and approved collection/retention of age, gender and educational qualification.
+        NOTE: age, gender and educational qualification are stored on the session; their collection and use
+        must be approved by the research team before participants are recruited. The identifier is stored as institutional_id; the form calls it
         "Participant ID" and this text follows the form's wording (research team to confirm it is the intended identifier). -#}
     <div class="modal-body" id="consent-body" role="region" aria-label="Study information" tabindex="0">
       <section class="consent-section" aria-labelledby="consent-a">
@@ -155,6 +155,10 @@
         <div class="topic">
           <h4>Participant identification</h4>
           <ul><li><strong>Your Participant ID.</strong> It links everything you do in this study to you. You will not be asked for your name.</li></ul>
+        </div>
+        <div class="topic">
+          <h4>Participant details</h4>
+          <ul><li><strong>Your age, gender and educational qualification.</strong> These are recorded with your study session for research analysis.</li></ul>
         </div>
         <div class="topic">
           <h4>Messages and assessment responses</h4>
