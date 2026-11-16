@@ -16,6 +16,8 @@ from solo_harness.db.models import (
     AssessmentInstance,
     AssessmentResponse,
     Attempt,
+    ConversationJudgeDecision,
+    SubsectionProgress,
     IdempotencyRecord,
     Judgment,
     LearnerHistorySnapshot,
@@ -30,7 +32,7 @@ from solo_harness.db.models import (
 )
 from solo_harness.research_time import RESEARCH_TIMEZONE_NAME, in_research_timezone
 
-EXPORT_SCHEMA_VERSION = "1.4"
+EXPORT_SCHEMA_VERSION = "1.5"
 
 
 def _derived_transition_outcomes(events) -> dict[str, str]:
@@ -136,7 +138,8 @@ def _artifact_index(root: Path | None, session_id: uuid.UUID, capture_run_id: uu
 def build_session_export(database_url: str, session_id: uuid.UUID, research_data_root: Path | None = None) -> dict[str, Any]:
     """Build a transactionally consistent export without mutating experiment state."""
     engine = make_engine(database_url)
-    with engine.connect().execution_options(isolation_level="REPEATABLE READ") as connection:
+    isolation = "REPEATABLE READ" if engine.dialect.name == "postgresql" else "SERIALIZABLE"
+    with engine.connect().execution_options(isolation_level=isolation) as connection:
         with connection.begin():
             with DbSession(bind=connection, expire_on_commit=False) as db:
                 session = db.get(Session, session_id)
@@ -159,6 +162,12 @@ def build_session_export(database_url: str, session_id: uuid.UUID, research_data
                     },
                     "study_version": _row(version),
                     "attempts": [_row(item) for item in attempts],
+                    "subsection_progress": [_row(item) for item in _ordered(db, SubsectionProgress,
+                        SubsectionProgress.session_id == session_id,
+                        SubsectionProgress.attempt_id, SubsectionProgress.order_in_attempt)],
+                    "conversation_judge_decisions": [_row(item) for item in _ordered(db,
+                        ConversationJudgeDecision, ConversationJudgeDecision.session_id == session_id,
+                        ConversationJudgeDecision.created_at, ConversationJudgeDecision.id)],
                     "learner_history_snapshots": [_row(item) for item in _ordered(db, LearnerHistorySnapshot, LearnerHistorySnapshot.session_id == session_id, LearnerHistorySnapshot.created_at, LearnerHistorySnapshot.id)],
                     "messages": [_row(item) for item in _ordered(db, Message, Message.attempt_id.in_(attempt_ids), Message.created_at, Message.attempt_id, Message.sequence_no)] if attempt_ids else [],
                     "paas_responses": [_row(item) for item in _ordered(db, PaasResponse, PaasResponse.session_id == session_id, PaasResponse.recorded_at, PaasResponse.id)],

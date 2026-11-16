@@ -518,7 +518,9 @@ class SessionRuntime:
 
     def create_v051_internal_test_session(self, db: DbSession, study_version_id, build_id="internal-v051-test", commit=True,
                                           controlled_c11_pilot=False, controlled_c1_full_pilot=False,
-                                          initial_pedagogy_id: str | None = None, unified_controlled_study=False):  # CHANGED
+                                          initial_pedagogy_id: str | None = None, unified_controlled_study=False,
+                                          starting_transition_id: str | None = None,
+                                          direct_assessment: bool = False):  # CHANGED
         """Create an explicitly marked candidate session; never used by participant enrollment."""
         compiled = self.catalog.load(db, study_version_id)
         if not self._v051(compiled):
@@ -526,8 +528,13 @@ class SessionRuntime:
         allowed_pedagogies = tuple(compiled.protocol["pedagogy_ids"])
         if initial_pedagogy_id is not None and initial_pedagogy_id not in allowed_pedagogies:
             raise ValueError("internal test pedagogy is not configured for this study")
+        transitions = tuple(compiled.protocol["transition_ids"])
+        start = starting_transition_id or transitions[0]
+        if start not in transitions:
+            raise ValueError("internal test transition is not configured for this study")
+        from_state = compiled.knowledge_slices[start]["transition"]["from_state_id"]
         session = Session(study_version_id=study_version_id, status="ACTIVE", phase="TRANSITION_READY",
-            formal_state_id=compiled.protocol["initial_state_id"], current_attempt_number=0,
+            formal_state_id=from_state, current_attempt_number=0,
             application_build_id=build_id, runtime_config_snapshot={
                 "internal_v051_testing": True,
                 "controlled_c11_pilot": bool(controlled_c11_pilot or unified_controlled_study),
@@ -537,11 +544,13 @@ class SessionRuntime:
             })
         db.add(session); db.flush()
         self._event(db, session, "V051_INTERNAL_TEST_SESSION_CREATED", {"study_version_id": str(study_version_id)})
-        self._create_attempt(db, session, compiled, compiled.protocol["transition_ids"][0],
-                             forced_pedagogy_id=initial_pedagogy_id)
+        self._create_attempt(db, session, compiled, start,
+                             forced_pedagogy_id=initial_pedagogy_id,
+                             initialize_v051_progress=not direct_assessment)
         if commit: db.commit()
         return session
-    def _create_attempt(self, db, session, compiled, transition_id, forced_pedagogy_id: str | None = None):
+    def _create_attempt(self, db, session, compiled, transition_id, forced_pedagogy_id: str | None = None,
+                        initialize_v051_progress: bool = True):
         used = db.scalars(select(Attempt.pedagogy_id).where(Attempt.session_id == session.id, Attempt.transition_id == transition_id)).all()
         eligible = [p for p in compiled.protocol["pedagogy_ids"] if p not in used]
         # CHANGED: preserve the initially assigned pedagogy across C1--C4.
@@ -564,7 +573,8 @@ class SessionRuntime:
         db.add(attempt); db.flush(); session.current_transition_id=transition_id; session.current_attempt_id=attempt.id; session.current_attempt_number=ordinal; session.phase="INTERVENTION_ACTIVE"
         self._event(db, session, "PEDAGOGY_SELECTED", {"eligible_candidate_ids": decision.eligible_candidate_ids, "excluded_used_ids": decision.excluded_candidate_ids, "selected_id": decision.selected_id, "selection_method": decision.selection_method, "timestamp": decision.selected_at.isoformat()}, attempt.id)
         self._event(db, session, "ATTEMPT_CREATED", {"transition_id": transition_id, "pedagogy_id": decision.selected_id}, attempt.id)
-        if self._v051(compiled): self.initialize_v051_subsections(db, session.id, commit=False)
+        if self._v051(compiled) and initialize_v051_progress:
+            self.initialize_v051_subsections(db, session.id, commit=False)
         if ordinal > 1:
             history = self.history_builder.build(db, session.id, transition_id, attempt.id)
             db.add(LearnerHistorySnapshot(session_id=session.id, target_attempt_id=attempt.id, transition_id=transition_id, source_attempt_ids=[uuid.UUID(entry["source_attempt_id"]) for entry in history["attempts"]], summary=history, generation_method="DETERMINISTIC"))

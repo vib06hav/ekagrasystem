@@ -131,7 +131,7 @@ def test_legacy_sessions_are_nullable_and_research_export_includes_demographics(
         20, "female", "postgraduate",
     )
     assert "institutional_id" not in projected
-    assert EXPORT_SCHEMA_VERSION == "1.4"
+    assert EXPORT_SCHEMA_VERSION == "1.5"
 
 
 def test_migration_adds_nullable_columns_to_existing_sessions_and_is_idempotent():

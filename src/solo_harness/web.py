@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 import hashlib
+import hmac
+import io
+import zipfile
 import json
 import logging
 import re
@@ -12,7 +15,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from fastapi import APIRouter, BackgroundTasks, Form, Header, HTTPException, Request
-from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from fastapi.responses import HTMLResponse, RedirectResponse, Response, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -34,6 +37,9 @@ from solo_harness.db.models import (
 )
 from solo_harness.runtime.ai import AIExecutionRuntime, OpenAICompatibleClient
 from solo_harness.runtime.engine import SessionRuntime
+from solo_harness.runtime.master_console import (
+    PEDAGOGIES, SECTIONS, SETS, create_master_session, is_master_session,
+)
 from solo_harness.transition_summaries import post_pass_transition_summary
 from solo_harness.teaching_render import render_tutor_markdown
 from solo_harness.runtime.paas import instrument_snapshot
@@ -87,6 +93,38 @@ def _internal_v051_access_enabled(settings, presented_token):
     configured = getattr(settings, "v051_internal_testing_token", None)
     return bool(getattr(settings, "enable_v051_internal_testing", False) and configured and presented_token
                 and secrets.compare_digest(configured.get_secret_value(), presented_token))
+
+
+def _master_console_enabled(settings) -> bool:
+    """Fail closed without both flags, a staff token, and a strong cookie signer."""
+    secret = getattr(settings, "web_session_secret", None)
+    token = getattr(settings, "v051_internal_testing_token", None)
+    return bool(getattr(settings, "enable_v051_internal_testing", False)
+                and getattr(settings, "enable_master_test_console", False)
+                and secret and token
+                and secret.get_secret_value()
+                and secret.get_secret_value() !=
+                "development-only-session-secret-change-before-research")
+
+
+def _master_console_auth_digest(settings) -> str:
+    return hmac.new(
+        settings.web_session_secret.get_secret_value().encode("utf-8"),
+        ("ekagra-master-console:" + settings.v051_internal_testing_token.get_secret_value()).encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+
+
+def _master_console_authorized(settings, browser_session) -> bool:
+    candidate = browser_session.get("master_console_auth")
+    return bool(_master_console_enabled(settings) and isinstance(candidate, str)
+                and hmac.compare_digest(candidate, _master_console_auth_digest(settings)))
+
+
+def _master_console_csrf_valid(browser_session, value: str) -> bool:
+    candidate = browser_session.get("master_console_csrf")
+    return bool(isinstance(candidate, str) and isinstance(value, str)
+                and hmac.compare_digest(candidate, value))
 
 
 _ALLOWED_GENDERS = frozenset({"male", "female", "other"})
@@ -268,7 +306,11 @@ class ParticipantApplication:
             else:
                 current_index = 0
             requested_index = current_index if selected_section is None else selected_section - 1
-            if requested_index < 0 or requested_index >= len(transition_ids) or requested_index > current_index:
+            master_entry = (session.runtime_config_snapshot or {}).get("master_console_entry_section") \
+                if is_master_session(session) else None
+            master_start = transition_ids.index(master_entry) if master_entry in transition_ids else 0
+            if (requested_index < master_start or requested_index < 0
+                    or requested_index >= len(transition_ids) or requested_index > current_index):
                 requested_index = current_index
             selected_transition_id = transition_ids[requested_index]
             is_current = requested_index == current_index
@@ -279,11 +321,14 @@ class ParticipantApplication:
                     state = "unresolved" if completed_outcomes.get(transition_id) == "UNRESOLVED" else "completed"
                 elif index == current_index and session.phase != "TERMINAL":
                     state = "current"
+                elif index < master_start:
+                    state = "skipped"
                 elif index < current_index:
                     state = "completed"
                 else:
                     state = "locked"
-                sections.append({"number": index + 1, "state": state, "enabled": index <= current_index})
+                sections.append({"number": index + 1, "state": state,
+                                 "enabled": index <= current_index and state != "skipped"})
 
             current_attempt = db.get(Attempt, session.current_attempt_id) if session.current_attempt_id else None
             section_titles = {item["id"]: item["title"] for item in compiled.authored.get("v051", {}).get("scientific", {}).get("curriculum.yaml", {}).get("sections", [])}
@@ -365,7 +410,8 @@ class ParticipantApplication:
             retryable = bool(operation and (operation.status in ("FAILED", "INVALID_OUTPUT") or operation.error_class in ("REVIEW_HOLD", "APPLICATION_FAILURE") or stale))
             technical_hold = bool(operation and operation.status == "TECHNICAL_HOLD")
             now = session.ended_at or datetime.now(timezone.utc)
-            elapsed_seconds = max(0, int((now - session.started_at).total_seconds())) if session.started_at else 0
+            elapsed_seconds = max(0, int((now - (session.started_at.replace(tzinfo=timezone.utc)
+                if session.started_at.tzinfo is None else session.started_at)).total_seconds())) if session.started_at else 0
 
             return {
                 "id": session.id,
@@ -561,6 +607,149 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
             return templates.TemplateResponse(request, "join.html", {"error": message, "settings": application.settings}, status_code=403)
         request.session["participant_session_id"] = str(session_id)
         return RedirectResponse("/session", status_code=303)
+
+    @router.get("/internal/master", response_class=HTMLResponse)
+    async def master_console_page(request: Request):
+        if not _master_console_enabled(application.settings):
+            raise HTTPException(status_code=404)
+        authorized = _master_console_authorized(application.settings, request.session)
+        capture = None
+        latest = None
+        if authorized:
+            _, capture_reason = inspect_active_capture(
+                application.settings.research_data_dir,
+                required_streams=application.settings.required_capture_streams,
+                heartbeat_max_age_seconds=application.settings.active_capture_max_age_seconds,
+            )
+            capture = capture_reason
+            raw = request.session.get("master_console_latest_session_id")
+            if raw:
+                try:
+                    with application.factory() as db:
+                        latest_candidate = db.get(Session, uuid.UUID(raw))
+                        if is_master_session(latest_candidate):
+                            latest = {"id": str(latest_candidate.id),
+                                      "section": latest_candidate.current_transition_id,
+                                      "phase": latest_candidate.phase}
+                except (ValueError, TypeError):
+                    pass
+        return templates.TemplateResponse(request, "internal/master.html", {
+            "authorized": authorized, "error": None, "csrf": request.session.get("master_console_csrf"),
+            "sections": SECTIONS, "pedagogies": PEDAGOGIES, "sets": SETS,
+            "capture_status": capture, "latest": latest,
+        }, headers={"Cache-Control": "no-store"})
+
+    @router.post("/internal/master/auth")
+    async def master_console_login(request: Request):
+        if not _master_console_enabled(application.settings):
+            raise HTTPException(status_code=404)
+        form = await request.form()
+        token = form.get("token")
+        if not isinstance(token, str) or len(token) > 512:
+            raise HTTPException(status_code=403, detail="invalid developer authorization")
+        if not _internal_v051_access_enabled(application.settings, token):
+            raise HTTPException(status_code=403, detail="invalid developer authorization")
+        request.session["master_console_auth"] = _master_console_auth_digest(application.settings)
+        request.session["master_console_csrf"] = secrets.token_urlsafe(24)
+        return RedirectResponse("/internal/master", status_code=303,
+                                headers={"Cache-Control": "no-store"})
+
+    @router.post("/internal/master/logout")
+    async def master_console_logout(request: Request):
+        if not _master_console_authorized(application.settings, request.session):
+            raise HTTPException(status_code=404)
+        form = await request.form()
+        if not _master_console_csrf_valid(request.session, form.get("csrf", "")):
+            raise HTTPException(status_code=403, detail="invalid console form token")
+        if (request.session.get("participant_session_id")
+                == request.session.get("master_console_latest_session_id")):
+            request.session.pop("participant_session_id", None)
+        for key in ("master_console_auth", "master_console_csrf", "master_console_latest_session_id"):
+            request.session.pop(key, None)
+        return RedirectResponse("/internal/master", status_code=303,
+                                headers={"Cache-Control": "no-store"})
+
+    @router.post("/internal/master/launch")
+    async def master_console_launch(request: Request):
+        if not _master_console_authorized(application.settings, request.session):
+            raise HTTPException(status_code=404)
+        form = await request.form()
+        section, pedagogy, mode = (form.get(key) for key in ("section", "pedagogy", "mode"))
+        assessment_set = form.get("assessment_set", "random")
+        csrf = form.get("csrf", "")
+        if not all(isinstance(value, str) and len(value) <= 40
+                   for value in (section, pedagogy, mode, assessment_set, csrf)):
+            raise HTTPException(status_code=422, detail="invalid console form")
+        if not _master_console_csrf_valid(request.session, csrf):
+            raise HTTPException(status_code=403, detail="invalid console form token")
+        try:
+            with application.factory() as db:
+                version = _internal_v051_candidate(db, application.settings)
+                if version is None:
+                    raise ValueError("the configured immutable study revision is not registered")
+                created = create_master_session(
+                    db, application.execution.runtime, version.id, section=section,
+                    pedagogy=pedagogy, mode=mode, assessment_set=assessment_set,
+                    build_id=application.settings.app_build_id,
+                )
+                created_id = str(created.id)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        request.session["participant_session_id"] = created_id
+        request.session["master_console_latest_session_id"] = created_id
+        return RedirectResponse("/session", status_code=303,
+                                headers={"Cache-Control": "no-store"})
+
+    @router.get("/internal/master/trace/{session_id}")
+    async def master_console_trace(request: Request, session_id: uuid.UUID):
+        if not _master_console_authorized(application.settings, request.session):
+            raise HTTPException(status_code=404)
+        with application.factory() as db:
+            record = db.get(Session, session_id)
+            if not is_master_session(record):
+                raise HTTPException(status_code=404)
+        from solo_harness.research_export import build_session_export
+        document = build_session_export(
+            application.settings.database_url, session_id,
+            research_data_root=application.settings.research_data_dir,
+        )
+        # Include session-local telemetry when present. Never traverse outside
+        # the authorized session directory or pull in other participants' data.
+        output = io.BytesIO()
+        included = []
+        omitted = []
+        limit_bytes = 64 * 1024 * 1024
+        total = 0
+        with zipfile.ZipFile(output, "w", zipfile.ZIP_DEFLATED) as bundle:
+            export_bytes = json.dumps(document, indent=2, ensure_ascii=False, sort_keys=True).encode("utf-8")
+            bundle.writestr("session_export.json", export_bytes)
+            included.append({"path": "session_export.json", "sha256": hashlib.sha256(export_bytes).hexdigest()})
+            base = (application.settings.research_data_dir / str(session_id)).resolve()
+            if base.is_dir():
+                for file in sorted(base.rglob("*")):
+                    if not file.is_file() or file.is_symlink() or not file.resolve().is_relative_to(base):
+                        continue
+                    relative = file.relative_to(base).as_posix()
+                    size = file.stat().st_size
+                    if total + size > limit_bytes:
+                        omitted.append({"path": relative, "reason": "64 MiB artifact limit"})
+                        continue
+                    body = file.read_bytes()
+                    path = f"session_artifacts/{relative}"
+                    bundle.writestr(path, body)
+                    included.append({"path": path, "sha256": hashlib.sha256(body).hexdigest()})
+                    total += len(body)
+            bundle.writestr("manifest.json", json.dumps({
+                "schema": "ekagra.master_console_trace.v1",
+                "session_id": str(session_id), "synthetic_dev_session": True,
+                "artifacts_included": included, "artifacts_omitted": omitted,
+                "note": "Capture-run files outside this session directory are referenced by the session export, not embedded.",
+            }, indent=2, sort_keys=True))
+        output.seek(0)
+        return StreamingResponse(output, media_type="application/zip", headers={
+            "Content-Disposition": f'attachment; filename="EKAGRAAI_DEV_TRACE_{session_id}.zip"',
+            "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff",
+        })
 
     @router.post("/internal/v051/session")
     async def internal_v051_session(request: Request, x_ekagra_internal_test_token: str | None = Header(None),

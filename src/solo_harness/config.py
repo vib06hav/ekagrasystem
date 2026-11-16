@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     required_capture_streams: Literal["screen", "screen_and_webcam"] = "screen_and_webcam"
     enable_f1_v04_development: bool = False
     enable_v051_internal_testing: bool = False
+    enable_master_test_console: bool = False  # CHANGED: opt-in developer UI; requires internal test token
     enable_v051_unified_study: bool = False  # CHANGED: explicit opt-in for real C1--C4 execution
     enable_controlled_c11_pilot: bool = False  # internal v0.5 sessions only; default off
     enable_controlled_c1_full_pilot: bool = False  # explicit internal C1.1--C1.4 overlay; default off

@@ -1,0 +1,33 @@
+:root { color-scheme: light; font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif; color: #17233a; background: #f3f5f9; }
+* { box-sizing: border-box; }
+body { margin: 0; }
+.console { width: min(780px, calc(100% - 36px)); margin: 56px auto 80px; }
+.masthead { margin-bottom: 30px; }
+.eyebrow { display: inline-block; border: 1px solid #cbd5e1; color: #475569; border-radius: 999px; padding: 6px 11px; font-size: 11px; font-weight: 750; letter-spacing: .08em; }
+h1 { font-size: clamp(29px, 5vw, 39px); letter-spacing: -.045em; margin: 14px 0 8px; }
+h2 { font-size: 20px; letter-spacing: -.02em; margin: 0 0 15px; }
+p { color: #526076; line-height: 1.55; }
+.panel { background: white; border: 1px solid #dce3ed; border-radius: 16px; padding: 27px; margin: 18px 0; box-shadow: 0 4px 24px #182f5210; }
+.panel-heading { display: flex; justify-content: space-between; align-items: start; gap: 15px; }
+.status { font-size: 11px; color: #425678; border: 1px solid #d2dceb; padding: 6px 9px; border-radius: 7px; font-weight: 700; white-space: nowrap; }
+form { display: grid; gap: 12px; }
+fieldset { border: none; padding: 17px 0; border-bottom: 1px solid #ebeff4; margin: 0; }
+legend, label[for] { font-weight: 700; font-size: 14px; padding: 0; }
+.radio-row { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 13px; }
+.radio-row label { cursor: pointer; display: inline-flex; align-items: center; gap: 7px; padding: 10px 12px; border-radius: 9px; border: 1px solid #dce3ed; font-size: 13px; }
+.radio-row label:has(input:checked) { background: #edf3ff; border-color: #7794ce; }
+input[type=radio] { accent-color: #345ea6; }
+input[type=password], select { border: 1px solid #cbd5e1; border-radius: 8px; font: inherit; padding: 12px; width: 100%; background: white; }
+select { max-width: 300px; }
+button, .download { display: inline-block; color: white; background: #284e8d; font-weight: 650; border: none; border-radius: 9px; padding: 13px 16px; font-size: 14px; cursor: pointer; text-decoration: none; }
+button:hover, .download:hover { background: #193c76; }
+.hint { font-size: 13px; color: #66768a; margin: 0 0 6px; }
+.small-panel p { margin: 10px 0; }
+.session-id { font-size: 12px; font-family: ui-monospace, monospace; overflow-wrap: anywhere; }
+.download { margin-top: 10px; }
+.disclaimer { font-size: 12px; margin-top: 20px; }
+@media(max-width: 570px) { .panel { padding: 20px; } .console { margin-top: 30px; } }
+
+.logout-form { margin-top: 18px; }
+.logout-button { background: transparent; color: #3e5372; border: 1px solid #c5d1e1; width: fit-content; }
+.logout-button:hover { background: #e8edf5; }
