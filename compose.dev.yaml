@@ -26,8 +26,9 @@ services:
       ACTIVATE_STUDY_ON_BOOTSTRAP: "true"
       ENABLE_F1_V04_DEVELOPMENT: "false"
       ENABLE_V051_UNIFIED_STUDY: "true"
-      REQUIRE_ACTIVE_CAPTURE: "false"
-      REQUIRED_CAPTURE_STREAMS: screen
+      REQUIRE_ACTIVE_CAPTURE: ${EKAGRA_DEV_REQUIRE_ACTIVE_CAPTURE:-false}
+      REQUIRED_CAPTURE_STREAMS: ${EKAGRA_DEV_REQUIRED_CAPTURE_STREAMS:-screen_and_webcam}
+      ACTIVE_CAPTURE_MAX_AGE_SECONDS: ${EKAGRA_DEV_ACTIVE_CAPTURE_MAX_AGE_SECONDS:-15}
       RESEARCH_DATA_DIR: /var/lib/ekagra-dev/research-data
       APP_BUILD_ID: ekagra-local-development
       WEB_SESSION_SECRET: ${EKAGRA_DEV_SESSION_SECRET:-ekagra-local-development-session-secret}
@@ -38,7 +39,9 @@ services:
     ports:
       - "127.0.0.1:${EKAGRA_DEV_APP_PORT:-18080}:8000"
     volumes:
-      - ekagra_dev_research_data:/var/lib/ekagra-dev/research-data
+      # A host bind mount lets the Windows recorder and the app validate the
+      # same marker, manifests, and media without touching collection data.
+      - ${EKAGRA_DEV_RESEARCH_DATA_DIR:-./local-artifacts/ekagra-dev}:/var/lib/ekagra-dev/research-data
     depends_on:
       db:
         condition: service_healthy
@@ -87,4 +90,3 @@ services:
 
 volumes:
   ekagra_dev_pgdata:
-  ekagra_dev_research_data:

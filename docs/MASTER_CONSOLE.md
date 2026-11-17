@@ -18,8 +18,9 @@ docker compose -f compose.dev.yaml up --build -d --wait
 ```
 
 Open <http://127.0.0.1:18080/internal/master>. The Docker development stack is
-bound to localhost, uses its own PostgreSQL database and research-data volume,
-activates v0.5 C1–C4, and disables the active-capture admission gate.
+bound to localhost, uses its own PostgreSQL database and ignored local-artifact
+directory, and activates v0.5 C1–C4. Capture admission is disabled by default
+but can be enabled in `dev.env` for participant-style `/join` tests.
 
 The Console creates synthetic `DEV-...` sessions with synthetic demographics.
 Choose C1–C4, P1/P2/P3/Random, and either teaching or direct assessment. Direct
@@ -33,4 +34,6 @@ Judge decisions, assessment records, UI/protocol events, and session-local
 telemetry up to the documented size limit.
 
 No live LLM provider is configured by default. Add provider values to `dev.env`
-only when intentionally testing paid Tutor or Judge calls.
+only when intentionally testing paid Tutor or Judge calls. Console-created
+synthetic sessions intentionally bypass capture, so use `/join` to test the
+real screen/webcam capture gate.

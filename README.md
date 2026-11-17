@@ -8,7 +8,7 @@ Console.
 You normally use one of two modes:
 
 - **Development** — safe local testing with an isolated Docker database,
-  no capture requirement, and the Master Console.
+  optional capture gating, and the Master Console.
 - **Participant collection** — the real study, with its separate database,
   capture gate, and no Master Console.
 
@@ -51,7 +51,7 @@ It does **not** use the participant database or research-data directory.
    - Participant-style enrollment: <http://127.0.0.1:18080/join>
 
    The Console is direct access in development—there is no token login.
-   Development disables the active-capture requirement.
+   Capture is disabled by default.
 
 Stop development while keeping its local database:
 
@@ -64,6 +64,44 @@ Delete **only development** data and start over:
 ```powershell
 docker compose --env-file dev.env -f compose.dev.yaml down -v
 ```
+
+### Test screen and webcam capture in development
+
+Development uses the same capture admission gate as participant collection when
+you opt in, but stores all media and manifests in the ignored local folder
+`local-artifacts/ekagra-dev/`. It never uses participant data.
+
+1. In `dev.env`, set:
+
+   ```env
+   EKAGRA_DEV_REQUIRE_ACTIVE_CAPTURE=true
+   EKAGRA_DEV_REQUIRED_CAPTURE_STREAMS=screen_and_webcam
+   EKAGRA_DEV_ACTIVE_CAPTURE_MAX_AGE_SECONDS=15
+   ```
+
+2. Restart the development stack:
+
+   ```powershell
+   docker compose --env-file dev.env -f compose.dev.yaml up --build -d --wait
+   ```
+
+3. In another PowerShell window, install the pinned FFmpeg runtime once if
+   needed, then start the host recorder:
+
+   ```powershell
+   powershell -ExecutionPolicy Bypass -File tools/windows_capture/bootstrap_ffmpeg.ps1
+   python tools/windows_capture/record.py preflight
+   python tools/windows_capture/record.py record --research-data local-artifacts/ekagra-dev
+   ```
+
+4. Test participant admission at <http://127.0.0.1:18080/join> with a fresh
+   participant ID. With the recorder stopped, enrollment must fail. With both
+   streams recording, it must succeed and the session receives a capture-run
+   ID. Use `/join`, not the Master Console: synthetic Console sessions bypass
+   capture by design.
+
+Stop the recorder with `Ctrl+C` when finished. Use a new recorder run and a
+new participant ID for every capture-test session.
 
 ## Participant collection: run the real study
 
