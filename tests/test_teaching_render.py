@@ -123,3 +123,43 @@ def test_presentation_contract_is_versioned_and_not_a_scientific_override():
     assert "Contrasting Cases" in TUTOR_PRESENTATION_GUIDANCE
     assert "Scient" in TUTOR_PRESENTATION_GUIDANCE
     assert "assessment" in TUTOR_PRESENTATION_GUIDANCE.lower()
+
+
+def test_cross_pedagogy_presentation_normalization():
+    # P3: Inline bullets and inline blockquote (exact learner report)
+    p3_raw = (
+        "Let us examine how different checking-bit values affect Group A when applied to the same selected data bits. "
+        "A parity checking group can be any explicitly specified set of transmitted bit positions rather than a full message, "
+        "row, or column, and its members determine how the receiver verifies the agreed rule. Let us compare two proposed "
+        "checking-bit choices for the data sequence 1100: * Proposed Choice 1 (Correct): The checking bit P is set to 0, "
+        "making the transmitted group bits 1100. Counting the ones gives 2 ones, resulting in an even parity check outcome "
+        "of PASS. * Proposed Choice 2 (Incorrect): The checking bit P is set to 1, making the group bits 1101. Counting "
+        "the ones gives 3 ones, resulting in an odd parity check outcome of FAIL. This contrast shows why the correct "
+        "checking-bit value satisfies the agreed rule while an incorrect choice violates it. > Key Takeaway: A checking "
+        "group evaluates a specific set of member positions against an agreed parity rule, meaning only a precise checking-bit "
+        "value will produce a passing verification at the receiver."
+    )
+    p3_html = str(render_tutor_markdown(p3_raw))
+    assert "<ul>" in p3_html and "<li>" in p3_html
+    assert "<strong>Proposed Choice 1 (Correct):</strong>" in p3_html
+    assert "<strong>Proposed Choice 2 (Incorrect):</strong>" in p3_html
+    assert "outcome of <strong>PASS</strong>" in p3_html
+    assert "outcome of <strong>FAIL</strong>" in p3_html
+    assert "<blockquote>" in p3_html
+    assert "<strong>Key Takeaway:</strong>" in p3_html
+    assert "<p>This contrast shows why the correct" in p3_html
+
+    # P1: Numbered steps normalized
+    p1_raw = (
+        "Let us trace Group A: 1. Step 1 (Membership): Group A has D1, D2, D3, P. "
+        "2. Step 2 (Parity): 2 ones -> outcome of PASS. > Key Takeaway: Groups check specified positions."
+    )
+    p1_html = str(render_tutor_markdown(p1_raw))
+    assert "<ol>" in p1_html and "<li>" in p1_html
+    assert "<strong>Step 1 (Membership):</strong>" in p1_html
+    assert "<blockquote>" in p1_html
+
+    # P2: Guided Question normalized
+    p2_raw = "Check Group B. **Question:** What is the value of Q?"
+    p2_html = str(render_tutor_markdown(p2_raw))
+    assert "<strong>Question:</strong>" in p2_html

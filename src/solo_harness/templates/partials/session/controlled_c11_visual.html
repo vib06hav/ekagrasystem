@@ -81,9 +81,11 @@
   {% if arrangement.position_order is defined and arrangement.initial_complete_sequence is defined %}
     <div class="c11-bit-row" aria-label="Transmitted positions">
     {% for pos in arrangement.position_order %}
-      <div class="c11-bit-cell">
+      {% set is_check = pos in ('P', 'Q', 'Z', 'R', 'S', 'K1', 'K2', 'K3') or (pos|length > 1 and pos[0] in ('K', 'Z')) %}
+      <div class="c11-bit-cell {{ 'is-check-bit' if is_check else 'is-data-bit' }}">
         <span class="c11-position">{{ pos }}</span>
         <span class="c11-value">{% if concealed and visual.subsection_id == 'C4.1' and 'group_a' in visual.mode and pos == 'P' %}?{% else %}{{ arrangement.initial_complete_sequence[loop.index0] }}{% endif %}</span>
+        <span class="c11-bit-tag">{{ 'CHECK' if is_check else 'DATA' }}</span>
       </div>
     {% endfor %}
     </div>
@@ -134,11 +136,31 @@
   {% endif %}
 
   {% if arrangement.groups is defined %}
-    <div class="c11-mapping-cases">
+    <div class="c11-mapping-cases c4-groups-grid">
     {% for group_name, group in arrangement.groups.items() %}
-      <div class="c11-case"><strong>Group {{ group_name }}</strong>
-        <div class="c11-sequence-label">{{ group.members|join(' · ') }}</div>
-        {% if not concealed %}<span>{{ group.initial_group_bits }} · {{ group.initial_result }}</span>{% endif %}
+      <div class="c11-case c4-visual-group-card group-{{ group_name|lower }}">
+        <div class="c4-group-card-header">
+          <strong class="c4-group-card-title">Group {{ group_name }}</strong>
+          {% if not concealed %}
+            <span class="c4-group-status-badge {{ 'res-pass' if group.initial_result == 'PASS' else 'res-fail' }}">{{ group.initial_result }}</span>
+          {% endif %}
+        </div>
+        <div class="c4-group-members-row">
+          <span class="c4-members-label">Members:</span>
+          <div class="c4-members-pills">
+            {% for m in group.members %}
+              <span class="c4-flip-pill">{{ m }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="c11-sequence-label" style="display:none;">{{ group.members|join(' · ') }}</div>
+        {% if not concealed %}
+          <div class="c4-group-values-row">
+            <span>Bits: <code>{{ group.initial_group_bits }}</code></span>
+            <span class="c4-ones-detail">({{ group.initial_ones if group.initial_ones is defined else '' }} ones)</span>
+          </div>
+          <span style="display:none;">{{ group.initial_group_bits }} · {{ group.initial_result }}</span>
+        {% endif %}
       </div>
     {% endfor %}
     </div>
@@ -164,10 +186,15 @@
   {# CHANGED: C4.1 P3 M02 must compare both prescribed valid/invalid
      CHANGED: check-bit choices, not merely show the correct one. #}
   {% if facts.hypothetical_group_A_parity_contrast is defined and visual.mode == 'group_a_valid_vs_invalid' %}
-    <div class="c11-mapping-cases" data-group-a-parity-contrast>
+    <div class="c11-mapping-cases c4-contrast-grid" data-group-a-parity-contrast>
       {% for label, candidate in facts.hypothetical_group_A_parity_contrast.items() %}
-        <div class="c11-case">
-          <strong>{{ 'Valid P choice' if label == 'correct' else 'Invalid P choice' }}</strong>
+        <div class="c11-case c4-contrast-card {{ 'contrast-valid' if label == 'correct' else 'contrast-invalid' }}">
+          <div class="c4-contrast-header">
+            <strong>{{ 'Valid P Choice (P=0)' if label == 'correct' else 'Invalid P Choice (P=1)' }}</strong>
+            {% if not concealed %}
+              <span class="c4-group-status-badge {{ 'res-pass' if candidate.result == 'PASS' else 'res-fail' }}">{{ candidate.result }}</span>
+            {% endif %}
+          </div>
           <div>Group A bits: <code>{{ candidate.group_A_bits }}</code></div>
           {% if not concealed %}<div>{{ candidate.ones }} ones · {{ candidate.result }}</div>{% endif %}
         </div>
@@ -176,12 +203,53 @@
   {% endif %}
 
   {% if facts.error_cases is defined %}
-    <div class="c11-mapping-cases">
+    <div class="c11-mapping-cases c4-error-grid">
     {% for key,c in facts.error_cases.items() %}
-      <div class="c11-case"><strong>{{ key|replace('_',' ')|capitalize }}</strong>
-      <code>{{ c.received_sequence }}</code>
-      <div>Changed positions: {{ c.flipped_positions|join(', ') if c.flipped_positions else 'None' }}</div>
-      {% if not concealed %}<div>Results: {% for group,result in c.group_results.items() %}{{ group }} {{ result }}{% if not loop.last %} · {% endif %}{% endfor %}</div>{% endif %}
+      {% set has_failed = false %}
+      {% if c.group_results is defined %}
+        {% for g, r in c.group_results.items() %}
+          {% if r == 'FAIL' %}{% set has_failed = true %}{% endif %}
+        {% endfor %}
+      {% endif %}
+      <div class="c11-case c4-error-card {{ 'has-failed-groups' if has_failed else 'all-passed-groups' }}">
+        <div class="c4-error-card-header">
+          <strong>{{ key|replace('_',' ')|capitalize }}</strong>
+          {% if not concealed %}
+            {% if has_failed %}
+              <span class="c4-verdict-pill verdict-detected">DETECTED</span>
+            {% elif c.flipped_positions %}
+              <span class="c4-verdict-pill verdict-undetected">UNDETECTED</span>
+            {% else %}
+              <span class="c4-verdict-pill verdict-detected">BASELINE</span>
+            {% endif %}
+          {% endif %}
+        </div>
+        <div class="c4-received-display">
+          <span class="c4-label-muted">Received:</span>
+          <code>{{ c.received_sequence }}</code>
+        </div>
+        <div class="c4-flipped-display">
+          <span class="c4-label-muted">Changed:</span>
+          {% if c.flipped_positions %}
+            {% for fp in c.flipped_positions %}
+              <span class="c4-flip-pill alert-flip">{{ fp }}</span>
+            {% endfor %}
+          {% else %}
+            <span class="c4-flip-pill pill-none">None</span>
+          {% endif %}
+        </div>
+        <div style="display:none;">Changed positions: {{ c.flipped_positions|join(', ') if c.flipped_positions else 'None' }}</div>
+        {% if not concealed %}
+          <div class="c4-checks-display">
+            <span class="c4-label-muted">Checks:</span>
+            <div class="c4-check-chips">
+              {% for group,result in c.group_results.items() %}
+                <span class="c4-chip-outcome {{ 'chip-fail' if result == 'FAIL' else 'chip-pass' }}">{{ group }}: {{ result }}</span>
+              {% endfor %}
+            </div>
+          </div>
+          <div style="display:none;">Results: {% for group,result in c.group_results.items() %}{{ group }} {{ result }}{% if not loop.last %} · {% endif %}{% endfor %}</div>
+        {% endif %}
       </div>
     {% endfor %}
     </div>
@@ -249,13 +317,43 @@
     </div>
   {% endif %}
   {% if facts.additional_check_alternatives is defined %}
-    <div class="c11-mapping-cases">
+    <div class="c11-mapping-cases c4-alternatives-grid">
     {% for key,c in facts.additional_check_alternatives.items() %}
-      <div class="c11-case"><strong>{{ c.label }}</strong>
-        <div>Added group: {{ c.added_group_members|join(' · ') }}</div>
-        {% if c.initial_complete_sequence is defined %}<div>Original: <code>{{ c.initial_complete_sequence }}</code></div>{% endif %}
-        {% if not concealed %}<div>After specified corruption: <code>{{ c.target_received_sequence if c.target_received_sequence is defined else '' }}</code></div>
-          {% if c.target_group_results is defined %}<div>New check: {{ c.target_group_results.C }}{% if c.new_group_target_flip_count is defined %} · Flips in new group: {{ c.new_group_target_flip_count }}{% endif %}</div>{% endif %}
+      {% set is_detected = c.target_group_results is defined and c.target_group_results.C == 'FAIL' %}
+      <div class="c11-case c4-alt-card {{ 'alt-detects' if is_detected else 'alt-misses' }}">
+        <div class="c4-alt-header">
+          <strong class="c4-alt-title">{{ c.label }}</strong>
+          {% if not concealed and c.target_group_results is defined %}
+            {% if is_detected %}
+              <span class="c4-verdict-pill verdict-detected">✓ DETECTS ERROR</span>
+            {% else %}
+              <span class="c4-verdict-pill verdict-undetected">⚠ MISSES ERROR</span>
+            {% endif %}
+          {% endif %}
+        </div>
+        <div class="c4-alt-members-row">
+          <span class="c4-label-muted">Added group:</span>
+          <div class="c4-members-pills">
+            {% for m in c.added_group_members %}
+              <span class="c4-flip-pill">{{ m }}</span>
+            {% endfor %}
+          </div>
+        </div>
+        <div style="display:none;">Added group: {{ c.added_group_members|join(' · ') }}</div>
+        {% if c.initial_complete_sequence is defined %}
+          <div class="c4-alt-seq-row"><span class="c4-label-muted">Original:</span> <code>{{ c.initial_complete_sequence }}</code></div>
+          <div style="display:none;">Original: <code>{{ c.initial_complete_sequence }}</code></div>
+        {% endif %}
+        {% if not concealed %}
+          <div class="c4-alt-corrupt-row"><span class="c4-label-muted">After corruption:</span> <code>{{ c.target_received_sequence if c.target_received_sequence is defined else '' }}</code></div>
+          <div style="display:none;">After specified corruption: <code>{{ c.target_received_sequence if c.target_received_sequence is defined else '' }}</code></div>
+          <div class="c4-alt-result-row">
+            <span class="c4-alt-check-tag">New check: {{ c.target_group_results.C }}</span>
+            {% if c.new_group_target_flip_count is defined %}
+              <span class="c4-alt-flips-badge">({{ c.new_group_target_flip_count }} flip{{ 's' if c.new_group_target_flip_count != 1 else '' }} in group)</span>
+            {% endif %}
+          </div>
+          <div style="display:none;">New check: {{ c.target_group_results.C }}{% if c.new_group_target_flip_count is defined %} · Flips in new group: {{ c.new_group_target_flip_count }}{% endif %}</div>
         {% endif %}
       </div>
     {% endfor %}

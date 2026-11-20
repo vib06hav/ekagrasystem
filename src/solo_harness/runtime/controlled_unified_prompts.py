@@ -136,16 +136,44 @@ bits, not a pristine original. Checking bits participate in their own groups.
 For P1, model the worked reasoning without demanding learner answers. For P3,
 show both matched cases and explain what stays fixed, what differs and why.
 For P2, on the first guided turn ask the single authored question without
-revealing its answer and set ready_for_judge=false; after a learner reply,
-address its meaning and supply the correct explanation even when wrong or
-unsure. If they ask a clarification instead, answer it and resume that same
-guided question; no correctness or mastery gate and no extra confirmation quiz.
+revealing its answer and set ready_for_judge=false. When the learner attempts
+an answer: if correct, give concise confirmation and essential reinforcement,
+then set ready_for_judge=true; if incorrect or unsure on their first attempt,
+provide staged feedback—acknowledge the attempt with a targeted hint or
+guiding observation without revealing the answer, invite a second attempt,
+and keep ready_for_judge=false; on a second attempt or if already guided once,
+explain the verified fact clearly and set ready_for_judge=true. If they ask a
+clarification instead, answer it and resume that same guided question; no
+endless loops, no mastery gate, and no extra confirmation quiz.
 For all pedagogies, respond to genuine doubts appropriately, with scientific
 limits rather than overclaims. In DOUBT mode answer only the pending question,
 then request review; do not repeat the approved lesson. The visual is passive
 and is never proof of Tutor delivery. Only set ready_for_judge=true once the
 required learner-visible explanation (and guided response opportunity, where
 required) has occurred. Return only the Tutor JSON schema."""
+
+    if move["id"].startswith("C4"):
+        rules += """
+
+INSTRUCTIONAL STRUCTURE AND FORMATTING RULES FOR SECTION C4:
+To maintain consistent, high-clarity presentation across all pedagogies (P1, P2, P3):
+1. Crisp Hook: Start with a 1-sentence hook introducing the active step, case, or goal.
+2. Distinct Markdown Elements (CRITICAL): Always separate paragraphs, list items (* or 1.), questions, and blockquotes (> ) with blank lines (\\n\\n). NEVER output asterisks, numbered steps, or blockquote symbols inline inside continuous prose.
+3. Typography & Styling:
+   - Bold bit positions (e.g. **D1**, **D2**, **P**, **Q**) and group names (e.g. **Group A**, **Group B**).
+   - Format transmitted/received bit strings in monospace backticks (e.g. `110001`, `1100`) and show flips clearly (e.g. **D1** flips 1 -> 0).
+   - Bold all check outcomes and verdicts: **PASS**, **FAIL**, **Detected**, **Undetected**.
+4. Pedagogy-Specific Structures:
+   - For P3 (Contrasting Cases): Present the compared cases as distinct bullet points on their own lines:
+     * **Proposed Choice 1 (or Case 1 - [Label]):** [Details, sequence `...`, ones count, outcome: **PASS**/**FAIL**]
+     * **Proposed Choice 2 (or Case 2 - [Label]):** [Details, sequence `...`, ones count, outcome: **FAIL**/**PASS**]
+     Follow with a separate paragraph highlighting what stays fixed vs what differs and why, then the takeaway.
+   - For P1 (Worked Examples): Trace step-by-step reasoning using numbered steps (1. **Step 1 ([Label]):** ...) or bullets, detailing group membership, ones count, and outcome.
+   - For P2 (Guided Practice): Keep the setup concise, place the question on its own paragraph preceded by a blank line:
+     **Question:** [Single authored question]?
+     When resolving/providing feedback: confirm or explain with bolded outcomes, then the takeaway.
+5. Highlighted Key Takeaway: Conclude every move's explanation with a Markdown blockquote:
+   > **Key Takeaway:** [1-2 concise sentences summarizing the underlying parity principle]."""
     return (rules + "\n[ACTIVE_MOVE_CONTEXT]\n" + json.dumps(payload, ensure_ascii=False,
             sort_keys=True, separators=(",", ":")) + "\n[OUTPUT_SCHEMA]\n" +
             json.dumps(V051TutorOutput.model_json_schema(), sort_keys=True, separators=(",", ":")))

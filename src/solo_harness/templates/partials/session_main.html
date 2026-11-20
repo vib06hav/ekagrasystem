@@ -30,21 +30,21 @@
 {% if not view.timeline %}<div class="empty">This section is ready to begin.</div>{% endif %}
 {% for item in view.timeline %}
   {% if item.kind == 'message' %}
-    <article class="message {{ item.role|lower }}"{% if item.role == 'TUTOR' %} data-tutor-message-sequence="{{ item.sequence_no }}"{% endif %}><div class="message-meta"><span>{% if item.role == 'TUTOR' %}Study assistant{% else %}You{% endif %}</span><time>{{ item.timestamp.strftime('%H:%M:%S') }}</time></div>{% if item.role == 'TUTOR' %}<div class="tutor-content" data-teaching-render="markdown-v1">{{ item.content | tutor_markdown }}</div>{% if item.visual %}{% include "partials/session/controlled_c11_visual.html" %}{% endif %}{% else %}{{ item.content }}{% endif %}</article>
+    <article class="message {{ item.role|lower }}{% if loop.last and view.is_current and view.phase == 'INTERVENTION_ACTIVE' and item.role == 'TUTOR' %} active-message{% endif %}"{% if item.role == 'TUTOR' %} data-tutor-message-sequence="{{ item.sequence_no }}"{% endif %}><div class="message-meta"><span>{% if item.role == 'TUTOR' %}Study assistant{% else %}You{% endif %}</span>{% if loop.last and view.is_current and view.phase == 'INTERVENTION_ACTIVE' and item.role == 'TUTOR' %}<span class="active-badge" aria-label="Current activity">Active</span>{% endif %}<time>{{ item.timestamp.strftime('%H:%M:%S') }}</time></div>{% if item.role == 'TUTOR' %}<div class="tutor-content" data-teaching-render="markdown-v1">{{ item.content | tutor_markdown }}</div>{% if item.visual %}{% include "partials/session/controlled_c11_visual.html" %}{% endif %}{% else %}{{ item.content }}{% endif %}</article>
   {% elif item.kind == 'subsection' %}
     {% set sub_rows = view.v051_subsections or [] %}
     {% set sub_match = sub_rows | selectattr('id', 'equalto', item.subsection_id) | first %}
-    <div class="subsection-divider" data-subsection-marker="{{ item.subsection_id }}" role="group" aria-label="{% if sub_match %}Subsection {{ sub_match.order }} of {{ sub_rows|length }}: {% else %}New subsection: {% endif %}{{ item.title|default(item.label, true) }}"><span class="subsection-divider-id">Section {{ view.section_number }} · {{ item.subsection_id }}</span><strong class="subsection-divider-title">{{ item.title|default(item.label, true) }}</strong><span class="subsection-divider-count">{% if sub_match %}Subsection {{ sub_match.order }} of {{ sub_rows|length }}{% else %}New subsection{% endif %}</span></div>
+    <div class="subsection-divider" data-subsection-marker="{{ item.subsection_id }}" role="group" aria-label="{% if sub_match %}Subsection {{ sub_match.order }} of {{ sub_rows|length }}: {% else %}New subsection: {% endif %}{{ item.title|default(item.label, true) }}"><div class="subsection-divider-body"><span class="subsection-divider-id">Section {{ view.section_number }} · {{ item.subsection_id }}</span><strong class="subsection-divider-title">{{ item.title|default(item.label, true) }}</strong></div><span class="subsection-divider-count">{% if sub_match %}Subsection {{ sub_match.order }} of {{ sub_rows|length }}{% else %}New subsection{% endif %}</span></div>
   {% else %}
     <div class="timeline-marker {{ item.kind }}"{% if item.kind == 'assessment' %} data-assessment-completed-marker{% endif %}{% if item.kind == 'activity' %} data-teaching-activity-number="{{ item.activity_number }}"{% endif %}><span>{{ item.label }}</span>{% if item.timestamp %}<time title="Time of day, not a duration">{% if item.kind == 'activity' %}Assigned at {% endif %}{{ item.timestamp.strftime('%H:%M:%S') }}</time>{% endif %}</div>
   {% endif %}
 {% endfor %}
   {% if view.controlled_c11 and view.controlled_c11.status != 'PILOT_BOUNDARY_HANDOFF' %}
     {% if view.controlled_c11.status == 'APPROVED_AWAITING_NEXT' %}
-      <form class="move-continuation" hx-post="/session/actions/c11-next" hx-target="#session-main" hx-swap="outerHTML" method="post">
+      <form class="move-continuation" hx-post="/session/actions/c11-next" hx-target="#session-main" hx-swap="outerHTML" method="post" {% if view.section_number == 4 %}data-c4-move-continuation{% endif %}>
         <input type="hidden" name="idempotency_key" value="{{ new_key }}">
         <input type="hidden" name="approval_version" value="{{ view.controlled_c11.approval_version }}">
-        <button>{% if view.controlled_c11.is_section_final_move %}Continue to effort rating{% elif view.controlled_c11.is_final_move %}Next subsection{% else %}Next{% endif %}</button>
+        <button {% if view.section_number == 4 %}data-c4-next-btn{% endif %}>{% if view.controlled_c11.is_section_final_move %}Continue to effort rating{% elif view.controlled_c11.is_final_move %}Next subsection{% else %}Next{% endif %}</button>
       </form>
     {% else %}
       <div class="move-continuation"><button disabled>{% if view.controlled_c11.is_section_final_move %}Continue to effort rating{% elif view.controlled_c11.is_final_move %}Next subsection{% else %}Next{% endif %}</button></div>
@@ -55,16 +55,23 @@
 
 {% macro assessment_arrangement(arrangement) %}
 <div class="assessment-arrangement" aria-label="{{ arrangement.label }}">
+  <div class="c4-arrangement-legend">
+    <span class="c4-legend-item"><strong>Data bits:</strong> {{ 'M1–M4' if ('M1' in arrangement.positions and 'M5' not in arrangement.positions) else ('M1–M5' if 'M5' in arrangement.positions else 'Q1–Q4') }}</span>
+    <span class="c4-legend-sep">·</span>
+    <span class="c4-legend-item"><strong>Checking bits:</strong> {{ 'K1–K3' if 'K3' in arrangement.positions else ('K1–K2' if 'K1' in arrangement.positions else 'Z1–Z3') }}</span>
+    <span class="c4-legend-sep">·</span>
+    <span class="c4-legend-item"><strong>Rule:</strong> Even parity per group</span>
+  </div>
   <strong class="assessment-arrangement-title">{{ arrangement.label }}</strong>
   <div class="assessment-arrangement-scroll">
     <table class="assessment-position-table" aria-label="Transmitted position values">
-      <caption>Original transmitted sequence (instructor's example)</caption>
+      <caption>Original transmitted sequence</caption>
       <thead><tr>{% for position in arrangement.positions %}<th scope="col">{{ position }}</th>{% endfor %}</tr></thead>
-      <tbody><tr>{% for position in arrangement.positions %}<td>{{ arrangement.sent_sequence[loop.index0] }}</td>{% endfor %}</tr></tbody>
+      <tbody><tr>{% for position in arrangement.positions %}<td><code>{{ arrangement.sent_sequence[loop.index0] }}</code></td>{% endfor %}</tr></tbody>
     </table>
   </div>
-  <div class="assessment-group-membership" aria-label="Parity-check groups">
-    {% for group, members in arrangement.groups.items() %}<div><strong>{{ group }}</strong> = { {{ members|join(', ') }} }</div>{% endfor %}
+  <div class="assessment-group-membership c4-group-brackets" aria-label="Parity-check groups">
+    {% for group, members in arrangement.groups.items() %}<div class="c4-group-chip"><strong class="c4-group-name">{{ group }}</strong> = { {{ members|join(', ') }} }</div>{% endfor %}
   </div>
 </div>
 {% endmacro %}
@@ -134,8 +141,147 @@
     {% elif view.f1_assessment_submitted %}
       <section class="assessment" data-telemetry-surface="assessment"><div class="phase-badge">Independent assessment</div><h2>Assessment submitted</h2><p>Assessment submitted. Your responses have been saved.</p></section>
     {% elif view.phase == 'ASSESSMENT_ACTIVE' and view.f1_public_assessment %}
-      <section class="assessment" data-telemetry-surface="assessment"><div class="phase-badge">Independent assessment</div><h2>Answer all four questions</h2><p>Select one option for each multiple-choice question, then explain your reasoning in your own words.</p>{% if view.f1_public_assessment.notation %}<p class="assessment-notation">{{ view.f1_public_assessment.notation }}</p>{% endif %}<form hx-post="/session/actions/assessment-response" hx-target="#session-main" hx-swap="outerHTML" method="post"><input type="hidden" name="idempotency_key" value="{{ new_key }}">{% for question in view.f1_public_assessment.mcqs %}<fieldset class="mcq"><legend>{{ loop.index }}. {{ question.stem }}</legend>{% if question.grid %}<pre class="assessment-bit-grid" aria-label="Received or transmitted parity grid">{% for row in question.grid %}{{ row|join(' ') }}{% if not loop.last %}
-{% endif %}{% endfor %}</pre>{% endif %}{% if question.arrangement %}{{ assessment_arrangement(question.arrangement) }}{% endif %}{% for option in question.options %}<label class="mcq-option"><input type="radio" name="{{ question.id|lower }}_answer" value="{{ option.id }}" required> <span><strong>{{ option.id }}.</strong> {{ option.text }}</span></label>{% endfor %}</fieldset>{% endfor %}<label for="assessment-response">4. Explain your reasoning</label><div class="assessment-subjective-prompt">{{ view.f1_public_assessment.subjective.prompt }}</div>{% if view.f1_public_assessment.subjective.arrangement %}{{ assessment_arrangement(view.f1_public_assessment.subjective.arrangement) }}{% endif %}<textarea id="assessment-response" name="response_text" required maxlength="12000"></textarea><button>Submit assessment</button></form></section>
+      {% set is_c4 = (view.section_number == 4) or (view.f1_public_assessment.mcqs and view.f1_public_assessment.mcqs[0].arrangement is defined) %}
+      <section class="assessment {% if is_c4 %}c4-assessment-container{% endif %}" data-telemetry-surface="assessment">
+        <div class="phase-badge">Independent assessment</div>
+        <h2>{% if is_c4 %}C4 Assessment: Generalized Parity{% else %}Answer all four questions{% endif %}</h2>
+        <p>{% if is_c4 %}Complete the multiple-choice questions, then explain your reasoning in the guided subjective question.{% else %}Select one option for each multiple-choice question, then explain your reasoning in your own words.{% endif %}</p>
+        {% if view.f1_public_assessment.notation %}
+          <div class="assessment-notation" {% if is_c4 %}style="display:none;" data-c4-notation-hidden{% endif %}>{{ view.f1_public_assessment.notation }}</div>
+        {% endif %}
+
+        {% if is_c4 %}
+          <div class="c4-stepper-header" aria-label="Assessment progress">
+            <span class="c4-stepper-counter">Question <strong id="c4-current-step-display">1</strong> of 4</span>
+            <div class="c4-stepper-dots">
+              <button type="button" class="c4-dot active" data-step-target="1" onclick="c4GoToStep(1)">1</button>
+              <button type="button" class="c4-dot" data-step-target="2" onclick="c4GoToStep(2)">2</button>
+              <button type="button" class="c4-dot" data-step-target="3" onclick="c4GoToStep(3)">3</button>
+              <button type="button" class="c4-dot" data-step-target="4" onclick="c4GoToStep(4)">4</button>
+            </div>
+          </div>
+
+          <form id="c4-assessment-form" hx-post="/session/actions/assessment-response" hx-target="#session-main" hx-swap="outerHTML" method="post" onsubmit="return c4HandleSubmit(event)">
+            <input type="hidden" name="idempotency_key" value="{{ new_key }}">
+
+            {% for question in view.f1_public_assessment.mcqs %}
+              <div class="c4-step {% if loop.first %}c4-step-active{% endif %}" data-step="{{ loop.index }}">
+                <div class="c4-mcq-card" role="group" aria-labelledby="c4-stem-{{ loop.index }}">
+                  <div class="c4-mcq-header">
+                    <p class="c4-q-stem" id="c4-stem-{{ loop.index }}">{{ question.stem }}</p>
+                  </div>
+                  {% if question.arrangement %}{{ assessment_arrangement(question.arrangement) }}{% endif %}
+                  
+                  <div class="c4-options-list" role="radiogroup" aria-label="Question {{ loop.index }} options">
+                    {% for option in question.options %}
+                      {% set parts = option.text.split(', because ') if ', because ' in option.text else (option.text.split(': ') if ': ' in option.text else [option.text]) %}
+                      <label class="c4-option-card">
+                        <input type="radio" name="{{ question.id|lower }}_answer" value="{{ option.id }}">
+                        <span class="c4-option-body">
+                          <strong class="c4-option-id">{{ option.id }}.</strong>
+                          <span class="c4-option-text">
+                            {% if parts|length > 1 %}
+                              {% if parts[0]|lower in ['detected', 'undetected'] %}
+                                <strong class="c4-option-claim">{{ parts[1]|capitalize }}</strong>
+                                <span class="c4-verdict-pill {{ 'verdict-detected' if 'detected' in parts[0]|lower and 'undetected' not in parts[0]|lower else 'verdict-undetected' }}">{{ parts[0] }}</span>
+                              {% else %}
+                                <strong class="c4-option-claim">{{ parts[0] }}</strong>
+                                <span class="c4-option-reason">because {{ parts[1] }}</span>
+                              {% endif %}
+                            {% else %}
+                              <span class="c4-option-plain">{{ option.text }}</span>
+                            {% endif %}
+                          </span>
+                        </span>
+                        <span class="c4-selected-badge" aria-hidden="true">✓ Selected</span>
+                      </label>
+                    {% endfor %}
+                  </div>
+                </div>
+
+                <div class="c4-step-nav">
+                  {% if not loop.first %}
+                    <button type="button" class="btn-prev" onclick="c4GoToStep({{ loop.index - 1 }})">← Previous</button>
+                  {% endif %}
+                  <button type="button" class="btn-next" onclick="c4GoToStep({{ loop.index + 1 }})">Next Question →</button>
+                </div>
+              </div>
+            {% endfor %}
+
+            <div class="c4-step" data-step="4">
+              <div class="c4-subjective-card">
+                <header class="c4-subjective-header">
+                  <h3>Question 4: Explain Your Reasoning</h3>
+                  <p class="c4-subjective-instructions">Use the arrangement and corruption patterns below to answer parts (a), (b), and (c).</p>
+                </header>
+
+                {% if view.f1_public_assessment.subjective.arrangement %}
+                  {{ assessment_arrangement(view.f1_public_assessment.subjective.arrangement) }}
+                {% endif %}
+
+                <div class="c4-patterns-card" aria-label="Tested corruption patterns">
+                  <h4 class="c4-patterns-title">Tested Corruption Patterns (starting from sent sequence)</h4>
+                  <table class="c4-patterns-table">
+                    <thead><tr><th scope="col">Pattern</th><th scope="col">Flipped Positions</th><th scope="col">Note</th></tr></thead>
+                    <tbody>
+                      <tr><td><strong>Pattern 1</strong></td><td><span class="c4-flip-pill">Q2</span>, <span class="c4-flip-pill">Q4</span></td><td>2 flips</td></tr>
+                      <tr><td><strong>Pattern 2</strong></td><td><span class="c4-flip-pill">Q1</span>, <span class="c4-flip-pill">Q2</span>, <span class="c4-flip-pill">Q3</span></td><td>3 flips</td></tr>
+                      <tr><td><strong>Pattern 3</strong></td><td><span class="c4-flip-pill">Q4</span>, <span class="c4-flip-pill">Z2</span></td><td>2 flips (includes checking bit Z2)</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="c4-subpart-block">
+                  <label for="c4-subpart-a" class="c4-subpart-label">
+                    <span class="c4-part-pill">Part (a)</span>
+                    <strong>Per-group flip counts and receiver detection</strong>
+                    <span class="c4-subpart-desc">For each pattern, count the flipped positions inside each group (H1, H2, H3) and say whether the receiver's checks detect the corruption.</span>
+                  </label>
+                  <textarea id="c4-subpart-a" class="c4-subpart-input" rows="4" placeholder="Pattern 1: ...&#10;Pattern 2: ...&#10;Pattern 3: ..."></textarea>
+                </div>
+
+                <div class="c4-subpart-block">
+                  <label for="c4-subpart-b" class="c4-subpart-label">
+                    <span class="c4-part-pill">Part (b)</span>
+                    <strong>Evaluating the student's rule claim</strong>
+                    <span class="c4-subpart-desc">A student says: <em>"If an odd number of positions flip, these checks always detect it."</em> Use the patterns to say whether this is true, and explain why.</span>
+                  </label>
+                  <textarea id="c4-subpart-b" class="c4-subpart-input" rows="3" placeholder="State whether true/false and cite the patterns as evidence..."></textarea>
+                </div>
+
+                <div class="c4-subpart-block">
+                  <label for="c4-subpart-c" class="c4-subpart-label">
+                    <span class="c4-part-pill">Part (c)</span>
+                    <strong>Evaluating the added check bit R and group H4</strong>
+                    <span class="c4-subpart-desc">The designers add one extra checking bit, R, with a new group H4 = {Q1, Q4, Z2, R}. R is set so H4 starts with an even number of 1s, and R does not flip. Would H4 detect Pattern 2? Would it detect Pattern 3? Does adding H4 mean every corruption would now be detected? Explain using flip counts.</span>
+                  </label>
+                  <textarea id="c4-subpart-c" class="c4-subpart-input" rows="4" placeholder="Would H4 detect Pattern 2? Pattern 3? Does H4 guarantee all errors are detected? Explain..."></textarea>
+                </div>
+
+                <div class="assessment-subjective-prompt" style="display:none;">{{ view.f1_public_assessment.subjective.prompt }}</div>
+                <textarea id="assessment-response" name="response_text" maxlength="12000" style="display:none;"></textarea>
+
+                <div id="c4-missing-summary" class="c4-missing-summary" style="display:none;" role="alert">
+                  <div class="c4-missing-header">
+                    <span class="c4-missing-icon" aria-hidden="true">⚠️</span>
+                    <strong>Please complete all questions before submitting:</strong>
+                  </div>
+                  <ul id="c4-missing-list" class="c4-missing-list"></ul>
+                </div>
+
+                <div class="c4-step-nav">
+                  <button type="button" class="btn-prev" onclick="c4GoToStep(3)">← Previous Question</button>
+                  <button type="submit" class="btn-submit" id="c4-submit-btn">Submit Assessment</button>
+                </div>
+              </div>
+            </div>
+          </form>
+
+        {% else %}
+          <form hx-post="/session/actions/assessment-response" hx-target="#session-main" hx-swap="outerHTML" method="post"><input type="hidden" name="idempotency_key" value="{{ new_key }}">{% for question in view.f1_public_assessment.mcqs %}<fieldset class="mcq"><legend>{{ loop.index }}. {{ question.stem }}</legend>{% if question.grid %}<pre class="assessment-bit-grid" aria-label="Received or transmitted parity grid">{% for row in question.grid %}{{ row|join(' ') }}{% if not loop.last %}
+{% endif %}{% endfor %}</pre>{% endif %}{% if question.arrangement %}{{ assessment_arrangement(question.arrangement) }}{% endif %}{% for option in question.options %}<label class="mcq-option"><input type="radio" name="{{ question.id|lower }}_answer" value="{{ option.id }}" required> <span><strong>{{ option.id }}.</strong> {{ option.text }}</span></label>{% endfor %}</fieldset>{% endfor %}<label for="assessment-response">4. Explain your reasoning</label><div class="assessment-subjective-prompt">{{ view.f1_public_assessment.subjective.prompt }}</div>{% if view.f1_public_assessment.subjective.arrangement %}{{ assessment_arrangement(view.f1_public_assessment.subjective.arrangement) }}{% endif %}<textarea id="assessment-response" name="response_text" required maxlength="12000"></textarea><button>Submit assessment</button></form>
+        {% endif %}
+      </section>
     {% elif view.phase == 'ASSESSMENT_ACTIVE' and view.f1_assessment_unavailable %}
       <section class="assessment" aria-live="polite"><div class="phase-badge">Independent assessment</div><h2>Assessment preparing</h2><p>Your assessment is not yet available. Please wait for the study team to make it available.</p></section>
     {% elif view.phase == 'ASSESSMENT_ACTIVE' %}

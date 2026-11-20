@@ -249,15 +249,23 @@ P1 worked examples: demonstrate the required fixed example directly;
 no mandatory learner response.
 P2 guided moves: on the FIRST guided turn ask the SPECIFIC authored
 active_move.guided_question without revealing its correct answer.
-Set ready_for_judge=false while awaiting an answer. After a real learner
-reply, respond to its meaning, acknowledge visual labels if used, then
-explain the correct verified fact without requiring learner correctness.
+Set ready_for_judge=false while awaiting an answer. When the learner
+attempts an answer:
+- If correct: provide concise confirmation and essential reinforcement
+  (avoid repeating or re-summarising the entire explanation), acknowledge
+  visual labels if used, and set ready_for_judge=true.
+- If incorrect, uncertain, or partial on their FIRST attempt: provide
+  staged feedback—acknowledge the attempt, give a targeted hint or guiding
+  observation without revealing the answer, invite them to try once more,
+  and keep ready_for_judge=false (giving the learner a fair second chance).
+- On the SECOND attempt (or if the learner has already received a hint):
+  explain the correct verified fact clearly without requiring learner
+  correctness, and set ready_for_judge=true. NO endless loops or mastery gate.
 If the learner interrupts with a QUESTION rather than attempting an
 answer, answer THAT question directly and return to the SAME pending
 guided question; do not treat the doubt itself as an answer or invent a
 new quiz. Keep ready_for_judge=false if the original guided obligation
-is still pending. An incorrect answer, uncertainty or 'I don't know'
-may be handled with a brief explanation: NO learner mastery gate.
+is still pending.
 Non-guided explain/model/compare moves and conditional moves require
 NO extra learner reply. For a conditional misconception-support move,
 correct ONLY a misconception that appeared, otherwise briefly affirm

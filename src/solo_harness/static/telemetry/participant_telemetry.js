@@ -137,7 +137,7 @@
   document.addEventListener('click', clickEvent, true);
   window.ParticipantTelemetry = {
     runId, performanceTimeOrigin: origin, metadata,
-    observeRender, flush,
+    observeRender, flush, enqueueUi,
     onRender(observer) { renderObservers.push(observer); },
   };
   if (window.rrwebRecord?.record) {

@@ -412,7 +412,7 @@ class ParticipantApplication:
                 "is_final_section": current_index == len(transition_ids) - 1,
                 "section_scientific_outcome": completed_outcomes.get(selected_transition_id),
                 "transition_summary": post_pass_transition_summary(
-                    f1_v04=bool(f1_study and compiled.authored.get("v04")),
+                    f1_v04=bool(f1_study and (compiled.authored.get("v04") or compiled.authored.get("v051"))),
                     is_current=is_current,
                     phase=session.phase,
                     outcome=completed_outcomes.get(selected_transition_id),
