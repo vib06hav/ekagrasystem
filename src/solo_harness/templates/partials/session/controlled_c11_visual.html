@@ -1,5 +1,20 @@
 {# Passive, frontend-owned C1.1 materials. Facts come only from the persisted
    server-generated instructional trace, never from model HTML/Markdown. #}
+{% macro frame_row(bits, payload_len, label) %}
+  <div class="c11-frame" aria-label="{{ label }}"><div class="c11-bit-row">
+  {% for bit in bits %}{% set is_parity = loop.index > payload_len %}
+    <div class="c11-bit-cell{{ ' is-parity' if is_parity }}"><span class="c11-position">{{ 'parity' if is_parity else loop.index }}</span><span class="c11-value">{{ bit }}</span></div>
+  {% endfor %}
+  </div></div>
+{% endmacro %}
+{% macro receiver_check(label, frame, convention, payload_len) %}
+  {% set ones = frame.count('1') %}{% set ok = (ones % 2 == 0) if convention == 'even' else (ones % 2 == 1) %}
+  <div class="c11-check" data-receiver-check="{{ 'pass' if ok else 'fail' }}">
+    <div class="c11-sequence-label">{{ label }}</div>
+    {{ frame_row(frame, payload_len, label) }}
+    <div class="c11-result">{{ 'PASS' if ok else 'FAIL' }} · {{ ones }} ones ({{ 'even' if ones % 2 == 0 else 'odd' }}) · the {{ convention }}-parity rule is {{ 'satisfied' if ok else 'broken' }}</div>
+  </div>
+{% endmacro %}
 {% set visual = item.visual %}
 {% if visual and (visual.subsection_id is not defined or visual.subsection_id[:2] == 'C1') and visual.component in ('mapping', 'sequence') %}
 <figure class="controlled-c11-visual" data-controlled-c11-visual="{{ visual.component }}" data-visual-mode="{{ visual.mode }}" data-visual-stage="{{ visual.stage }}">
@@ -60,11 +75,31 @@
     {% if visual.stage != 'prompt' %}<div class="c11-sequence-label">One bit can change while travelling.</div>{% endif %}
   {% elif visual.component == 'checking' %}
     <figcaption>Data with one checking position</figcaption>
-    <div class="c11-unit-contrast"><div><span class="c11-label">Data</span><code>{{ visual.fixed_cases.payload_bits }}</code></div><div><span class="c11-label">Checking position</span><code>p</code></div></div>
+    <div class="c11-bit-row">
+    {% for bit in visual.fixed_cases.payload_bits %}
+      <div class="c11-bit-cell"><span class="c11-position">{{ loop.index }}</span><span class="c11-value">{{ bit }}</span></div>
+    {% endfor %}
+      <div class="c11-bit-cell is-parity"><span class="c11-position">checking</span><span class="c11-value">{{ visual.fixed_cases.checking_position }}</span></div>
+    </div>
+    <div class="c11-sequence-label">Data bits are shown first; <code>{{ visual.fixed_cases.checking_position }}</code> marks the extra checking position and has no value yet.</div>
   {% elif visual.component == 'parity' %}
     <figcaption>Checking a complete bit frame</figcaption>
+    <div class="c11-sequence-label">Payload bits</div>
+    {{ frame_row(visual.fixed_cases.payload_bits, visual.fixed_cases.payload_bits|length, 'Payload bits') }}
     {% if visual.stage == 'prompt' %}<div class="c11-sequence-label">Use the shown payload and the stated checking rule.</div>
-    {% else %}<div class="c11-unit-contrast"><div><span class="c11-label">Payload</span><code>{{ visual.fixed_cases.payload_bits }}</code></div><div><span class="c11-label">Complete frame</span><code>{{ visual.fixed_cases.even_frame }}</code></div></div>{% endif %}
+    {% elif 'receiver' in visual.mode and visual.fixed_cases.even_fail_received is defined %}
+      {% set n = visual.fixed_cases.payload_bits|length %}
+      {{ receiver_check('Received frame, even-parity rule', visual.fixed_cases.even_pass_received, 'even', n) }}
+      {{ receiver_check('Received frame, even-parity rule', visual.fixed_cases.even_fail_received, 'even', n) }}
+      {{ receiver_check('Received frame, odd-parity rule', visual.fixed_cases.odd_pass_received, 'odd', n) }}
+    {% else %}
+      {% set want_odd = 'odd' in visual.mode %}
+      {% set both = visual.mode == 'sender_both' %}
+      {% if not want_odd or both %}<div class="c11-sequence-label">Complete frame with even parity</div>
+        {{ frame_row(visual.fixed_cases.even_frame, visual.fixed_cases.payload_bits|length, 'Even-parity frame') }}{% endif %}
+      {% if (want_odd or both) and visual.fixed_cases.odd_frame is defined %}<div class="c11-sequence-label">Complete frame with odd parity</div>
+        {{ frame_row(visual.fixed_cases.odd_frame, visual.fixed_cases.payload_bits|length, 'Odd-parity frame') }}{% endif %}
+    {% endif %}
   {% endif %}
 </figure>
 {% endif %}

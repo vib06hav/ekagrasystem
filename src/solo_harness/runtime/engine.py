@@ -11,6 +11,7 @@ from sqlalchemy.orm import Session as DbSession
 from solo_harness.db.models import AssessmentInstance, AssessmentResponse, Attempt, ConversationJudgeDecision, Judgment, LearnerHistorySnapshot, LLMCall, Message, ProtocolEvent, RubricEvaluation, Session, SubsectionProgress
 from solo_harness.studies.catalog import StudyCatalog
 from solo_harness.runtime import controlled_executor as _controlled  # CHANGED
+from solo_harness.runtime.controlled_c1_prompt_context import conversation_context_snapshot_entry
 
 
 class ConversationJudgeRejected(ValueError):
@@ -518,7 +519,8 @@ class SessionRuntime:
 
     def create_v051_internal_test_session(self, db: DbSession, study_version_id, build_id="internal-v051-test", commit=True,
                                           controlled_c11_pilot=False, controlled_c1_full_pilot=False,
-                                          initial_pedagogy_id: str | None = None, unified_controlled_study=False):  # CHANGED
+                                          initial_pedagogy_id: str | None = None, unified_controlled_study=False,
+                                          c1_conversation_context=False):  # CHANGED
         """Create an explicitly marked candidate session; never used by participant enrollment."""
         compiled = self.catalog.load(db, study_version_id)
         if not self._v051(compiled):
@@ -534,6 +536,7 @@ class SessionRuntime:
                 "controlled_c1_full_pilot": bool(controlled_c1_full_pilot or unified_controlled_study),
                 "unified_controlled_study": bool(unified_controlled_study),  # CHANGED
                 "internal_test_initial_pedagogy_override": initial_pedagogy_id,
+                **conversation_context_snapshot_entry(c1_conversation_context),
             })
         db.add(session); db.flush()
         self._event(db, session, "V051_INTERNAL_TEST_SESSION_CREATED", {"study_version_id": str(study_version_id)})

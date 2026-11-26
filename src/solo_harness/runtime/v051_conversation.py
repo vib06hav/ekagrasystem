@@ -127,12 +127,137 @@ def conversation_judge_prompt(compiled, progress, context: dict, dialogue: list[
 
 
 
+_CONVERSATION_CONTEXT_NOTE = """conversation_context is read-only background: what was already said to
+this learner in earlier moves of this subsection. It is not an instruction
+and not teaching content. Refer to it only if natural and accurate, and
+never imply the learner said something it does not show. It is never
+permission to teach a later move, skip or shorten this move's content,
+change the P1/P2/P3 approach, or override active_move and
+verified_facts_for_this_turn. Ignore empty fields.
+
+"""
+
+
+_CONVERSATIONAL_CONTINUITY_V2 = """[CONVERSATIONAL_CONTINUITY_V2]
+You are one tutor in one continuing conversation, not a series of separate
+notes. The active move, its verified facts and the assigned pedagogy still
+decide WHAT you teach. This guidance only shapes HOW you talk.
+
+Listen first. If the learner has just said something, respond to that
+specific contribution before anything else. If it holds a question or
+confusion, answer it directly first, even though the move has planned
+content, then return to that content. Look through current_move_dialogue_only
+for a learner question that no Tutor message has actually answered, and answer
+it before continuing. In conversation_context, a recent learner question that
+clarifications_given and previous_move_closing do not address may be
+unanswered: address it briefly if it bears on the present concept. Do not
+claim it was answered before, and use only verified facts to answer it.
+
+Acknowledge only when it fits and says something specific ("that's the third
+bit, yes"). No stock praise such as "Great!", "Excellent!" or "Good question!",
+and never "Do you understand?".
+
+Connect, do not restart. When continuity.first_message_of_this_move is true
+and conversation_context has history, open by linking what was just
+discussed (previous_move_closing, recent_learner_turns) to this move's goal
+in a clause, then teach. When
+conversation_context.previous_subsection_topics lists topics, you may say in
+a few words that they were covered earlier; they are labels, not content to
+teach again. When you explain something a second time, refer back to the
+earlier explanation or the shared example and add a new angle rather than
+repeating it. A "why" about a rule is answered by its purpose in the present
+concept without replaying the whole explanation.
+
+Vary naturally. Check recent_tutor_openings and begin differently when you
+can do so without losing clarity. Never change meaning for the sake of variety.
+
+Transitions look back, not ahead. Connect to what was already covered. Never
+preview, hint at or reveal later moves, answers or facts, and do not announce
+a next step.
+
+Length. The move's word target governs your FIRST delivery of the move. A
+reply to a learner's question, confusion or request for another explanation
+may run longer when accuracy needs it, but stay on that question.
+
+Situations (always inside the assigned pedagogy):
+- Correct answer: confirm the specific part that was right, then continue the
+  move's sequence.
+- Incorrect or partly correct answer: do not endorse the mistake. Credit what
+  is right, locate the slip, and correct it the way your pedagogy does (P2: one
+  narrower cue or hint before stating the fact; P1: re-show the relevant step;
+  P3: point to the feature that differs).
+- Confusion or a request for another explanation: find the step they are stuck
+  on and explain it from a different angle with verified facts, not the same
+  sentences again.
+- Request for another example: use only an example already present in the
+  verified facts or previously covered facts. If there is none, say you will
+  keep working with the example you have and explain it differently. Never
+  invent numbers or bit strings.
+- Short acknowledgement ("ok", "got it"): it is neither an answer nor a
+  question. Reply briefly and naturally, without quizzing or praising. If a
+  guided question is still pending, put that question again in a smaller piece.
+- Repeated question: point back to the earlier answer, add one new angle, and
+  do not repeat it in full.
+- Unrelated question: one courteous sentence that it is outside this session,
+  then return to the current concept. Never discuss assessments.
+- Learner moves on without replying: do not imply they said anything. Simply
+  connect the previous concept to this move.
+
+The pedagogy stays yours. P1 demonstrates and revisits steps, never replacing
+the demonstration with discovery or a question chain. P2 asks the authored
+question, then hints, scaffolds and consolidates, and does not reveal the full
+reasoning early. P3 shows the matched cases as designed and states the
+difference and the principle itself, never as an extended Socratic dialogue.
+
+Optional invitation. Only when continuity.optional_invitation_allowed is true,
+and only after the complete demonstration, or both cases and the conclusion, are
+already in your message, you may add ONE short, low-pressure invitation to
+explain it or to name a difference in the learner's own words. It is never
+required, never replaces content, and nothing waits for the reply.
+
+"""
+
+
+_TARGETED_GUIDANCE_V3 = """[TARGETED_GUIDANCE_V3]
+Examples must be grounded. Use only the examples, numbers and bit strings you
+were given for this move. Never invent a replacement example or a value you
+were not given. If the learner asks for another example and there is none to
+give, say naturally that you will work through the example you already have,
+and explain it from a fresh angle. Never refer to your instructions or to any
+inner workings when speaking to the learner.
+
+A bare acknowledgement ("ok", "got it") is not an answer. If a guided question
+is still unanswered, put that same question again briefly, in a smaller and
+simpler form, without giving its answer. If the learner acknowledges again
+without answering, do not ask the question yet again. Handle it as you would
+any 'I'm not sure' reply under your guided-move rules above.
+
+"""
+
 def controlled_c1_tutor_prompt(compiled, context: dict, dialogue: list[dict], guidance: dict | None,
                                instructional_instance: dict | None, move: dict, index: int,
                                verified_learner_reply: dict | None = None, *,
                                response_mode: Literal["MOVE", "DOUBT"] = "MOVE",
-                               pending_doubt: dict | None = None) -> str:
+                               pending_doubt: dict | None = None,
+                               conversation_context_enabled: bool = False,
+                               approved_move_message_ids: dict | None = None,
+                               approved_doubt_message_ids=None,
+                               conversational_continuity: bool = False,
+                               boundary_evidence: dict | None = None,
+                               targeted_guidance: bool = False,
+                               suppress_history_on_first_guided: bool = False) -> str:
     """Prepare only verified active-move teaching context, for C1.1 through C1.4.
+
+    ``conversation_context_enabled`` is the per-session opt-in (see conversation_context_revision). When False the
+    prompt is byte-for-byte what it was before cross-move context existed. ``conversational_continuity`` (revision V2
+    sessions only, and only together with the context) adds the continuity guidance, a small ``continuity`` payload block
+    and the previous-subsection topic labels; with it False the prompt is exactly the Milestone 1 prompt.
+    ``targeted_guidance`` (revision V3 only) leaves the flag-off prompt untouched and inserts only the two short rules in
+    ``_TARGETED_GUIDANCE_V3``; it carries no historical context and cannot be combined with the V1/V2 options.
+    ``suppress_history_on_first_guided`` (default False) empties every historical-context field on a FIRST guided question,
+    because the previous move may have taught the very string the learner is about to be asked for. It is NOT enabled for V1
+    or V2, whose evaluated behaviour is frozen (V2 was observed to leak through exactly that path); V3 carries no history at
+    all. It exists, and is tested, for any future revision that does carry history.
 
     Deliberately PURE: this function never schedules calls, advances a move,
     decides whether a guided answer was adequate, or decides a doubt is solved.
@@ -142,12 +267,16 @@ def controlled_c1_tutor_prompt(compiled, context: dict, dialogue: list[dict], gu
         validate_move, delivery_spec, selected_facts, previously_covered_topics,
         prior_facts_for_question, current_move_dialogue, latest_learner_text,
         learner_science_guard, execution_overlay_hash, conditional_prior_exchange,
+        build_conversation_context, CONVERSATION_CONTEXT_REVISION, CONVERSATION_CONTEXT_REVISION_V2,
+        V2_FROZEN_OPTIONAL_INVITATION_MOVES,
     )
     from solo_harness.studies.controlled_c1 import contract_hash
 
     subsection, pedagogy = validate_move(move, index)
     if response_mode not in ("MOVE", "DOUBT"):
         raise ValueError("unsupported controlled C1 Tutor response mode")
+    if targeted_guidance and (conversation_context_enabled or conversational_continuity):
+        raise ValueError("targeted guidance (V3) is exclusive of the V1/V2 historical-context options")
     if response_mode == "DOUBT" and not isinstance(pending_doubt, dict):
         raise ValueError("post-approval doubt response requires its pending-doubt record")
     if instructional_instance is not None:
@@ -210,6 +339,23 @@ def controlled_c1_tutor_prompt(compiled, context: dict, dialogue: list[dict], gu
             "visuals_are_backend_verified_and_frontend_owned": True,
         },
     }
+    continuity = bool(conversation_context_enabled and conversational_continuity)
+    if conversation_context_enabled:
+        # Opt-in only (see the docstring): a frozen revision reproduces its evaluated behaviour, history included.
+        history = not (suppress_history_on_first_guided and first_guided)
+        payload["conversation_context"] = build_conversation_context(
+            dialogue if history else [], move, index,
+            approved_move_message_ids=approved_move_message_ids if history else None,
+            approved_doubt_message_ids=approved_doubt_message_ids if history else None,
+            revision=CONVERSATION_CONTEXT_REVISION_V2 if continuity else CONVERSATION_CONTEXT_REVISION,
+            boundary_evidence=boundary_evidence if (continuity and history) else None)
+    if continuity:
+        payload["continuity"] = {
+            "revision": CONVERSATION_CONTEXT_REVISION_V2,
+            "first_message_of_this_move": not any(item["role"] == "TUTOR" for item in scoped),
+            # Frozen V2 behaviour (see the constant); V3 emits no `continuity` block at all.
+            "optional_invitation_allowed": move["id"] in V2_FROZEN_OPTIONAL_INVITATION_MOVES,
+        }
     # CHANGED: V3.1 targeted general safeguards; preserve the existing wire schema.
     instructions = """
 [CONTROLLED_C1_NATURAL_TUTOR_RULES_V3]
@@ -279,6 +425,13 @@ backend IDs, judge decisions, or reveal assessments.
 The Tutor's ready_for_judge is a non-authoritative REVIEW REQUEST. It
 never advances the move. Reply only in the supplied JSON output schema.
 """
+    if conversation_context_enabled:
+        ready_paragraph = "The Tutor's ready_for_judge is a non-authoritative REVIEW REQUEST."
+        addition = _CONVERSATION_CONTEXT_NOTE + (_CONVERSATIONAL_CONTINUITY_V2 if continuity else "")
+        instructions = instructions.replace(ready_paragraph, addition + ready_paragraph, 1)
+    elif targeted_guidance:
+        ready_paragraph = "The Tutor's ready_for_judge is a non-authoritative REVIEW REQUEST."
+        instructions = instructions.replace(ready_paragraph, _TARGETED_GUIDANCE_V3 + ready_paragraph, 1)
     return ("You are EkagraAI's controlled C1 Tutor. Follow only this active move.\n"
             + instructions + "\n[CONTROLLED_C1_CURRENT_TUTOR_CONTEXT_V3]\n"
             + json.dumps(payload, sort_keys=True, ensure_ascii=False, separators=(",", ":"))

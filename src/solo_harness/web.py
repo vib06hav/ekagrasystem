@@ -37,6 +37,7 @@ from solo_harness.transition_summaries import post_pass_transition_summary
 from solo_harness.teaching_render import render_tutor_markdown
 from solo_harness.runtime.paas import instrument_snapshot
 from solo_harness.runtime import controlled_executor as _controlled  # CHANGED
+from solo_harness.runtime.controlled_c1_prompt_context import conversation_context_snapshot_entry
 from solo_harness.runtime.assessment_persistence import is_deliverable_f1, is_f1_frozen, is_f1_study, public_projection, submit_f1_response
 from solo_harness.research_time import in_research_timezone
 from solo_harness.telemetry import append_keyboard_batch, append_rrweb_batch, ensure_browser_manifest, record_ui_events
@@ -45,6 +46,35 @@ logger = logging.getLogger(__name__)
 
 templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 templates.env.filters["tutor_markdown"] = render_tutor_markdown
+
+
+def project_move_visuals(messages) -> dict:
+    """Presentation projection: sequence_no -> the one visual to render for each move.
+
+    Persisted tutor traces are an audit record and stay untouched. A guided move
+    stores a prompt-stage visual on its first Tutor message and, later, a
+    complete-stage visual on a continuation; this shows a single card at the
+    first message and upgrades it to the (already server-verified) complete
+    stage only if such a persisted descriptor exists.
+    """
+    shown: dict = {}
+    owner: dict = {}
+    for message in sorted((m for m in messages if m.role == "TUTOR"), key=lambda m: m.sequence_no):
+        trace = message.instructional_trace or {}
+        visual = trace.get("pilot_visual")
+        if not visual:
+            continue
+        move_id = trace.get("pilot_move_id")
+        if not move_id:
+            shown[message.sequence_no] = visual
+            continue
+        key = (move_id, visual.get("component"))
+        if key not in owner:
+            owner[key] = message.sequence_no
+            shown[message.sequence_no] = visual
+        elif visual.get("stage") == "complete":
+            shown[owner[key]] = visual
+    return shown
 
 _STATIC_DIR = Path(__file__).parent / "static"
 _asset_hashes: dict[str, tuple[int, str]] = {}
@@ -153,6 +183,9 @@ class ParticipantApplication:
                         "unified_controlled_study": unified,  # CHANGED
                         "controlled_c11_pilot": unified,  # CHANGED
                         "controlled_c1_full_pilot": unified,  # CHANGED
+                        # Opt-in is decided once, here, and stamped on the session (default off).
+                        **conversation_context_snapshot_entry(
+                            unified and getattr(self.settings, "enable_c1_conversation_context", False)),
                         "capture_required_at_join": requires_capture,
                         "capture_required_streams": self.settings.required_capture_streams if requires_capture else "none",
                         "capture_heartbeat_max_age_seconds": self.settings.active_capture_max_age_seconds if requires_capture else None,
@@ -268,6 +301,7 @@ class ParticipantApplication:
                     "timestamp": in_research_timezone(attempt.assigned_at),
                 })
                 marked_subsection = None
+                move_visuals = project_move_visuals(messages_by_attempt[attempt.id])
                 for message in messages_by_attempt[attempt.id]:
                     subsection_id = (message.instructional_trace or {}).get("subsection_id") if v051_candidate else None
                     if subsection_id and subsection_id != marked_subsection:
@@ -280,7 +314,7 @@ class ParticipantApplication:
                         "content": message.content_text,
                         "sequence_no": message.sequence_no,
                         "timestamp": in_research_timezone(message.created_at),
-                        "visual": ((message.instructional_trace or {}).get("pilot_visual")
+                        "visual": (move_visuals.get(message.sequence_no)
                             if message.role == "TUTOR" and v051_candidate and
                             (session.runtime_config_snapshot or {}).get("controlled_c11_pilot") else None),
                     })
@@ -543,6 +577,7 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
                 controlled_c1_full_pilot=full_c1,
                 initial_pedagogy_id=x_ekagra_internal_pedagogy,
                 unified_controlled_study=unified,  # CHANGED
+                c1_conversation_context=bool(full_c1 and getattr(application.settings, "enable_c1_conversation_context", False)),
             )
             # The browser handoff is a one-use capability.  A session UUID alone
             # is never enough to attach to a staff-created pilot session.

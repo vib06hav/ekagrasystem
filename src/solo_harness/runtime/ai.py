@@ -8,7 +8,7 @@ import httpx
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import and_, or_, select
 from solo_harness.config import Settings
-from solo_harness.db.models import AssessmentInstance, AssessmentResponse, Attempt, LLMCall, Message, Session, StudyVersion, SubsectionProgress, V04Evaluation
+from solo_harness.db.models import AssessmentInstance, AssessmentResponse, Attempt, ConversationJudgeDecision, LLMCall, Message, Session, StudyVersion, SubsectionProgress, V04Evaluation
 from solo_harness.runtime.engine import ConversationJudgeRejected, SessionRuntime
 from solo_harness.runtime import controlled_executor as _controlled  # CHANGED
 
@@ -55,6 +55,43 @@ def _decode(value):
 
 # Bound unattended model-to-model review cycles; real learner exchanges reset this count.
 _MAX_AUTONOMOUS_REVIEWS = 6
+
+
+def move_answer_reply_exists(rows, move_id, before_sequence) -> bool:
+    """True when a learner message lies inside this move's own window.
+
+    Learner rows carry no move id; the association is positional: after the
+    first Tutor message stamped with `move_id` and before the message being
+    created. A reply to an earlier move precedes this move's first message and
+    can never fall inside the window.
+    """
+    first = next((r for r in rows if r.role == "TUTOR"
+                  and (r.instructional_trace or {}).get("pilot_move_id") == move_id), None)
+    return first is not None and any(r.role == "LEARNER" and first.sequence_no < r.sequence_no < before_sequence for r in rows)
+
+def approved_doubt_message_ids(db, attempt_id, subsection_progress_id) -> list[str]:
+    """Tutor message ids whose DOUBT-mode reply was approved by an APPLIED Judge ADVANCE.
+
+    Read-only provenance for the C1 conversation context. A post-approval doubt reply is not added
+    to ``move_evidence``; its approval exists only as a persisted decision plus the reviewed message id
+    recorded in the Judge call's audit. Scoped to one attempt and one subsection ledger.
+    """
+    rows = db.execute(
+        select(ConversationJudgeDecision.payload, LLMCall.request_payload)
+        .join(LLMCall, LLMCall.id == ConversationJudgeDecision.llm_call_id)
+        .where(ConversationJudgeDecision.attempt_id == attempt_id,
+               ConversationJudgeDecision.subsection_progress_id == subsection_progress_id,
+               ConversationJudgeDecision.action == "ADVANCE",
+               ConversationJudgeDecision.application_status == "APPLIED")).all()
+    ids = []
+    for payload, request in rows:
+        audit = (request or {}).get("audit", {}) if isinstance(request, dict) else {}
+        reviewed = audit.get("reviewed_tutor_message_id")
+        if ((payload or {}).get("review_mode") == "DOUBT_REVIEW" and audit.get("pilot_review_mode") == "DOUBT_REVIEW"
+                and isinstance(reviewed, str)):
+            ids.append(reviewed)
+    return ids
+
 
 class AIExecutionRuntime:
     def __init__(self,runtime:SessionRuntime,client:LLMClient,settings:Settings): self.runtime,self.client,self.settings=runtime,client,settings
@@ -159,9 +196,37 @@ class AIExecutionRuntime:
                 verified_reply = _controlled.unambiguous_reply_feedback(move, learner_text, instructional)
                 # CHANGED: preserve mature C1 V3.2 prompt verbatim; C2--C4 get
                 # the equivalent move-scoped, schema-identical prompt adapter.
+                # Per-session opt-in recorded at creation: resuming never changes it, and sessions that predate it stay off.
+                context_revision = None
                 if _controlled.section_of(progress) == "C1":
+                    from solo_harness.runtime.controlled_c1_prompt_context import conversation_context_revision
+                    context_revision = conversation_context_revision(session.runtime_config_snapshot)
+                    from solo_harness.runtime.controlled_c1_prompt_context import (
+                        CONTEXT_CARRYING_REVISIONS, CONVERSATION_CONTEXT_REVISION_V2, CONVERSATION_CONTEXT_REVISION_V3)
+                    # V1 = context; V2 = context + continuity guidance (both frozen); V3 = the flag-off prompt plus two short
+                    # targeted rules and NO history, so it needs no approval lookups at all.
+                    with_context = context_revision in CONTEXT_CARRYING_REVISIONS
+                    targeted = context_revision == CONVERSATION_CONTEXT_REVISION_V3
+                    continuity = context_revision == CONVERSATION_CONTEXT_REVISION_V2
+                    boundary = None
+                    if continuity and position == 0 and progress.order_in_attempt > 1:
+                        # First move of a later subsection: the immediately preceding subsection of THIS attempt, only if
+                        # completed, and only the move ids its own ledger shows as approved (labels are derived from those).
+                        previous = db.scalar(select(SubsectionProgress).where(
+                            SubsectionProgress.attempt_id == attempt.id,
+                            SubsectionProgress.order_in_attempt == progress.order_in_attempt - 1,
+                            SubsectionProgress.status == "COMPLETED"))
+                        if previous is not None:
+                            boundary = {"subsection_id": previous.subsection_id,
+                                        "approved_move_ids": list((previous.move_evidence or {}).keys())}
                     prompt = controlled_c1_tutor_prompt(compiled, context, dialogue, guidance, instructional, move, position,
-                                                         verified_reply, response_mode=response_mode, pending_doubt=pending_doubt)
+                                                         verified_reply, response_mode=response_mode, pending_doubt=pending_doubt,
+                                                         conversational_continuity=continuity, boundary_evidence=boundary,
+                                                         targeted_guidance=targeted,
+                                                         conversation_context_enabled=with_context,
+                                                         approved_move_message_ids=progress.move_evidence if with_context else None,
+                                                         approved_doubt_message_ids=(approved_doubt_message_ids(db, attempt.id, progress.id)
+                                                                                     if with_context else None))
                 else:
                     from solo_harness.runtime.controlled_unified_prompts import tutor_prompt
                     prompt = tutor_prompt(compiled, context, dialogue, guidance, instructional, move, position,
@@ -169,6 +234,8 @@ class AIExecutionRuntime:
                 audit.update({"pilot_move_id":move["id"], "pilot_move_index":position,
                               "pilot_contract_sha256":_controlled.contract_hash(progress), "pilot_response_mode":response_mode,
                               "pending_doubt_message_id": pending_doubt.get("learner_message_id") if pending_doubt else None})
+                if context_revision:   # auditable per call in llm_calls.request_payload["audit"]; absent means no context was sent
+                    audit["c1_conversation_context_revision"] = context_revision
             else:
                 prompt = v051_tutor_prompt(compiled,progress,context,dialogue,guidance,instructional)
             messages=(CanonicalMessage(role="system",content=prompt),)
@@ -458,11 +525,10 @@ class AIExecutionRuntime:
                             if not prior_current:
                                 visual=_controlled.visual_descriptor(move, pilot_progress.instructional_state["verified_instructional_instance"], "prompt" if move["learner_response_policy"] == "guided" else "complete")  # CHANGED
                             elif (out.ready_for_judge and move["visual"]
-                                  and move["learner_response_policy"] == "guided"):  # CHANGED
-                                first=prior_current[0]
-                                had_reply=db.scalar(select(Message.id).where(Message.attempt_id==attempt.id,
-                                    Message.role=="LEARNER",Message.sequence_no>first.sequence_no)) is not None
-                                if had_reply:
+                                  and move["learner_response_policy"] == "guided"
+                                  and audit.get("pilot_response_mode", "MOVE") == "MOVE"):  # CHANGED: a doubt reply is not the move's answer
+                                all_rows=db.scalars(select(Message).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no)).all()
+                                if move_answer_reply_exists(all_rows, move["id"], seq):
                                     visual=_controlled.visual_descriptor(move, pilot_progress.instructional_state["verified_instructional_instance"], "complete")
                             if visual:
                                 trace["pilot_visual"] = visual

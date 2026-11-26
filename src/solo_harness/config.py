@@ -41,6 +41,9 @@ class Settings(BaseSettings):
     enable_v051_unified_study: bool = False  # CHANGED: explicit opt-in for real C1--C4 execution
     enable_controlled_c11_pilot: bool = False  # internal v0.5 sessions only; default off
     enable_controlled_c1_full_pilot: bool = False  # explicit internal C1.1--C1.4 overlay; default off
+    # C1-only cross-move conversation context. Read ONLY when a session is created, to stamp the session's
+    # runtime_config_snapshot; a running session never re-reads it. Default off.
+    enable_c1_conversation_context: bool = False
     v051_internal_testing_token: SecretStr | None = None
     # The implementation retains its v051 module names, but there is one
     # executable experimental study candidate: v0.5.
