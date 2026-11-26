@@ -27,6 +27,13 @@ class RawLLMResponse:
     provider_request_id:str|None; status_code:int; raw_response_text:str; response_payload:dict|None; structured_candidate:object|str|None; finish_reason:str|None; refusal:bool; usage:dict; latency_ms:int
 class ProviderError(RuntimeError):
     def __init__(self, error_class,message,retryable): super().__init__(message); self.error_class,self.retryable=error_class,retryable
+class WordLimitExceeded(RuntimeError): pass
+
+# CHANGED: A length-only rewrite must not change the Tutor's first completion decision.
+class C3WordRewriteInconsistent(RuntimeError):
+    def __init__(self, message, rewrite_audit):
+        super().__init__(message)
+        self.rewrite_audit = rewrite_audit
 class LLMClient(Protocol):
     def prepare(self, request:LLMRequest)->PreparedLLMRequest: ...
     async def send(self, prepared:PreparedLLMRequest)->RawLLMResponse: ...
@@ -68,7 +75,64 @@ class AIExecutionRuntime:
     def _science(self):
         from solo_harness.studies.scientific_v04 import load_scientific_v04
         return load_scientific_v04(self.settings.study_dir)
-    def reserve_tutor(self,db,session_id,learner_text=None,commit=True,auto_reviews_since_learner=0):
+    async def _enforce_c3_word_cap(self, request, prepared, raw, audit):
+        """Rewrite an over-limit isolated-C3 delivery before it can become visible."""
+        if (request.logical_role != "TUTOR" or not audit.get("c3_isolated_pilot_version")
+                or audit.get("pilot_response_mode") != "MOVE"):
+            return raw, []
+        from solo_harness.runtime.controlled_c3_pilot_prompts import (
+            guided_delivery_stage, learner_message_word_cap, learner_message_word_count,
+            word_limit_rewrite_instruction,
+        )
+        from solo_harness.runtime.v051_conversation import V051TutorOutput
+        subsection = audit["subsection_id"]
+        move = _controlled.contract("C3")["subsections"][subsection]["moves_by_pedagogy"][audit["pedagogy_id"]][audit["pilot_move_index"]]
+        rewrites = []
+        original_ready = None  # CHANGED: Freeze the initial C3 P2 decision only.
+        original_stage = audit.get("c3_guided_stage")
+        is_guided = original_stage is not None  # CHANGED: P1/P3 rewrite behavior stays unchanged.
+        cap = None
+        for retry in range(3):
+            output = V051TutorOutput.model_validate(_decode(raw.structured_candidate or raw.raw_response_text))
+            if retry == 0:  # CHANGED: Derive the cap and delivery type only from the first Tutor output.
+                original_ready = output.ready_for_judge
+                if original_stage:
+                    original_stage = guided_delivery_stage(
+                        original_stage, int(audit["c3_guided_hint_count"]),
+                        bool(audit.get("c3_guided_has_learner_reply")), original_ready,
+                    )
+                cap = learner_message_word_cap(move, original_stage)
+            count = learner_message_word_count(output.learner_message)
+            same_decision = not is_guided or output.ready_for_judge == original_ready  # CHANGED
+            if is_guided:  # CHANGED: Additional stage audit belongs to C3 P2 only.
+                rewrites.append({"attempt": retry, "word_count": count, "cap": cap,
+                                 "ready_for_judge": output.ready_for_judge,
+                                 "expected_ready_for_judge": original_ready,
+                                 "accepted": count <= cap and same_decision})
+            else:
+                rewrites.append({"attempt": retry, "word_count": count, "cap": cap,
+                                 "accepted": count <= cap})
+            if not same_decision:  # CHANGED: Do not publish a shortened response with a new decision.
+                raise C3WordRewriteInconsistent(
+                    "C3 word-limit rewrite changed ready_for_judge; retry the Tutor turn", rewrites)
+            if count <= cap:
+                return raw, rewrites
+            if retry == 2:
+                exc = WordLimitExceeded(f"C3 Tutor exceeded the {cap}-word cap after two rewrite requests")
+                exc.rewrite_audit = rewrites  # CHANGED: Keep failed rewrite history for diagnosis.
+                raise exc
+            rewrite = word_limit_rewrite_instruction(
+                count, cap, output.model_dump(mode="json"), original_stage if is_guided else None)  # CHANGED
+            request = LLMRequest(request.logical_role, uuid.uuid4(), request.retry_group_id, retry + 1,
+                                 request.provider, request.model,
+                                 request.messages + (CanonicalMessage(role="system", content=rewrite),),
+                                 request.response_schema_name, request.response_schema_version,
+                                 request.response_json_schema, request.generation_parameters,
+                                 request.timeout_seconds, request.audit_context)
+            raw = await self.client.send(self.client.prepare(request))
+        raise AssertionError("unreachable")
+    def reserve_tutor(self,db,session_id,learner_text=None,commit=True,auto_reviews_since_learner=0,
+                      retry_c3_guided_reply=False):
         from solo_harness.runtime.v04_native import TutorProse,tutor_messages
         from solo_harness.studies.v04_instructional import resolve_instructional_instance
         # The session lock is the stage lease: distinct HTTP idempotency keys may
@@ -127,7 +191,8 @@ class AIExecutionRuntime:
                 controlled = dict(_controlled.state(progress))
                 status = controlled.get("status", "TEACHING")
                 response_mode, pending_doubt = "MOVE", None
-                if learner_text is not None:
+                learner = None
+                if learner_text is not None or retry_c3_guided_reply:
                     learner = next((item for item in reversed(dialogue) if item["role"] == "LEARNER"), None)
                     if status == "APPROVED_AWAITING_NEXT":
                         if learner is None:
@@ -159,7 +224,29 @@ class AIExecutionRuntime:
                 verified_reply = _controlled.unambiguous_reply_feedback(move, learner_text, instructional)
                 # CHANGED: preserve mature C1 V3.2 prompt verbatim; C2--C4 get
                 # the equivalent move-scoped, schema-identical prompt adapter.
-                if _controlled.section_of(progress) == "C1":
+                from solo_harness.runtime.controlled_c3_pilot_prompts import pilot_enabled as c3_pilot_enabled
+                if c3_pilot_enabled(session, progress):
+                    from solo_harness.runtime.controlled_c3_pilot_prompts import (
+                        new_guided_state, tutor_prompt as c3_tutor_prompt,
+                    )
+                    c3_stage = None
+                    c3_hint_count = 0
+                    c3_has_learner_reply = False
+                    if move["learner_response_policy"] == "guided" and response_mode == "MOVE":
+                        guided = controlled.get("c3_guided")
+                        if not isinstance(guided, dict) or guided.get("move_id") != move["id"]:
+                            guided = new_guided_state(move["id"])
+                        controlled["c3_guided"] = guided
+                        progress.instructional_state = {**(progress.instructional_state or {}),
+                                                        _controlled.state_key(progress): controlled}
+                        c3_stage = guided["stage"]
+                        c3_hint_count = int(guided["hint_count"])
+                        c3_has_learner_reply = learner is not None
+                    prompt = c3_tutor_prompt(compiled, context, dialogue, guidance, instructional, move, position,
+                                             verified_reply, response_mode=response_mode, pending_doubt=pending_doubt,
+                                             p2_stage=c3_stage, p2_hint_count=c3_hint_count,
+                                             has_learner_reply=c3_has_learner_reply)
+                elif _controlled.section_of(progress) == "C1":
                     prompt = controlled_c1_tutor_prompt(compiled, context, dialogue, guidance, instructional, move, position,
                                                          verified_reply, response_mode=response_mode, pending_doubt=pending_doubt)
                 else:
@@ -169,6 +256,11 @@ class AIExecutionRuntime:
                 audit.update({"pilot_move_id":move["id"], "pilot_move_index":position,
                               "pilot_contract_sha256":_controlled.contract_hash(progress), "pilot_response_mode":response_mode,
                               "pending_doubt_message_id": pending_doubt.get("learner_message_id") if pending_doubt else None})
+                if c3_pilot_enabled(session, progress):
+                    audit.update({"c3_isolated_pilot_version": "C3_ISOLATED_PROMPT_SEPARATION_V1",
+                                  "c3_guided_stage": c3_stage,
+                                  "c3_guided_hint_count": c3_hint_count,
+                                  "c3_guided_has_learner_reply": c3_has_learner_reply})
             else:
                 prompt = v051_tutor_prompt(compiled,progress,context,dialogue,guidance,instructional)
             messages=(CanonicalMessage(role="system",content=prompt),)
@@ -223,7 +315,14 @@ class AIExecutionRuntime:
                 raise ValueError("latest Tutor response is not from the active controlled move")
             all_moves=_controlled.moves(progress)
             # CHANGED: the audit/decision machinery is common; prompt science is section-specific.
-            if _controlled.section_of(progress) == "C1":
+            from solo_harness.runtime.controlled_c3_pilot_prompts import pilot_enabled as c3_pilot_enabled
+            if c3_pilot_enabled(session, progress):
+                from solo_harness.runtime.controlled_c3_pilot_prompts import judge_prompt as c3_judge_prompt
+                prompt = c3_judge_prompt(compiled, context, dialogue,
+                    (progress.instructional_state or {}).get("verified_instructional_instance"),
+                    move, position, position == len(all_moves)-1, progress.move_evidence or {},
+                    review_mode=review_mode, pending_doubt=pending_doubt)
+            elif _controlled.section_of(progress) == "C1":
                 prompt = controlled_c1_judge_prompt(compiled, context, dialogue,
                     (progress.instructional_state or {}).get("verified_instructional_instance"),
                     move, position, position == len(all_moves)-1, progress.move_evidence or {},
@@ -237,6 +336,9 @@ class AIExecutionRuntime:
             audit.update({"pilot_move_id":move["id"],"pilot_move_index":position,
                           "pilot_contract_sha256":_controlled.contract_hash(progress), "pilot_review_mode":review_mode,
                           "pending_doubt_message_id": pending_doubt.get("learner_message_id") if pending_doubt else None})
+            if c3_pilot_enabled(session, progress):
+                from solo_harness.runtime.controlled_c3_pilot_prompts import PILOT_VERSION
+                audit["c3_isolated_pilot_version"] = PILOT_VERSION
         else:
             prompt=conversation_judge_prompt(compiled,progress,context,dialogue,(progress.instructional_state or {}).get("verified_instructional_instance"))
         call=self._reserve(db,session,attempt,None,"CONVERSATION_JUDGE",(CanonicalMessage(role="system",content=prompt),),ConversationJudgeOutput,audit)
@@ -423,20 +525,35 @@ class AIExecutionRuntime:
                 call.parsed_response=out.model_dump(mode="json"); call.status="SUCCEEDED"; call.completed_at=datetime.now(timezone.utc)
                 next_call = None
                 pilot_review = bool(audit.get("pilot_move_id"))
+                c3_pilot_review = bool(audit.get("c3_isolated_pilot_version"))
                 if (decision.action == "CONTINUE" and session.phase == "INTERVENTION_ACTIVE") or (
                         not pilot_review and decision.action != "HOLD" and session.phase == "INTERVENTION_ACTIVE"):
                     # The Judge is a real controller: its stored guidance is
                     # compiled into the next Tutor request, rather than merely
                     # being displayed or left for an external caller to use.
                     reviewed = int(audit.get("auto_reviews_since_learner", 0))
-                    next_call = self.reserve_tutor(db, session.id, commit=False,
-                        auto_reviews_since_learner=(reviewed if pilot_review else (0 if decision.action == "ADVANCE" else reviewed)))
+                    if c3_pilot_review and reviewed >= _MAX_AUTONOMOUS_REVIEWS:
+                        self.runtime.record_v051_delivery_exception(
+                            db, session.id, audit["subsection_id"],
+                            {"reason": "C3 move Judge repair limit exhausted"}, commit=False)
+                    else:
+                        next_call = self.reserve_tutor(db, session.id, commit=False,
+                            auto_reviews_since_learner=(reviewed if pilot_review else (0 if decision.action == "ADVANCE" else reviewed)))
                 db.commit(); return next_call or decision
             if call.purpose in ("ASSESSMENT_WRITER","SEMANTIC_REVIEW"):
                 # A received assessment role is applied as its own durable result.
                 # Accepted-item checkpoints remain the constructor's recovery boundary.
                 call.parsed_response=out.model_dump(mode="json"); call.status="SUCCEEDED"; call.completed_at=datetime.now(timezone.utc); db.commit(); return
             if call.purpose=="TUTOR":
+                c3_guided_stage = audit.get("c3_guided_stage")
+                is_c3_guided = bool(audit.get("c3_isolated_pilot_version") and c3_guided_stage)
+                c3_delivery_stage = None
+                if is_c3_guided:
+                    from solo_harness.runtime.controlled_c3_pilot_prompts import guided_delivery_stage
+                    c3_delivery_stage = guided_delivery_stage(
+                        c3_guided_stage, int(audit["c3_guided_hint_count"]),
+                        bool(audit.get("c3_guided_has_learner_reply")), out.ready_for_judge,
+                    )
                 if not db.scalar(select(Message.id).where(Message.llm_call_id==call.id)):
                     seq=(db.scalar(select(Message.sequence_no).where(Message.attempt_id==attempt.id).order_by(Message.sequence_no.desc())) or 0)+1
                     if self.runtime._v051(self.runtime._compiled(db,session)):
@@ -450,6 +567,9 @@ class AIExecutionRuntime:
                                 raise ValueError("stale controlled C1.1 Tutor response")
                             trace.update({"pilot_move_id":move["id"], "pilot_contract_sha256":audit["pilot_contract_sha256"],
                                           "pilot_response_mode":audit.get("pilot_response_mode", "MOVE")})
+                            if is_c3_guided:
+                                trace.update({"c3_guided_stage": c3_delivery_stage,
+                                              "ready_for_judge": c3_delivery_stage == "FINAL"})
                             earlier=db.scalars(select(Message).where(Message.attempt_id==attempt.id, Message.role=="TUTOR").order_by(Message.sequence_no)).all()
                             prior_current=[m for m in earlier if (m.instructional_trace or {}).get("pilot_move_id")==move["id"]]
                             # A visual appears once at the first message, with an optional
@@ -457,7 +577,12 @@ class AIExecutionRuntime:
                             visual=None
                             if not prior_current:
                                 visual=_controlled.visual_descriptor(move, pilot_progress.instructional_state["verified_instructional_instance"], "prompt" if move["learner_response_policy"] == "guided" else "complete")  # CHANGED
-                            elif (out.ready_for_judge and move["visual"]
+                            elif is_c3_guided and c3_delivery_stage == "FINAL":
+                                current_state = dict(_controlled.state(pilot_progress))
+                                guided = current_state.get("c3_guided") if isinstance(current_state.get("c3_guided"), dict) else {}
+                                if move["visual"] and not guided.get("complete_visual_message_id"):
+                                    visual=_controlled.visual_descriptor(move, pilot_progress.instructional_state["verified_instructional_instance"], "complete")
+                            elif (not audit.get("c3_isolated_pilot_version") and not is_c3_guided and out.ready_for_judge and move["visual"]
                                   and move["learner_response_policy"] == "guided"):  # CHANGED
                                 first=prior_current[0]
                                 had_reply=db.scalar(select(Message.id).where(Message.attempt_id==attempt.id,
@@ -470,18 +595,52 @@ class AIExecutionRuntime:
                         trace={"fidelity_note":out.fidelity_note}
                     message=Message(attempt_id=attempt.id,sequence_no=seq,role="TUTOR",content_text=out.learner_message,content_format="markdown",llm_call_id=call.id,instructional_trace=trace,material_ids=[],exposed_kc_ids=[],exposed_relation_ids=[])
                     db.add(message); db.flush()
+                    if is_c3_guided:
+                        _, pilot_progress = self.runtime._active_v051_progress(db, session)
+                        controlled = dict(_controlled.state(pilot_progress))
+                        guided = controlled.get("c3_guided")
+                        if isinstance(guided, dict) and guided.get("move_id") == audit.get("pilot_move_id"):
+                            guided = {**guided, "stage": c3_delivery_stage}
+                            if c3_delivery_stage == "HINT_1":
+                                guided["hint_count"] = 1
+                            elif c3_delivery_stage == "HINT_2":
+                                guided["hint_count"] = 2
+                            if (trace.get("pilot_visual", {}).get("stage") == "prompt"
+                                    and not guided.get("question_visual_message_id")):
+                                guided = {**guided, "question_visual_message_id": str(message.id)}
+                            if trace.get("pilot_visual", {}).get("stage") == "complete":
+                                guided = {**guided, "complete_visual_message_id": str(message.id)}
+                            controlled["c3_guided"] = guided
+                            pilot_progress.instructional_state = {**(pilot_progress.instructional_state or {}),
+                                                                   _controlled.state_key(pilot_progress): controlled}
+                            self.runtime._event(db, session, "C3_GUIDED_TURN_PERSISTED", {
+                                "move_id": audit["pilot_move_id"], "stage": c3_delivery_stage,
+                                "visual_stage": trace.get("pilot_visual", {}).get("stage"),
+                                "message_id": str(message.id),
+                            }, attempt.id)
                 else:
                     message=db.scalar(select(Message).where(Message.llm_call_id==call.id))
                 call.parsed_response=out.model_dump(mode="json"); call.status="SUCCEEDED"; call.completed_at=datetime.now(timezone.utc)
                 if self.runtime._v051(self.runtime._compiled(db,session)):
                     reviewed=int(audit.get("auto_reviews_since_learner", 0))
                     wants_review = out.ready_for_judge and reviewed < _MAX_AUTONOMOUS_REVIEWS
-                    if wants_review and audit.get("pilot_move_id"):
+                    if audit.get("pilot_move_id"):
                         from solo_harness.studies.controlled_c1 import active_move
                         _, pilot_progress=self.runtime._active_v051_progress(db,session)
                         current, _=_controlled.active_move(self.runtime._compiled(db,session),pilot_progress)
                         response_mode = audit.get("pilot_response_mode", "MOVE")
-                        if response_mode == "MOVE" and current["learner_response_policy"] == "guided":
+                        c3_normal_move = bool(audit.get("c3_isolated_pilot_version")
+                                              and response_mode == "MOVE"
+                                              and current["learner_response_policy"] != "guided")
+                        c3_bounded_review = c3_normal_move or (is_c3_guided and response_mode == "MOVE")
+                        review_exhausted = c3_bounded_review and reviewed >= _MAX_AUTONOMOUS_REVIEWS
+                        if c3_normal_move:
+                            # C3 P1/P3 completion is Judge-owned; Tutor readiness is advisory only.
+                            wants_review = not review_exhausted
+                        if is_c3_guided and response_mode == "MOVE":
+                            # The Tutor's existing schema flag decides adequacy; the backend only enforces the hint bound.
+                            wants_review = c3_delivery_stage == "FINAL" and not review_exhausted
+                        elif response_mode == "MOVE" and current["learner_response_policy"] == "guided":
                             # Wait for a real learner reply following the first prompt.
                             # A premature Tutor readiness flag cannot trigger a Judge
                             # rejection or turn a guided move into a monologue.
@@ -491,22 +650,16 @@ class AIExecutionRuntime:
                             wants_review=bool(first and any(row.role=="LEARNER" and
                                 first.sequence_no < row.sequence_no < message.sequence_no for row in all_rows))
                         controlled = dict(_controlled.state(pilot_progress))
-                        if wants_review:
+                        if review_exhausted:
+                            self.runtime.record_v051_delivery_exception(
+                                db, session.id, pilot_progress.subsection_id,
+                                {"reason": "C3 move Judge repair limit exhausted",
+                                 "move_id": current["id"]}, commit=False)
+                        elif wants_review:
                             controlled["status"] = "REVIEWING_DOUBT" if response_mode == "DOUBT" else "REVIEWING_MOVE"
                         elif response_mode == "MOVE":
                             controlled["status"] = "AWAITING_LEARNER"
                         pilot_progress.instructional_state = {**(pilot_progress.instructional_state or {}),
-                                                            _controlled.state_key(pilot_progress): controlled}  # CHANGED
-                    elif audit.get("pilot_move_id"):
-                        # A guided question is the only ordinary state that waits
-                        # for an actual learner reply without a Judge call.
-                        from solo_harness.studies.controlled_c1 import active_move
-                        _, pilot_progress=self.runtime._active_v051_progress(db,session)
-                        controlled = dict(_controlled.state(pilot_progress))
-                        if audit.get("pilot_response_mode", "MOVE") == "MOVE":
-                            current, _ = _controlled.active_move(self.runtime._compiled(db,session), pilot_progress)
-                            controlled["status"] = "AWAITING_LEARNER" if current["learner_response_policy"] == "guided" else "TEACHING"
-                            pilot_progress.instructional_state = {**(pilot_progress.instructional_state or {}),
                                                             _controlled.state_key(pilot_progress): controlled}  # CHANGED
                     next_call=(self.reserve_conversation_judge(db, session.id, commit=False,
                         auto_reviews_since_learner=reviewed + 1) if wants_review else None)
@@ -557,7 +710,7 @@ class AIExecutionRuntime:
         # provider I/O and retry sleeps.  A second worker observes SENDING.
         request_payload=dict(call.request_payload); request_body=call.request_body_text; purpose=call.purpose; model=call.model
         call.status="SENDING"; db.commit()
-        transient=[]
+        transient=[]; word_limit_rewrites=[]
         try:
             schema=type("Schema",(),{"__name__":request_payload["schema_name"],"model_json_schema":staticmethod(lambda:request_payload["schema"])})
             request=self._request(purpose,tuple(CanonicalMessage.model_validate(x) for x in request_payload["messages"]),model,schema,request_payload.get("audit") or {})
@@ -569,18 +722,31 @@ class AIExecutionRuntime:
                     transient.append({"attempt":automatic_attempt+1,"error_class":exc.error_class,"message":str(exc)[:500]})
                     if not exc.retryable or automatic_attempt==2: raise
                     await asyncio.sleep(2**automatic_attempt)
+            raw, word_limit_rewrites = await self._enforce_c3_word_cap(
+                request, prepared, raw, request_payload.get("audit") or {})
             call=db.scalar(select(LLMCall).where(LLMCall.id==call_id).with_for_update())
             if not call or call.status!="SENDING": return
-            call.request_payload={**call.request_payload,"automatic_transport_retries":transient}
+            call.request_payload={**call.request_payload,"automatic_transport_retries":transient,
+                                  "c3_word_limit_rewrites":word_limit_rewrites}
             call.provider_request_id=raw.provider_request_id; call.raw_response_text=raw.raw_response_text; call.response_payload=raw.response_payload; call.latency_ms=raw.latency_ms; call.status="RECEIVED"; db.commit()
             next_call = await self._finalize_received(db,call_id)
             if isinstance(next_call, uuid.UUID): await self.execute(db,next_call)
         except Exception as exc:
             db.rollback()
+            word_limit_rewrites = getattr(exc, "rewrite_audit", word_limit_rewrites)  # CHANGED
             call=db.scalar(select(LLMCall).where(LLMCall.id==call_id).with_for_update())
             if call and call.status=="SENDING":
-                call.request_payload={**call.request_payload,"automatic_transport_retries":transient}
-                call.status="FAILED"; call.error_class="TECHNICAL_FAILURE"; call.error_message=str(exc)[:4000]; call.completed_at=datetime.now(timezone.utc); db.commit()
+                call.request_payload={**call.request_payload,"automatic_transport_retries":transient,
+                                      "c3_word_limit_rewrites":word_limit_rewrites}
+                from solo_harness.runtime.controlled_c3_pilot_prompts import C3GuidedFinalInconsistent
+                call.status=("TECHNICAL_HOLD" if isinstance(exc, WordLimitExceeded)
+                             else "INVALID_OUTPUT" if isinstance(exc, (C3GuidedFinalInconsistent, C3WordRewriteInconsistent))  # CHANGED
+                             else "FAILED")
+                call.error_class=("WORD_LIMIT_EXHAUSTED" if isinstance(exc, WordLimitExceeded)
+                                  else "C3_REWRITE_READY_FLAG_INCONSISTENT" if isinstance(exc, C3WordRewriteInconsistent)  # CHANGED
+                                  else "C3_FINAL_READY_FLAG_INCONSISTENT" if isinstance(exc, C3GuidedFinalInconsistent)
+                                  else "TECHNICAL_FAILURE")
+                call.error_message=str(exc)[:4000]; call.completed_at=datetime.now(timezone.utc); db.commit()
     def reserve_manual_retry(self,db,session_id,commit=True,authorized_requeue=False):
         """Retry only the server-side operation that is currently on hold.
 
@@ -598,7 +764,9 @@ class AIExecutionRuntime:
                 LLMCall.session_id==session.id, LLMCall.attempt_id==attempt.id,
                 or_(LLMCall.status.in_(("STARTED","SENDING")), and_(LLMCall.status=="RECEIVED", LLMCall.error_class.is_distinct_from("APPLICATION_FAILURE"))),
             ))
-            previous=db.scalar(select(LLMCall).where(LLMCall.session_id==session.id,LLMCall.attempt_id==attempt.id).order_by(LLMCall.started_at.desc()))
+            previous=db.scalar(select(LLMCall).where(
+                LLMCall.session_id==session.id, LLMCall.attempt_id==attempt.id,
+            ).order_by(LLMCall.completed_at.desc(), LLMCall.started_at.desc()))
         if active: raise ValueError("an operation is already active")
         if previous and previous.status=="RECEIVED" and previous.error_class=="APPLICATION_FAILURE":
             return previous.id
@@ -624,7 +792,17 @@ class AIExecutionRuntime:
                 call=self.reserve_conversation_judge(db,session_id,commit=False,
                     auto_reviews_since_learner=int(audit.get("auto_reviews_since_learner", 0)))
         elif session.phase=="INTERVENTION_ACTIVE":
-            call=self.reserve_tutor(db,session_id,commit=False)
+            audit=(previous.request_payload or {}).get("audit", {})
+            call=self.reserve_tutor(
+                db, session_id, commit=False,
+                retry_c3_guided_reply=(  # CHANGED: reuse a saved C3 P2 learner turn for any retryable Tutor failure.
+                    previous.purpose == "TUTOR"
+                    and bool(audit.get("c3_isolated_pilot_version"))
+                    and audit.get("pilot_response_mode") == "MOVE"
+                    and audit.get("c3_guided_stage") in ("QUESTION", "HINT_1", "HINT_2", "FINAL")
+                    and bool(audit.get("c3_guided_has_learner_reply"))
+                ),
+            )
         elif session.phase=="ASSESSMENT_GENERATING":
             call=self.reserve_assessment(db,session_id,item.id,commit=False)
         elif session.phase=="ASSESSMENT_AWAITING_EVALUATION":

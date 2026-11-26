@@ -1,0 +1,465 @@
+{
+  "status": "REVIEW_DRAFT_NOT_FOR_IMPLEMENTATION",
+  "source": "EKAGRAAI_LATEST_FULL_SOURCE_AND_PROMPT_AUDIT(1).zip",
+  "scope": "C3.1 and C3.2 only, 30 move goals, 10 P2 guided questions and two hints each",
+  "moves": [
+    {
+      "move_id": "C3.1-P1-M01",
+      "pedagogy": "P1",
+      "visual_mode": "group_membership",
+      "required_content_refs": [
+        "C3.1.O01",
+        "C3.1.O05"
+      ],
+      "tutor_goal": "Use the starting grid to show the six data cells and six checking cells, including the corner. Explain that each complete row and column has its own even-parity check; all seven pass. Point out how the row and column checks overlap, so one bit change can affect both.",
+      "normal_delivery_word_cap": 90
+    },
+    {
+      "move_id": "C3.1-P1-M02",
+      "pedagogy": "P1",
+      "visual_mode": "single_flip_comparison",
+      "required_content_refs": [
+        "C3.1.O01",
+        "C3.1.O04",
+        "C3.1.O06"
+      ],
+      "tutor_goal": "Work through the data-bit change in row 1, column 2 and the corner-bit change in row 3, column 4. Name the two checks that fail in each example and explain why. Both examples involve just one changed bit; do not infer an actual error history from check results.",
+      "normal_delivery_word_cap": 85
+    },
+    {
+      "move_id": "C3.1-P1-M03",
+      "pedagogy": "P1",
+      "visual_mode": "same_row_combined_flips",
+      "required_content_refs": [
+        "C3.1.O02",
+        "C3.1.O03",
+        "C3.1.O06"
+      ],
+      "tutor_goal": "Show the two changes in row 1, columns 1 and 2. Explain that row 1 still passes because it has two changes, while columns 1 and 2 fail because each has one. Count changes within each check, not across the entire grid.",
+      "normal_delivery_word_cap": 70
+    },
+    {
+      "move_id": "C3.1-P1-M04",
+      "pedagogy": "P1",
+      "visual_mode": "two_position_patterns",
+      "required_content_refs": [
+        "C3.1.O02",
+        "C3.1.O04",
+        "C3.1.O06"
+      ],
+      "tutor_goal": "Compare the two grids. Two changes in column 1 leave that column passing while rows 1 and 2 fail. Two changes in different rows and columns make rows 1 and 2 and columns 1 and 2 fail. Explain why the positions matter even though both grids have two changes.",
+      "normal_delivery_word_cap": 95
+    },
+    {
+      "move_id": "C3.1-P1-M05",
+      "pedagogy": "P1",
+      "visual_mode": null,
+      "required_content_refs": [
+        "C3.1.O01",
+        "C3.1.O02",
+        "C3.1.O03",
+        "C3.1.O04",
+        "C3.1.O05",
+        "C3.1.O06"
+      ],
+      "tutor_goal": "Bring the cases together. Starting from a valid check, an odd number of changes makes it fail; an even number leaves it passing, although bits may have changed. Explain that single parity uses this rule for one group and two-dimensional parity uses it for overlapping rows and columns, including checking bits.",
+      "normal_delivery_word_cap": 75
+    },
+    {
+      "move_id": "C3.1-P2-M01",
+      "pedagogy": "P2",
+      "visual_mode": "group_membership_prompt",
+      "required_content_refs": [
+        "C3.1.O01",
+        "C3.1.O05"
+      ],
+      "tutor_goal": "Show the valid grid and highlight a data bit. Ask the stored question without naming the highlighted bit’s row or column first. After the learner responds, identify its position and explain that every bit is checked through its row and column, including the corner checking bit. Keep the data/checking cell distinction clear.",
+      "normal_delivery_word_cap": null,
+      "guided_question": "Which row and column checks contain the highlighted bit?",
+      "hint_1": "Look at the row number beside the highlighted bit.",
+      "hint_2": "Now follow that bit upward to its column number. Which two labels meet there?",
+      "stage_word_caps": {
+        "question": 45,
+        "hint_1": 35,
+        "hint_2": 35,
+        "final_explanation": 70
+      }
+    },
+    {
+      "move_id": "C3.1-P2-M02",
+      "pedagogy": "P2",
+      "visual_mode": "single_flip_prediction",
+      "required_content_refs": [
+        "C3.1.O01",
+        "C3.1.O04",
+        "C3.1.O06"
+      ],
+      "tutor_goal": "Show only the first one-bit-change grid, with checking results hidden. Ask the stored question. After guided attempts, explain why row 1 and column 2 fail, then show and explain the corner-bit example: row 3 and column 4 fail. Do not ask a second required question.",
+      "normal_delivery_word_cap": null,
+      "guided_question": "Which row and column checks fail because this bit changed?",
+      "hint_1": "Find the row and column that cross at the highlighted bit.",
+      "hint_2": "Before the change, every check passed. A single bit change affects both checks crossing that bit. Which are they?",
+      "stage_word_caps": {
+        "question": 40,
+        "hint_1": 35,
+        "hint_2": 35,
+        "final_explanation": 80
+      }
+    },
+    {
+      "move_id": "C3.1-P2-M03",
+      "pedagogy": "P2",
+      "visual_mode": "same_row_prediction",
+      "required_content_refs": [
+        "C3.1.O02",
+        "C3.1.O03",
+        "C3.1.O06"
+      ],
+      "tutor_goal": "Show two changed bits in row 1 but hide the results. Ask the stored question about row 1 and columns 1 and 2. After guided attempts, explain that row 1 passes with two changes and both columns fail with one change each.",
+      "normal_delivery_word_cap": null,
+      "guided_question": "Which checks pass or fail for row 1 and columns 1 and 2?",
+      "hint_1": "Count the changed bits in row 1. Then count them separately in each affected column.",
+      "hint_2": "Starting from a passing check, one change makes it fail; two changes leave it passing. Apply that rule to each group.",
+      "stage_word_caps": {
+        "question": 40,
+        "hint_1": 35,
+        "hint_2": 35,
+        "final_explanation": 65
+      }
+    },
+    {
+      "move_id": "C3.1-P2-M04",
+      "pedagogy": "P2",
+      "visual_mode": "position_comparison_prompt",
+      "required_content_refs": [
+        "C3.1.O02",
+        "C3.1.O04",
+        "C3.1.O06"
+      ],
+      "tutor_goal": "Show only the two-changes-in-column-1 grid and hide the result. Ask whether column 1 passes. After guided attempts, explain why column 1 passes and rows 1 and 2 fail. Then show the different-rows-and-columns grid, where four checks fail; do not require another answer.",
+      "normal_delivery_word_cap": null,
+      "guided_question": "Does column 1 pass or fail after these two changes?",
+      "hint_1": "Count how many changed bits are in column 1.",
+      "hint_2": "Each bit change toggles that column check once. After the first toggle, what does the second change do to its result?",
+      "stage_word_caps": {
+        "question": 40,
+        "hint_1": 35,
+        "hint_2": 35,
+        "final_explanation": 90
+      }
+    },
+    {
+      "move_id": "C3.1-P2-M05",
+      "pedagogy": "P2",
+      "visual_mode": null,
+      "required_content_refs": [
+        "C3.1.O01",
+        "C3.1.O02",
+        "C3.1.O03",
+        "C3.1.O04",
+        "C3.1.O05",
+        "C3.1.O06"
+      ],
+      "tutor_goal": "Ask the stored question about what makes each check pass or fail after bits change. Guide the learner if needed, then explain the odd/even rule from a valid starting grid. Link it to single parity and overlapping row and column checks. Do not turn this into a mastery test.",
+      "normal_delivery_word_cap": null,
+      "guided_question": "Starting from a valid grid, what determines whether each row or column check passes or fails after bits change?",
+      "hint_1": "Think about one row or column at a time, not the total changes in the grid.",
+      "hint_2": "If the check passed at first, what does an odd number of changes do? What does an even number do?",
+      "stage_word_caps": {
+        "question": 45,
+        "hint_1": 35,
+        "hint_2": 35,
+        "final_explanation": 70
+      }
+    },
+    {
+      "move_id": "C3.1-P3-M01",
+      "pedagogy": "P3",
+      "visual_mode": "baseline_vs_single_flip",
+      "required_content_refs": [
+        "C3.1.O01",
+        "C3.1.O04",
+        "C3.1.O05"
+      ],
+      "tutor_goal": "Compare the valid grid with the grid where the bit in row 1, column 2 changes. The parity rule stays the same. Explain why all checks pass first, but only row 1 and column 2 fail in the second grid.",
+      "normal_delivery_word_cap": 80
+    },
+    {
+      "move_id": "C3.1-P3-M02",
+      "pedagogy": "P3",
+      "visual_mode": "data_vs_corner_flip",
+      "required_content_refs": [
+        "C3.1.O01",
+        "C3.1.O04",
+        "C3.1.O06"
+      ],
+      "tutor_goal": "Compare a single changed data bit with a single changed corner checking bit. Both use the same rule and have one change. Explain why the first fails row 1 and column 2, but the second fails row 3 and column 4.",
+      "normal_delivery_word_cap": 90
+    },
+    {
+      "move_id": "C3.1-P3-M03",
+      "pedagogy": "P3",
+      "visual_mode": "same_row_vs_same_column",
+      "required_content_refs": [
+        "C3.1.O02",
+        "C3.1.O03",
+        "C3.1.O04"
+      ],
+      "tutor_goal": "Compare two changes in one row with two changes in one column. The number of changes stays at two. Explain why the shared row passes in the first grid and the shared column passes in the second, while the checks crossing each changed bit fail.",
+      "normal_delivery_word_cap": 85
+    },
+    {
+      "move_id": "C3.1-P3-M04",
+      "pedagogy": "P3",
+      "visual_mode": "same_group_vs_distributed_flips",
+      "required_content_refs": [
+        "C3.1.O02",
+        "C3.1.O03",
+        "C3.1.O04",
+        "C3.1.O06"
+      ],
+      "tutor_goal": "Compare two changes in the same row with two changes in different rows and columns. Both grids start valid and have two changes. Explain why the first has two failed column checks while the second has four failed checks.",
+      "normal_delivery_word_cap": 90
+    },
+    {
+      "move_id": "C3.1-P3-M05",
+      "pedagogy": "P3",
+      "visual_mode": null,
+      "required_content_refs": [
+        "C3.1.O01",
+        "C3.1.O02",
+        "C3.1.O03",
+        "C3.1.O04",
+        "C3.1.O05",
+        "C3.1.O06"
+      ],
+      "tutor_goal": "Use the comparisons to state the rule. Count changes inside each row or column, not just in the whole grid. From a valid start, odd counts make a check fail and even counts leave it passing. Explain how overlapping checks extend the single-parity rule.",
+      "normal_delivery_word_cap": 85
+    },
+    {
+      "move_id": "C3.2-P1-M01",
+      "pedagogy": "P1",
+      "visual_mode": "receiver_evidence_boundary",
+      "required_content_refs": [
+        "C3.2.O01"
+      ],
+      "tutor_goal": "Show the received grid. Explain that the receiver sees the twelve received bits and can run the agreed row and column checks, but cannot see what was originally sent. A failed check means a parity rule is broken; a passing check does not prove nothing changed.",
+      "normal_delivery_word_cap": 80
+    },
+    {
+      "move_id": "C3.2-P1-M02",
+      "pedagogy": "P1",
+      "visual_mode": "two_bit_outcome_comparison",
+      "required_content_refs": [
+        "C3.2.O01",
+        "C3.2.O06"
+      ],
+      "tutor_goal": "Start with two different sets of observed check results. For the first, show how two changes in row 1 could explain columns 1 and 2 failing while rows pass. For the second, show how changes in row 1, column 1 and row 2, column 2 could explain four failed checks. Neither cause is proved.",
+      "normal_delivery_word_cap": 85
+    },
+    {
+      "move_id": "C3.2-P1-M03",
+      "pedagogy": "P1",
+      "visual_mode": "same_received_grid_two_histories",
+      "required_content_refs": [
+        "C3.2.O01",
+        "C3.2.O02",
+        "C3.2.O03",
+        "C3.2.O05"
+      ],
+      "tutor_goal": "Show that two different valid starting grids can produce exactly the same received grid. One possible history changes row 2, column 1; the other changes three specified bits. Both leave only row 2 and column 1 failing. Explain why the receiver cannot know which happened and why correction requires an exactly-one-error assumption.",
+      "normal_delivery_word_cap": 100
+    },
+    {
+      "move_id": "C3.2-P1-M04",
+      "pedagogy": "P1",
+      "visual_mode": "four_corner_rectangle",
+      "required_content_refs": [
+        "C3.2.O04",
+        "C3.2.O06"
+      ],
+      "tutor_goal": "Show the four changes forming a rectangle across rows 1 and 2 and columns 1 and 2. Explain that each affected row and column has two changes, so all seven checks pass. The receiver sees no failed checks, but the bits have changed.",
+      "normal_delivery_word_cap": 75
+    },
+    {
+      "move_id": "C3.2-P1-M05",
+      "pedagogy": "P1",
+      "visual_mode": "evidence_and_inference_summary",
+      "required_content_refs": [
+        "C3.2.O01",
+        "C3.2.O02",
+        "C3.2.O03",
+        "C3.2.O04",
+        "C3.2.O05",
+        "C3.2.O06"
+      ],
+      "tutor_goal": "Separate three conclusions. A failed check reveals a broken parity rule. One failed row and column suggest a possible location only if exactly one error is assumed. Even all passing checks do not prove the data is unchanged. Link these limits to the one-versus-three histories and the rectangle.",
+      "normal_delivery_word_cap": 80
+    },
+    {
+      "move_id": "C3.2-P2-M01",
+      "pedagogy": "P2",
+      "visual_mode": "receiver_evidence_question",
+      "required_content_refs": [
+        "C3.2.O01"
+      ],
+      "tutor_goal": "Show a received grid and ask the stored question about whether the receiver knows which bits changed. After guided attempts, explain what the receiver can check and why it cannot see the original transmission.",
+      "normal_delivery_word_cap": null,
+      "guided_question": "The receiver can see a received grid. Does that tell it exactly which bits changed during transmission?",
+      "hint_1": "The receiver can read what arrived. Can it also see a separate copy of what was sent?",
+      "hint_2": "If two different starting grids could lead to the same received bits, could the receiver know which one was sent?",
+      "stage_word_caps": {
+        "question": 40,
+        "hint_1": 35,
+        "hint_2": 35,
+        "final_explanation": 65
+      }
+    },
+    {
+      "move_id": "C3.2-P2-M02",
+      "pedagogy": "P2",
+      "visual_mode": "two_bit_outcome_question",
+      "required_content_refs": [
+        "C3.2.O01",
+        "C3.2.O06"
+      ],
+      "tutor_goal": "Show that only columns 1 and 2 fail while all rows pass. Ask the stored question for one possible two-bit cause; keep the cause hidden. After guided attempts, show the same-row possibility. Then contrast it with the second pattern, where two rows and two columns fail, and explain one possible cause. Neither is proved.",
+      "normal_delivery_word_cap": null,
+      "guided_question": "Every row passes, but columns 1 and 2 fail. What two-bit arrangement could explain those results?",
+      "hint_1": "Both failed columns must have an odd number of changes. All rows still pass.",
+      "hint_2": "Each failed column could contain one change. How should the two changes be placed so every row still has an even number of changes?",
+      "stage_word_caps": {
+        "question": 40,
+        "hint_1": 35,
+        "hint_2": 35,
+        "final_explanation": 80
+      }
+    },
+    {
+      "move_id": "C3.2-P2-M03",
+      "pedagogy": "P2",
+      "visual_mode": "same_received_grid_guided_comparison",
+      "required_content_refs": [
+        "C3.2.O01",
+        "C3.2.O02",
+        "C3.2.O03",
+        "C3.2.O05"
+      ],
+      "tutor_goal": "Show the received grid with row 2 and column 1 failing. Ask whether those results prove how many bits changed. After guided attempts, reveal both different valid starting grids and the one-change and three-change paths to the identical received grid. Explain why correction is conditional.",
+      "normal_delivery_word_cap": null,
+      "guided_question": "Row 2 and column 1 fail in this received grid. Can those results prove how many bits changed?",
+      "hint_1": "The receiver sees one failed row and one failed column. Does that tell it what the starting grid was?",
+      "hint_2": "Imagine another valid starting grid with several changes that still leads to these same received bits. Would the checks tell the histories apart?",
+      "stage_word_caps": {
+        "question": 45,
+        "hint_1": 35,
+        "hint_2": 35,
+        "final_explanation": 100
+      }
+    },
+    {
+      "move_id": "C3.2-P2-M04",
+      "pedagogy": "P2",
+      "visual_mode": "four_corner_rectangle_question",
+      "required_content_refs": [
+        "C3.2.O04",
+        "C3.2.O06"
+      ],
+      "tutor_goal": "Show a received grid where all seven checks pass. Ask whether that proves the bits arrived unchanged; do not show the rectangle yet. After guided attempts, reveal the four-corner changes and explain why two changes in every affected row and column leave all checks passing.",
+      "normal_delivery_word_cap": null,
+      "guided_question": "All seven checks pass on this received grid. Does that prove the bits arrived unchanged?",
+      "hint_1": "Could a row still pass after two of its bits change?",
+      "hint_2": "Think about an arrangement where every affected row and column contains an even number of changes. What would that do to each check?",
+      "stage_word_caps": {
+        "question": 40,
+        "hint_1": 35,
+        "hint_2": 35,
+        "final_explanation": 75
+      }
+    },
+    {
+      "move_id": "C3.2-P2-M05",
+      "pedagogy": "P2",
+      "visual_mode": "justified_inference_question",
+      "required_content_refs": [
+        "C3.2.O01",
+        "C3.2.O02",
+        "C3.2.O03",
+        "C3.2.O04",
+        "C3.2.O05",
+        "C3.2.O06"
+      ],
+      "tutor_goal": "Show the failed row 2 and column 1 results and ask what must be assumed before correcting their intersection. After guided attempts, explain why exactly one error is an assumption, not a conclusion from the checks; distinguish detection, possible location, and justified correction.",
+      "normal_delivery_word_cap": null,
+      "guided_question": "Row 2 and column 1 fail. What must you assume before correcting the bit where they meet?",
+      "hint_1": "Do those two failed checks prove only one bit changed?",
+      "hint_2": "Different error histories could explain these failures. What extra condition on the number of changed bits would justify choosing just the intersection?",
+      "stage_word_caps": {
+        "question": 40,
+        "hint_1": 35,
+        "hint_2": 35,
+        "final_explanation": 85
+      }
+    },
+    {
+      "move_id": "C3.2-P3-M01",
+      "pedagogy": "P3",
+      "visual_mode": "instructor_receiver_contrast",
+      "required_content_refs": [
+        "C3.2.O01"
+      ],
+      "tutor_goal": "Contrast what a teaching example can show with what a receiver actually knows. An example can display a starting grid and specified changes; the receiver sees only the arrived grid and check results. Explain why those are different kinds of information.",
+      "normal_delivery_word_cap": 75
+    },
+    {
+      "move_id": "C3.2-P3-M02",
+      "pedagogy": "P3",
+      "visual_mode": "same_row_vs_different_rows",
+      "required_content_refs": [
+        "C3.2.O01",
+        "C3.2.O06"
+      ],
+      "tutor_goal": "Compare two different received checking patterns: only columns 1 and 2 fail in one, while rows 1 and 2 and columns 1 and 2 fail in the other. Explain one possible two-bit cause for each, but do not present either cause as proven.",
+      "normal_delivery_word_cap": 90
+    },
+    {
+      "move_id": "C3.2-P3-M03",
+      "pedagogy": "P3",
+      "visual_mode": "one_vs_three_same_observation",
+      "required_content_refs": [
+        "C3.2.O01",
+        "C3.2.O02",
+        "C3.2.O03",
+        "C3.2.O05"
+      ],
+      "tutor_goal": "Compare the two different valid starting grids and the one-change versus three-change histories. Both lead to exactly the same received grid, with row 2 and column 1 failing. Explain why the receiver cannot choose between the histories and why correction depends on an assumption.",
+      "normal_delivery_word_cap": 100
+    },
+    {
+      "move_id": "C3.2-P3-M04",
+      "pedagogy": "P3",
+      "visual_mode": "detected_vs_undetected",
+      "required_content_refs": [
+        "C3.2.O04",
+        "C3.2.O06"
+      ],
+      "tutor_goal": "Compare the detected three-change example with the undetected four-corner rectangle. The first leaves row 2 and column 1 failing; the second leaves every check passing. Explain the different numbers of changes within the affected rows and columns, not just the total errors.",
+      "normal_delivery_word_cap": 85
+    },
+    {
+      "move_id": "C3.2-P3-M05",
+      "pedagogy": "P3",
+      "visual_mode": "warranted_vs_unwarranted_inference",
+      "required_content_refs": [
+        "C3.2.O01",
+        "C3.2.O02",
+        "C3.2.O03",
+        "C3.2.O04",
+        "C3.2.O05",
+        "C3.2.O06"
+      ],
+      "tutor_goal": "Contrast justified and unjustified conclusions. A failed check means a rule was broken, not that an exact bit was found. A failed row and column suggest an intersection only under a single-error assumption. All checks passing does not prove unchanged data. Keep detection, possible location, and correction separate.",
+      "normal_delivery_word_cap": 90
+    }
+  ]
+}

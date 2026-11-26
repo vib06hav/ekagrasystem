@@ -17,7 +17,8 @@ SETS = ("A", "B", "C", "random")
 
 
 def create_master_session(db, runtime, study_version_id, *, section: str, pedagogy: str,
-                          mode: str, assessment_set: str = "random", build_id: str = "dev") -> Session:
+                          mode: str, assessment_set: str = "random", build_id: str = "dev",
+                          c3_isolated_pilot: bool = False) -> Session:
     """Create one synthetic, auditable, immediately usable internal session.
 
     The direct-assessment shortcut does not fabricate teaching, Paas, or LLM rows.
@@ -41,6 +42,7 @@ def create_master_session(db, runtime, study_version_id, *, section: str, pedago
         unified_controlled_study=True,
         initial_pedagogy_id=None if pedagogy == "random" else pedagogy,
         starting_transition_id=section, direct_assessment=(mode == "assessment"),
+        c3_isolated_pilot=c3_isolated_pilot,
     )
     # Synthetic values must match the existing enrollment schema but NEVER
     # indicate that a human consented or provided demographic answers.

@@ -266,8 +266,10 @@ class ParticipantApplication:
             if attempt_ids and v051_candidate:
                 for progress in db.scalars(select(SubsectionProgress).where(SubsectionProgress.attempt_id.in_(attempt_ids))).all():
                     progress_by_attempt[progress.attempt_id].append(progress)
+            # Attempts are rendered in their existing lifecycle order below; within an
+            # attempt, durable sequence_no is authoritative over clock timestamps.
             messages = db.scalars(
-                select(Message).where(Message.attempt_id.in_(attempt_ids)).order_by(Message.created_at, Message.sequence_no)
+                select(Message).where(Message.attempt_id.in_(attempt_ids)).order_by(Message.attempt_id, Message.sequence_no)
             ).all() if attempt_ids else []
             messages_by_attempt: dict[uuid.UUID, list[Message]] = defaultdict(list)
             for message in messages:
@@ -644,6 +646,8 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
                     db, application.execution.runtime, version.id, section=section,
                     pedagogy=pedagogy, mode=mode, assessment_set=assessment_set,
                     build_id=application.settings.app_build_id,
+                    c3_isolated_pilot=(application.settings.app_environment == "development"
+                                       and getattr(application.settings, "enable_c3_isolated_pilot", False)),
                 )
                 created_id = str(created.id)
         except ValueError as exc:
@@ -725,6 +729,8 @@ def participant_router(application: ParticipantApplication) -> APIRouter:
                 controlled_c1_full_pilot=full_c1,
                 initial_pedagogy_id=x_ekagra_internal_pedagogy,
                 unified_controlled_study=unified,  # CHANGED
+                c3_isolated_pilot=(application.settings.app_environment == "development"
+                                   and getattr(application.settings, "enable_c3_isolated_pilot", False)),
             )
             # The browser handoff is a one-use capability.  A session UUID alone
             # is never enough to attach to a staff-created pilot session.

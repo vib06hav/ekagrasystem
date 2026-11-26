@@ -520,7 +520,8 @@ class SessionRuntime:
                                           controlled_c11_pilot=False, controlled_c1_full_pilot=False,
                                           initial_pedagogy_id: str | None = None, unified_controlled_study=False,
                                           starting_transition_id: str | None = None,
-                                          direct_assessment: bool = False):  # CHANGED
+                                          direct_assessment: bool = False,
+                                          c3_isolated_pilot: bool = False):  # CHANGED
         """Create an explicitly marked candidate session; never used by participant enrollment."""
         compiled = self.catalog.load(db, study_version_id)
         if not self._v051(compiled):
@@ -540,6 +541,8 @@ class SessionRuntime:
                 "controlled_c11_pilot": bool(controlled_c11_pilot or unified_controlled_study),
                 "controlled_c1_full_pilot": bool(controlled_c1_full_pilot or unified_controlled_study),
                 "unified_controlled_study": bool(unified_controlled_study),  # CHANGED
+                "c3_isolated_pilot_version": (
+                    "C3_ISOLATED_PROMPT_SEPARATION_V1" if c3_isolated_pilot else None),
                 "internal_test_initial_pedagogy_override": initial_pedagogy_id,
             })
         db.add(session); db.flush()

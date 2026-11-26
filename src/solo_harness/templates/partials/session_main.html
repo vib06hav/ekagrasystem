@@ -1,5 +1,6 @@
 {% macro section_nav(view) %}
 {% set acts = (view.timeline or [])|selectattr('kind','in',['activity','assessment'])|list %}
+{% if view.attempt_status == 'ASSIGNED' and not view.started_at %}{% set acts = [] %}{% endif %}
 {% set in_assessment = view.is_current and view.phase in ['ASSESSMENT_GENERATING','ASSESSMENT_ACTIVE','JUDGING','ASSESSMENT_AWAITING_EVALUATION'] %}
 <nav class="section-nav" id="section-nav" aria-label="Study sections">
 {% for section in view.sections %}

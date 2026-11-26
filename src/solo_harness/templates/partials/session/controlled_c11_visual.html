@@ -69,8 +69,137 @@
 </figure>
 {% endif %}
 
+{# C3.2 keeps receiver evidence separate from instructor-only worked paths. #}
+{% if visual and visual.subsection_id == 'C3.2' and visual.component == 'parity_grid' %}
+{% set facts = visual.fixed_cases %}{% set concealed = visual.stage == 'prompt' %}
+{% macro c32_grid(title, grid, failed_rows=[], failed_columns=[], changed=[], results=true) -%}
+<section class="c31-grid-panel c32-grid-panel"><h3>{{ title }}</h3>
+  <div class="c31-grid" role="table" aria-label="{{ title }}">
+    <span class="c31-corner" aria-hidden="true"></span>{% for column in range(1, 5) %}<span class="c31-axis c31-column-axis" role="columnheader">Column {{ column }}</span>{% endfor %}
+    {% for row in range(1, 4) %}<span class="c31-axis c31-row-axis" role="rowheader">Row {{ row }}</span>{% for value in grid[row - 1] %}{% set column = loop.index %}{% set code = 'R' ~ row ~ 'C' ~ column %}{% if row <= 2 and column <= 3 %}{% set role = 'data cell' %}{% set tone = 'data' %}{% elif row <= 2 %}{% set role = 'row checking cell' %}{% set tone = 'row-check' %}{% elif column <= 3 %}{% set role = 'column checking cell' %}{% set tone = 'column-check' %}{% else %}{% set role = 'corner checking cell' %}{% set tone = 'corner-check' %}{% endif %}<span class="c31-cell c31-{{ tone }}{% if code in changed %} is-changed{% endif %}" role="cell" aria-label="Row {{ row }}, column {{ column }}, {{ role }}, value {{ value }}{% if code in changed %}, outlined as one possible set of changes{% endif %}">{{ value }}</span>{% endfor %}{% endfor %}
+  </div>
+  {% if changed %}<p class="c31-legend">Outlined bits show one possible set of changes.</p>{% endif %}
+  {% if results %}<div class="c31-results" aria-label="Observed check results">{% if not failed_rows and not failed_columns %}<span>All seven checks: <strong class="result-pass">PASS</strong></span>{% else %}{% for row in range(1, 4) %}{% if ('R' ~ row) in failed_rows %}<span>Row {{ row }}: <strong class="result-fail">FAIL</strong></span>{% endif %}{% endfor %}{% for column in range(1, 5) %}{% if ('C' ~ column) in failed_columns %}<span>Column {{ column }}: <strong class="result-fail">FAIL</strong></span>{% endif %}{% endfor %}<span class="c31-other-checks">All other checks pass.</span>{% endif %}</div>{% endif %}
+</section>
+{%- endmacro %}
+<figure class="controlled-c11-visual c31-parity-visual c32-parity-visual" data-c32-parity-grid data-unified-visual="{{ visual.component }}" data-visual-mode="{{ visual.mode }}" data-visual-stage="{{ visual.stage }}">
+  <div class="c31-panels">
+  {% if visual.mode in ('receiver_evidence_boundary', 'receiver_evidence_question', 'instructor_receiver_contrast') %}
+    {{ c32_grid('Received grid', facts.initial_valid_grid, results=true) }}
+    <section class="c11-case c32-evidence-card"><strong>What we can check</strong><div>The received bits and which checks pass or fail.</div>{% if not concealed %}<strong>What we cannot know from this alone</strong><div>The original is not available to the receiver.</div>{% endif %}</section>
+  {% elif visual.mode in ('two_bit_outcome_comparison', 'two_bit_outcome_question', 'same_row_vs_different_rows') %}
+    {% set same = facts.case_B_same_row_two_bit %}{% set spread = facts.case_C_different_rows_and_columns_two_bit %}
+    {% if concealed and visual.mode == 'two_bit_outcome_question' %}{{ c32_grid('Columns 1 and 2 fail', same.received_grid, same.failed_rows, same.failed_columns) }}{% else %}{{ c32_grid('Example 1 — Columns 1 and 2 fail', same.received_grid, same.failed_rows, same.failed_columns, same.flipped_positions) }}{{ c32_grid('Example 2 — Rows 1 and 2, columns 1 and 2 fail', spread.received_grid, spread.failed_rows, spread.failed_columns, spread.flipped_positions) }}{% endif %}
+  {% elif visual.mode in ('same_received_grid_two_histories', 'same_received_grid_guided_comparison', 'one_vs_three_same_observation') %}
+    {% set one = facts.case_D_same_received_grid_one_flip_history %}{% set three = facts.case_E_same_received_grid_three_flip_history %}
+    {{ c32_grid('Received grid — same in both examples' if not concealed else 'Received grid — row 2 and column 1 fail', one.received_grid, one.failed_rows, one.failed_columns) }}
+    {% if not concealed %}{{ c32_grid('Possible starting grid A — one change', one.original_grid_for_instructor_explanation, changed=one.flipped_positions, results=false) }}{{ c32_grid('Possible starting grid B — three changes', three.original_grid_for_instructor_explanation, changed=three.flipped_positions, results=false) }}<section class="c11-case c32-evidence-card"><strong>Different starting grids. Same received bits and checks.</strong></section>{% endif %}
+  {% elif visual.mode in ('four_corner_rectangle', 'four_corner_rectangle_question') %}
+    {% set rectangle = facts.case_F_four_corner_rectangle %}
+    {{ c32_grid('Received grid — all checks pass', rectangle.received_grid, rectangle.failed_rows, rectangle.failed_columns) }}
+    {% if not concealed %}{{ c32_grid('One possible starting grid', rectangle.original_grid_for_instructor_explanation, changed=rectangle.flipped_positions, results=false) }}<section class="c11-case c32-evidence-card"><strong>Four changes, but no check fails.</strong></section>{% endif %}
+  {% elif visual.mode == 'detected_vs_undetected' %}
+    {% set detected = facts.case_E_same_received_grid_three_flip_history %}{% set rectangle = facts.case_F_four_corner_rectangle %}
+    {{ c32_grid('Detected — row 2 and column 1 fail', detected.received_grid, detected.failed_rows, detected.failed_columns) }}{{ c32_grid('Undetected — all checks pass', rectangle.received_grid, rectangle.failed_rows, rectangle.failed_columns) }}
+  {% elif visual.mode == 'justified_inference_question' %}
+    {% set observed = facts.case_D_same_received_grid_one_flip_history %}
+    {{ c32_grid('Row 2 and column 1 fail', observed.received_grid, observed.failed_rows, observed.failed_columns) }}
+    <section class="c11-case c32-evidence-card" data-receiver-inference-summary>{% if concealed %}<strong>What the checks can show</strong><div>Use the shown failed checks to consider what would require an assumption.</div>{% else %}<strong>What the checks cannot prove</strong><div>Their intersection is a possible error location, not proof a change occurred there. Correcting that bit uniquely requires assuming exactly one error. Passing all checks does not prove unchanged transmission.</div>{% endif %}</section>
+  {% else %}
+    <section class="c11-case c32-evidence-card" data-c32-inference-summary data-receiver-inference-summary><strong>What the receiver can conclude</strong>{% if concealed %}<div>Compare what observed checks establish with what would need an error-count assumption.</div>{% else %}<div>A failed check shows a broken parity rule. One failed row and one failed column make their intersection a possible error location, not a proven change. Correcting that bit uniquely requires assuming exactly one error. Passing all checks does not prove unchanged transmission.</div>{% endif %}</section>
+  {% endif %}
+  </div>
+</figure>
+{% endif %}
+
+{# C3.1 uses actual, server-verified 3x4 parity grids.  Its machine codes
+   stay in the descriptor; this markup intentionally renders natural labels. #}
+{% if visual and visual.subsection_id == 'C3.1' and visual.component == 'parity_grid' %}
+{% set facts = visual.fixed_cases %}
+{% set concealed = visual.stage == 'prompt' %}
+{% if visual.mode in ('group_membership', 'group_membership_prompt') %}
+  {% set panel_keys = ['valid'] %}
+{% elif visual.mode in ('single_flip_comparison', 'single_flip_prediction', 'data_vs_corner_flip') %}
+  {% set panel_keys = ['case_A', 'case_B'] %}
+{% elif visual.mode in ('same_row_combined_flips', 'same_row_prediction') %}
+  {% set panel_keys = ['case_C'] %}
+{% elif visual.mode in ('two_position_patterns', 'position_comparison_prompt') %}
+  {% set panel_keys = ['case_D', 'case_E'] %}
+{% elif visual.mode == 'baseline_vs_single_flip' %}
+  {% set panel_keys = ['valid', 'case_A'] %}
+{% elif visual.mode == 'same_row_vs_same_column' %}
+  {% set panel_keys = ['case_C', 'case_D'] %}
+{% elif visual.mode == 'same_group_vs_distributed_flips' %}
+  {% set panel_keys = ['case_C', 'case_E'] %}
+{% else %}
+  {% set panel_keys = [] %}
+{% endif %}
+{% if concealed and visual.mode == 'single_flip_prediction' %}{% set panel_keys = ['case_A'] %}{% endif %}
+{% if concealed and visual.mode == 'position_comparison_prompt' %}{% set panel_keys = ['case_D'] %}{% endif %}
+{% set titles = {'valid': 'A complete valid grid', 'case_A': 'One data bit changes', 'case_B': 'The corner checking bit changes', 'case_C': 'Two changes in the same row', 'case_D': 'Two changes in the same column', 'case_E': 'Two changes in different rows and columns'} %}
+<figure class="controlled-c11-visual c31-parity-visual" data-c31-parity-grid data-unified-visual="{{ visual.component }}" data-visual-mode="{{ visual.mode }}" data-visual-stage="{{ visual.stage }}">
+  <figcaption>Even parity</figcaption>
+  <div class="c31-panels">
+  {% for key in panel_keys %}
+    {% if key == 'valid' %}
+      {% set grid = facts.initial_valid_grid %}
+      {% set changed = [] %}
+      {% set failed_rows = [] %}
+      {% set failed_columns = [] %}
+      {% set focus = ['R1C2', 'R3C4'] if visual.mode == 'group_membership' else (['R1C2'] if visual.mode == 'group_membership_prompt' else []) %}
+    {% else %}
+      {% set example = facts[key] %}
+      {% set grid = example.received_grid %}
+      {% set changed = example.flipped_positions %}
+      {% set failed_rows = example.failed_rows %}
+      {% set failed_columns = example.failed_columns %}
+      {% set focus = [] %}
+    {% endif %}
+    <section class="c31-grid-panel">
+      {% set title = ('Which row and column?' if concealed else 'Highlighted bit: row 1, column 2') if visual.mode == 'group_membership_prompt' else (('One bit changes — what fails?' if concealed else titles[key]) if visual.mode == 'single_flip_prediction' else (('Two bits change in one row' if visual.mode == 'same_row_prediction' else ('Two bits change in column 1' if concealed and visual.mode == 'position_comparison_prompt' else titles[key])))) %}
+      <h3>{{ title }}</h3>
+      <div class="c31-grid" role="table" aria-label="{{ title }}">
+        <span class="c31-corner" aria-hidden="true"></span>
+        {% for column in range(1, 5) %}<span class="c31-axis c31-column-axis" role="columnheader">Column {{ column }}</span>{% endfor %}
+        {% for row in range(1, 4) %}
+          <span class="c31-axis c31-row-axis" role="rowheader">Row {{ row }}</span>
+          {% for value in grid[row - 1] %}
+            {% set column = loop.index %}
+            {% set code = 'R' ~ row ~ 'C' ~ column %}
+            {% if row <= 2 and column <= 3 %}{% set role = 'data cell' %}{% set tone = 'data' %}
+            {% elif row <= 2 %}{% set role = 'row checking cell' %}{% set tone = 'row-check' %}
+            {% elif column <= 3 %}{% set role = 'column checking cell' %}{% set tone = 'column-check' %}
+            {% else %}{% set role = 'corner checking cell' %}{% set tone = 'corner-check' %}{% endif %}
+            {% set hide_target_position = concealed and visual.mode == 'group_membership_prompt' and code in focus %}
+            <span class="c31-cell c31-{{ tone }}{% if code in changed %} is-changed{% endif %}{% if code in focus %} is-focused{% endif %}" role="cell"{% if hide_target_position %} aria-label="Highlighted {{ role }}, value {{ value }}"{% else %} aria-label="Row {{ row }}, column {{ column }}, {{ role }}, value {{ value }}{% if code in changed %}, outlined as a change used in this example{% endif %}"{% endif %}>{{ value }}</span>
+          {% endfor %}
+        {% endfor %}
+      </div>
+      {% if key == 'valid' and visual.mode == 'group_membership_prompt' %}
+        <p class="c31-legend">Use the numbered row and column labels to identify its checks.</p>
+      {% elif key == 'valid' and visual.mode == 'group_membership' %}
+        <p class="c31-legend">The coloured cells show data bits and checking bits.</p>
+      {% elif key == 'valid' %} {# CHANGED: the baseline panel has no changed bits. #}
+        <p class="c31-legend">Starting grid — all checks pass.</p> {# CHANGED #}
+      {% else %}
+        <p class="c31-legend">Outlined bits show changes used in this example.</p>
+      {% endif %}
+      {% if not concealed %}
+        <div class="c31-results" aria-label="Check results">
+          {% set show_all_results = key == 'valid' and visual.mode in ('group_membership', 'group_membership_prompt') %}
+          {% for row in range(1, 4) %}{% set row_code = 'R' ~ row %}{% if show_all_results or row_code in failed_rows or (key != 'valid' and example.passing_affected_row is defined and row_code == example.passing_affected_row) or (key == 'valid' and row == 1) %}<span>Row {{ row }}: <strong class="{{ 'result-fail' if row_code in failed_rows else 'result-pass' }}">{{ 'FAIL' if row_code in failed_rows else 'PASS' }}</strong></span>{% endif %}{% endfor %}
+          {% for column in range(1, 5) %}{% set column_code = 'C' ~ column %}{% if show_all_results or column_code in failed_columns or (key != 'valid' and example.passing_affected_column is defined and column_code == example.passing_affected_column) or (key == 'valid' and column == 2) %}<span>Column {{ column }}: <strong class="{{ 'result-fail' if column_code in failed_columns else 'result-pass' }}">{{ 'FAIL' if column_code in failed_columns else 'PASS' }}</strong></span>{% endif %}{% endfor %}
+          {% if not show_all_results %}<span class="c31-other-checks">All other checks pass.</span>{% endif %}
+        </div>
+      {% endif %}
+    </section>
+  {% endfor %}
+  </div>
+</figure>
+{% endif %}
+
 {# CHANGED: one passive science-card renderer for C2--C4; never Tutor HTML. #}
-{% if visual and visual.subsection_id is defined and visual.subsection_id[:2] in ('C2', 'C3', 'C4') %}
+{% if visual and visual.subsection_id is defined and visual.subsection_id[:2] in ('C2', 'C3', 'C4') and visual.subsection_id not in ('C3.1', 'C3.2') %}
 {% set facts = visual.fixed_cases %}
 {% set concealed = visual.stage == 'prompt' %}
 <figure class="controlled-c11-visual unified-check-visual" data-unified-visual="{{ visual.component }}" data-visual-mode="{{ visual.mode }}" data-visual-stage="{{ visual.stage }}">

@@ -44,6 +44,7 @@ class Settings(BaseSettings):
     enable_v051_unified_study: bool = False  # CHANGED: explicit opt-in for real C1--C4 execution
     enable_controlled_c11_pilot: bool = False  # internal v0.5 sessions only; default off
     enable_controlled_c1_full_pilot: bool = False  # explicit internal C1.1--C1.4 overlay; default off
+    enable_c3_isolated_pilot: bool = False  # development-only C3 prompt overlay; fresh sessions only
     v051_internal_testing_token: SecretStr | None = None
     # The implementation retains its v051 module names, but there is one
     # executable experimental study candidate: v0.5.
